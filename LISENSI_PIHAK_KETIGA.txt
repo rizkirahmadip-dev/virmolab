@@ -1,0 +1,52 @@
+VirmoDock — Lisensi komponen pihak ketiga
+==========================================
+
+VirmoDock sendiri berlisensi GPL-3.0-or-later (lihat LICENSE). Semua komponen di bawah gratis
+dan open-source. Teks lisensi lengkap ada di folder "licenses" di samping berkas ini.
+
+Pustaka yang berjalan di dalam proses VirmoDock
+-----------------------------------------------
+Komponen            Versi        Lisensi                         Berkas lisensi
+Qt / PySide6         6.11.2      LGPL-3.0 (pustaka dinamis)      licenses/LGPL-3.0.txt, licenses/GPL-3.0.txt
+  (Qt WebEngine berisi Chromium; daftar lisensinya: https://doc.qt.io/qt-6/qtwebengine-licensing.html)
+RDKit                2026.03.6   BSD-3-Clause                    licenses/RDKit_LICENSE.txt
+Meeko                0.8.0       LGPL-2.1                        licenses/Meeko_LICENSE_LGPL-2.1.txt
+gemmi                0.7.5       MPL-2.0                         licenses/gemmi_LICENSE.txt
+NumPy                2.5.3       BSD-3-Clause (+ komponen)       licenses/NumPy_LICENSE.txt
+SciPy                1.18.1      BSD-3-Clause (+ komponen)       licenses/SciPy_LICENSE.txt
+Pillow               12.3.0      MIT-CMU                         licenses/Pillow_LICENSE.txt
+openpyxl             3.1.5       MIT                             licenses/openpyxl_LICENSE.txt
+et_xmlfile           2.0.0       MIT                             licenses/et_xmlfile_LICENSE.txt
+3Dmol.js             (viewer)    BSD-3-Clause                    licenses/3Dmol.js_LICENSE.txt
+Ikon gaya Lucide     -           ISC                             licenses/Lucide_LICENSE.txt
+Python               3.14        PSF License                     https://docs.python.org/3/license.html
+
+Program terpisah (dijalankan sebagai proses tersendiri, folder bin/)
+---------------------------------------------------------------------
+Program              Versi       Lisensi                         Berkas lisensi
+AutoDock-GPU         1.6 (build OpenCL Windows, proyek VS dimodifikasi: tanpa /openmp:llvm)
+                                 GPL-2.0 (+ bagian LGPL-2.1)     licenses/AutoDock-GPU_LICENSE_*.txt
+AutoDock4, AutoGrid4 4.2.6       GPL-2.0                         licenses/GPL-2.0.txt
+AutoDock Vina        1.2.7       Apache-2.0                      licenses/AutoDock-Vina_LICENSE.txt
+Open Babel (obabel)  3.1.1       GPL-2.0                         licenses/GPL-2.0.txt
+OpenCL ICD Loader, clinfo (Khronos OpenCL SDK 2026.05.29)
+                                 Apache-2.0                      licenses/Apache-2.0.txt
+Microsoft Visual C++ runtime (vcomp140.dll, msvcp140.dll)
+                                 Redistributable Microsoft (boleh disertakan bersama aplikasi)
+
+Kode sumber program GPL (GPL-2.0 pasal 3)
+-----------------------------------------
+Kode sumber lengkap untuk program GPL yang disertakan dapat diperoleh dari:
+  AutoDock-GPU  : https://github.com/ccsb-scripps/AutoDock-GPU  (versi yang dibangun VirmoDock beserta
+                  berkas proyek Visual Studio yang dimodifikasi disertakan pada rilis kode sumber VirmoDock)
+  AutoDock4.2.6 : https://autodock.scripps.edu/download-autodock4/
+  Open Babel    : https://github.com/openbabel/openbabel (tag openbabel-3-1-1)
+Atas permintaan, apt. Rizki Rahmadi Pratama, M. Farm (pengembang VirmoDock) menyediakan salinan kode sumber yang persis sama dengan biner yang
+didistribusikan selama minimal tiga tahun sejak rilis.
+
+Data & layanan
+--------------
+RCSB PDB (https://www.rcsb.org) dan PubChem (https://pubchem.ncbi.nlm.nih.gov) diakses langsung oleh
+pengguna; kutip sumber data sesuai ketentuan masing-masing.
+
+Catatan: ini ringkasan teknis, bukan nasihat hukum.

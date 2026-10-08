@@ -1,0 +1,27 @@
+<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Troubleshooting · VirmoDock</title><link rel="stylesheet" href="gaya.css"><link rel="icon" href="gambar/ikon.png"></head><body><header><img src="gambar/logo_putih.svg" alt="VirmoDock" style="height:30px;margin-right:6px"><span style="color:#9fb4d3;font-size:13px;margin-right:10px">0.9.0</span><a href="panduan.html">Panduan pengguna</a><a href="instalasi.html">Instalasi</a><a href="pindah_laptop.html">Pindah laptop</a><a href="gpu.html">Setup GPU</a><a href="troubleshooting.html" class="aktif">Troubleshooting</a><a href="metode.html">Metode &amp; kriteria</a></header><main><h1>Troubleshooting</h1>
+<p class="lead">Masalah umum dan cara mengatasinya. Galat juga selalu dijelaskan di panel <b>Pesan</b> beserta langkah yang disarankan.</p>
+
+<div class="catatan"><b>Langkah pertama:</b> jalankan <b>Tools › Uji mandiri komponen</b>. VirmoDock memeriksa semua mesin docking, Open Babel, RDKit/Meeko, docking Vina kecil, deteksi GPU, dan ekspor Excel, lalu menampilkan mana yang gagal. Dari baris perintah: <code>VirmoDock.exe --uji-mandiri hasil.json</code>.</div>
+<table>
+<tr><th style="width:32%">Gejala</th><th>Penyebab &amp; solusi</th></tr>
+<tr><td>Status bar: “OpenCL tidak tersedia — mode CPU”</td><td>Driver GPU lama atau driver bawaan Windows. Perbarui driver (<a href="gpu.html">Setup GPU</a>), restart, buka VirmoDock lagi.</td></tr>
+<tr><td>Panel Pesan: “AutoDock-GPU tidak bisa memakai GPU (galat OpenCL)”</td><td>Job sudah dilanjutkan otomatis dengan Vina. Perbarui driver; bila tetap gagal, pakai Vina.</td></tr>
+<tr><td>Viewport 3D hitam/kosong</td><td>Driver grafis tidak mendukung WebGL. Perbarui driver grafis. Sementara itu, jalankan VirmoDock dengan rendering perangkat lunak: buat shortcut dengan target <code>VirmoDock.exe --disable-gpu</code>.</td></tr>
+<tr><td>Impor RCSB/PubChem gagal</td><td>Periksa koneksi internet; jaringan kampus/kantor dengan proxy bisa memblokir. Unduh berkas PDB/SDF lewat browser lalu buka dengan <b>File › Buka</b>.</td></tr>
+<tr><td>“ID … tidak ditemukan di RCSB PDB”</td><td>ID salah ketik, atau struktur hanya tersedia sebagai mmCIF (VirmoDock mencoba mmCIF otomatis).</td></tr>
+<tr><td>Preparasi reseptor: banyak residu dibuang</td><td>Residu dengan atom hilang (umum di loop fleksibel). Bila residu itu di dekat situs aktif, pilih struktur PDB lain dengan resolusi lebih baik, atau perbaiki struktur di software lain terlebih dahulu.</td></tr>
+<tr><td>Preparasi reseptor gagal di Meeko</td><td>VirmoDock otomatis memakai Open Babel. Bila tetap gagal, coba pilih rantai tertentu saja dan hapus ligan/aditif.</td></tr>
+<tr><td>Ligan: “&gt; 32 torsi (batas AutoDock-GPU)”</td><td>Jalankan ligan tersebut dengan mesin Vina.</td></tr>
+<tr><td>Ligan: “tipe atom tidak didukung AutoDock”</td><td>Mengandung unsur seperti B atau Si yang tidak punya parameter AutoDock4. Ganti ligan atau gunakan Vina dengan hati-hati.</td></tr>
+<tr><td>Peringatan grid “melebihi 126 titik”</td><td>Kotak terlalu besar untuk spasi 0,375 Å. Naikkan spasi (mis. 0,5–0,6 Å) atau perkecil kotak. Tombol “Seluruh protein (blind)” mengatur spasi otomatis.</td></tr>
+<tr><td>Validasi redocking RMSD &gt; 2 Å</td><td>Coba: kotak dipusatkan ke ligan asli, run lebih banyak (preset Teliti), atau mesin lain. Bila ligan asli punya ion logam/air penting di situs aktif, pertahankan saat preparasi reseptor.</td></tr>
+<tr><td>Docking berhenti saat laptop tidur (sleep)</td><td>Atur Windows agar tidak tidur saat dicolokkan. Job yang terputus berstatus <i>Dijeda</i> dan bisa dilanjutkan.</td></tr>
+<tr><td>Antivirus menghapus/memblokir <code>autodock_gpu.exe</code> atau <code>vina.exe</code></td><td>Program ilmiah tanpa tanda tangan kadang dicurigai. Tambahkan folder VirmoDock ke pengecualian antivirus, lalu pasang ulang.</td></tr>
+<tr><td>Tampilan terlalu kecil/besar</td><td>VirmoDock mengikuti skala Windows (Settings › Display › Scale). Panel bisa disembunyikan lewat menu View; <b>View › Atur ulang layout</b> mengembalikan tata letak.</td></tr>
+<tr><td>Jendela tidak terlihat setelah lepas monitor kedua</td><td>Otomatis dipusatkan ke layar utama saat dibuka. Bila masih tersembunyi: <kbd>Alt</kbd>+<kbd>Space</kbd> › Move.</td></tr>
+</table>
+
+<h2>Melapor masalah</h2>
+<p><b>Help › Lapor masalah / kirim saran</b> menyusun teks berisi uraian Anda, info sistem, dan log terakhir. Periksa isinya, klik <b>Salin</b>, lalu kirim lewat email atau halaman Issues proyek. VirmoDock tidak mengirim apa pun secara otomatis. Folder log: <b>Help › Buka folder log</b>.</p>
+<figure><img src="gambar/14_lapor.png" alt="Lapor masalah" style="max-width:720px"></figure>
+<footer>VirmoDock 0.9.0 · dokumentasi offline · GPL-3.0-or-later</footer></main></body></html>

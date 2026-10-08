@@ -1,0 +1,36 @@
+# Lingkungan & hasil build
+.venv/
+__pycache__/
+*.pyc
+build/
+dist/
+rilis/
+
+# Keluaran uji & tangkapan layar pengembangan
+dev/uji/
+dev/tut/
+dev/*.png
+dev/*.svg
+dev/*.log
+dev/*.json
+
+# Unduhan & alat pihak ketiga (dipasang terpisah, lihat README)
+vendor/_unduh/
+vendor/dl/
+vendor/innosetup/
+vendor/opencl/
+
+# Hasil build AutoDock-GPU (sumber & proyek VS tetap ikut)
+vendor/adgpu_src/bin/
+vendor/adgpu_src/AutoDock-GPU/x64/
+vendor/adgpu_src/*.vcxproj.user
+
+# Data lokal
+portable.flag
+data/
+Proyek/
+*.vmdbackup
+vendor/adgpu_src/input/
+
+# Dibuat ulang oleh build_tools/rilis.py
+docs/Tutorial_Docking_VirmoDock.pdf

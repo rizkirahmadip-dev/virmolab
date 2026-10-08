@@ -1,0 +1,35 @@
+<h1>Setup GPU</h1>
+<p class="lead">AutoDock-GPU di VirmoDock memakai OpenCL, jadi berjalan di GPU NVIDIA, AMD, maupun Intel tanpa CUDA atau WSL. Tanpa GPU, VirmoDock tetap bekerja penuh dengan AutoDock Vina di CPU.</p>
+
+<h2>Membaca status bar</h2>
+<table>
+<tr><th>Status bar</th><th>Arti</th><th>Yang perlu dilakukan</th></tr>
+<tr><td><code>● NVIDIA GeForce … · 6 GB · driver 610.74 · OpenCL</code></td><td>GPU siap untuk AutoDock-GPU.</td><td>Tidak ada.</td></tr>
+<tr><td><code>● … · OpenCL tidak tersedia — mode CPU</code></td><td>GPU terlihat tetapi driver tidak menyediakan OpenCL.</td><td>Perbarui driver (di bawah).</td></tr>
+<tr><td><code>● Tidak ada GPU — mode CPU (Vina)</code></td><td>Tidak ada GPU yang bisa dipakai.</td><td>Pakai Vina; atur exhaustiveness sesuai waktu.</td></tr>
+</table>
+<p>Cek ulang kapan saja lewat <b>Tools › Cek sistem / GPU</b>. Pilihan perangkat juga ada di toolbar (<i>Perangkat</i>).</p>
+
+<h2>Memasang / memperbarui driver</h2>
+<h3>NVIDIA</h3>
+<ol><li>Buka <a href="https://www.nvidia.com/Download/index.aspx">nvidia.com/Download</a>, pilih seri dan model GPU laptop.</li>
+<li>Unduh <i>Game Ready</i> atau <i>Studio Driver</i>, jalankan, pilih instalasi <i>Express</i>.</li>
+<li>Restart laptop, buka VirmoDock lagi.</li></ol>
+<h3>AMD</h3>
+<ol><li>Buka <a href="https://www.amd.com/en/support/download/drivers.html">amd.com › Drivers</a>, pilih <i>Auto-Detect and Install</i>.</li>
+<li>Jalankan installer, restart, buka VirmoDock lagi.</li></ol>
+<h3>Intel (grafis terintegrasi)</h3>
+<ol><li>Buka <a href="https://www.intel.com/content/www/us/en/support/detect.html">Intel Driver &amp; Support Assistant</a>.</li>
+<li>Pasang pembaruan grafis yang disarankan, restart, buka VirmoDock lagi.</li></ol>
+<div class="catatan">Laptop dengan dua GPU (mis. Intel + NVIDIA): VirmoDock memilih GPU diskrit (VRAM terbesar). Pastikan laptop tersambung ke charger dan mode daya “Best performance” agar GPU diskrit aktif.</div>
+
+<h2>Bila GPU gagal saat docking</h2>
+<p>Jika AutoDock-GPU melaporkan galat OpenCL (kernel gagal dikompilasi, memori GPU penuh, driver rusak), VirmoDock <b>otomatis melanjutkan job dengan AutoDock Vina di CPU</b> dan menulis alasannya di panel <b>Pesan</b>. Hasil tetap valid; hanya lebih lambat. Perbarui driver lalu jalankan job baru untuk memakai GPU lagi.</p>
+
+<h2>Perkiraan waktu</h2>
+<table>
+<tr><th>Mesin &amp; perangkat</th><th>1 ligan (14 torsi, kotak 22 Å)</th></tr>
+<tr><td>AutoDock-GPU, RTX 3060 Laptop, 50 run</td><td>± 3–5 detik</td></tr>
+<tr><td>AutoDock Vina, Ryzen 7 5800H 16 thread, exhaustiveness 8</td><td>± 50 detik</td></tr>
+</table>
+<p>Ligan dengan &gt; 32 torsi atau &gt; 256 atom tidak didukung AutoDock-GPU dan otomatis dilewati dengan alasan; jalankan ligan itu dengan Vina.</p>

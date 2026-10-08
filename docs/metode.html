@@ -1,0 +1,56 @@
+<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Metode &amp; kriteria · VirmoDock</title><link rel="stylesheet" href="gaya.css"><link rel="icon" href="gambar/ikon.png"></head><body><header><img src="gambar/logo_putih.svg" alt="VirmoDock" style="height:30px;margin-right:6px"><span style="color:#9fb4d3;font-size:13px;margin-right:10px">0.9.0</span><a href="panduan.html">Panduan pengguna</a><a href="instalasi.html">Instalasi</a><a href="pindah_laptop.html">Pindah laptop</a><a href="gpu.html">Setup GPU</a><a href="troubleshooting.html">Troubleshooting</a><a href="metode.html" class="aktif">Metode &amp; kriteria</a></header><main><h1>Metode &amp; kriteria</h1>
+<p class="lead">Rincian ilmiah yang dipakai VirmoDock, untuk ditulis di bagian Metode naskah.</p>
+
+<h2>Preparasi</h2>
+<table>
+<tr><th>Langkah</th><th>Alat</th><th>Rincian</th></tr>
+<tr><td>Pembersihan reseptor</td><td>gemmi</td><td>Model pertama; konformasi alternatif okupansi tertinggi; hidrogen asli dibuang; air, ligan, aditif kristalisasi dihapus; ion logam dalam radius 8 Å dari ligan asli dipertahankan (tipe AD4, muatan formal).</td></tr>
+<tr><td>Reseptor → PDBQT</td><td>Meeko 0.8</td><td>Templat residu; hidrogen polar; muatan Gasteiger; tipe atom AutoDock4. Residu tidak lengkap dibuang dan dilaporkan. Cadangan: Open Babel 3.1.1.</td></tr>
+<tr><td>Ligan</td><td>RDKit, Open Babel, Meeko</td><td>Fragmen terbesar; protonasi pH 7,4 (Open Babel); koordinat 3D ETKDGv3 bila perlu; minimisasi MMFF94 (500 langkah, cadangan UFF); torsi, hidrogen polar, muatan Gasteiger, makrosiklik fleksibel (Meeko).</td></tr>
+<tr><td>Ligan validasi</td><td>sama</td><td>Konformasi kristal tanpa minimisasi (cincin kaku dipertahankan).</td></tr>
+</table>
+
+<h2>Docking — parameter bawaan</h2>
+<table>
+<tr><th>Mesin</th><th>Bawaan (preset Standar)</th></tr>
+<tr><td>AutoGrid4 4.2.6</td><td>Spasi 0,375 Å, titik genap ≤ 126 per sumbu, peta per tipe atom ligan + elektrostatik + desolvasi; dipakai ulang bila parameter sama.</td></tr>
+<tr><td>AutoDock-GPU 1.6 (OpenCL)</td><td>50 run, LGA + ADADELTA, jumlah evaluasi heuristik, AutoStop, seed 42. Pose = wakil terbaik tiap klaster (RMSD 2,0 Å).</td></tr>
+<tr><td>AutoDock Vina 1.2.7</td><td>Exhaustiveness 16, 9 pose, rentang energi 3 kcal/mol, seed 42.</td></tr>
+<tr><td>AutoDock 4.2.6</td><td>LGA, 50 run, populasi 150, 2,5 juta evaluasi, 27 000 generasi, Solis-Wets.</td></tr>
+</table>
+
+<h2>Kriteria interaksi</h2>
+<table>
+<tr><th>Jenis</th><th>Kriteria</th></tr>
+<tr><td>Ikatan hidrogen</td><td>Donor···akseptor ≤ 3,5 Å; H···akseptor ≤ 2,8 Å; sudut D–H···A ≥ 110° (tanpa atom H: hanya jarak D···A).</td></tr>
+<tr><td>Hidrofobik</td><td>Karbon ligan yang hanya terikat C/H (atau Cl/Br/I) ↔ karbon protein yang hanya terikat C/H, ≤ 4,0 Å; satu kontak terdekat per residu.</td></tr>
+<tr><td>π–π</td><td>Pusat cincin aromatik ≤ 5,5 Å; tumpuk: sudut bidang ≤ 30° dan offset ≤ 3,0 Å; bentuk T: sudut ≥ 60°.</td></tr>
+<tr><td>π–kation</td><td>Pusat cincin ↔ kation (LYS NZ, ARG NE/NH1/NH2, HIS terprotonasi ganda, amina ligan bermuatan) ≤ 6,0 Å, offset lateral ≤ 2,0 Å.</td></tr>
+<tr><td>Jembatan garam</td><td>Gugus bermuatan berlawanan (ASP/GLU/ujung-C ↔ LYS/ARG/HIS+; gugus ionik ligan) ≤ 4,0 Å.</td></tr>
+<tr><td>Ikatan halogen</td><td>C–X···A (X = Cl, Br, I; A = O, N, S): X···A ≤ 3,5 Å, sudut C–X···A ≥ 140°.</td></tr>
+<tr><td>Koordinasi logam</td><td>Ion logam ↔ O/N/S ligan ≤ 2,8 Å.</td></tr>
+<tr><td>van der Waals</td><td>Residu tanpa interaksi lain dengan atom berat ≤ 4,2 Å dari ligan (untuk diagram 2D).</td></tr>
+</table>
+
+<h2>Besaran turunan</h2>
+<ul>
+<li><b>Ki perkiraan</b> = exp(ΔG / RT), R = 1,987207 × 10⁻³ kcal mol⁻¹ K⁻¹, T = 298,15 K.</li>
+<li><b>Efisiensi ligan (LE)</b> = −ΔG / jumlah atom berat (kcal/mol per atom berat).</li>
+<li><b>RMSD redocking</b>: atom berat, tanpa penjajaran (pose dan kristal di kerangka koordinat reseptor yang sama), minimum atas semua pemetaan simetri molekul; dihitung pada graf tanpa orde ikatan agar tidak terpengaruh protonasi. Valid bila ≤ 2,0 Å.</li>
+<li><b>RMSD ref</b> (AutoDock): RMSD terhadap koordinat ligan masukan, dari berkas .dlg.</li>
+</ul>
+
+<h2>Perangkat lunak yang perlu dikutip</h2>
+<ol>
+<li>Santos-Martins D, et al. Accelerating AutoDock4 with GPUs and gradient-based local search. <i>J Chem Theory Comput.</i> 2021;17(2):1060–1073. doi:10.1021/acs.jctc.0c01006</li>
+<li>Morris GM, et al. AutoDock4 and AutoDockTools4. <i>J Comput Chem.</i> 2009;30(16):2785–2791. doi:10.1002/jcc.21256</li>
+<li>Eberhardt J, et al. AutoDock Vina 1.2.0. <i>J Chem Inf Model.</i> 2021;61(8):3891–3898. doi:10.1021/acs.jcim.1c00203; Trott O, Olson AJ. <i>J Comput Chem.</i> 2010;31(2):455–461. doi:10.1002/jcc.21334</li>
+<li>Meeko (Forli Lab, Scripps Research). https://github.com/forlilab/Meeko</li>
+<li>RDKit: Open-source cheminformatics. https://www.rdkit.org</li>
+<li>O'Boyle NM, et al. Open Babel. <i>J Cheminform.</i> 2011;3:33. doi:10.1186/1758-2946-3-33</li>
+<li>Wojdyr M. GEMMI. <i>J Open Source Softw.</i> 2022;7(73):4200. doi:10.21105/joss.04200</li>
+<li>Rego N, Koes D. 3Dmol.js. <i>Bioinformatics.</i> 2015;31(8):1322–1324. doi:10.1093/bioinformatics/btu829</li>
+</ol>
+<p>Laporan PDF VirmoDock mencantumkan sitasi sesuai mesin yang benar-benar dipakai.</p>
+<div class="peringatan">Hasil docking adalah prediksi komputasi, bukan bukti aktivitas biologis; konfirmasi dengan uji eksperimen.</div>
+<footer>VirmoDock 0.9.0 · dokumentasi offline · GPL-3.0-or-later</footer></main></body></html>

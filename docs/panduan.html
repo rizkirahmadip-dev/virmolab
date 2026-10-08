@@ -1,0 +1,125 @@
+<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Panduan pengguna · VirmoDock</title><link rel="stylesheet" href="gaya.css"><link rel="icon" href="gambar/ikon.png"></head><body><header><img src="gambar/logo_putih.svg" alt="VirmoDock" style="height:30px;margin-right:6px"><span style="color:#9fb4d3;font-size:13px;margin-right:10px">0.9.0</span><a href="panduan.html" class="aktif">Panduan pengguna</a><a href="instalasi.html">Instalasi</a><a href="pindah_laptop.html">Pindah laptop</a><a href="gpu.html">Setup GPU</a><a href="troubleshooting.html">Troubleshooting</a><a href="metode.html">Metode &amp; kriteria</a></header><main><h1>Panduan pengguna</h1>
+<p class="lead">Alur lengkap docking di VirmoDock, dari mengimpor protein sampai laporan PDF — semuanya di dalam satu aplikasi.</p>
+
+<nav class="isi"><b>Isi:</b>
+<a href="#tampilan">Tampilan</a> · <a href="#impor">1. Impor</a> · <a href="#reseptor">2. Reseptor</a> ·
+<a href="#ligan">3. Ligan</a> · <a href="#grid">4. Grid box</a> · <a href="#docking">5. Docking</a> ·
+<a href="#hasil">6. Hasil</a> · <a href="#interaksi">7. Interaksi</a> · <a href="#diagram">8. Diagram 2D</a> ·
+<a href="#validasi">9. Validasi</a> · <a href="#banding">10. Bandingkan</a> · <a href="#ekspor">11. Ekspor &amp; laporan</a> ·
+<a href="#proyek">Proyek</a> · <a href="#pintasan">Pintasan</a></nav>
+
+<h2 id="tampilan">Tampilan jendela</h2>
+<figure><img src="gambar/02_impor.png" alt="Jendela utama"><figcaption>Jendela utama setelah mengimpor 1HSG.</figcaption></figure>
+<table>
+<tr><th>Bagian</th><th>Fungsi</th></tr>
+<tr><td>Menu &amp; toolbar (atas)</td><td>Semua perintah. Toolbar: impor, siapkan reseptor/ligan, grid box, pilihan mesin &amp; perangkat, tombol <b>Jalankan</b>.</td></tr>
+<tr><td>Hierarki (kiri)</td><td>Semua objek: protein → rantai → residu, ligan, air, ion, ligan siap docking, hasil pose. Centang = tampil/sembunyi; klik kanan = gaya, warna, fokus, ekspor, hapus.</td></tr>
+<tr><td>Viewport 3D / Hasil / Diagram 2D (tengah)</td><td>Tampilan 3D (putar: seret kiri; geser: seret kanan; zoom: gulir), tabel hasil, diagram interaksi 2D.</td></tr>
+<tr><td>Properti, Tampilan, Parameter, Interaksi (kanan)</td><td>Info objek terpilih, gaya ala PyMOL, parameter docking &amp; grid box, daftar interaksi.</td></tr>
+<tr><td>Antrean job, Log, Pesan (bawah)</td><td>Progres docking; catatan kerja; peringatan dan galat beserta apa yang harus dilakukan.</td></tr>
+<tr><td>Status bar</td><td>GPU &amp; driver yang terdeteksi, progres, jumlah atom, folder proyek.</td></tr>
+</table>
+<p>Semua panel bisa dipindah, ditumpuk sebagai tab, atau dilepas. Tata letak tersimpan otomatis; kembalikan lewat <b>View › Atur ulang layout</b>. Mode gelap: <kbd>Ctrl</kbd>+<kbd>T</kbd>.</p>
+
+<h2 id="impor">1. Impor struktur</h2>
+<ul>
+<li><b>File › Buka</b> (<kbd>Ctrl</kbd>+<kbd>O</kbd>) atau seret berkas/folder ke jendela: PDB, PDBQT, mmCIF, SDF, MOL2, SMILES.</li>
+<li><b>Impor dari RCSB PDB</b> (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>): ketik ID, mis. <code>1HSG</code>. Struktur dipecah otomatis menjadi protein, ligan asli, air, dan ion.</li>
+<li><b>PubChem</b>: satu nama atau CID per baris (struktur 3D; bila tidak ada, dibuat dari 2D). <b>SMILES</b>: struktur 3D dibuat lalu diminimisasi MMFF.</li>
+</ul>
+<p>Grid box otomatis dipusatkan pada ligan asli terbesar (aditif kristalisasi seperti GOL, EDO, SO4 diabaikan).</p>
+
+<h2 id="reseptor">2. Siapkan reseptor</h2>
+<figure><img src="gambar/03_dialog_reseptor.png" alt="Dialog reseptor" style="max-width:560px"><figcaption>Prepare › Siapkan reseptor.</figcaption></figure>
+<ol class="langkah">
+<li>Pilih protein dan rantai yang dipakai.</li>
+<li>Atur pembersihan: hapus air, hapus ligan asli &amp; aditif, pertahankan ion logam (Zn, Mg, Ca, Mn, Fe, Cu, Co, Ni) dalam radius dari ligan asli (0 = semua).</li>
+<li>Konformasi alternatif: okupansi tertinggi (disarankan) atau selalu altloc A.</li>
+<li>Muatan: Gasteiger dihitung Meeko (disarankan) atau muatan templat residu. Muatan Kollman tidak tersedia (hanya di MGLTools).</li>
+<li>Klik <b>Siapkan</b>. Hasilnya objek <i>“… (siap)”</i>; berkas <code>reseptor/reseptor.pdbqt</code> dan <code>laporan_prep.txt</code> tersimpan di proyek.</li>
+</ol>
+<div class="catatan">Residu yang atomnya tidak lengkap dibuang dan didaftar di panel <b>Pesan</b>. Bila Meeko gagal, VirmoDock otomatis memakai Open Babel.</div>
+
+<h2 id="ligan">3. Siapkan ligan (banyak sekaligus)</h2>
+<figure><img src="gambar/05_dialog_ligan.png" alt="Dialog ligan"><figcaption>Prepare › Siapkan ligan: status tiap ligan dan alasannya.</figcaption></figure>
+<ul>
+<li>Ligan di sesi ini muncul di tabel; tambah dari berkas, folder, PubChem, atau SMILES langsung di dialog.</li>
+<li>Opsi: protonasi pada pH (bawaan 7,4), minimisasi MMFF94, makrosiklik kaku/fleksibel.</li>
+<li>Status: <span style="color:var(--ok)">siap</span>, <span style="color:var(--warn)">peringatan</span> (mis. &gt; 32 torsi atau &gt; 256 atom — tidak bisa di AutoDock-GPU, pakai Vina), <span style="color:var(--bad)">gagal</span> (dengan alasan). Satu ligan gagal tidak menghentikan yang lain.</li>
+<li>Ligan siap masuk grup <b>Ligan siap docking</b> di Hierarki.</li>
+</ul>
+
+<h2 id="grid">4. Grid box</h2>
+<figure><img src="gambar/06_parameter_gridbox.png" alt="Grid box"><figcaption>Grid box biru di viewport dan angka di panel Parameter.</figcaption></figure>
+<ul>
+<li>Angka pusat/ukuran/spasi di panel <b>Parameter</b>; titik grid dan peringatan (&gt; 126 titik per sumbu, &gt; 30 Å) tampil langsung.</li>
+<li>Tombol: <b>Pusat ke ligan asli</b>, <b>Pusat ke residu terpilih</b> (klik atom atau pilih residu di Hierarki, <kbd>Ctrl</kbd>+klik untuk banyak), <b>Sesuaikan ke ligan +8 Å</b>, <b>Seluruh protein (blind)</b>.</li>
+<li>Dengan mouse di viewport: <kbd>Shift</kbd>+seret = geser kotak; <kbd>Shift</kbd>+gulir = ukuran; <kbd>Alt</kbd>+gulir = satu sumbu (pilih sumbu dengan tombol <kbd>X</kbd>/<kbd>Y</kbd>/<kbd>Z</kbd>).</li>
+</ul>
+
+<h2 id="docking">5. Docking &amp; antrean</h2>
+<figure><img src="gambar/07_antrean.png" alt="Antrean"><figcaption>Job di panel Antrean; tiap ligan punya status dan progres.</figcaption></figure>
+<table>
+<tr><th>Mesin</th><th>Kapan dipakai</th><th>Parameter utama</th></tr>
+<tr><td>AutoDock-GPU</td><td>Laptop dengan GPU (OpenCL). Sangat cepat; cocok untuk screening.</td><td>Jumlah run (bawaan 50), evaluasi heuristik</td></tr>
+<tr><td>AutoDock Vina</td><td>Tanpa GPU, atau ligan besar (&gt; 32 torsi).</td><td>Exhaustiveness (8–32), jumlah pose, rentang energi</td></tr>
+<tr><td>AutoDock4</td><td>Perbandingan dengan penelitian lama (lambat).</td><td>ga_run, ga_pop_size, ga_num_evals</td></tr>
+</table>
+<ul>
+<li>Preset <b>Cepat / Standar / Teliti</b>, atau simpan preset sendiri. Seed tetap = hasil bisa diulang.</li>
+<li><b>Jalankan</b> (<kbd>F5</kbd>) memakai semua ligan siap, atau hanya yang dipilih di Hierarki.</li>
+<li>Panel Antrean: <b>Jeda</b> (setelah ligan yang sedang berjalan), <b>Lanjut</b>, <b>Batal</b>, buka folder hasil/log. Jendela boleh di-minimize; notifikasi Windows muncul saat selesai.</li>
+<li>Bila GPU gagal (OpenCL), job otomatis dilanjutkan dengan Vina di CPU dan alasannya ditulis di panel Pesan.</li>
+<li>Menutup aplikasi saat docking: job menjadi <i>Dijeda</i> dan bisa dilanjutkan tanpa mengulang ligan yang sudah selesai.</li>
+</ul>
+
+<h2 id="hasil">6. Tabel hasil</h2>
+<figure><img src="gambar/08_hasil.png" alt="Hasil"><figcaption>Tab Hasil: satu baris per ligan; panah membuka semua pose.</figcaption></figure>
+<p>Kolom: ΔG (kcal/mol), Ki perkiraan, LE (efisiensi ligan), ukuran klaster, RMSD ke kristal (hijau ≤ 2 Å), RMSD referensi, jumlah ikatan H (H), hidrofobik (HF), π, dan interaksi lain. Sortir dengan klik judul kolom; saring dengan nama atau batas ΔG. <b>Klik dua kali</b> baris untuk memuat pose ke viewport.</p>
+
+<h2 id="interaksi">7. Interaksi 3D</h2>
+<figure><img src="gambar/09_interaksi.png" alt="Interaksi"><figcaption>Garis putus-putus berwarna per jenis interaksi; residu kontak sebagai stick.</figcaption></figure>
+<p>Panel <b>Interaksi</b> menampilkan daftar per jenis beserta jarak dan sudut; klik baris untuk memfokuskan residu. Centang jenis yang ingin ditampilkan. Warna: <span style="color:#2e9e5b">ikatan hidrogen</span>, <span style="color:#c98a12">hidrofobik</span>, <span style="color:#7b5cd6">π–π</span>, <span style="color:#2f8fd6">π–kation</span>, <span style="color:#cf3f3f">jembatan garam</span>, <span style="color:#1aa3a3">ikatan halogen</span>, <span style="color:#7d80b0">logam</span>. Kriteria lengkap: <a href="metode.html">Metode &amp; kriteria</a>.</p>
+
+<h2 id="diagram">8. Diagram interaksi 2D</h2>
+<figure><img src="gambar/10_diagram2d.png" alt="Diagram 2D"><figcaption>Tab Diagram 2D untuk pose yang dipilih.</figcaption></figure>
+<p>Simpan sebagai SVG/PDF (vektor, bisa diedit di Inkscape, Illustrator, Word) atau PNG/TIFF dengan DPI pilihan.</p>
+
+<h2 id="validasi">9. Validasi redocking</h2>
+<figure><img src="gambar/11_validasi.png" alt="Validasi"><figcaption>Kristal (karbon magenta) vs pose terbaik (karbon biru).</figcaption></figure>
+<p><b>Analyze › Validasi redocking</b> men-docking ulang ligan kristal dengan parameter yang sama, dimulai dari konformasi kristal tanpa minimisasi, lalu menghitung RMSD pose terbaik terhadap kristal. <b>RMSD ≤ 2,0 Å = metode valid.</b> Hasil disimpan di proyek dan dikutip di laporan PDF. Lakukan sebelum menafsirkan hasil screening.</p>
+
+<h2 id="banding">10. Bandingkan ligan &amp; peta interaksi</h2>
+<figure><img src="gambar/12_bandingkan.png" alt="Bandingkan"><figcaption>Centang 2–4 ligan di tab Hasil lalu klik Bandingkan.</figcaption></figure>
+<p>Empat viewport berdampingan (tombol <i>Samakan sudut pandang</i>), daftar residu yang berinteraksi dengan semua ligan, dan peta panas residu × ligan. Tombol <b>Peta interaksi</b> menampilkan peta untuk semua hasil.</p>
+
+<h2 id="ekspor">11. Ekspor &amp; laporan</h2>
+<figure><img src="gambar/13_ekspor.png" alt="Ekspor" style="max-width:720px"><figcaption>File › Ekspor (<kbd>Ctrl</kbd>+<kbd>E</kbd>).</figcaption></figure>
+<table>
+<tr><th>Kategori</th><th>Isi</th></tr>
+<tr><td>Gambar 3D</td><td>PNG, TIFF (LZW/tanpa kompresi), JPEG, WebP; preset jurnal 85/120/180 mm @ 600 dpi, slide 1920×1080/4K, poster; latar putih/transparan. Gambar dirender ulang pada resolusi penuh (maks. 8192 px).</td></tr>
+<tr><td>Diagram 2D</td><td>SVG/PDF vektor, PNG/TIFF ber-DPI.</td></tr>
+<tr><td>Struktur</td><td>Kompleks PDB (reseptor + pose, ligan di rantai L), kompleks semua ligan, SDF bertag (ΔG, Ki, LE, RMSD, interaksi, SMILES), PDBQT.</td></tr>
+<tr><td>Tabel</td><td>Excel (.xlsx: Ringkasan, Semua pose, Interaksi, Parameter, Info) atau CSV (titik koma &amp; desimal koma untuk Excel Indonesia).</td></tr>
+<tr><td>Laporan PDF</td><td>Validasi, reseptor, parameter &amp; perangkat, 15 hasil teratas, gambar 3D dan diagram 2D ligan terbaik, interaksi, metode, sitasi software.</td></tr>
+</table>
+
+<h2 id="proyek">Proyek, simpan otomatis, pemulihan</h2>
+<ul>
+<li>Proyek adalah folder <code>Nama.vmd</code> berisi <code>proyek.json</code>, reseptor, ligan, grid, dan hasil (log asli mesin selalu disimpan). Dibuat otomatis saat preparasi pertama; ganti lewat <b>File › Proyek baru</b> / <b>Buka proyek</b> / <b>Simpan</b> (<kbd>Ctrl</kbd>+<kbd>S</kbd>).</li>
+<li>Simpan otomatis setiap perubahan penting dan setiap 3 menit, dengan 5 cadangan terakhir di <code>.cadangan</code>.</li>
+<li>Bila VirmoDock tertutup tidak normal (listrik mati), saat dibuka lagi muncul tawaran <i>Pulihkan pekerjaan terakhir</i>.</li>
+</ul>
+
+<h2 id="pintasan">Pintasan keyboard</h2>
+<table>
+<tr><th>Tombol</th><th>Aksi</th><th>Tombol</th><th>Aksi</th></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>O</kbd></td><td>Buka berkas</td><td><kbd>F5</kbd></td><td>Jalankan docking</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd></td><td>Impor RCSB</td><td><kbd>G</kbd></td><td>Tampil/sembunyi grid box</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>S</kbd></td><td>Simpan proyek</td><td><kbd>I</kbd></td><td>Tampil/sembunyi interaksi</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>E</kbd></td><td>Ekspor</td><td><kbd>M</kbd></td><td>Ukur jarak (klik dua atom)</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>D</kbd></td><td>Panel Parameter</td><td><kbd>F</kbd></td><td>Sesuaikan tampilan</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>T</kbd></td><td>Mode gelap/terang</td><td><kbd>F1</kbd></td><td>Panduan ini</td></tr>
+</table>
+<div class="peringatan">Hasil docking adalah prediksi komputasi, bukan bukti aktivitas biologis; konfirmasi dengan uji eksperimen. Ki dihitung dari ΔG sebagai perkiraan.</div>
+<footer>VirmoDock 0.9.0 · dokumentasi offline · GPL-3.0-or-later</footer></main></body></html>

@@ -1,0 +1,17 @@
+"""Bungkus docs/_sumber/*.html dengan kerangka & navigasi seragam -> docs/*.html."""
+from pathlib import Path
+import re
+SUMBER = Path("docs/_sumber")
+NAV = [("panduan", "Panduan pengguna"), ("instalasi", "Instalasi"), ("pindah_laptop", "Pindah laptop"),
+       ("gpu", "Setup GPU"), ("troubleshooting", "Troubleshooting"), ("metode", "Metode & kriteria")]
+versi = re.search(r'__version__ = "([^"]+)"', Path("virmodock/__init__.py").read_text()).group(1)
+for nama, judul in NAV:
+    isi = (SUMBER / f"{nama}.html").read_text(encoding="utf-8")
+    nav = "".join(f'<a href="{n}.html"{" class=\"aktif\"" if n == nama else ""}>{t.replace("&", "&amp;")}</a>' for n, t in NAV)
+    html = (f'<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
+            f'<title>{judul.replace("&", "&amp;")} · VirmoDock</title><link rel="stylesheet" href="gaya.css">'
+            f'<link rel="icon" href="gambar/ikon.png"></head><body><header><img src="gambar/logo_putih.svg" alt="VirmoDock" style="height:30px;margin-right:6px"><span style="color:#9fb4d3;font-size:13px;margin-right:10px">{versi}</span>{nav}</header><main>{isi}'
+            f'<footer>VirmoDock {versi} · dokumentasi offline · GPL-3.0-or-later</footer></main></body></html>\n')
+    Path(f"docs/{nama}.html").write_text(html, encoding="utf-8")
+    print("docs/" + nama + ".html")
+import shutil; shutil.copy("virmodock/aset/virmodock_256.png", "docs/gambar/ikon.png"); shutil.copy("branding/virmodock_logo_horizontal_putih.svg", "docs/gambar/logo_putih.svg"); shutil.copy("branding/virmodock_logo_horizontal.svg", "docs/gambar/logo_horizontal.svg")

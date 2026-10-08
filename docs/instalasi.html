@@ -1,0 +1,47 @@
+<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Instalasi · VirmoDock</title><link rel="stylesheet" href="gaya.css"><link rel="icon" href="gambar/ikon.png"></head><body><header><img src="gambar/logo_putih.svg" alt="VirmoDock" style="height:30px;margin-right:6px"><span style="color:#9fb4d3;font-size:13px;margin-right:10px">0.9.0</span><a href="panduan.html">Panduan pengguna</a><a href="instalasi.html" class="aktif">Instalasi</a><a href="pindah_laptop.html">Pindah laptop</a><a href="gpu.html">Setup GPU</a><a href="troubleshooting.html">Troubleshooting</a><a href="metode.html">Metode &amp; kriteria</a></header><main><h1>Instalasi</h1>
+<p class="lead">VirmoDock berjalan di Windows 10/11 64-bit tanpa perlu Python, WSL, MGLTools, atau program lain. Semua mesin docking sudah disertakan.</p>
+
+<h2>Kebutuhan minimum</h2>
+<table>
+<tr><th></th><th>Minimum</th><th>Disarankan</th></tr>
+<tr><td>Sistem</td><td>Windows 10 64-bit</td><td>Windows 10/11 64-bit terbaru</td></tr>
+<tr><td>RAM</td><td>4 GB</td><td>8 GB atau lebih</td></tr>
+<tr><td>Ruang disk</td><td>± 1,2 GB (program) + ruang proyek</td><td>SSD</td></tr>
+<tr><td>GPU</td><td>Tidak wajib (Vina di CPU)</td><td>NVIDIA/AMD/Intel dengan driver OpenCL terbaru (AutoDock-GPU)</td></tr>
+<tr><td>Layar</td><td>1366 × 768</td><td>1920 × 1080, skala 100–200 %</td></tr>
+</table>
+
+<h2>Pilihan A — Installer (disarankan)</h2>
+<ol class="langkah">
+<li>Jalankan <code>VirmoDock-Setup-x.y.z.exe</code>. Bila Windows SmartScreen muncul (“Windows protected your PC”), klik <b>More info › Run anyway</b> — installer belum ditandatangani sertifikat berbayar.</li>
+<li>Pilih folder instalasi (bawaan: <code>C:\Program Files\VirmoDock</code>, atau folder pengguna bila tanpa hak admin).</li>
+<li>Pilih tugas tambahan: ikon Desktop, kaitkan berkas <code>.pdbqt</code>/<code>.vmdbackup</code> dengan VirmoDock (opsional).</li>
+<li>Klik <b>Pasang</b>, lalu <b>Selesai</b> untuk membuka VirmoDock.</li>
+</ol>
+<p>Hapus pemasangan lewat <b>Settings › Apps › VirmoDock › Uninstall</b>. Proyek di folder kerja (bawaan <code>Documents\VirmoDock</code>) tidak ikut terhapus.</p>
+
+<h2>Pilihan B — Versi portable (tanpa instalasi)</h2>
+<ol class="langkah">
+<li>Ekstrak <code>VirmoDock-Portable-x.y.z.zip</code> ke folder mana saja (mis. flashdisk atau <code>D:\VirmoDock</code>). Hindari folder yang dilindungi seperti <code>C:\Program Files</code>.</li>
+<li>Jalankan <code>VirmoDock.exe</code>.</li>
+</ol>
+<p>Versi portable menyimpan pengaturan di <code>data\pengaturan.ini</code> dan proyek bawaan di <code>Proyek\</code> di dalam folder itu sendiri — tidak menyentuh registry. Penanda portable adalah berkas <code>portable.flag</code>; jangan dihapus.</p>
+
+<h2>Pertama kali dibuka</h2>
+<figure><img src="gambar/01_wizard.png" alt="Wizard pertama kali" style="max-width:640px"><figcaption>Wizard pemeriksaan sistem.</figcaption></figure>
+<ol class="langkah">
+<li><b>Pemeriksaan sistem</b>: GPU, driver, CPU, RAM, dan mode docking bawaan (GPU bila OpenCL tersedia, selain itu CPU). Bila GPU ada tetapi OpenCL tidak, ikuti panduan driver yang muncul — lihat <a href="gpu.html">Setup GPU</a>.</li>
+<li><b>Software pendukung</b>: PyMOL, ChimeraX, Discovery Studio Visualizer dideteksi untuk tombol “Buka di…”. Semuanya opsional.</li>
+<li><b>Folder kerja</b>: tempat proyek baru disimpan.</li>
+</ol>
+<p>Deteksi GPU dijalankan ulang setiap kali VirmoDock dibuka, jadi setelah pindah laptop atau memperbarui driver tidak perlu mengatur apa pun. Wizard bisa dibuka lagi lewat <b>Tools › Cek sistem / GPU</b>.</p>
+
+<h2>Lokasi berkas</h2>
+<table>
+<tr><th>Isi</th><th>Terpasang</th><th>Portable</th></tr>
+<tr><td>Program</td><td>Folder instalasi</td><td>Folder hasil ekstrak</td></tr>
+<tr><td>Pengaturan</td><td>Registry <code>HKCU\Software\VirmoDock</code></td><td><code>data\pengaturan.ini</code></td></tr>
+<tr><td>Log (untuk lapor masalah)</td><td><code>%LOCALAPPDATA%\VirmoDock\log</code></td><td><code>data\log</code></td></tr>
+<tr><td>Proyek</td><td><code>Documents\VirmoDock</code> (bisa diubah)</td><td><code>Proyek\</code></td></tr>
+</table>
+<footer>VirmoDock 0.9.0 · dokumentasi offline · GPL-3.0-or-later</footer></main></body></html>
