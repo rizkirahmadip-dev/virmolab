@@ -8,6 +8,7 @@ from PySide6.QtWidgets import (QAbstractItemView, QHBoxLayout, QHeaderView, QLab
                                QWidget)
 
 from ..core import mesin as M
+from ..core.laporan import id_angka
 from . import icons, theme
 
 LABEL_STATUS = {"menunggu": "Menunggu", "berjalan": "Berjalan", "dijeda": "Dijeda", "selesai": "Selesai",
@@ -131,7 +132,7 @@ class PanelAntrean(QWidget):
         it.setText(4, f"{LABEL_STATUS.get(j['status'], j['status'])} {len(selesai)}/{len(lig)}")
         it.setForeground(4, QColor(self._warna(j["status"])))
         e = [l["energi"] for l in lig if l.get("energi") is not None]
-        it.setText(5, f"{min(e):.2f}" if e else "")
+        it.setText(5, id_angka(f"{min(e):.2f}") if e else "")
         detik = [l["detik"] for l in lig if l.get("detik") and l["status"] == "selesai"]
         total = None
         if j.get("mulai"):
@@ -155,7 +156,7 @@ class PanelAntrean(QWidget):
             c.setForeground(4, QColor(self._warna(l["status"])))
             c.setToolTip(4, l.get("pesan") or "")
             c.setToolTip(0, l.get("pesan") or "")
-            c.setText(5, f"{l['energi']:.2f}" if l.get("energi") is not None else "")
+            c.setText(5, id_angka(f"{l['energi']:.2f}") if l.get("energi") is not None else "")
             c.setText(6, _durasi(l.get("detik")))
             for k in (5, 6):
                 c.setTextAlignment(k, Qt.AlignRight | Qt.AlignVCenter)

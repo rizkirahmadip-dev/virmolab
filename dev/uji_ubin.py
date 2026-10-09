@@ -9,7 +9,7 @@ from pathlib import Path
 
 from PySide6.QtCore import QSettings, QTimer
 
-SUMBER = Path("dev/uji/kerja_docs/1HSG_20261008_1914.vmd").resolve()
+SUMBER = Path(str(sorted(Path("dev/uji/kerja_docs").glob("*.vmd"))[-1])).resolve()
 sys.argv = [sys.argv[0]]
 KERJA = Path("dev/uji/ubin").resolve()
 shutil.rmtree(KERJA, ignore_errors=True)

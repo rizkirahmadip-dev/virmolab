@@ -14,7 +14,7 @@ st = QSettings("VirmoDock", "VirmoDock")
 st.setValue("tema", "terang")
 st.remove("layout")
 st.remove("sesi_terbuka")
-SUMBER = Path("dev/uji/kerja_docs/6M2N_20261008_1440.vmd").resolve()
+SUMBER = sorted(Path("dev/uji/kerja_docs").glob("*.vmd"))[-1].resolve()  # proyek docs terbaru
 OUT = Path("dev/uji/statistik/gui").resolve()
 OUT.mkdir(parents=True, exist_ok=True)
 PROYEK = OUT / "proyek_uji.vmd"
@@ -59,6 +59,9 @@ def hook():
             for i, (k, _t) in enumerate(__import__("virmodock.ui.tab_statistik", fromlist=["JENIS"]).JENIS):
                 st_.c_jenis.setCurrentIndex(i)
                 svg, ukuran = st_.svg()
+                if k == "ifp" and not any(d.get("ifp") for d in st_.data):
+                    print("  ifp: dilewati (proyek lama tanpa sidik jari interaksi)", flush=True)
+                    continue
                 print(f"  {k}: svg {len(svg)} B ukuran {ukuran}", flush=True)
                 s.grab().save(str(OUT / f"gui_{k}.png"))
                 for f in ("svg", "png"):

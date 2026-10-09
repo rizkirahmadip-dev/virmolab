@@ -290,6 +290,8 @@ def dosis_respons(konsentrasi, respons, log_x=True):
     x, y = x[ok], y[ok]
     if len(set(x)) < 4:
         return {"galat": "Butuh minimal 4 konsentrasi berbeda untuk model 4PL."}
+    if float(np.ptp(y)) < 1e-9:
+        return {"galat": "Respons sama di semua konsentrasi: tidak ada kurva dosis–respons yang bisa dihitung."}
     lx = np.log10(x) if log_x else x
     p0 = [float(y.min()), float(y.max()), float(np.median(lx)), 1.0 if y[np.argmax(lx)] > y[np.argmin(lx)] else -1.0]
     try:
@@ -304,11 +306,24 @@ def dosis_respons(konsentrasi, respons, log_x=True):
     t = stats.t.ppf(0.975, dof)
     lo, hi = par[2] - t * se[2], par[2] + t * se[2]
     xs = np.linspace(lx.min() - 0.3, lx.max() + 0.3, 200)
-    return {"bawah": float(par[0]), "atas": float(par[1]), "log_ic50": float(par[2]), "hill": float(par[3]),
+    r2 = 1 - ss_res / ss_tot if ss_tot else None
+    ci_ok = bool(np.isfinite(se[2]) and abs(lo) < 300 and abs(hi) < 300)
+    peringatan = []
+    if not lx.min() <= par[2] <= lx.max():
+        peringatan.append("IC₅₀ berada di luar rentang konsentrasi yang diuji (ekstrapolasi): kurang andal — "
+                          "tambahkan konsentrasi di sekitar IC₅₀.")
+    if not ci_ok or (hi - lo) > 2:
+        peringatan.append("CI 95% IC₅₀ sangat lebar atau tak terhitung: data belum cukup mendefinisikan kurva "
+                          "(perlu titik di dasar, puncak, dan sekitar IC₅₀).")
+    if abs(par[1] - par[0]) < 0.25 * float(np.ptp(y)) or abs(par[3]) > 10:
+        peringatan.append("Bentuk kurva tidak sigmoid wajar (dasar ≈ puncak atau kemiringan ekstrem): periksa data.")
+    if r2 is not None and r2 < 0.8:
+        peringatan.append(f"Kecocokan model rendah (R² = {f_angka(r2, 2)}).")
+    return {"peringatan": peringatan, "bawah": float(par[0]), "atas": float(par[1]), "log_ic50": float(par[2]), "hill": float(par[3]),
             "ic50": float(10 ** par[2]) if log_x else float(par[2]),
             "ic50_ci": ((float(10 ** lo), float(10 ** hi)) if log_x else (float(lo), float(hi)))
-            if np.isfinite(se[2]) and abs(lo) < 300 and abs(hi) < 300 else None,
-            "r2": 1 - ss_res / ss_tot if ss_tot else None, "n": int(len(y)), "dof": dof,
+            if ci_ok else None,
+            "r2": r2, "n": int(len(y)), "dof": dof,
             "kurva": (xs.tolist(), model_4pl(xs, *par).tolist()), "titik": (lx.tolist(), y.tolist()),
             "log_x": log_x}
 
@@ -363,7 +378,13 @@ def roc(negatif, positif, rendah_positif=False):
            "characteristic (ROC). Luas di bawah kurva (AUC) dihitung dengan metode nonparametrik (Mann–Whitney) "
            "beserta interval kepercayaan 95 % metode DeLong; titik potong optimal ditentukan dengan indeks Youden. "
            "Analisis dilakukan dengan VirmoDock (SciPy).")
-    return {"auc": auc, "se": se, "ci": ci, "p": p, "potong": float(potong), "sens": sens, "spes": spes, "ef": ef,
+    peringatan = []
+    if auc < 0.5:
+        peringatan.append("AUC < 0,5: skor justru membedakan ke arah sebaliknya — periksa pilihan arah "
+                          "(“Skor rendah = positif” untuk ΔG docking) atau letak kolom negatif/positif.")
+    if min(n0, n1) < 10:
+        peringatan.append("Jumlah data kecil (< 10 per kelompok): interval kepercayaan AUC kurang andal.")
+    return {"peringatan": peringatan, "auc": auc, "se": se, "ci": ci, "p": p, "potong": float(potong), "sens": sens, "spes": spes, "ef": ef,
             "fpr": fpr, "tpr": tpr, "n0": n0, "n1": n1, "rendah_positif": rendah_positif, "titik": titik,
             "interpretasi": inter, "metode": met}
 

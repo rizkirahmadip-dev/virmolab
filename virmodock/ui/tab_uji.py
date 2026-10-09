@@ -316,7 +316,7 @@ class PanelFormat(QFrame):
         f.addRow("Grup", self.c_grup)
         self.b_warna = TombolWarna()
         self.b_warna.warna.connect(self._set_warna_grup)
-        b_pal = QPushButton("Warna palet")
+        b_pal = QPushButton("Palet")
         b_pal.setToolTip("Kembalikan warna grup ini ke palet")
         b_pal.clicked.connect(lambda: self._set_warna_grup(None))
         bw = QHBoxLayout()
@@ -1013,6 +1013,8 @@ class TabUji(QWidget):
                      f"<tr><th>Bawah / Atas</th><td class='n'>{F(h['bawah'], 2)} / {F(h['atas'], 2)}</td></tr>"
                      f"<tr><th>R²</th><td class='n'>{F(h['r2'], 4)}</td><td>n = {h['n']}, df = {h['dof']}</td></tr>"
                      "</table>")
+            for w in h.get("peringatan") or []:
+                o.append(f"<p class='w'>⚠ {escape(w)}</p>")
             self._teks = (f"IC50 = {F(h['ic50'], 3)}" + (f" (CI 95% {F(ci[0], 3)}–{F(ci[1], 3)})" if ci else "")
                           + f"; Hill = {F(h['hill'], 2)}; R² = {F(h['r2'], 3)}.\nNilai IC50 ditentukan dengan "
                           "regresi nonlinear model logistik empat parameter (log[inhibitor] vs respons, kemiringan "
@@ -1032,6 +1034,8 @@ class TabUji(QWidget):
                      f"{F(h['ef'][5], 2)} · EF10% = {F(h['ef'][10], 2)}</td></tr>"
                      f"<tr><th>n</th><td class='n'>{h['n1']} / {h['n0']}</td><td>positif / negatif</td></tr></table>"
                      f"<p>{escape(h['interpretasi'])}</p><p class='m'><b>Metode:</b> {escape(h['metode'])}</p>")
+            for w in h.get("peringatan") or []:
+                o.append(f"<p class='w'>⚠ {escape(w)}</p>")
             self._teks = f"{h['interpretasi']}\n{h['metode']}"
             self.info.setHtml("".join(o))
             return

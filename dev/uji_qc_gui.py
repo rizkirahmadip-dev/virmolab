@@ -14,7 +14,7 @@ st = QSettings("VirmoDock", "VirmoDock")
 st.setValue("tema", "terang")
 st.remove("layout")
 st.remove("sesi_terbuka")
-SUMBER = Path("dev/uji/kerja_docs/6M2N_20261008_1440.vmd").resolve()
+SUMBER = sorted(Path("dev/uji/kerja_docs").glob("*.vmd"))[-1].resolve()  # proyek docs terbaru
 OUT = Path("dev/uji/qc/gui").resolve()
 OUT.mkdir(parents=True, exist_ok=True)
 PROYEK = OUT / "proyek_uji.vmd"

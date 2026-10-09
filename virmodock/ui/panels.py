@@ -6,6 +6,7 @@ from PySide6.QtWidgets import (QAbstractItemView, QButtonGroup, QColorDialog, QC
                                QScrollArea, QSizePolicy, QSlider, QTableWidget, QTableWidgetItem, QToolButton, QTreeWidget,
                                QTreeWidgetItem, QVBoxLayout, QWidget)
 
+from ..core.laporan import id_angka
 from . import icons
 
 IKON_JENIS = {"protein": "rec", "ligan": "lig", "air": "water", "ion": "ion", "pose": "lig", "kompleks": "layers",
@@ -84,7 +85,7 @@ class PanelHierarki(QWidget):
         self._diam = True
         info = {"protein": f"{o.info.get('atom', '')} atom", "ligan": o.info.get("rumus", ""),
                 "air": str(o.info.get("jumlah", "")), "ion": str(o.info.get("jumlah", "")),
-                "pose": f"{o.info.get('energi', 0):.2f}" if "energi" in o.info else ""}.get(o.jenis, "")
+                "pose": id_angka(f"{o.info.get('energi', 0):.2f}") if "energi" in o.info else ""}.get(o.jenis, "")
         induk = self._grup(o.grup) if getattr(o, "grup", "") else self.pohon
         it = self._baru(induk, o.nama, info, ("obj", o.id), o.tampil, IKON_JENIS.get(o.jenis))
         it.setData(0, Qt.UserRole + 1, o.jenis)
@@ -309,7 +310,7 @@ class PanelProperti(QWidget):
         for k, v in baris:
             kk = QLabel(k)
             kk.setObjectName("muted")
-            vv = QLabel(str(v))
+            vv = QLabel(id_angka(str(v)))
             vv.setObjectName("mono")
             vv.setTextInteractionFlags(Qt.TextSelectableByMouse)
             vv.setWordWrap(True)

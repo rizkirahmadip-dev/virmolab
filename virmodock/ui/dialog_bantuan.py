@@ -69,7 +69,7 @@ class DialogLisensi(QDialog):
         kutip.setHtml(
             "<h3>Mengutip VirmoDock dan perangkat lunak di dalamnya</h3>"
             f"<p>VirmoDock {versi}. Aplikasi desktop molecular docking (open-source, GPL-3.0-or-later).</p>"
-            "<p>Kutip juga mesin dan pustaka yang Anda pakai (laporan PDF VirmoDock mencantumkannya otomatis):</p><ol>"
+            "<p>Kutip juga mesin dan pustaka yang Anda pakai (laporan VirmoDock mencantumkannya otomatis):</p><ol>"
             + "".join(f"<li>{v}</li>" for v in SITASI.values()) + "</ol>"
             "<p>Bila memakai kontrol kualitas pose, sifat ligan, atau BOILED-Egg:</p><ol>"
             + "".join(f"<li>{v}</li>" for v in [SITASI_QC] + SITASI_SIFAT) + "</ol>")

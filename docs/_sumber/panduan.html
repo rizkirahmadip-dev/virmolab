@@ -1,5 +1,5 @@
 <h1>Panduan pengguna</h1>
-<p class="lead">Alur lengkap docking di VirmoDock, dari mengimpor protein sampai laporan PDF — semuanya di dalam satu aplikasi, dipandu lima langkah.</p>
+<p class="lead">Alur lengkap docking di VirmoDock, dari mengimpor protein sampai laporan (PDF, Word, atau HTML interaktif) — semuanya di dalam satu aplikasi, dipandu lima langkah.</p>
 
 <nav class="isi"><b>Isi:</b>
 <a href="#tampilan">Tampilan</a> · <a href="#mulai">Mulai</a> · <a href="#protein">1. Protein</a> ·
@@ -14,7 +14,7 @@
 <table>
 <tr><th style="width:28%">Bagian</th><th>Fungsi</th></tr>
 <tr><td>Menu (atas)</td><td>Delapan menu: <b>Berkas, Edit, Tampilan, Siapkan, Docking, Analisis, Alat, Bantuan</b>. Arahkan tetikus ke sebuah item untuk melihat keterangannya di bilah status.</td></tr>
-<tr><td>Toolbar</td><td>Buka berkas, simpan, ambil dari RCSB, interaksi 3D, ukur jarak, gambar 3D, laporan PDF, “Buka di…” program lain; di tengah tombol <b>ruang kerja</b> <i>Siapkan · Docking · Analisis</i>; di kanan mode gelap.</td></tr>
+<tr><td>Toolbar</td><td>Buka berkas, simpan, ambil dari RCSB, interaksi 3D, ukur jarak, gambar 3D, laporan, “Buka di…” program lain; di tengah tombol <b>ruang kerja</b> <i>Siapkan · Docking · Analisis</i>; di kanan mode gelap.</td></tr>
 <tr><td>Langkah (kiri atas)</td><td>Lima langkah: <b>1 Protein → 2 Ligan → 3 Area docking → 4 Jalankan → 5 Hasil</b>. Tanda centang = langkah selesai; teks kecil = status (mis. “3 siap”). Klik untuk membuka langkah itu.</td></tr>
 <tr><td>Objek (kiri bawah)</td><td>Semua objek: protein → rantai → residu, ligan, air, ion, <i>Ligan siap docking</i>, hasil pose. Centang = tampil/sembunyi; klik kanan = gaya, warna, fokus, ganti nama, ekspor, hapus.</td></tr>
 <tr><td>Tengah</td><td>Tab <b>Viewport 3D</b>, <b>Hasil</b>, <b>Diagram 2D</b>, <b>Sifat Ligan</b>, <b>Statistik</b> (tab yang tampil mengikuti ruang kerja).</td></tr>
@@ -140,10 +140,12 @@
 <li>Ekspor SVG/PDF (vektor), PNG/TIFF 600 dpi, <b>Salin</b> ke clipboard, atau <b>＋ Komposer</b> untuk dijadikan panel figur.</li>
 </ul>
 <h3>Format grafik (klik elemen)</h3>
+<figure><img src="gambar/18_uji_format.png" alt="Uji dan Grafik dengan panel Format" style="max-width:860px"><figcaption>Tab Uji &amp; Grafik: grup “Ekstrak 100” diklik, panel Format kanan menampilkan warna, penanda, dan opasitasnya.</figcaption></figure>
 <p>Panel <b>Format</b> di kanan (tombol <i>Format ◂/▸</i>) mengatur tampilan grafik. Arahkan mouse ke grafik: bagian yang bisa diformat disorot; klik untuk membukanya di panel — <b>judul</b>, <b>label sumbu Y</b>, <b>sumbu Y</b> (minimum, maksimum, jarak tik, skala log₁₀, <b>patah sumbu</b> untuk melompati rentang kosong bila satu grup jauh lebih besar), <b>sumbu X</b> (label, nama grup miring), <b>grup</b> (warna per grup, bentuk &amp; ukuran penanda, opasitas, lebar batang), dan <b>tanda signifikansi</b>. Klik latar grafik untuk pengaturan umum (ukuran, huruf, tebal garis, palet, kisi, titik individual).</p>
 <p><b>Gaya tersimpan</b>: simpan tampilan favorit (huruf, warna, ukuran, penanda) dengan <i>Simpan…</i>, lalu pakai di grafik lain dengan <i>Terapkan</i> — teks dan rentang sumbu tidak ikut berubah. Tersedia gaya bawaan: <i>Jurnal hitam-putih</i>, <i>Kolom jurnal (ringkas)</i>, dan <i>Presentasi (huruf besar)</i>.</p>
 
 <h2 id="komposer">Komposer figur (panel A/B/C)</h2>
+<figure><img src="gambar/19_komposer.png" alt="Komposer figur" style="max-width:760px"><figcaption>Grafik uji (A) dan gambar 3D (B) disusun menjadi satu figur 174 mm.</figcaption></figure>
 <p><b>Analisis › Komposer figur</b> (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd>) menggabungkan beberapa gambar menjadi satu figur jurnal berlabel A, B, C. Tambahkan panel dari <i>＋ Tambah ▾</i>: grafik Uji &amp; Grafik, grafik Statistik, diagram interaksi 2D, BOILED-Egg, gambar viewport 3D, atau berkas gambar (PNG/JPG/SVG). Urutkan dengan menyeret atau tombol ↑ ↓; centang <i>Lebar penuh</i> agar panel (mis. gambar 3D) memakai satu baris sendiri.</p>
 <ul>
 <li>Atur jumlah kolom, jarak antar panel, gaya label (A / a / (A) / (a) / A.), ukuran label, dan lebar cetak (85 / 120 / 174 mm).</li>
@@ -161,6 +163,7 @@
 <tr><td>Tabel</td><td>Excel (.xlsx: Ringkasan, Semua pose, Interaksi, Sifat ligan, Statistik, Parameter, Info) atau CSV (titik koma &amp; desimal koma untuk Excel Indonesia).</td></tr>
 <tr><td>Laporan</td><td>Validasi, reseptor, parameter &amp; perangkat, hasil teratas, gambar 3D dan diagram 2D ligan terbaik, interaksi, PoseBusters, sifat ligan, metode, sitasi software. Tiga format: <b>PDF</b> (siap cetak), <b>Word .docx</b> (judul, tabel, dan gambar bisa disunting), dan <b>HTML interaktif</b> — satu berkas yang bisa dibuka offline di peramban mana pun: penjelajah 3D (klik baris tabel untuk melihat pose 30 ligan teratas beserta residu kontak dan garis interaksi; permukaan kantong, putar, simpan PNG), tabel hasil lengkap yang bisa dicari &amp; diurutkan, dan laporan lengkap. Pintasan <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd>.</td></tr>
 </table>
+<figure><img src="gambar/20_video.png" alt="Dialog video" style="max-width:420px"><figcaption>Video presentasi sinematik 4K: zoom → putar → sorot interaksi.</figcaption></figure>
 <p><b>Berkas › Ekspor › Video / animasi 3D…</b> merekam viewport seperti tampil sekarang: <i>Putar 360°</i>, <i>Goyang ±30°</i>, atau <i>Zoom masuk ke situs pengikatan</i> (beralih mulus dari seluruh protein ke pandangan saat ini). Setiap bingkai dirender ulang pada resolusi penuh (bukan rekaman layar), termasuk label residu. Format: <b>Video MP4 H.264</b> — Full HD 1920×1080, 2K 2560×1440, 4K 3840×2160, kotak 1080×1080, atau tegak 1080×1920 (Reels/Story) pada 24/30/60 bingkai/detik, kualitas tinggi (4K30 ± 40 Mbps); cocok untuk PowerPoint, YouTube, dan media sosial. Rekaman 4K 8 detik butuh ± 1 menit. Juga tersedia GIF (WhatsApp/web, 256 warna), WebP animasi, dan folder bingkai PNG untuk editor video.</p>
 <p><b>Label 3D</b> (residu, jarak interaksi, pengukuran, kantong) digambar ulang pada resolusi kanvas yang sebenarnya — tetap tajam di layar HiDPI dan pada ekspor/video 4K. Label residu berbentuk pil: nama residu tebal, nomor abu-abu, dan titik warna jenis interaksinya.</p>
 <p><b>Salin gambar</b> (<b>Edit › Salin gambar</b>, <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>C</kbd>) menyalin isi tab yang terbuka — viewport 3D, diagram 2D, BOILED-Egg, atau grafik — ke clipboard untuk ditempel ke Word/PowerPoint.</p>

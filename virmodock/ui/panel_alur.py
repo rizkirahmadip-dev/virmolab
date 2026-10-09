@@ -206,7 +206,7 @@ class PanelLangkah(QStackedWidget):
                      8,
                      A("validasi", _tombol("Validasi redocking…", ikon="check", tip="Docking ulang ligan kristal; RMSD ≤ 2 Å = valid")),
                      A("ekspor", _tombol("Ekspor gambar / tabel / struktur…", ikon="dl")),
-                     A("laporan", _tombol("Buat laporan PDF…", True, ikon="report")))
+                     A("laporan", _tombol("Buat laporan…", True, ikon="report")))
         self._tambah("Hasil", "Lihat peringkat, interaksi, dan buat laporan.", isi, None)
 
     def _A(self, kunci, tombol):

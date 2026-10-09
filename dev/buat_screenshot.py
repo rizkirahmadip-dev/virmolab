@@ -146,7 +146,34 @@ def hook():
             s.tab_tengah.setCurrentWidget(s.sifat)
             QTimer.singleShot(2500, lambda: (simpan(s, "16_sifat"), s.tab_tengah.setCurrentWidget(s.statistik),
                                              s.statistik.c_jenis.setCurrentIndex(1),
-                                             QTimer.singleShot(1500, lambda: (simpan(s, "17_statistik"), s.l15()))))
+                                             QTimer.singleShot(1500, lambda: (simpan(s, "17_statistik"), s.l14b()))))
+
+        def l14b(s):
+            # Uji & Grafik: contoh data + panel Format terbuka pada elemen grup
+            s.tab_tengah.setCurrentWidget(s.uji)
+            s.uji.isi_contoh()
+            s.uji.e_judul.setText("Berat kering tanaman")
+            s.uji.hitung()
+            s.uji.b_format.setChecked(True)
+            s.uji.format.pilih("grup:2")
+            QTimer.singleShot(1200, lambda: (simpan(s, "18_uji_format"), s.l14c()))
+
+        def l14c(s):
+            # Komposer figur: grafik uji + gambar 3D
+            s._komposer_tambah("uji")
+            s.tab_tengah.setCurrentWidget(s.w_view)
+            QTimer.singleShot(1500, lambda: s._komposer_tambah("3d"))
+            QTimer.singleShot(6000, lambda: (s.komposer.resize(1180, 720), simpan(s.komposer, "19_komposer"),
+                                             s.komposer.close(), s.l14d()))
+
+        def l14d(s):
+            from virmodock.ui.dialog_animasi import DialogAnimasi
+            d = DialogAnimasi(s, s.viewer.height() / max(1, s.viewer.width()))
+            d.c_jenis.setCurrentIndex(d.c_jenis.findData("sinema"))
+            d.c_fmt.setCurrentIndex(d.c_fmt.findData("mp4"))
+            d.c_res.setCurrentIndex(d.c_res.findData("uhd"))
+            d.show()
+            QTimer.singleShot(600, lambda: (simpan(d, "20_video"), d.reject(), s.l15()))
 
         def l15(s):
             s.atur_ruang("siapkan")

@@ -11,6 +11,7 @@ from html import escape
 
 from . import paths
 from .laporan import GAYA as GAYA_LAPORAN
+from .laporan import _id
 
 KOLOM = (("peringkat", "#", "n"), ("ligan", "Ligan", ""), ("energi", "ΔG (kcal/mol)", "n"), ("ki", "Ki perkiraan", ""),
          ("le", "LE", "n"), ("hbond", "Ikatan H", "n"), ("hidrofobik", "Hidrofobik", "n"), ("pi", "π", "n"),
@@ -147,7 +148,8 @@ def buat(judul, html_laporan, baris, pose, reseptor, fmt_reseptor, js3dmol, jeni
                           f"src='data:image/svg+xml;base64,{base64.b64encode(svg2d.encode('utf-8')).decode()}'")
     gaya_lap = re.sub(r"(^|\})\s*([^{}]+)\{", lambda g: g.group(1) + " " + ", ".join(
         ".lap " + s.strip() for s in g.group(2).split(",")) + " {", GAYA_LAPORAN)
-    data = {"baris": [{k: b.get(k) for k, _, _ in KOLOM} | {"pi": b.get("pi", 0) + b.get("pikation", 0),
+    data = {"baris": [{k: b.get(k) for k, _, _ in KOLOM} | {"ki": _id(str(b.get("ki") or "")) or None,
+                                                         "pi": b.get("pi", 0) + b.get("pikation", 0),
                                                          "qc": (b["qc"].get("lulus") if b.get("qc") and not
                                                                 b["qc"].get("galat") else None),
                                                          "pose": b.get("_pose", -1)} for b in baris],

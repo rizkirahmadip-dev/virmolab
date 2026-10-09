@@ -166,6 +166,19 @@ def uji(lapor=None):
             raise RuntimeError("tidak ada kantong")
         return f"P2Rank 2.5.1 + Java 21, kantong #1 skor {k[0]['skor']:.1f}"
     cek("Deteksi kantong (P2Rank)", p2rank_uji)
+
+    def video():
+        # FFmpeg (Qt Multimedia) terbundel & encoder H.264 Windows tersedia untuk ekspor video MP4
+        from PySide6.QtCore import QCoreApplication
+        if QCoreApplication.instance() is None:
+            video._app = QCoreApplication([])
+        from PySide6.QtMultimedia import QMediaFormat
+        f = QMediaFormat(QMediaFormat.FileFormat.MPEG4)
+        kodek = f.supportedVideoCodecs(QMediaFormat.ConversionMode.Encode)
+        if QMediaFormat.VideoCodec.H264 not in kodek:
+            raise RuntimeError("encoder H.264 tidak tersedia (video MP4 tidak bisa dibuat; GIF/WebP tetap bisa)")
+        return "MP4 H.264 siap (Qt Multimedia + FFmpeg)"
+    cek("Perekam video (MP4 H.264)", video)
     return hasil
 
 

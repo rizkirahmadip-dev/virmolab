@@ -7,6 +7,7 @@ from PySide6.QtWidgets import (QGridLayout, QHeaderView, QLabel, QPushButton, QS
                                QTableWidgetItem, QToolBar, QVBoxLayout, QWidget)
 
 from ..core.analisis import NAMA_JENIS, SINGKAT, URUT_JENIS
+from ..core.laporan import id_angka
 from . import theme
 from .viewer_widget import Viewer
 
@@ -36,7 +37,7 @@ class PetaPanas(QTableWidget):
         self.setColumnCount(len(semua))
         self.setHorizontalHeaderLabels([r.replace(" ", "\n", 1) for r in semua])
         self.horizontalHeader().setMinimumHeight(52)
-        self.setVerticalHeaderLabels([f"{n}  ({e:.2f})" for n, e, _ in baris])
+        self.setVerticalHeaderLabels([f"{n}  ({id_angka(f'{e:.2f}')})" for n, e, _ in baris])
         t = theme.TOKEN[self.mode]
         for i, (_n, _e, res) in enumerate(baris):
             for k, r in enumerate(semua):

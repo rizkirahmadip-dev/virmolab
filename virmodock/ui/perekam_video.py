@@ -29,6 +29,7 @@ class PerekamVideo(QObject):
         self.antre = []
         self.n = 0
         self._tutup = False
+        self._batal = False       # dibatalkan/gagal: berhenti tanpa sinyal 'selesai'
         # JEBAKAN: QVideoFrameInput(format) tidak pernah 'siap' (sendVideoFrame selalu False) di Qt 6.11/Windows;
         # tanpa format, format diambil dari bingkai pertama.
         self.masuk = QVideoFrameInput()
@@ -91,9 +92,10 @@ class PerekamVideo(QObject):
 
     def batal(self):
         self.antre.clear()
+        self._batal = True
         self._tutup = True
         self.rek.stop()
 
     def _status(self, st):
-        if st == QMediaRecorder.RecorderState.StoppedState and self._tutup:
+        if st == QMediaRecorder.RecorderState.StoppedState and self._tutup and not self._batal:
             self.selesai.emit(self.rek.actualLocation().toLocalFile() or self.f)

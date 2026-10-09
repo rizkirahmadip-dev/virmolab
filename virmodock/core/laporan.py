@@ -1,5 +1,6 @@
 """Laporan ringkas (HTML untuk QTextDocument -> PDF)."""
 from datetime import datetime
+import re
 from html import escape
 
 from .analisis import KRITERIA, NAMA_JENIS, URUT_JENIS
@@ -39,8 +40,29 @@ td.n { text-align: right; font-family: Consolas, monospace; }
 """
 
 
+def id_angka(t):
+    """Teks angka -> gaya Indonesia: koma desimal, tanda minus asli (U+2212). Hanya angka di awal teks
+    (mis. Ki "221.99 pM") yang diubah; teks lain apa adanya."""
+    m = re.match(r"^(-?)(\d+)\.(\d+)", t)
+    if m:
+        t = ("−" if m.group(1) else "") + m.group(2) + "," + m.group(3) + t[m.end():]
+    elif t.startswith("-") and t[1:2].isdigit():
+        t = "−" + t[1:]
+    return t
+
+
+_id = id_angka
+
+
+def _n(v, d=2):
+    """Angka -> teks gaya Indonesia dengan d desimal."""
+    return "–" if v is None or v == "" else _id(f"{float(v):.{d}f}")
+
+
 def _f(v, fmt="{:.2f}"):
-    return "–" if v is None or v == "" else (fmt.format(v) if isinstance(v, float) else escape(str(v)))
+    if v is None or v == "":
+        return "–"
+    return escape(_id(fmt.format(v) if isinstance(v, float) else str(v)))
 
 
 def _kelas_qc(q):
@@ -71,7 +93,7 @@ def html(proyek, baris, info, interaksi_terbaik=None, ada_gambar3d=False, ada_di
         ok = val["rmsd"] <= 2.0
         o.append(f"<p>Ligan kristal <b>{escape(val.get('ligan', ''))}</b> didocking ulang ke reseptor dengan parameter "
                  f"yang sama ({escape(val.get('mesin', ''))}), dimulai dari konformasi kristal tanpa minimisasi. RMSD pose terbaik terhadap kristal: "
-                 f"<span class='{'ok' if ok else 'bad'}'>{val['rmsd']:.2f} Å</span> "
+                 f"<span class='{'ok' if ok else 'bad'}'>{_n(val['rmsd'])} Å</span> "
                  f"({'valid, ≤ 2,0 Å' if ok else 'tidak valid, > 2,0 Å'}); RMSD minimum di antara pose teratas "
                  f"{_f(val.get('rmsd_min'))} Å; ΔG {_f(val.get('energi'))} kcal/mol.</p>")
     else:
@@ -101,15 +123,16 @@ def html(proyek, baris, info, interaksi_terbaik=None, ada_gambar3d=False, ada_di
     for j in jobs:
         p = j["parameter"]
         if j["mesin"] == "vina":
-            cari = f"exhaustiveness {p.get('exhaustiveness')}, {p.get('num_modes')} pose, rentang {p.get('energy_range')}"
+            cari = (f"exhaustiveness {p.get('exhaustiveness')}, {p.get('num_modes')} pose, rentang "
+                    f"{_f(p.get('energy_range'), '{:.1f}')}")
         elif j["mesin"] == "adgpu":
             cari = f"{p.get('nrun')} run, " + ("evaluasi heuristik" if p.get("heuristik") else f"{p.get('nev')} evaluasi")
         else:
             cari = f"ga_run {p.get('nrun')}, pop {p.get('pop')}, {p.get('nev')} evaluasi"
         cari += f", seed {p.get('seed') or 'acak'}"
         k = j["kotak"]
-        kot = (f"{', '.join(f'{v:.2f}' for v in k['pusat'])}; {' × '.join(f'{v:.1f}' for v in k['ukuran'])} Å; "
-               f"{k.get('spasi', 0.375)} Å")
+        kot = (f"({' · '.join(_n(v) for v in k['pusat'])}); {' × '.join(_n(v, 1) for v in k['ukuran'])} Å; "
+               f"{_n(k.get('spasi', 0.375), 3)} Å")
         ok = sum(1 for l in j["ligan"] if l["status"] == "selesai")
         o.append(f"<tr><td>{escape(j['id'])}</td><td>{escape(M.MESIN[j['mesin']])}"
                  + (" (alih dari AD-GPU)" if j["mesin"] != j.get("mesin_asal") else "")
@@ -125,7 +148,7 @@ def html(proyek, baris, info, interaksi_terbaik=None, ada_gambar3d=False, ada_di
              "<th>Ikatan H</th><th>Hidrofobik</th><th>π</th><th>RMSD kristal (Å)</th><th>PoseBusters</th>"
              "<th>Mesin</th></tr>")
     for b in baris[:15]:
-        o.append(f"<tr><td class='n'>{b['peringkat']}</td><td>{escape(b['ligan'])}</td><td class='n'>{b['energi']:.2f}</td>"
+        o.append(f"<tr><td class='n'>{b['peringkat']}</td><td>{escape(b['ligan'])}</td><td class='n'>{_n(b['energi'])}</td>"
                  f"<td class='n'>{_f(b['ki'])}</td><td class='n'>{_f(b['le'], '{:.3f}')}</td>"
                  f"<td class='n'>{b['hbond']}</td><td class='n'>{b['hidrofobik']}</td>"
                  f"<td class='n'>{b['pi'] + b['pikation']}</td><td class='n'>{_f(b['rmsd_kristal'])}</td>"
@@ -136,7 +159,7 @@ def html(proyek, baris, info, interaksi_terbaik=None, ada_gambar3d=False, ada_di
         o.append(f"<p class='mut'>15 dari {len(baris)} hasil ditampilkan; tabel lengkap tersedia di ekspor CSV/XLSX.</p>")
     if baris:
         b = baris[0]
-        o.append(f"<p>Ligan terbaik: <b>{escape(b['ligan'])}</b>, ΔG {b['energi']:.2f} kcal/mol "
+        o.append(f"<p>Ligan terbaik: <b>{escape(b['ligan'])}</b>, ΔG {_n(b['energi'])} kcal/mol "
                  f"(Ki perkiraan {_f(b['ki'])}).</p>")
         if ada_gambar3d or ada_diagram:
             o.append("<table><tr>")
@@ -153,7 +176,7 @@ def html(proyek, baris, info, interaksi_terbaik=None, ada_gambar3d=False, ada_di
                 if h["jenis"] == "vdw":
                     continue
                 o.append(f"<tr><td>{NAMA_JENIS[h['jenis']]}</td><td>{escape(h['residu'])}</td>"
-                         f"<td>{escape(h['atom_p'])}</td><td class='n'>{h['jarak']:.2f}</td>"
+                         f"<td>{escape(h['atom_p'])}</td><td class='n'>{_n(h['jarak'])}</td>"
                          f"<td class='n'>{_f(h.get('sudut'), '{:.0f}°')}</td></tr>")
             o.append("</table>")
 
@@ -171,8 +194,8 @@ def html(proyek, baris, info, interaksi_terbaik=None, ada_gambar3d=False, ada_di
                      "<th>Lipinski</th><th>Veber</th><th>Absorpsi GI</th><th>BBB</th><th>PAINS</th></tr>")
             for n in urut[:15]:
                 x = sifat_ligan[n]
-                o.append(f"<tr><td>{escape(n)}</td><td class='n'>{x['mw']:.1f}</td><td class='n'>{x['wlogp']:.2f}</td>"
-                         f"<td class='n'>{x['tpsa']:.1f}</td><td class='n'>{_f(x.get('qed'), '{:.2f}')}</td>"
+                o.append(f"<tr><td>{escape(n)}</td><td class='n'>{_n(x['mw'], 1)}</td><td class='n'>{_n(x['wlogp'])}</td>"
+                         f"<td class='n'>{_n(x['tpsa'], 1)}</td><td class='n'>{_f(x.get('qed'), '{:.2f}')}</td>"
                          f"<td>{escape(S.sel(x, 'lipinski'))}</td><td>{escape(S.sel(x, 'veber'))}</td>"
                          f"<td>{escape(S.sel(x, 'gi'))}</td><td>{escape(S.sel(x, 'bbb'))}</td>"
                          f"<td>{'<span class=warn>' + escape(', '.join(x['pains'])) + '</span>' if x['pains'] else '–'}"
@@ -187,9 +210,10 @@ def html(proyek, baris, info, interaksi_terbaik=None, ada_gambar3d=False, ada_di
              "(RDKit, MMFF94), lalu dikonversi ke PDBQT (Meeko). "
              + ("Peta grid dibuat dengan AutoGrid4. " if any(m in ("adgpu", "ad4") for m in mesin_dipakai) else "")
              + "Docking dijalankan dengan " + ", ".join(M.MESIN[m] for m in mesin_dipakai) + ". "
-             f"Interaksi dianalisis dengan kriteria geometri: ikatan hidrogen D···A ≤ {k['hbond_da']} Å dan sudut "
-             f"D–H···A ≥ {k['hbond_sudut']:.0f}°, kontak hidrofobik ≤ {k['hidrofobik']} Å, π–π ≤ {k['pi']} Å, "
-             f"π–kation ≤ {k['pikation']} Å, jembatan garam ≤ {k['garam']} Å, ikatan halogen ≤ {k['halogen']} Å. "
+             f"Interaksi dianalisis dengan kriteria geometri: ikatan hidrogen D···A ≤ {_n(k['hbond_da'], 1)} Å dan "
+             f"sudut D–H···A ≥ {k['hbond_sudut']:.0f}°, kontak hidrofobik ≤ {_n(k['hidrofobik'], 1)} Å, "
+             f"π–π ≤ {_n(k['pi'], 1)} Å, π–kation ≤ {_n(k['pikation'], 1)} Å, jembatan garam ≤ {_n(k['garam'], 1)} Å, "
+             f"ikatan halogen ≤ {_n(k['halogen'], 1)} Å. "
              "RMSD redocking dihitung tanpa penjajaran dan memperhitungkan simetri molekul."
              + (" Sifat fisikokimia dan kemiripan obat dihitung dengan RDKit dari struktur netral (WLOGP "
                 "Wildman–Crippen, TPSA Ertl); aturan Lipinski, Veber, Ghose, Egan, Muegge; peringatan substruktur "

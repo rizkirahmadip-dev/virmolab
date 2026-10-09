@@ -4,6 +4,7 @@ from PySide6.QtGui import QColor
 from PySide6.QtWidgets import (QHBoxLayout, QHeaderView, QLabel, QLineEdit, QPushButton,
                                QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget)
 
+from ..core.laporan import id_angka
 from ..core import qc
 from . import theme
 
@@ -144,7 +145,7 @@ class PanelHasil(QWidget):
 
     def _sel(self, it, k, v, fmt="{:.2f}"):
         it.setData(k, Qt.UserRole, v)
-        it.setText(k, "" if v is None else (fmt.format(v) if isinstance(v, float) else str(v)))
+        it.setText(k, "" if v is None else (id_angka(fmt.format(v)) if isinstance(v, float) else str(v)))
         if k in NUM:
             it.setTextAlignment(k, Qt.AlignRight | Qt.AlignVCenter)
 
@@ -163,7 +164,7 @@ class PanelHasil(QWidget):
             self._sel(it, 0, b["peringkat"])
             it.setText(1, b["ligan"])
             self._sel(it, 2, b["energi"])
-            it.setText(3, b["ki"] or "")
+            it.setText(3, id_angka(b["ki"] or ""))
             self._sel(it, 4, b["le"], "{:.3f}")
             self._sel(it, 5, b["klaster"])
             self._sel(it, 6, b["rmsd_kristal"])

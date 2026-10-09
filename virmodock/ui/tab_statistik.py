@@ -104,8 +104,14 @@ class TabStatistik(QWidget):
         if self.c_job.count() > 1:
             self.c_job.addItem("Semua job · ΔG terbaik per ligan", SEMUA)
         i = self.c_job.findData(lama)
-        # bawaan: job terbaru yang punya hasil
-        self.c_job.setCurrentIndex(i if i >= 0 else max(0, self.c_job.count() - (2 if self.c_job.count() > 1 else 1)))
+        if i < 0:
+            # bawaan: job terbaru yang punya hasil; bila isinya < 3 ligan (statistik tak bermakna) dan ada
+            # 'Semua job', pakai 'Semua job' agar grafik tidak kosong
+            i = max(0, self.c_job.count() - (2 if self.c_job.count() > 1 else 1))
+            jid = self.c_job.itemData(i)
+            if self.c_job.count() > 1 and sum(1 for d in baris if d["job"] == jid) < 3:
+                i = self.c_job.count() - 1
+        self.c_job.setCurrentIndex(i)
         self.c_job.blockSignals(False)
         self._pilih_job()
 
@@ -207,6 +213,15 @@ class TabStatistik(QWidget):
              f"td.n{{text-align:right;font-family:Consolas,monospace;}} .m{{color:{t['mut']};}}</style>"]
         if not d:
             self.info.setHtml("".join(o) + "<p class='m'>Belum ada hasil docking. Jalankan docking dulu.</p>")
+            return
+        if not self.svg()[0]:
+            saran = (" Pilih <b>Semua job</b> di kotak Job." if self.c_job.findData(SEMUA) >= 0
+                     and self.c_job.currentData() != SEMUA else "")
+            if self.c_jenis.currentData() == "ifp" and not any(x.get("ifp") for x in d):
+                saran = (" Sidik jari interaksi belum dihitung untuk hasil ini (proyek lama): jalankan "
+                         "<b>Analisis › Hitung ulang analisis hasil</b>.")
+            self.info.setHtml("".join(o) + f"<p class='m'>Grafik ini butuh lebih banyak data: {len(d)} ligan pada pilihan "
+                              f"ini (histogram/sebar ≥ 2, matriks korelasi ≥ 3 dengan nilai bervariasi).{saran}</p>")
             return
         j = self.c_jenis.currentData()
         if j == "sebar":

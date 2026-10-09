@@ -5,6 +5,7 @@ from PySide6.QtSvg import QSvgRenderer
 from PySide6.QtWidgets import (QCheckBox, QGridLayout, QHBoxLayout, QHeaderView, QLabel, QPushButton, QToolBar,
                                QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget)
 
+from ..core.laporan import id_angka
 from ..core.analisis import KRITERIA, NAMA_JENIS, URUT_JENIS
 from . import icons, theme
 from .panels import judul_seksi
@@ -108,7 +109,7 @@ class PanelInteraksi(QWidget):
             g.setFont(0, f)
             for h in item:
                 teks = h["residu"] + (f" · {h['atom_p']}" if h["atom_p"] and j not in ("pi",) else "")
-                c = QTreeWidgetItem(g, [teks, f"{h['jarak']:.2f}", f"{h['sudut']:.0f}°" if h.get("sudut") else ""])
+                c = QTreeWidgetItem(g, [teks, id_angka(f"{h['jarak']:.2f}"), f"{h['sudut']:.0f}°" if h.get("sudut") else ""])
                 c.setToolTip(0, teks + (f" · {h['sub']}" if h.get("sub") else ""))
                 c.setData(0, Qt.UserRole, h)
                 c.setTextAlignment(1, Qt.AlignRight | Qt.AlignVCenter)
