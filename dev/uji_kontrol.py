@@ -14,6 +14,7 @@ PROYEK = sorted(Path("dev/uji/kerja").glob("*.vmd"))[-1].resolve()
 
 import virmodock.app as A
 from PySide6.QtWidgets import QApplication
+Path("dev/uji/gambar").mkdir(parents=True, exist_ok=True)  # keluaran gambar uji
 
 
 def hook():
@@ -60,7 +61,7 @@ def hook():
         def l4(s):
             j = s.pelaksana.cari(s.jj)
             print("setelah jeda:", j["status"], [(l["id"], l["status"]) for l in j["ligan"]], flush=True)
-            s.grab().save("dev/kontrol_gelap.png")
+            s.grab().save("dev/uji/gambar/kontrol_gelap.png")
             s.pelaksana.lanjut(s.jj)
             QTimer.singleShot(12000, s.l5)
 

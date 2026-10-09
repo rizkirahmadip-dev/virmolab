@@ -1,8 +1,10 @@
 """Gabungkan terjemahan ke virmodock/i18n/en.json.
 
-Sumber: dev/i18n_teks.json (hasil dev/ekstrak_teks.py SEBELUM kamus ada) + dev/i18n_b*.json / i18n_p*.json
-({indeks: terjemahan}) + dev/i18n_tambahan.json ({"teks": {id: en}, "pola": {pola: en}}).
-Kamus lama dipertahankan; entri baru menimpa.
+Sumber: virmodock/i18n/en.json (kamus lama, dipertahankan) + dev/i18n_tambahan.json ({"teks": {id: en},
+"pola": {pola: en}}) — entri tambahan menimpa. Teks baru: jalankan dev/ekstrak_teks.py (-> dev/i18n_teks_baru.json),
+terjemahkan, tulis ke i18n_tambahan.json, lalu jalankan skrip ini.
+(Riwayat: kamus awal dibuat dari dev/i18n_teks.json + i18n_b*/p*.json berbasis indeks; berkas indeks itu kini
+diarsipkan di dev/uji/arsip_lama/i18n_indeks/ dan langkah indeks hanya berjalan bila dev/i18n_teks.json ada.)
 
   PYTHONIOENCODING=utf-8 .venv/Scripts/python.exe dev/buat_kamus.py
 """

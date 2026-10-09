@@ -26,6 +26,7 @@ from PySide6.QtWidgets import QApplication, QFileDialog, QMessageBox
 QMessageBox.information = staticmethod(lambda *a, **k: print("INFO:", a[2] if len(a) > 2 else a, flush=True))
 QFileDialog.getExistingDirectory = staticmethod(lambda *a, **k: str(OUT / "kompleks"))
 from PySide6.QtGui import QDesktopServices
+Path("dev/uji/gambar").mkdir(parents=True, exist_ok=True)  # keluaran gambar uji
 QDesktopServices.openUrl = staticmethod(lambda *a: True)
 
 
@@ -62,17 +63,17 @@ def hook():
 
         def l3(s):
             s.p("interaksi aktif:", s._aktif_inter["judul"], len(s._aktif_inter["daftar"]))
-            s.grab().save("dev/t3_interaksi.png")
+            s.grab().save("dev/uji/gambar/t3_interaksi.png")
             s.tab_tengah.setCurrentWidget(s.diagram)
             QTimer.singleShot(800, s.l4)
 
         def l4(s):
-            s.grab().save("dev/t3_diagram.png")
+            s.grab().save("dev/uji/gambar/t3_diagram.png")
             s.tab_tengah.setCurrentWidget(s.hasil)
             QTimer.singleShot(500, s.l4b)
 
         def l4b(s):
-            s.grab().save("dev/t3_hasil.png")
+            s.grab().save("dev/uji/gambar/t3_hasil.png")
             # ekspor
             for d in ({"jenis": "gambar3d", "fmt": "tif", "lebar": 4252, "tinggi": 2835, "dpi": 600, "kompresi": "tiff_lzw",
                        "latar": "putih"},
@@ -99,7 +100,7 @@ def hook():
 
         def l6(s):
             s.p("validasi:", s.proyek.validasi)
-            s.grab().save("dev/t3_validasi.png")
+            s.grab().save("dev/uji/gambar/t3_validasi.png")
             from virmodock.core import ekspor
             b = ekspor.baris_hasil(s.proyek)
             pilih = [(x["job"], x["lid"]) for x in b[:3]]
@@ -107,12 +108,12 @@ def hook():
             QTimer.singleShot(7000, s.l7)
 
         def l7(s):
-            s.grab().save("dev/t3_banding.png")
+            s.grab().save("dev/uji/gambar/t3_banding.png")
             s.peta_interaksi()
             QTimer.singleShot(1000, s.l8)
 
         def l8(s):
-            s.grab().save("dev/t3_peta.png")
+            s.grab().save("dev/uji/gambar/t3_peta.png")
             s._ekspor({"jenis": "laporan", "penulis": "Uji otomatis", "gambar": True})
             QTimer.singleShot(6000, s.l9)
 

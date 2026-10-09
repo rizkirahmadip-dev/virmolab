@@ -1,7 +1,7 @@
 """Uji alur Tahap 2 di GUI: impor -> reseptor -> ligan -> docking AD-GPU & Vina -> pose -> buka ulang proyek.
 
 Dialog dilewati (fungsi intinya dipanggil langsung). Tangkapan hanya jendela VirmoDock (widget.grab()).
-  VD_SHOT=dev/alur.png PYTHONPATH=. .venv/Scripts/python.exe dev/uji_alur.py
+  VD_SHOT=dev/uji/gambar/alur.png PYTHONPATH=. .venv/Scripts/python.exe dev/uji_alur.py
 """
 import os
 import shutil
@@ -20,10 +20,11 @@ st.setValue("tema", os.environ.get("VD_TEMA", "terang"))
 st.setValue("folder_kerja", str(KERJA))
 st.remove("layout")
 st.remove("sesi_terbuka")
-out = os.environ.get("VD_SHOT", "dev/alur.png")
+out = os.environ.get("VD_SHOT", "dev/uji/gambar/alur.png")
 
 import virmodock.app as A
 from PySide6.QtWidgets import QApplication
+Path("dev/uji/gambar").mkdir(parents=True, exist_ok=True)  # keluaran gambar uji
 
 
 def hook():
@@ -40,7 +41,7 @@ def hook():
             s.langkah = 0
             s.pelaksana.jobSelesai.connect(s._job_ok)
             QTimer.singleShot(2500, s.l1)
-            QTimer.singleShot(400000, lambda: (print("TIMEOUT"), s._foto("dev/alur_timeout.png"), QApplication.quit()))
+            QTimer.singleShot(400000, lambda: (print("TIMEOUT"), s._foto("dev/uji/gambar/alur_timeout.png"), QApplication.quit()))
 
         def cetak(s, *a):
             print(*a, flush=True)
@@ -75,7 +76,7 @@ def hook():
             s.param.set_parameter({"mesin": "vina", "perangkat": "cpu", "exhaustiveness": 4})
             s._param_berubah(s.param.parameter())
             s.jalankan_docking()
-            QTimer.singleShot(3000, lambda: s._foto("dev/alur_jalan.png"))
+            QTimer.singleShot(3000, lambda: s._foto("dev/uji/gambar/alur_jalan.png"))
 
         def _job_ok(s, jid):
             j = s.pelaksana.cari(jid)
@@ -101,7 +102,7 @@ def hook():
             s.cetak("buka ulang:", n_obj, "->", len(s.objek), "objek; kotak", s.proyek.kotak,
                     "; param mesin", s.proyek.parameter.get("mesin"), "; job", [j["status"] for j in s.proyek.job])
             s.cetak("panel kotak", s.param.kotak())
-            QTimer.singleShot(4000, lambda: (s._foto("dev/alur_buka.png"), s.cetak(s.log.toPlainText()[-2500:]),
+            QTimer.singleShot(4000, lambda: (s._foto("dev/uji/gambar/alur_buka.png"), s.cetak(s.log.toPlainText()[-2500:]),
                                              s.cetak("PESAN:", s.pesan.toPlainText()[-1500:]), QApplication.quit()))
 
         def _foto(s, f):

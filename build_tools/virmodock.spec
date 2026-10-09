@@ -51,7 +51,9 @@ a = Analysis([str(AKAR / "VirmoDock.pyw"), str(AKAR / "VirmoDock_cli.py")], path
                        "PySide6.QtTest", "PySide6.QtBluetooth", "PySide6.QtNfc", "PySide6.QtSensors",
                        "PySide6.QtSerialPort", "PySide6.QtDesigner", "PySide6.QtHelp", "PySide6.QtLocation",
                        "PySide6.QtGraphs", "PySide6.QtSpatialAudio", "PySide6.QtTextToSpeech"],
-             noarchive=False)
+             # modul Python sebagai .pyc di _internal (bukan PYZ di dalam exe): dipakai bersama kedua exe,
+             # tanpa ini tiap exe membawa salinan PYZ ±70 MB
+             noarchive=True)
 
 
 def buang(tujuan):

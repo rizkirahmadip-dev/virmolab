@@ -5,6 +5,7 @@ sys.argv = [sys.argv[0]]
 QSettings("VirmoDock", "VirmoDock").remove("sesi_terbuka")
 import virmodock.app as A
 from PySide6.QtWidgets import QApplication, QMessageBox
+Path("dev/uji/gambar").mkdir(parents=True, exist_ok=True)  # keluaran gambar uji
 QMessageBox.information = staticmethod(lambda *a, **k: None)
 P = sorted(Path("dev/uji/kerja").glob("*.vmd"))[-1].resolve()
 def hook():
@@ -20,7 +21,7 @@ def hook():
             for o in s.objek.values():
                 if o.tampil and o.jenis in ("pose", "ligan"):
                     print(o.nama, o.grup, o.gaya["warna"], o.gaya["reps"])
-            QTimer.singleShot(2500, lambda: (s.grab().save("dev/overlay.png"), QApplication.quit()))
+            QTimer.singleShot(2500, lambda: (s.grab().save("dev/uji/gambar/overlay.png"), QApplication.quit()))
     mainwindow.JendelaUtama = U
     A.main()
 hook()

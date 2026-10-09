@@ -2,13 +2,15 @@
 import sys, os
 from PySide6.QtCore import QTimer, QSettings
 sys.argv = [sys.argv[0]]
-out = os.environ.get("VD_SHOT", "dev/shot.png")
+out = os.environ.get("VD_SHOT", "dev/uji/gambar/shot.png")
 tema = os.environ.get("VD_TEMA", "terang")
 pdb = os.environ.get("VD_PDB", "1HSG")
 QSettings("VirmoDock", "VirmoDock").setValue("wizard_selesai", True)
 QSettings("VirmoDock", "VirmoDock").setValue("tema", tema)
 import virmodock.app as A
 from PySide6.QtWidgets import QApplication
+from pathlib import Path
+Path("dev/uji/gambar").mkdir(parents=True, exist_ok=True)  # keluaran gambar uji
 orig = A.main
 def hook():
     from virmodock.ui import mainwindow

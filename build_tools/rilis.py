@@ -31,7 +31,8 @@ Pengaturan disimpan di data\\pengaturan.ini, log di data\\log, proyek bawaan di 
 dalam folder ini (tidak menyentuh registry). Jangan hapus berkas portable.flag.
 
 Panduan: _internal\\docs\\panduan.html (juga Help › Panduan pengguna, F1).
-Uji komponen: VirmoDock.exe --uji-mandiri hasil.json
+Uji komponen: VirmoDock.exe --uji-mandiri hasil.json  (atau: VirmoDock-cli.exe uji)
+Baris perintah (docking batch/skrip): VirmoDock-cli.exe -h
 Lisensi: GPL-3.0-or-later (LICENSE); komponen pihak ketiga: _internal\\LISENSI_PIHAK_KETIGA.txt
 """
 

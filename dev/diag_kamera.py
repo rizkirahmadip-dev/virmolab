@@ -15,6 +15,7 @@ UK = [int(x) for x in os.environ.get("VD_UKURAN", "1440x900").split("x")]
 
 import virmodock.app as A  # noqa: E402
 from PySide6.QtWidgets import QApplication  # noqa: E402
+Path("dev/uji/gambar").mkdir(parents=True, exist_ok=True)  # keluaran gambar uji
 
 JS = ("(()=>{const g=document.getElementById('gl').getBoundingClientRect(), c=VM.v.getCanvas(), "
       "gl=c.getContext('webgl2')||c.getContext('webgl'), vp=gl?gl.getParameter(gl.VIEWPORT):null;"
@@ -38,12 +39,12 @@ def hook():
         def cek(s, label, lanjut=None):
             def cb(r):
                 print(label, r, flush=True)
-                s.grab().save(f"dev/diag_{label}.png")
+                s.grab().save(f"dev/uji/gambar/diag_{label}.png")
                 if lanjut:
                     lanjut()
             print("cek", label, flush=True)
             print("LOG:", s.log.toPlainText()[-1500:], flush=True)
-            s.grab().save(f"dev/diag_{label}_pra.png")
+            s.grab().save(f"dev/uji/gambar/diag_{label}_pra.png")
             s.viewer.page().runJavaScript("1+1", 0, lambda r: print("js-sederhana", r, flush=True))
             s.viewer.page().runJavaScript("JSON.stringify([innerWidth, innerHeight, document.getElementById('gl').getBoundingClientRect().width])", 0, lambda r: print("js-ukuran", r, flush=True))
             s.viewer.page().runJavaScript(JS, 0, cb)
