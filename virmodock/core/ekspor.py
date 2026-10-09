@@ -5,7 +5,9 @@ from datetime import datetime
 
 KOLOM_HASIL = [("peringkat", "Peringkat"), ("ligan", "Ligan"), ("energi", "ΔG (kcal/mol)"), ("ki", "Ki perkiraan"),
                ("le", "LE (kcal/mol/atom berat)"), ("klaster", "Klaster (n)"), ("rmsd_kristal", "RMSD kristal (Å)"),
-               ("rmsd", "RMSD ref / l.b. (Å)"), ("hbond", "Ikatan H"), ("hidrofobik", "Hidrofobik"), ("pi", "π–π"),
+               ("rmsd", "RMSD ref / l.b. (Å)"), ("ifp_sim", "Kemiripan IFP vs kristal (Tanimoto)"),
+               ("posebusters", "PoseBusters"),
+               ("posebusters_gagal", "PoseBusters: uji gagal"), ("hbond", "Ikatan H"), ("hidrofobik", "Hidrofobik"), ("pi", "π–π"),
                ("pikation", "π–kation"), ("garam", "Jembatan garam"), ("halogen", "Halogen"), ("logam", "Logam"),
                ("n_pose", "Jumlah pose"), ("mesin", "Mesin"), ("job", "Job"), ("detik", "Waktu (s)"),
                ("smiles", "SMILES")]
@@ -14,6 +16,7 @@ KOLOM_HASIL = [("peringkat", "Peringkat"), ("ligan", "Ligan"), ("energi", "ΔG (
 def baris_hasil(proyek, jobs=None):
     """Satu baris per ligan per job (pose terbaik), urut ΔG."""
     from . import mesin as M
+    from . import qc
     baris = []
     for j in (jobs if jobs is not None else proyek.job):
         for l in j["ligan"]:
@@ -29,8 +32,21 @@ def baris_hasil(proyek, jobs=None):
                           **{k: n.get(k, 0) for k in ("hbond", "hidrofobik", "pi", "pikation", "garam", "halogen",
                                                       "logam")},
                           "n_pose": l.get("n_pose"), "mesin": M.MESIN.get(j["mesin"], j["mesin"]), "job": j["id"],
-                          "detik": l.get("detik"), "smiles": lig.get("smiles", ""), "residu": l.get("residu") or {},
-                          "pose": l.get("pose") or []})
+                          "detik": l.get("detik"), "smiles": lig.get("smiles", ""), "residu": l.get("residu") or {}, "ifp": l.get("ifp") or [],
+                          "pose": l.get("pose") or [], "qc": l.get("qc"), "posebusters": qc.teks_sel(l.get("qc")),
+                          "posebusters_gagal": ", ".join((l.get("qc") or {}).get("gagal") or [])})
+    # acuan IFP: pose kristal ligan asli (dari job dengan reseptor yang sama bila ada)
+    from .analisis import tanimoto
+    acuan = {}
+    for j in proyek.job:
+        for l in j["ligan"]:
+            if l.get("ifp_kristal"):
+                acuan.setdefault(j.get("reseptor"), l["ifp_kristal"])
+                acuan.setdefault(None, l["ifp_kristal"])
+    rec_job = {j["id"]: j.get("reseptor") for j in proyek.job}
+    for b in baris:
+        ref = acuan.get(rec_job.get(b["job"])) or acuan.get(None)
+        b["ifp_sim"] = tanimoto(b["ifp"], ref) if ref else None
     baris.sort(key=lambda b: b["energi"])
     for i, b in enumerate(baris, 1):
         b["peringkat"] = i
@@ -54,8 +70,8 @@ def csv_teks(baris, pemisah=";", desimal_koma=True):
     return "﻿" + buf.getvalue()   # BOM: Excel membaca Δ, µ, Å dengan benar
 
 
-def simpan_xlsx(path, proyek, baris, interaksi_per_ligan=None, info=None):
-    """Lembar: Ringkasan, Semua pose, Interaksi, Parameter, Info."""
+def simpan_xlsx(path, proyek, baris, interaksi_per_ligan=None, info=None, sifat_ligan=None):
+    """Lembar: Ringkasan, Semua pose, Interaksi, Sifat ligan, Statistik, Parameter, Info."""
     from openpyxl import Workbook
     from openpyxl.formatting.rule import ColorScaleRule
     from openpyxl.styles import Alignment, Font, PatternFill
@@ -107,6 +123,41 @@ def simpan_xlsx(path, proyek, baris, interaksi_per_ligan=None, info=None):
                           h["atom_p"], h["jarak"], h.get("sudut")])
     lembar(wb.create_sheet(), "Interaksi", ["Ligan", "Job", "Jenis", "Subjenis", "Residu", "Atom protein",
                                             "Jarak (Å)", "Sudut (°)"], inter)
+    bit = sorted({x for b in baris for x in b.get("ifp") or []},
+                 key=lambda x: (-sum(1 for b in baris if x in (b.get("ifp") or [])), x))
+    if bit:   # sidik jari interaksi: 1 baris per ligan, 1 kolom per bit 'residu|jenis' (urut frekuensi)
+        from .analisis import NAMA_JENIS
+        kol = ["Ligan", "Job", "ΔG (kcal/mol)", "IFP vs kristal"] + [
+            f"{x.split('|')[0]} · {NAMA_JENIS.get(x.split('|')[1], x.split('|')[1])}" for x in bit]
+        ws = lembar(wb.create_sheet(), "Sidik jari interaksi", kol,
+                    [[b["ligan"], b["job"], b["energi"], b.get("ifp_sim")]
+                     + [1 if x in (b.get("ifp") or []) else 0 for x in bit] for b in baris])
+        if baris:
+            ws.conditional_formatting.add(
+                f"E2:{get_column_letter(len(kol))}{len(baris) + 1}",
+                ColorScaleRule(start_type="num", start_value=0, start_color="FFFFFF", end_type="num", end_value=1,
+                               end_color="1F5FBF"))
+    if sifat_ligan:
+        from .sifat import baris_xlsx
+        kol, data = baris_xlsx(sifat_ligan)
+        lembar(wb.create_sheet(), "Sifat ligan", kol, data)
+    from . import statistik as S
+    sif = {l["id"]: l["sifat"] for l in proyek.ligan if isinstance(l.get("sifat"), dict)}
+    ds = S.dataset(baris, sif)
+    stat = []
+    for jid in dict.fromkeys(d["job"] for d in ds):
+        sub = [d for d in ds if d["job"] == jid]
+        for k, label, _p, _d in S.VARIABEL:
+            r = S.deskriptif(S.kolom(sub, k))
+            if r["n"]:
+                stat.append([jid, sub[0]["mesin"], label, r["n"], r["rerata"], r["sd"], r["median"], r["q1"], r["q3"],
+                             r["min"], r["maks"]])
+    if stat:
+        ws = lembar(wb.create_sheet(), "Statistik", ["Job", "Mesin", "Variabel", "n", "Rerata", "SD", "Median", "Q1",
+                                                     "Q3", "Min", "Maks"], stat)
+        for c in ws.iter_rows(min_row=2, min_col=5, max_col=11):
+            for x in c:
+                x.number_format = "0.000"
     par = []
     for j in proyek.job:
         for k, v in j["parameter"].items():

@@ -10,7 +10,7 @@ PRESET_3D = [("Layar ×2", None, None, None), ("Jurnal 1 kolom · 85 mm · 600 d
              ("Jurnal 1,5 kolom · 120 mm · 600 dpi", 120, None, 600), ("Jurnal 2 kolom · 180 mm · 600 dpi", 180, None, 600),
              ("Slide 16:9 · 1920×1080", None, (1920, 1080), 150), ("Slide 4K · 3840×2160", None, (3840, 2160), 300),
              ("Poster · 300 mm · 300 dpi", 300, None, 300), ("Kustom", None, None, None)]
-MAKS_PX = 8192
+MAKS_PX = 16384   # > 4096 px dirender per ubin (mainwindow.UBIN_PX)
 
 
 def _ket(t):
@@ -121,7 +121,7 @@ class DialogEkspor(QDialog):
         f.addRow(_ket("SDF berisi tag ΔG, Ki, LE, klaster, RMSD, jumlah interaksi, SMILES — terbaca di DataWarrior, "
                       "KNIME, PyMOL. Kompleks PDB: ligan di rantai L (HETATM + CONECT) dengan REMARK hasil."))
         if not ada_pose:
-            f.addRow(_ket("Pose aktif: pilih pose di Hierarki atau klik dua kali baris di tab Hasil."))
+            f.addRow(_ket("Pose aktif: pilih pose di panel Objek atau klik dua kali baris di tab Hasil."))
         self.stack.addWidget(w)
 
         # ---- tabel
@@ -153,10 +153,19 @@ class DialogEkspor(QDialog):
         self.l_penulis.setPlaceholderText("Nama / institusi (opsional)")
         self.l_gambar = QCheckBox("Sertakan gambar 3D dan diagram 2D ligan terbaik")
         self.l_gambar.setChecked(True)
+        self.l_fmt = QComboBox()
+        self.l_fmt.addItem("PDF (siap cetak)", "pdf")
+        self.l_fmt.addItem("Word .docx (bisa disunting)", "docx")
+        self.l_fmt.addItem("HTML interaktif (penjelajah 3D + tabel)", "html")
+        i = self.l_fmt.findData(self.st.value("format_laporan", "pdf"))
+        self.l_fmt.setCurrentIndex(max(0, i))
+        f.addRow("Format", self.l_fmt)
         f.addRow("Penulis", self.l_penulis)
         f.addRow(self.l_gambar)
         f.addRow(_ket("Isi: validasi redocking, reseptor & preparasi, parameter dan perangkat, tabel 15 teratas, "
-                      "gambar & interaksi ligan terbaik, metode singkat dengan kriteria interaksi, sitasi software."))
+                      "gambar & interaksi ligan terbaik, metode singkat dengan kriteria interaksi, sitasi software. "
+                      "HTML interaktif: satu berkas yang bisa dibuka offline di peramban — pose 3D 30 ligan teratas "
+                      "(klik baris tabel), tabel lengkap yang bisa dicari & diurutkan, dan laporan lengkap."))
         self.stack.addWidget(w)
 
         bawah = QHBoxLayout()
@@ -196,6 +205,8 @@ class DialogEkspor(QDialog):
         teks = f"{w} × {h} px"
         if max(w, h) > MAKS_PX:
             teks += f"  — melebihi {MAKS_PX} px, akan dibatasi"
+        elif max(w, h) > 4096:
+            teks += "  — dirender per ubin (lebih lama)"
         self.g_px.setText(teks)
 
     def _ekspor(self):
@@ -218,5 +229,7 @@ class DialogEkspor(QDialog):
             d = {"jenis": "tabel", "fmt": "xlsx" if self.t_fmt.currentIndex() == 0 else "csv",
                  "sep": self.t_sep.currentData(), "koma": self.t_dec.currentData(), "interaksi": self.t_inter.isChecked()}
         else:
-            d = {"jenis": "laporan", "penulis": self.l_penulis.text().strip(), "gambar": self.l_gambar.isChecked()}
+            self.st.setValue("format_laporan", self.l_fmt.currentData())
+            d = {"jenis": "laporan", "penulis": self.l_penulis.text().strip(), "gambar": self.l_gambar.isChecked(),
+                 "fmt": self.l_fmt.currentData()}
         self.minta.emit(d)

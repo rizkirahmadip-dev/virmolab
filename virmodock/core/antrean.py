@@ -39,6 +39,7 @@ class Pelaksana(QObject):
     log = Signal(str)
     pesan = Signal(str)                       # pesan penting untuk panel Pesan
     perluSimpan = Signal()
+    qcSelesai = Signal(str, str, object)      # id job, id ligan, hasil PoseBusters (dari thread pekerja)
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -55,6 +56,39 @@ class Pelaksana(QObject):
         self.timer_dlg.setInterval(1000)
         self.timer_dlg.timeout.connect(self._intip_dlg)
         self._dlg_pos = 0
+        self._qc_pool = None      # PoseBusters di thread terpisah (± 0,4 s/pose) agar GUI tetap responsif
+        self.qcSelesai.connect(self._qc_masuk)
+
+    # ---------------------------------------------------------- QC pose
+    def _qc_antre(self, j, l, pose):
+        from . import qc
+        if not qc.tersedia():
+            return
+        if self._qc_pool is None:
+            from concurrent.futures import ThreadPoolExecutor
+            self._qc_pool = ThreadPoolExecutor(max_workers=1, thread_name_prefix="qc")
+        pr, jid, lid = self.proyek, j["id"], l["id"]
+        salinan = dict(l)
+
+        def kerja():
+            try:
+                h = qc.periksa_ligan(pr, j, salinan, pose)
+            except Exception as e:   # jangan sampai thread mati diam-diam
+                h = {"v": qc.VERSI, "galat": str(e)[:200]}
+            if h is not None:
+                self.qcSelesai.emit(jid, lid, h)   # antre ke thread GUI
+        self._qc_pool.submit(kerja)
+
+    def _qc_masuk(self, jid, lid, h):
+        j = self.cari(jid)
+        l = next((x for x in (j or {}).get("ligan", []) if x["id"] == lid), None)
+        if l is None:
+            return
+        l["qc"] = h
+        if h.get("gagal"):
+            self.log.emit(f"PoseBusters {l['nama']}: gagal {len(h['gagal'])} uji — " + ", ".join(h["gagal"]))
+        self.liganSelesai.emit(jid, lid)
+        self.perluSimpan.emit()
 
     # ---------------------------------------------------------- publik
     def atur_proyek(self, proyek):
@@ -377,6 +411,7 @@ class Pelaksana(QObject):
                 analisis.ringkas_ligan(self.proyek, l, pose, self._reseptor(j))
             except Exception as e:
                 self.log.emit(f"Analisis {l['nama']} dilewati: {e}")
+            self._qc_antre(j, l, pose)
             self.log.emit(f"{l['nama']}: {pose[0].energi:.2f} kcal/mol ({l['detik']:.1f} s)")
             self.liganSelesai.emit(j["id"], l["id"])
         elif j["mesin"] == "adgpu" and (M.RE_GALAT_OPENCL.search(self.keluaran) or kode in M.KODE_GALAT_DLL):
@@ -388,7 +423,7 @@ class Pelaksana(QObject):
             self.pesan.emit("AutoDock-GPU tidak bisa memakai GPU (galat OpenCL):\n"
                             f"{M.ringkas_galat(self.keluaran)}\n"
                             "Job dilanjutkan otomatis dengan AutoDock Vina di CPU. Perbarui driver GPU "
-                            "(Tools › Cek sistem / GPU) untuk memakai GPU lagi.")
+                            "(Alat › Cek sistem dan GPU) untuk memakai GPU lagi.")
         else:
             l["status"] = "gagal"
             l["pesan"] = l.get("pesan") or M.ringkas_galat(self.keluaran, 300) or f"kode keluar {kode}"

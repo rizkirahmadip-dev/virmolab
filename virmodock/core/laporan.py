@@ -43,7 +43,15 @@ def _f(v, fmt="{:.2f}"):
     return "–" if v is None or v == "" else (fmt.format(v) if isinstance(v, float) else escape(str(v)))
 
 
-def html(proyek, baris, info, interaksi_terbaik=None, ada_gambar3d=False, ada_diagram=False, penulis=""):
+def _kelas_qc(q):
+    if not q or q.get("galat"):
+        return ""
+    return " class='ok'" if q.get("lulus") else " class='bad'"
+
+
+def html(proyek, baris, info, interaksi_terbaik=None, ada_gambar3d=False, ada_diagram=False, penulis="",
+         sifat_ligan=None):
+    """sifat_ligan: {nama ligan: dict core.sifat.hitung} (opsional)."""
     pr = proyek
     rec = pr.reseptor or {}
     jobs = pr.job
@@ -67,7 +75,7 @@ def html(proyek, baris, info, interaksi_terbaik=None, ada_gambar3d=False, ada_di
                  f"({'valid, ≤ 2,0 Å' if ok else 'tidak valid, > 2,0 Å'}); RMSD minimum di antara pose teratas "
                  f"{_f(val.get('rmsd_min'))} Å; ΔG {_f(val.get('energi'))} kcal/mol.</p>")
     else:
-        o.append("<p class='warn'>Validasi redocking belum dilakukan. Disarankan menjalankan Analyze › Validasi "
+        o.append("<p class='warn'>Validasi redocking belum dilakukan. Disarankan menjalankan Docking › Validasi "
                  "redocking sebelum menafsirkan hasil.</p>")
 
     # ---- reseptor
@@ -114,12 +122,14 @@ def html(proyek, baris, info, interaksi_terbaik=None, ada_gambar3d=False, ada_di
     # ---- hasil
     o.append("<h2>4. Hasil</h2>")
     o.append("<table class='t'><tr><th>#</th><th>Ligan</th><th>ΔG (kcal/mol)</th><th>Ki perkiraan</th><th>LE</th>"
-             "<th>Ikatan H</th><th>Hidrofobik</th><th>π</th><th>RMSD kristal (Å)</th><th>Mesin</th></tr>")
+             "<th>Ikatan H</th><th>Hidrofobik</th><th>π</th><th>RMSD kristal (Å)</th><th>PoseBusters</th>"
+             "<th>Mesin</th></tr>")
     for b in baris[:15]:
         o.append(f"<tr><td class='n'>{b['peringkat']}</td><td>{escape(b['ligan'])}</td><td class='n'>{b['energi']:.2f}</td>"
                  f"<td class='n'>{_f(b['ki'])}</td><td class='n'>{_f(b['le'], '{:.3f}')}</td>"
                  f"<td class='n'>{b['hbond']}</td><td class='n'>{b['hidrofobik']}</td>"
                  f"<td class='n'>{b['pi'] + b['pikation']}</td><td class='n'>{_f(b['rmsd_kristal'])}</td>"
+                 f"<td{_kelas_qc(b.get('qc'))}>{escape(b.get('posebusters') or '–')}</td>"
                  f"<td>{escape(b['mesin'])}</td></tr>")
     o.append("</table>")
     if len(baris) > 15:
@@ -147,6 +157,28 @@ def html(proyek, baris, info, interaksi_terbaik=None, ada_gambar3d=False, ada_di
                          f"<td class='n'>{_f(h.get('sudut'), '{:.0f}°')}</td></tr>")
             o.append("</table>")
 
+    # ---- sifat ligan
+    if sifat_ligan and baris:
+        from . import sifat as S
+        urut, sudah = [], set()
+        for b in baris:
+            if b["ligan"] in sifat_ligan and b["ligan"] not in sudah:
+                urut.append(b["ligan"])
+                sudah.add(b["ligan"])
+        if urut:
+            o.append("<p><b>Sifat ligan (drug-likeness, BOILED-Egg)</b></p>")
+            o.append("<table class='t'><tr><th>Ligan</th><th>MW</th><th>WLOGP</th><th>TPSA (Å²)</th><th>QED</th>"
+                     "<th>Lipinski</th><th>Veber</th><th>Absorpsi GI</th><th>BBB</th><th>PAINS</th></tr>")
+            for n in urut[:15]:
+                x = sifat_ligan[n]
+                o.append(f"<tr><td>{escape(n)}</td><td class='n'>{x['mw']:.1f}</td><td class='n'>{x['wlogp']:.2f}</td>"
+                         f"<td class='n'>{x['tpsa']:.1f}</td><td class='n'>{_f(x.get('qed'), '{:.2f}')}</td>"
+                         f"<td>{escape(S.sel(x, 'lipinski'))}</td><td>{escape(S.sel(x, 'veber'))}</td>"
+                         f"<td>{escape(S.sel(x, 'gi'))}</td><td>{escape(S.sel(x, 'bbb'))}</td>"
+                         f"<td>{'<span class=warn>' + escape(', '.join(x['pains'])) + '</span>' if x['pains'] else '–'}"
+                         "</td></tr>")
+            o.append("</table>")
+
     # ---- metode
     k = KRITERIA
     o.append("<h2>5. Metode singkat</h2>")
@@ -158,13 +190,27 @@ def html(proyek, baris, info, interaksi_terbaik=None, ada_gambar3d=False, ada_di
              f"Interaksi dianalisis dengan kriteria geometri: ikatan hidrogen D···A ≤ {k['hbond_da']} Å dan sudut "
              f"D–H···A ≥ {k['hbond_sudut']:.0f}°, kontak hidrofobik ≤ {k['hidrofobik']} Å, π–π ≤ {k['pi']} Å, "
              f"π–kation ≤ {k['pikation']} Å, jembatan garam ≤ {k['garam']} Å, ikatan halogen ≤ {k['halogen']} Å. "
-             "RMSD redocking dihitung tanpa penjajaran dan memperhitungkan simetri molekul.</p>")
+             "RMSD redocking dihitung tanpa penjajaran dan memperhitungkan simetri molekul."
+             + (" Sifat fisikokimia dan kemiripan obat dihitung dengan RDKit dari struktur netral (WLOGP "
+                "Wildman–Crippen, TPSA Ertl); aturan Lipinski, Veber, Ghose, Egan, Muegge; peringatan substruktur "
+                "PAINS; prediksi absorpsi saluran cerna dan penetrasi sawar darah otak dengan model BOILED-Egg."
+                if sifat_ligan else "")
+             + (" Kewajaran fisik pose terbaik tiap ligan (kimia, geometri ikatan, kerataan cincin, energi internal, "
+                "jarak dan tumpang-tindih dengan protein) diperiksa dengan PoseBusters (konfigurasi dock)."
+                if any(b.get("qc") and not b["qc"].get("galat") for b in baris) else "") + "</p>")
     o.append("<h2>6. Perangkat lunak yang dikutip</h2><ol>")
     kunci = [m for m in mesin_dipakai] + ["meeko", "rdkit", "openbabel", "gemmi", "3dmol"]
     if "adgpu" in kunci and "ad4" not in kunci:
         kunci.insert(1, "ad4")  # AD-GPU memakai fungsi skor & AutoGrid AutoDock4
     for x in kunci:
         o.append(f"<li>{escape(SITASI[x])}</li>")
+    if any(b.get("qc") and not b["qc"].get("galat") for b in baris):
+        from .qc import SITASI as SITASI_QC
+        o.append(f"<li>{escape(SITASI_QC)}</li>")
+    if sifat_ligan:
+        from .sifat import SITASI as SITASI_SIFAT
+        for x in SITASI_SIFAT[:5] + SITASI_SIFAT[7:8]:   # BOILED-Egg, Lipinski, Ghose, Veber, Egan, PAINS
+            o.append(f"<li>{escape(x)}</li>")
     o.append("</ol>")
     o.append("<p class='mut'>Hasil docking adalah prediksi komputasi, bukan bukti aktivitas biologis; konfirmasi "
              "dengan uji eksperimen. Ki dihitung dari ΔG pada 298 K sebagai perkiraan.</p>")

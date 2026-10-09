@@ -1,4 +1,4 @@
-<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Metode &amp; kriteria · VirmoDock</title><link rel="stylesheet" href="gaya.css"><link rel="icon" href="gambar/ikon.png"></head><body><header><img src="gambar/logo_putih.svg" alt="VirmoDock" style="height:30px;margin-right:6px"><span style="color:#9fb4d3;font-size:13px;margin-right:10px">0.9.0</span><a href="panduan.html">Panduan pengguna</a><a href="instalasi.html">Instalasi</a><a href="pindah_laptop.html">Pindah laptop</a><a href="gpu.html">Setup GPU</a><a href="troubleshooting.html">Troubleshooting</a><a href="metode.html" class="aktif">Metode &amp; kriteria</a></header><main><h1>Metode &amp; kriteria</h1>
+<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Metode &amp; kriteria · VirmoDock</title><link rel="stylesheet" href="gaya.css"><link rel="icon" href="gambar/ikon.png"></head><body><header><img src="gambar/logo_putih.svg" alt="VirmoDock" style="height:30px;margin-right:6px"><span style="color:#9fb4d3;font-size:13px;margin-right:10px">0.9.0</span><a href="panduan.html">Panduan pengguna</a><a href="instalasi.html">Instalasi</a><a href="pindah_laptop.html">Pindah laptop</a><a href="gpu.html">Setup GPU</a><a href="troubleshooting.html">Mengatasi masalah</a><a href="metode.html" class="aktif">Metode &amp; kriteria</a></header><main><h1>Metode &amp; kriteria</h1>
 <p class="lead">Rincian ilmiah yang dipakai VirmoDock, untuk ditulis di bagian Metode naskah.</p>
 
 <h2>Preparasi</h2>
@@ -6,9 +6,12 @@
 <tr><th>Langkah</th><th>Alat</th><th>Rincian</th></tr>
 <tr><td>Pembersihan reseptor</td><td>gemmi</td><td>Model pertama; konformasi alternatif okupansi tertinggi; hidrogen asli dibuang; air, ligan, aditif kristalisasi dihapus; ion logam dalam radius 8 Å dari ligan asli dipertahankan (tipe AD4, muatan formal).</td></tr>
 <tr><td>Reseptor → PDBQT</td><td>Meeko 0.8</td><td>Templat residu; hidrogen polar; muatan Gasteiger; tipe atom AutoDock4. Residu tidak lengkap dibuang dan dilaporkan. Cadangan: Open Babel 3.1.1.</td></tr>
-<tr><td>Ligan</td><td>RDKit, Open Babel, Meeko</td><td>Fragmen terbesar; protonasi pH 7,4 (Open Babel); koordinat 3D ETKDGv3 bila perlu; minimisasi MMFF94 (500 langkah, cadangan UFF); torsi, hidrogen polar, muatan Gasteiger, makrosiklik fleksibel (Meeko).</td></tr>
+<tr><td>Ligan</td><td>RDKit, Open Babel, Meeko</td><td>Fragmen terbesar; protonasi pH 7,4 (Open Babel, atau Dimorphite-DL 2.1 dengan opsi enumerasi keadaan protonasi pada pH ± 1); koordinat 3D ETKDGv3 bila perlu; minimisasi MMFF94 (500 langkah, cadangan UFF); torsi, hidrogen polar, muatan Gasteiger, makrosiklik fleksibel (Meeko).</td></tr>
 <tr><td>Ligan validasi</td><td>sama</td><td>Konformasi kristal tanpa minimisasi (cincin kaku dipertahankan).</td></tr>
 </table>
+
+<h2>Deteksi kantong</h2>
+<p>P2Rank 2.5.1 (model bawaan, Java 21 terpisah): titik permukaan pelarut diberi skor ligandabilitas oleh random forest lalu diklaster menjadi kantong; peringkat berdasarkan skor, probabilitas terkalibrasi. Grid box: pusat kantong, ukuran = rentang atom residu kantong + 4 Å per sumbu, dibatasi 16–30 Å.</p>
 
 <h2>Docking — parameter bawaan</h2>
 <table>
@@ -38,7 +41,59 @@
 <li><b>Efisiensi ligan (LE)</b> = −ΔG / jumlah atom berat (kcal/mol per atom berat).</li>
 <li><b>RMSD redocking</b>: atom berat, tanpa penjajaran (pose dan kristal di kerangka koordinat reseptor yang sama), minimum atas semua pemetaan simetri molekul; dihitung pada graf tanpa orde ikatan agar tidak terpengaruh protonasi. Valid bila ≤ 2,0 Å.</li>
 <li><b>RMSD ref</b> (AutoDock): RMSD terhadap koordinat ligan masukan, dari berkas .dlg.</li>
+<li><b>Sidik jari interaksi (IFP)</b>: himpunan bit "residu × jenis interaksi" (kriteria di atas, tanpa vdW) pose terbaik; kemiripan = koefisien Tanimoto |A∩B| / |A∪B|. Acuan kolom "IFP vs kristal" = IFP pose kristal ligan asli terhadap reseptor yang sama.</li>
+<li><b>Kontribusi energi per atom</b>: suku antarmolekul fungsi skor AutoDock Vina (Trott &amp; Olson 2010) dihitung ulang per pasangan atom berat — tipe XS dari tipe AutoDock + ikatan dari jarak kovalen; jarak permukaan d = r − R₁ − R₂; gauss1 (−0,0356), gauss2 (−0,00516), repulsi (0,840), hidrofobik (−0,0351), ikatan H (−0,587); batas 8 Å — dan seluruhnya dibebankan ke atom ligan. Jumlahnya mendekati "Final Intermolecular Energy" <code>vina --score_only</code> (1HSG/indinavir kristal: −19,28 vs −19,27 kcal/mol).</li>
 </ul>
+
+<h2>Kontrol kualitas pose (PoseBusters)</h2>
+<p>Pose terbaik tiap ligan diperiksa otomatis setelah docking dengan <b>PoseBusters</b> 0.6.5 (konfigurasi <i>dock</i>; Buttenschoen dkk. 2024), di proses terpisah sehingga antarmuka tetap responsif. Proyek lama dilengkapi otomatis saat dibuka. Kolom <b>PoseBusters</b> di tab Hasil: <i>Lulus</i> = semua uji lulus ("PB-valid"); <i>Gagal (n)</i> = n uji gagal (arahkan kursor untuk rincian). Rincian pose mana pun: Analisis › Periksa pose aktif (PoseBusters)….</p>
+<table>
+<tr><th>Kelompok</th><th>Uji</th></tr>
+<tr><td>Kimia</td><td>Sanitasi RDKit, dapat diubah ke InChI, semua atom terhubung, tanpa radikal.</td></tr>
+<tr><td>Geometri</td><td>Panjang &amp; sudut ikatan dan tabrakan internal dalam batas distance geometry (toleransi 25 %/30 %), cincin aromatik &amp; ikatan rangkap datar (≤ 0,25 Å), cincin non-aromatik tidak datar, energi internal UFF ≤ 100 × rerata konformer acak.</td></tr>
+<tr><td>Antarmolekul</td><td>Ligan ≤ 5 Å dari protein; jarak minimum ke protein/kofaktor/ion/air ≥ 0,75 × jumlah jari-jari vdW (ion 0,5 ×); tumpang-tindih volume ≤ 7,5 %.</td></tr>
+</table>
+<p>Protein yang dipakai: reseptor bersih (tanpa air dan ligan). Pose "Gagal" tidak otomatis salah, tetapi perlu diperiksa sebelum dilaporkan (mis. kontak terlalu dekat dengan residu).</p>
+
+<h2>Sifat ligan (drug-likeness) dan BOILED-Egg</h2>
+<p>Tab <b>Sifat Ligan</b> (Analisis › Sifat ligan dan BOILED-Egg). Dihitung RDKit dari struktur <b>netral</b> (fragmen terbesar, muatan dinetralkan), sehingga tidak terpengaruh protonasi pH saat preparasi docking.</p>
+<table>
+<tr><th>Aturan</th><th>Kriteria</th></tr>
+<tr><td>Lipinski</td><td>MW ≤ 500; WLOGP ≤ 5; donor H (NH + OH) ≤ 5; akseptor H (N + O) ≤ 10. Lolos bila ≤ 1 pelanggaran.</td></tr>
+<tr><td>Ghose</td><td>160 ≤ MW ≤ 480; −0,4 ≤ WLOGP ≤ 5,6; 40 ≤ MR ≤ 130; 20 ≤ jumlah atom (dengan H) ≤ 70.</td></tr>
+<tr><td>Veber</td><td>Ikatan rotasi ≤ 10; TPSA ≤ 140 Å².</td></tr>
+<tr><td>Egan</td><td>WLOGP ≤ 5,88; TPSA ≤ 131,6 Å².</td></tr>
+<tr><td>Muegge</td><td>200 ≤ MW ≤ 600; −2 ≤ WLOGP ≤ 5; TPSA ≤ 150; cincin ≤ 7; C &gt; 4; heteroatom &gt; 1; ikatan rotasi ≤ 15; akseptor H ≤ 10; donor H ≤ 5.</td></tr>
+<tr><td>QED</td><td>Indeks kemiripan obat 0–1 (Bickerton 2012).</td></tr>
+<tr><td>PAINS / Brenk</td><td>Substruktur pengganggu uji (PAINS A–C) dan gugus tak diinginkan (Brenk). Peringatan, bukan larangan.</td></tr>
+<tr><td>BOILED-Egg</td><td>Titik (TPSA, WLOGP) di dalam elips putih = absorpsi saluran cerna tinggi; di dalam kuning telur = menembus sawar darah otak (Daina &amp; Zoete 2016). Parameter elips sama dengan model asli.</td></tr>
+</table>
+<p>WLOGP = metode Wildman–Crippen (sama dengan SwissADME). SwissADME memakai MLOGP untuk Lipinski dan XLOGP3 untuk Muegge; VirmoDock memakai WLOGP untuk semua aturan, sehingga hasil bisa sedikit berbeda di dekat batas. Ekspor: tabel CSV, lembar "Sifat ligan" di XLSX, grafik SVG/PDF/PNG/TIFF; ringkasan ikut di laporan PDF.</p>
+
+<h2>Statistik dan grafik</h2>
+<p>Tab <b>Statistik</b> (Analisis › Statistik dan grafik). Satu titik data = satu ligan dalam satu job (pose terbaik). Pilih satu job agar hanya membandingkan hasil dari mesin dan parameter yang sama; "Semua job" memakai ΔG terbaik tiap ligan.</p>
+<ul>
+<li><b>Histogram</b>: jumlah kelas otomatis (aturan Freedman–Diaconis, 5–30 kelas) atau diatur manual; garis putus-putus = rerata.</li>
+<li><b>Sebar + regresi</b>: regresi linear kuadrat terkecil, R², koefisien Pearson r dan Spearman ρ beserta nilai p dua sisi (scipy.stats), pita = selang kepercayaan 95 % garis regresi.</li>
+<li><b>Batang ΔG teratas</b>: N ligan dengan ΔG terendah.</li>
+<li><b>Matriks korelasi</b> Pearson atau Spearman (pasangan lengkap per sel); * = p &lt; 0,05 tanpa koreksi uji berganda.</li>
+<li><b>pKi perkiraan</b> = −ΔG / (RT ln 10).</li>
+<li>Tafsiran besaran |r| (Evans 1996): &lt; 0,2 sangat lemah, 0,2–0,4 lemah, 0,4–0,6 sedang, 0,6–0,8 kuat, ≥ 0,8 sangat kuat — hanya panduan.</li>
+</ul>
+<p>Korelasi menunjukkan hubungan, bukan sebab-akibat. Ekspor: grafik SVG/PDF (vektor) atau PNG/TIFF ber-DPI, data CSV (untuk Excel/SPSS/R/GraphPad Prism), dan lembar "Statistik" (deskriptif per job) di XLSX.</p>
+
+<h2>Uji statistik (tab Uji &amp; Grafik)</h2>
+<ul>
+<li>Normalitas: Shapiro–Wilk per grup (n ≥ 3). Homogenitas varians: Brown–Forsythe (Levene berbasis median). α = 0,05.</li>
+<li>Pemilihan otomatis — 2 grup: t-test Welch bila semua normal, selain itu Mann–Whitney (berpasangan: t berpasangan / Wilcoxon bertanda). ≥ 3 grup: semua normal &amp; varians homogen → ANOVA satu arah + Tukey HSD; normal tetapi varians tidak homogen → ANOVA Welch + Games–Howell; tidak normal → Kruskal–Wallis + Dunn (koreksi Holm). Manual: + ANOVA dengan Dunnett terhadap kolom pertama.</li>
+<li>Ukuran efek: Cohen d dan Hedges g (dua grup), Cohen dz (berpasangan), r = z/√N (Mann–Whitney), η² (ANOVA), ε² (Kruskal–Wallis).</li>
+<li>Dosis–respons: regresi nonlinear kuadrat terkecil model logistik 4 parameter Y = Bawah + (Atas − Bawah) / (1 + 10^((logIC₅₀ − X)·Hill)), X = log₁₀ konsentrasi; CI 95% IC₅₀ dari galat baku logIC₅₀ (distribusi t, df = n − 4) lalu ditransformasi balik.</li>
+<li>ROC: AUC = statistik Mann–Whitney U/(n₁·n₀) (ties = ½); galat baku dan CI 95% metode DeLong (komponen penempatan); p dari uji Mann–Whitney dua sisi (H₀: AUC = 0,5). Ambang: skor ≥ t → positif (atau ≤ t untuk “skor rendah = positif”, mis. ΔG). Titik potong optimal = indeks Youden maksimum (sensitivitas + spesifisitas − 1). Faktor pengayaan EF<sub>x%</sub> = (aktif di x% teratas / jumlah x% teratas) / (aktif total / jumlah total).</li>
+<li>Kontingensi: 2 × 2 → uji eksak Fisher dua sisi (utama), χ² dengan koreksi Yates, rasio odds (CI 95% Woolf) dan risiko relatif (CI 95% Katz) baris pertama vs kedua, koreksi Haldane–Anscombe (+0,5) bila ada sel nol. r × c → χ² Pearson; bila > 20% sel berfrekuensi harapan &lt; 5 atau ada yang &lt; 1, dipakai uji eksak Fisher r × c (SciPy). Ukuran efek Cramér V. Diperiksa: AUC = U/(n₁·n₀) persis; contoh “tea tasting” Fisher p = 0,4857, OR = 9 (sesuai rujukan).</li>
+<li>Validasi terhadap R (data PlantGrowth): ANOVA F(2; 27) = 4,846, p = 0,0159; Tukey p = 0,391 / 0,198 / 0,012; Kruskal–Wallis H = 7,988, p = 0,0184; ANOVA Welch F = 5,181, df₂ = 17,13, p = 0,0174 — identik.</li>
+</ul>
+
+<p>Rujukan metode ROC: DeLong ER, DeLong DM, Clarke-Pearson DL. Comparing the areas under two or more correlated receiver operating characteristic curves: a nonparametric approach. <i>Biometrics.</i> 1988;44(3):837–845. doi:10.2307/2531595 · Youden WJ. Index for rating diagnostic tests. <i>Cancer.</i> 1950;3(1):32–35. doi:10.1002/1097-0142(1950)3:1&lt;32::AID-CNCR2820030106&gt;3.0.CO;2-3</p>
 
 <h2>Perangkat lunak yang perlu dikutip</h2>
 <ol>
@@ -49,6 +104,9 @@
 <li>RDKit: Open-source cheminformatics. https://www.rdkit.org</li>
 <li>O'Boyle NM, et al. Open Babel. <i>J Cheminform.</i> 2011;3:33. doi:10.1186/1758-2946-3-33</li>
 <li>Wojdyr M. GEMMI. <i>J Open Source Softw.</i> 2022;7(73):4200. doi:10.21105/joss.04200</li>
+<li>Krivák R, Hoksza D. P2Rank: machine learning based tool for rapid and accurate prediction of ligand binding sites from protein structure. <i>J Cheminform.</i> 2018;10:39. doi:10.1186/s13321-018-0285-8 (bila deteksi kantong dipakai)</li>
+<li>Ropp PJ, et al. Dimorphite-DL: an open-source program for enumerating the ionization states of drug-like small molecules. <i>J Cheminform.</i> 2019;11:14. doi:10.1186/s13321-019-0336-9 (bila dipakai)</li>
+<li>Virtanen P, et al. SciPy 1.0. <i>Nat Methods.</i> 2020;17:261–272. doi:10.1038/s41592-019-0686-2 (statistik)</li>
 <li>Rego N, Koes D. 3Dmol.js. <i>Bioinformatics.</i> 2015;31(8):1322–1324. doi:10.1093/bioinformatics/btu829</li>
 </ol>
 <p>Laporan PDF VirmoDock mencantumkan sitasi sesuai mesin yang benar-benar dipakai.</p>

@@ -1,6 +1,6 @@
 """Uji mandiri instalasi: semua komponen penting bisa dimuat dan dijalankan di laptop ini.
 
-Dipakai dari menu Tools › Uji mandiri dan baris perintah `VirmoDock.exe --uji-mandiri hasil.json`.
+Dipakai dari menu Alat › Uji mandiri komponen dan baris perintah `VirmoDock.exe --uji-mandiri hasil.json`.
 """
 import json
 import subprocess
@@ -103,6 +103,69 @@ def uji(lapor=None):
         import openpyxl
         return f"openpyxl {openpyxl.__version__}"
     cek("Ekspor Excel", xlsx)
+
+    def sifat_lig():
+        from . import sifat
+        s = sifat.dari_teks("CN1C(=O)CN=C(c2ccccc2)c2cc(Cl)ccc21", "smiles")   # diazepam: GI & BBB
+        if not (s["gi"] and s["bbb"] and s["qed"]):
+            raise RuntimeError("hasil BOILED-Egg/QED diazepam tidak sesuai")
+        kat = sifat._filter("PAINS").GetNumEntries()
+        return f"WLOGP {s['wlogp']}, TPSA {s['tpsa']}, PAINS {kat} pola"
+    cek("Sifat ligan (QED, PAINS, BOILED-Egg)", sifat_lig)
+
+    def stat():
+        from . import statistik
+        k = statistik.korelasi([1, 2, 3, 4, 5], [2.1, 3.9, 6.2, 8.1, 9.8])
+        if not (k["r"] > 0.99 and k["p"] < 0.01):
+            raise RuntimeError("korelasi uji tidak sesuai")
+        import scipy
+        return f"scipy {scipy.__version__}, r {k['r']:.4f}"
+    cek("Statistik (scipy)", stat)
+
+    def posebusters():
+        import tempfile
+        from rdkit import Chem
+        from rdkit.Chem import AllChem
+        from . import qc
+        m = Chem.AddHs(Chem.MolFromSmiles("CC(=O)O"))
+        AllChem.EmbedMolecule(m, randomSeed=7)
+        with tempfile.TemporaryDirectory() as d:
+            f = Path(d) / "p.pdb"
+            f.write_text("ATOM      1  CA  ALA A   1       2.500   2.500   2.500  1.00  0.00           C\nEND\n")
+            h = qc.periksa_proses(m, f)          # lewat proses pekerja (--qc-pekerja)
+            pek = qc._pek is not None
+            qc.tutup()
+        geo = {n: ok for _k, n, g, ok in h["uji"] if g == "Geometri"}
+        if not geo or not all(geo.values()):
+            raise RuntimeError(f"uji geometri asam asetat gagal: {h['gagal']}")
+        import posebusters
+        return f"posebusters {posebusters.__version__}, {h['n_uji']} uji, proses pekerja {'ya' if pek else 'TIDAK'}"
+    cek("Kontrol kualitas pose (PoseBusters)", posebusters)
+
+    def dimorphite():
+        from rdkit import Chem
+        from . import prep_ligan
+        v = prep_ligan.varian_dimorphite(Chem.MolFromSmiles("CC(=O)Oc1ccccc1C(=O)O"), 7.4, 1)
+        if not v or Chem.GetFormalCharge(v[0]) != -1:
+            raise RuntimeError("aspirin pH 7,4 seharusnya bermuatan −1")
+        import dimorphite_dl
+        return f"dimorphite_dl {getattr(dimorphite_dl, '__version__', '?')}, aspirin −1"
+    cek("Protonasi Dimorphite-DL", dimorphite)
+
+    def p2rank_uji():
+        import tempfile
+        from . import p2rank
+        if not p2rank.tersedia():
+            raise RuntimeError("bin/p2rank atau bin/jre tidak ada")
+        teks = (Path(__file__).resolve().parents[1] / "aset" / "uji_1hsg.pdb")
+        if not teks.exists():
+            return "terpasang (struktur uji tidak dibawa, prediksi tidak dijalankan)"
+        with tempfile.TemporaryDirectory() as d:
+            k = p2rank.prediksi(teks.read_text(), d)
+        if not k:
+            raise RuntimeError("tidak ada kantong")
+        return f"P2Rank 2.5.1 + Java 21, kantong #1 skor {k[0]['skor']:.1f}"
+    cek("Deteksi kantong (P2Rank)", p2rank_uji)
     return hasil
 
 

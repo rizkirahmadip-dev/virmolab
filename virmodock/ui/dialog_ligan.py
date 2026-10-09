@@ -3,12 +3,12 @@ from pathlib import Path
 
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QColor
-from PySide6.QtWidgets import (QAbstractItemView, QCheckBox, QDialog, QDoubleSpinBox, QFileDialog, QGroupBox,
+from PySide6.QtWidgets import (QAbstractItemView, QCheckBox, QComboBox, QDialog, QDoubleSpinBox, QFileDialog, QGroupBox,
                                QHBoxLayout, QHeaderView, QLabel, QProgressBar, QPushButton, QSpinBox, QTableWidget,
                                QTableWidgetItem, QVBoxLayout)
 
 from ..core import molekul
-from ..core.prep_ligan import OpsiLigan, siapkan_banyak
+from ..core.prep_ligan import OpsiLigan, dimorphite_tersedia, siapkan_banyak
 from . import kerja, theme
 from .dialogs import DialogAmbil
 
@@ -60,7 +60,24 @@ class DialogLigan(QDialog):
         self.sp_ph.setRange(0, 14)
         self.sp_ph.setSingleStep(0.1)
         self.sp_ph.setValue(7.4)
-        self.sp_ph.setToolTip("Model pH Open Babel")
+        self.sp_ph.setToolTip("pH target protonasi")
+        self.cmb_metode = QComboBox()
+        self.cmb_metode.addItem("Open Babel", "obabel")
+        self.cmb_metode.addItem("Dimorphite-DL", "dimorphite")
+        self.cmb_metode.setToolTip("Open Babel: model pH bawaan (fenol tetap netral).\n"
+                                   "Dimorphite-DL: aturan pKa per gugus (Ropp dkk. 2019); fenol/katekol bisa "
+                                   "dianggap terdeprotonasi.\nKeduanya berbasis aturan: periksa muatan hasil.")
+        if not dimorphite_tersedia():
+            self.cmb_metode.model().item(1).setEnabled(False)
+        self.sp_varian = QSpinBox()
+        self.sp_varian.setRange(1, 8)
+        self.sp_varian.setValue(1)
+        self.sp_varian.setPrefix("varian ≤ ")
+        self.sp_varian.setToolTip("Dimorphite-DL: 1 = satu keadaan pada pH tepat. > 1 = semua keadaan protonasi "
+                                  "pada pH ± 1, tiap varian jadi ligan terpisah 'nama [vN]'.")
+        self.sp_varian.setEnabled(False)
+        self.cmb_metode.currentIndexChanged.connect(
+            lambda: self.sp_varian.setEnabled(self.cmb_metode.currentData() == "dimorphite"))
         self.c_min = QCheckBox("Minimisasi MMFF94, langkah")
         self.c_min.setChecked(True)
         self.sp_lang = QSpinBox()
@@ -69,7 +86,7 @@ class DialogLigan(QDialog):
         self.sp_lang.setValue(500)
         self.c_makro = QCheckBox("Makrosiklik kaku")
         self.c_makro.setToolTip("Bawaan Meeko: cincin makro (≥7 atom) dibuat fleksibel.")
-        for w in (self.c_ph, self.sp_ph, self.c_min, self.sp_lang, self.c_makro):
+        for w in (self.c_ph, self.sp_ph, self.cmb_metode, self.sp_varian, self.c_min, self.sp_lang, self.c_makro):
             gh.addWidget(w)
         gh.addStretch(1)
         lay.addWidget(g)
@@ -198,7 +215,9 @@ class DialogLigan(QDialog):
 
     # ------------------------------------------------------------ proses
     def opsi(self):
-        return OpsiLigan(ph=self.sp_ph.value(), protonasi=self.c_ph.isChecked(), minimisasi=self.c_min.isChecked(),
+        return OpsiLigan(ph=self.sp_ph.value(), protonasi=self.c_ph.isChecked(),
+                         metode_ph=self.cmb_metode.currentData(), varian=self.sp_varian.value(),
+                         minimisasi=self.c_min.isChecked(),
                          langkah=self.sp_lang.value(), makrosiklik_kaku=self.c_makro.isChecked())
 
     def jalankan(self):
@@ -218,22 +237,33 @@ class DialogLigan(QDialog):
         self.prog.setValue(0)
         self._idx = idx
         kerja.jalankan(siapkan_banyak, data, self.opsi(), selesai=self._selesai, galat=self._galat,
-                       progres=lambda k, n, nama: (self.prog.setValue(k), self.l_stat.setText(f"{k}/{n} · {nama}")))
+                       progres=lambda k, n, nama: (self.prog.setMaximum(n), self.prog.setValue(k),
+                                                       self.l_stat.setText(f"{k}/{n} · {nama}")))
 
     def _selesai(self, hasil):
         t = theme.TOKEN[self.mode]
         ok = []
-        for r, h in zip(self._idx, hasil):
+        per_baris = {}
+        for h in hasil:   # enumerasi varian: beberapa hasil per baris masukan
+            per_baris.setdefault(h.asal, []).append(h)
+            if h.status != "gagal":
+                ok.append((self.baris[self._idx[h.asal]], h))
+        for k, r in enumerate(self._idx):
+            hs = per_baris.get(k) or []
+            if not hs:
+                continue
+            h = next((x for x in hs if x.status != "gagal"), hs[0])
             warna = {"siap": t["ok"], "peringatan": t["warn"], "gagal": t["bad"]}[h.status]
             self._set(r, 2, h.rumus or self.tabel.item(r, 2).text())
             self._set(r, 3, f"{h.mw:.1f}" if h.mw else self.tabel.item(r, 3).text(), kanan=True)
             self._set(r, 4, str(h.torsi) if h.status != "gagal" else "", kanan=True)
             self._set(r, 5, str(h.atom) if h.status != "gagal" else "", kanan=True)
-            self._set(r, 6, h.status, warna=warna)
-            self._set(r, 7, h.alasan)
-            self.tabel.item(r, 7).setToolTip(h.alasan)
+            self._set(r, 6, h.status if len(hs) == 1 else f"{h.status} ({len(hs)} varian)", warna=warna)
+            alasan = h.alasan if len(hs) == 1 else " | ".join(f"{x.nama}: muatan {x.muatan:+d}" for x in hs)
+            self._set(r, 7, alasan)
+            self.tabel.item(r, 7).setToolTip("\n".join(f"{x.nama}: {x.status}, muatan {x.muatan:+d}; {x.alasan}"
+                                                       for x in hs))
             if h.status != "gagal":
-                ok.append((self.baris[r], h))
                 self.tabel.item(r, 0).setCheckState(Qt.Unchecked)
         gagal = sum(1 for h in hasil if h.status == "gagal")
         self.l_stat.setText(f"Selesai: {len(ok)} siap docking, {gagal} gagal.")

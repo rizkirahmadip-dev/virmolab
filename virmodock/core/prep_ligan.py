@@ -20,6 +20,8 @@ TIPE_DIDUKUNG = {"C", "A", "N", "NA", "NS", "OA", "OS", "SA", "S", "HD", "HS", "
 class OpsiLigan:
     ph: float = 7.4
     protonasi: bool = True
+    metode_ph: str = "obabel"      # obabel | dimorphite
+    varian: int = 1                 # Dimorphite-DL: >1 = enumerasi keadaan protonasi pada pH ± 1 (ligan terpisah)
     minimisasi: bool = True
     langkah: int = 500
     makrosiklik_kaku: bool = False
@@ -38,11 +40,13 @@ class HasilLigan:
     atom: int = 0
     muatan: int = 0
     tipe: list = field(default_factory=list)
+    asal: int = -1                  # indeks masukan (enumerasi varian: beberapa hasil per masukan)
 
     def ke_dict(self):
         d = asdict(self)
         d.pop("pdbqt")
         d.pop("sdf")
+        d.pop("asal")
         return d
 
 
@@ -89,6 +93,72 @@ def _protonasi(mol, ph):
     return baru, ""
 
 
+def dimorphite_tersedia():
+    try:
+        import dimorphite_dl  # noqa: F401
+        return True
+    except Exception:
+        return False
+
+
+def _muatan_dari(mol, smiles_varian):
+    """Salin muatan formal varian (SMILES Dimorphite-DL) ke molekul asli: koordinat atom berat dipertahankan."""
+    from rdkit import Chem
+    asli = Chem.RemoveHs(mol)
+    var = Chem.MolFromSmiles(smiles_varian)
+    if var is None:
+        return None
+
+    def netral(m):
+        q = Chem.RWMol(m)
+        for a in q.GetAtoms():
+            a.SetFormalCharge(0)
+            a.SetNumExplicitHs(0)
+            a.SetNoImplicit(False)
+        q.UpdatePropertyCache(strict=False)
+        return q
+    pasang = netral(asli).GetSubstructMatch(netral(var), useChirality=False)
+    if len(pasang) != var.GetNumAtoms() or var.GetNumAtoms() != asli.GetNumAtoms():
+        return None
+    baru = Chem.RWMol(asli)
+    for i_var, i_asli in enumerate(pasang):
+        q = var.GetAtomWithIdx(i_var).GetFormalCharge()
+        a = baru.GetAtomWithIdx(i_asli)
+        if a.GetFormalCharge() != q:
+            a.SetFormalCharge(q)
+            a.SetNumExplicitHs(0)
+            a.SetNoImplicit(False)
+    Chem.SanitizeMol(baru)
+    return baru.GetMol()
+
+
+def varian_dimorphite(mol, ph, maks=1):
+    """Keadaan protonasi Dimorphite-DL (Apache-2.0). maks=1: satu keadaan pada pH tepat (presisi 0);
+    maks>1: semua keadaan pada pH ± 1 (presisi 1 SD), dibatasi `maks`. Kembalikan list Mol (koordinat asli)."""
+    from rdkit import Chem
+    from dimorphite_dl import protonate_smiles
+    import logging
+    try:
+        from loguru import logger
+        logger.disable("dimorphite_dl")
+    except Exception:
+        pass
+    logging.getLogger("dimorphite_dl").setLevel(logging.ERROR)
+    smi = Chem.MolToSmiles(Chem.RemoveHs(mol))
+    if maks <= 1:
+        hasil = protonate_smiles(smi, ph_min=ph, ph_max=ph, precision=0.0)[:1]   # max_variants=1 memotong ke masukan netral
+    else:
+        hasil = protonate_smiles(smi, ph_min=ph - 1, ph_max=ph + 1, precision=1.0, max_variants=maks)
+    out = []
+    for s in hasil or []:
+        m = _muatan_dari(mol, s)
+        if m is None:   # tidak bisa dipetakan: bangun ulang dari SMILES (koordinat dibuat ETKDG)
+            m = Chem.MolFromSmiles(s)
+        if m is not None:
+            out.append(m)
+    return out
+
+
 def _3d(mol, minimisasi, langkah):
     from rdkit import Chem
     from rdkit.Chem import AllChem
@@ -131,7 +201,20 @@ def siapkan_satu(nama, teks, fmt, opsi):
         if len(frag) > 1:  # garam/pelarut: ambil fragmen terbesar
             mol = max(frag, key=lambda m: m.GetNumHeavyAtoms())
             catatan.append("fragmen kecil (garam/pelarut) dibuang")
-        if opsi.protonasi:
+        if opsi.protonasi and opsi.metode_ph == "dimorphite" and getattr(opsi, "_mol_varian", None) is not None:
+            mol = opsi._mol_varian       # varian Dimorphite-DL yang sudah dipilih di siapkan_banyak
+            catatan.append(f"protonasi Dimorphite-DL pH {opsi.ph:g}")
+        elif opsi.protonasi and opsi.metode_ph == "dimorphite":
+            try:
+                v = varian_dimorphite(mol, opsi.ph, 1)
+                if v:
+                    mol = v[0]
+                    catatan.append(f"protonasi Dimorphite-DL pH {opsi.ph:g}")
+                else:
+                    catatan.append("Dimorphite-DL tanpa hasil, memakai struktur asli")
+            except Exception as e:
+                catatan.append(f"Dimorphite-DL gagal ({type(e).__name__}), memakai struktur asli")
+        elif opsi.protonasi:
             mol, c = _protonasi(mol, opsi.ph)
             if c:
                 catatan.append(c)
@@ -172,16 +255,51 @@ def siapkan_satu(nama, teks, fmt, opsi):
     return h
 
 
+def _uraikan_varian(daftar, opsi):
+    """Enumerasi Dimorphite-DL: satu masukan -> beberapa (nama [vN], teks, fmt, opsi varian)."""
+    from copy import copy
+    from rdkit import Chem
+    out = []
+    for i, (n, t, f) in enumerate(daftar):
+        try:
+            mol = mol_dari(t, f)
+            frag = Chem.GetMolFrags(mol, asMols=True)
+            if len(frag) > 1:
+                mol = max(frag, key=lambda m: m.GetNumHeavyAtoms())
+            vs = varian_dimorphite(mol, opsi.ph, opsi.varian)
+        except Exception:
+            vs = []
+        if len(vs) <= 1:
+            o = copy(opsi)
+            o._mol_varian = vs[0] if vs else None
+            if not vs:
+                o.metode_ph = "dimorphite"
+            out.append((n, t, f, o, i))
+            continue
+        for k, m in enumerate(vs, 1):
+            o = copy(opsi)
+            o._mol_varian = m
+            out.append((f"{n} [v{k}]", t, f, o, i))
+    return out
+
+
 def siapkan_banyak(daftar, opsi=None, lapor=None, pekerja=None):
-    """daftar: [(nama, teks, fmt)]. Kembalikan list HasilLigan sesuai urutan masukan."""
+    """daftar: [(nama, teks, fmt)]. Kembalikan list HasilLigan sesuai urutan masukan
+    (enumerasi Dimorphite-DL dapat menambah baris: 'nama [v1]', 'nama [v2]', …)."""
     opsi = opsi or OpsiLigan()
     pekerja = pekerja or max(1, (os.cpu_count() or 2) // 2)
+    if opsi.protonasi and opsi.metode_ph == "dimorphite":   # Dimorphite-DL tidak aman di thread: hitung di sini
+        tugas = _uraikan_varian(daftar, opsi)
+    else:
+        tugas = [(n, t, f, opsi, i) for i, (n, t, f) in enumerate(daftar)]
+    daftar = tugas
     hasil = [None] * len(daftar)
     with ThreadPoolExecutor(max_workers=pekerja) as ex:
-        fut = {ex.submit(siapkan_satu, n, t, f, opsi): i for i, (n, t, f) in enumerate(daftar)}
+        fut = {ex.submit(siapkan_satu, n, t, f, o): i for i, (n, t, f, o, _a) in enumerate(daftar)}
         for k, f in enumerate(as_completed(fut), 1):
             i = fut[f]
             hasil[i] = f.result()
+            hasil[i].asal = daftar[i][4]
             if lapor:
                 lapor.progres.emit(k, len(daftar), hasil[i].nama)
                 lapor.log.emit(f"Ligan {hasil[i].nama}: {hasil[i].status}"

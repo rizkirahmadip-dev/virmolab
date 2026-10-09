@@ -15,8 +15,19 @@ gemmi                0.7.5       MPL-2.0                         licenses/gemmi_
 NumPy                2.5.3       BSD-3-Clause (+ komponen)       licenses/NumPy_LICENSE.txt
 SciPy                1.18.1      BSD-3-Clause (+ komponen)       licenses/SciPy_LICENSE.txt
 Pillow               12.3.0      MIT-CMU                         licenses/Pillow_LICENSE.txt
+FFmpeg (via Qt)      7.1.5       LGPL-2.1-or-later (DLL)         licenses/FFmpeg_LICENSE_LGPL-2.1.txt
+PoseBusters          0.6.5       MIT                             licenses/PoseBusters_LICENSE.txt
+pandas               3.0.6       BSD-3-Clause (+ komponen)       licenses/pandas_LICENSE.txt
+PyYAML               6.0.3       MIT                             licenses/PyYAML_LICENSE.txt
+python-dateutil      2.9.0       Apache-2.0 / BSD-3-Clause       licenses/python-dateutil_LICENSE.txt
+six                  1.17.0      MIT                             licenses/six_LICENSE.txt
+tzdata               2026.5      Apache-2.0                      licenses/tzdata_LICENSE.txt, licenses/Apache-2.0.txt
 openpyxl             3.1.5       MIT                             licenses/openpyxl_LICENSE.txt
 et_xmlfile           2.0.0       MIT                             licenses/et_xmlfile_LICENSE.txt
+Dimorphite-DL        2.1.0       Apache-2.0                      licenses/Dimorphite-DL_LICENSE.txt
+loguru               0.7.3       MIT                             licenses/loguru_LICENSE.txt
+colorama             0.4.6       BSD-3-Clause                    licenses/colorama_LICENSE.txt
+win32-setctime       1.2.0       MIT                             licenses/win32-setctime_LICENSE.txt
 3Dmol.js             (viewer)    BSD-3-Clause                    licenses/3Dmol.js_LICENSE.txt
 Ikon gaya Lucide     -           ISC                             licenses/Lucide_LICENSE.txt
 Python               3.14        PSF License                     https://docs.python.org/3/license.html
@@ -28,6 +39,10 @@ AutoDock-GPU         1.6 (build OpenCL Windows, proyek VS dimodifikasi: tanpa /o
                                  GPL-2.0 (+ bagian LGPL-2.1)     licenses/AutoDock-GPU_LICENSE_*.txt
 AutoDock4, AutoGrid4 4.2.6       GPL-2.0                         licenses/GPL-2.0.txt
 AutoDock Vina        1.2.7       Apache-2.0                      licenses/AutoDock-Vina_LICENSE.txt
+P2Rank (bin/p2rank)  2.5.1       MIT                             licenses/P2Rank_LICENSE.txt
+  (pustaka Java di bin/p2rank/lib: lisensi masing-masing, daftar di licenses/P2Rank_pustaka.txt)
+Eclipse Temurin JRE  21.0.12.1   GPL-2.0 + Classpath Exception   licenses/Eclipse-Temurin-JRE_LICENSE.txt
+  (dipakai hanya untuk menjalankan P2Rank; komponen lain di bin/jre/legal)
 Open Babel (obabel)  3.1.1       GPL-2.0                         licenses/GPL-2.0.txt
 OpenCL ICD Loader, clinfo (Khronos OpenCL SDK 2026.05.29)
                                  Apache-2.0                      licenses/Apache-2.0.txt

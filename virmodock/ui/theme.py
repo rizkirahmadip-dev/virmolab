@@ -110,6 +110,31 @@ QGroupBox::title {{ subcontrol-origin: margin; left: 8px; top: 2px; color: {t['i
 QLabel#sech {{ background: {t['tb2']}; border-bottom: 1px solid {t['line2']}; border-top: 1px solid {t['line2']};
               padding: 5px 8px; font-weight: 600; color: {t['ink']}; }}
 QLabel#muted {{ color: {t['mut']}; }}
+QLabel#judulMenu {{ color: {t['mut']}; font-size: 8pt; font-weight: 600; padding: 4px 12px 2px 26px; }}
+QLabel#judulHalaman {{ font-size: 11pt; font-weight: 600; color: {t['ink']}; }}
+QLabel#statusLangkah {{ color: {t['ink2']}; }}
+QFrame#garis {{ background: {t['line2']}; border: 0; }}
+QWidget#kakiPanel {{ border-top: 1px solid {t['line2']}; }}
+QPushButton#aksiLangkah {{ text-align: left; padding: 6px 10px; }}
+QPushButton#aksiLangkah:hover {{ border-color: {t['acc']}; background: {t['accs']}; color: {t['acct']}; }}
+QWidget#halamanAwal {{ background: {t['view']}; }}
+QLabel#judulAwal {{ font-size: 15pt; font-weight: 600; color: {t['ink']}; padding-bottom: 4px; }}
+QFrame#ubin {{ background: {t['surf']}; border: 1px solid {t['line']}; border-radius: 4px; }}
+QFrame#ubin:hover {{ border-color: {t['acc']}; background: {t['accs']}; }}
+QLabel#ubinJudul {{ font-weight: 600; color: {t['ink']}; }}
+QToolButton#langkah {{ text-align: left; padding: 4px 8px; border: 1px solid transparent; border-radius: 3px;
+                      color: {t['ink2']}; }}
+QToolButton#langkah:hover {{ background: {t['hov']}; }}
+QToolButton#langkah:checked {{ background: {t['accs']}; border-color: {t['accs']}; color: {t['acct']}; font-weight: 600; }}
+QPushButton#tautan {{ background: transparent; border: 0; color: {t['acc']}; padding: 4px 2px; font-weight: 600; }}
+QPushButton#tautan:hover {{ color: {t['acc2']}; text-decoration: underline; }}
+QPushButton#ruang {{ background: transparent; border: 1px solid {t['line']}; border-radius: 0; padding: 4px 14px;
+                    color: {t['ink2']}; margin: 0; }}
+QPushButton#ruang:checked {{ background: {t['accs']}; border-color: {t['acc']}; color: {t['acct']}; font-weight: 600; }}
+QPushButton#ruang:hover:!checked {{ background: {t['hov']}; }}
+QToolButton#antreanRingkas {{ padding: 1px 8px; border-radius: 2px; color: {t['ink2']}; }}
+QToolButton#antreanRingkas:checked {{ background: {t['accs']}; color: {t['acct']}; border-color: transparent; }}
+QToolBar#toolbar_view {{ background: {t['surf']}; border-bottom: 1px solid {t['line2']}; padding: 2px 6px; }}
 QLabel#mono {{ font-family: "Cascadia Mono",Consolas,monospace; }}
 
 QSlider::groove:horizontal {{ height: 4px; background: {t['line']}; border-radius: 2px; }}

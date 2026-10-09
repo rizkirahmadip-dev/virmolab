@@ -97,7 +97,7 @@ class Wizard(QWizard):
 
         p2 = QWizardPage()
         p2.setTitle("Software pendukung")
-        p2.setSubTitle("Untuk tombol 'Buka di…'. Bisa diubah kapan saja di Tools › Pengaturan.")
+        p2.setSubTitle("Untuk tombol 'Buka di…'. Bisa diubah kapan saja di Alat › Atur lokasi program lain.")
         f = QFormLayout(p2)
         for nama in ("PyMOL", "ChimeraX", "Discovery Studio Visualizer"):
             jalur = env.eksternal.get(nama)

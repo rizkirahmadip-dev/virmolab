@@ -7,7 +7,7 @@ from PySide6.QtCore import QSettings, Qt, QTimer
 sys.argv = [sys.argv[0]]
 OUT = Path("docs/gambar").resolve()
 st = QSettings("VirmoDock", "VirmoDock")
-for k in ("layout", "sesi_terbuka", "geometri"):
+for k in ("layout", "layout_v2", "sesi_terbuka", "geometri"):
     st.remove(k)
 st.setValue("wizard_selesai", True)
 st.setValue("tema", "terang")
@@ -52,6 +52,7 @@ def hook():
         def l3(s):
             prot = next(o for o in s.objek.values() if o.jenis == "protein")
             s.hier.pilih_objek(prot.id)
+            s.d_tamp.show()
             s.d_tamp.raise_()
             g = dict(prot.gaya, permukaan={"type": "ses", "color": {"mode": "hydro"}, "opacity": 0.85, "mesh": False})
             s.ubah_gaya(prot.id, g)

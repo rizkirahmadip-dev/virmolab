@@ -24,11 +24,13 @@ for f in (AKAR / "vendor" / "bin").rglob("*"):
     if f.is_file():
         datas.append((str(f), str(Path("bin") / f.parent.relative_to(AKAR / "vendor" / "bin"))))
 datas += collect_data_files("meeko") + collect_data_files("rdkit", includes=["Data/*.fdef", "Data/*.txt"])
-hidden = collect_submodules("meeko") + ["gemmi", "openpyxl", "rdkit.Chem.ChemicalFeatures"]
+datas += collect_data_files("posebusters")   # config/*.yml (konfigurasi uji)
+datas += collect_data_files("dimorphite_dl")  # smarts/site_substructures.smarts (aturan pKa)
+hidden = collect_submodules("meeko") + collect_submodules("dimorphite_dl") + ["gemmi", "openpyxl", "rdkit.Chem.ChemicalFeatures"]
 
 a = Analysis([str(AKAR / "VirmoDock.pyw")], pathex=[str(AKAR)], datas=datas, hiddenimports=hidden,
              excludes=["openbabel", "tkinter", "matplotlib", "IPython", "pytest", "PySide6.Qt3DCore", "PySide6.QtCharts",
-                       "PySide6.QtDataVisualization", "PySide6.QtMultimedia", "PySide6.QtQuick3D", "PySide6.QtSql",
+                       "PySide6.QtDataVisualization", "PySide6.QtQuick3D", "PySide6.QtSql", "PySide6.QtMultimediaWidgets",
                        "PySide6.QtTest", "PySide6.QtBluetooth", "PySide6.QtNfc", "PySide6.QtSensors",
                        "PySide6.QtSerialPort", "PySide6.QtDesigner", "PySide6.QtHelp", "PySide6.QtLocation",
                        "PySide6.QtGraphs", "PySide6.QtSpatialAudio", "PySide6.QtTextToSpeech"],

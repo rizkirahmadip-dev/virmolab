@@ -1,4 +1,4 @@
-"""Panel Parameter Docking: mesin, perangkat, pencarian, grid box, preset."""
+"""Parameter docking, dibagi dua halaman panel Langkah: Area docking (grid box) dan Jalankan."""
 import math
 
 from PySide6.QtCore import QSettings, Qt, QTimer, Signal
@@ -49,32 +49,34 @@ class PanelDocking(QWidget):
         self._diam = False
         self.warna_warn = "#c98a12"
         self.st = paths.settings()
-        luar = QVBoxLayout(self)
-        luar.setContentsMargins(0, 0, 0, 0)
-        luar.setSpacing(0)
-        isi = QWidget()
-        lay = QVBoxLayout(isi)
+        # Dua halaman yang ditempatkan JendelaUtama di panel Langkah:
+        #   self.hal_area   -> langkah 3 "Area docking" (grid box)
+        #   self.hal_jalan  -> langkah 4 "Jalankan" (mesin, perangkat, preset, Lanjutan, tombol jalankan)
+
+        # =============================================================== JALANKAN
+        isi_j = QWidget()
+        lay = QVBoxLayout(isi_j)
         lay.setContentsMargins(0, 0, 0, 8)
         lay.setSpacing(0)
-
-        # ---------------- ringkasan
-        lay.addWidget(judul_seksi("Masukan"))
         f0 = QFormLayout()
-        f0.setContentsMargins(10, 6, 10, 6)
+        f0.setContentsMargins(10, 8, 10, 6)
         f0.setHorizontalSpacing(12)
         self.l_rec = QLabel("belum disiapkan")
         self.l_rec.setObjectName("mono")
         self.l_lig = QLabel("0")
         self.l_lig.setObjectName("mono")
+        self.l_area = QLabel("belum diatur")
+        self.l_area.setObjectName("mono")
         f0.addRow(self._m("Reseptor"), self.l_rec)
         f0.addRow(self._m("Ligan siap"), self.l_lig)
+        f0.addRow(self._m("Area"), self.l_area)
         lay.addLayout(f0)
 
-        # ---------------- mesin & perangkat
-        lay.addWidget(judul_seksi("Mesin"))
+        lay.addWidget(judul_seksi("Mesin dan perangkat"))
         w = QWidget()
         v = QVBoxLayout(w)
-        v.setContentsMargins(10, 6, 10, 6)
+        v.setContentsMargins(10, 8, 10, 6)
+        v.setSpacing(6)
         seg = QHBoxLayout()
         seg.setSpacing(0)
         self.grp_mesin = QButtonGroup(self)
@@ -93,35 +95,41 @@ class PanelDocking(QWidget):
             seg.addWidget(b)
         self.grp_mesin.idToggled.connect(lambda i, on: on and self._mesin_ganti())
         v.addLayout(seg)
-        fp = QFormLayout()
-        self.cmb_alat = QComboBox()
-        self.cmb_alat.currentIndexChanged.connect(self._ubah)
-        fp.addRow(self._m("Perangkat"), self.cmb_alat)
-        hp = QHBoxLayout()
-        self.cmb_preset = QComboBox()
-        self.cmb_preset.addItems(list(PRESET) + list((self.st.value("preset_kustom", {}) or {}).keys()))
-        self.cmb_preset.setCurrentText("Standar")
-        self.cmb_preset.setMinimumWidth(60)
-        b_terap = QToolButton()
-        b_terap.setText("Terapkan")
-        b_terap.clicked.connect(lambda: self.terapkan_preset(self.cmb_preset.currentText()))
-        b_simpan = QToolButton()
-        b_simpan.setText("Simpan…")
-        b_simpan.setToolTip("Simpan parameter saat ini sebagai preset kustom")
-        b_simpan.clicked.connect(self._simpan_preset)
-        hp.addWidget(self.cmb_preset, 1)
-        hp.addWidget(b_terap)
-        hp.addWidget(b_simpan)
-        fp.addRow(self._m("Preset"), hp)
-        v.addLayout(fp)
         self.l_mesin = QLabel()
         self.l_mesin.setObjectName("muted")
         self.l_mesin.setWordWrap(True)
         v.addWidget(self.l_mesin)
+        fp = QFormLayout()
+        fp.setHorizontalSpacing(12)
+        self.cmb_alat = QComboBox()
+        self.cmb_alat.currentIndexChanged.connect(self._ubah)
+        fp.addRow(self._m("Perangkat"), self.cmb_alat)
+        self.cmb_preset = QComboBox()
+        self.cmb_preset.addItems(list(PRESET) + list((self.st.value("preset_kustom", {}) or {}).keys()))
+        self.cmb_preset.setCurrentText("Standar")
+        self.cmb_preset.setMinimumWidth(60)
+        self.cmb_preset.setToolTip("Cepat = uji coba; Standar = penelitian umum; Teliti = hasil akhir/publikasi")
+        self.cmb_preset.textActivated.connect(self.terapkan_preset)   # langsung diterapkan saat dipilih
+        fp.addRow(self._m("Ketelitian"), self.cmb_preset)
+        v.addLayout(fp)
         lay.addWidget(w)
 
-        # ---------------- pencarian
-        lay.addWidget(judul_seksi("Pencarian"))
+        # ---------------- Lanjutan (terlipat)
+        self.b_lanjutan = QToolButton()
+        self.b_lanjutan.setText("Lanjutan")
+        self.b_lanjutan.setCheckable(True)
+        self.b_lanjutan.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
+        self.b_lanjutan.setArrowType(Qt.RightArrow)
+        self.b_lanjutan.setToolTip("Parameter pencarian rinci, seed, dan preset kustom")
+        hl = QHBoxLayout()
+        hl.setContentsMargins(6, 4, 10, 0)
+        hl.addWidget(self.b_lanjutan)
+        hl.addStretch(1)
+        lay.addLayout(hl)
+        self.w_lanjutan = QWidget()
+        vl = QVBoxLayout(self.w_lanjutan)
+        vl.setContentsMargins(0, 0, 0, 0)
+        vl.setSpacing(0)
         self.stack = QStackedWidget()
         # AD-GPU
         a = QWidget()
@@ -162,21 +170,76 @@ class PanelDocking(QWidget):
         fc.addRow(self._m("ga_pop_size"), self.sp_pop)
         fc.addRow(self._m("ga_num_evals"), self.sp_evals)
         self.stack.addWidget(c)
-        lay.addWidget(self.stack)
+        vl.addWidget(self.stack)
         fs = QFormLayout()
         fs.setContentsMargins(10, 0, 10, 6)
         self.sp_seed = _spin(0, 2147483647, 42)
         self.sp_seed.setSpecialValueText("acak")
         self.sp_seed.setToolTip("Seed tetap = hasil dapat diulang. 0 = acak.")
         fs.addRow(self._m("Seed"), self.sp_seed)
-        lay.addLayout(fs)
+        b_simpan = QToolButton()
+        b_simpan.setText("Simpan sebagai preset…")
+        b_simpan.setToolTip("Simpan parameter saat ini sebagai pilihan ketelitian baru")
+        b_simpan.clicked.connect(self._simpan_preset)
+        fs.addRow("", b_simpan)
+        vl.addLayout(fs)
+        lay.addWidget(self.w_lanjutan)
+        self.w_lanjutan.setVisible(False)
+        self.b_lanjutan.toggled.connect(self._lipat)
         for s in (self.sp_nrun, self.sp_nev, self.sp_exh, self.sp_modes, self.sp_erange, self.sp_cpu, self.sp_garun,
                   self.sp_pop, self.sp_evals, self.sp_seed):
             s.valueChanged.connect(self._ubah)
         self.c_heur.toggled.connect(self._ubah)
 
-        # ---------------- grid box
-        lay.addWidget(judul_seksi("Grid box"))
+        lay.addStretch(1)
+        kaki = QWidget()                      # tombol jalankan menempel di bawah (selalu terlihat)
+        kaki.setObjectName("kakiPanel")
+        hr = QVBoxLayout(kaki)
+        hr.setContentsMargins(10, 8, 10, 8)
+        hr.setSpacing(6)
+        self.b_run = QPushButton("Jalankan docking")
+        self.b_run.setObjectName("primary")
+        self.b_run.setMinimumHeight(32)
+        self.b_run.clicked.connect(self.jalankan)
+        hr.addWidget(self.b_run)
+        self.l_run = QLabel("Semua ligan siap akan didocking. Pilih ligan tertentu di Objek untuk "
+                            "mendocking sebagian saja. Pantau di Antrean (bawah).")
+        self.l_run.setObjectName("muted")
+        self.l_run.setWordWrap(True)
+        hr.addWidget(self.l_run)
+        self.hal_jalan = QWidget()
+        vj = QVBoxLayout(self.hal_jalan)
+        vj.setContentsMargins(0, 0, 0, 0)
+        vj.setSpacing(0)
+        vj.addWidget(self._gulir(isi_j), 1)
+        vj.addWidget(kaki)
+
+        # =============================================================== AREA (grid box)
+        isi_a = QWidget()
+        lay = QVBoxLayout(isi_a)
+        lay.setContentsMargins(0, 0, 0, 8)
+        lay.setSpacing(0)
+        bk = QVBoxLayout()
+        bk.setContentsMargins(10, 8, 10, 6)
+        bk.setSpacing(4)
+        self.btn_kotak = {}
+        for k, t, tip in (
+                ("ligan_asli", "Pusat di ligan asli (disarankan)",
+                 "Kantong tempat ligan kristal terikat (ukuran = ligan + 10 Å, min 20 Å)"),
+                ("residu", "Pusat di residu terpilih", "Pilih residu di Objek atau klik atom di viewport dulu"),
+                ("sesuai", "Sesuaikan ke ligan terpilih +8 Å", "Ukuran = rentang ligan terpilih + 8 Å tiap sisi"),
+                ("kantong", "Deteksi kantong (P2Rank)…",
+                 "Cari kantong pengikatan otomatis dengan P2Rank (tanpa ligan asli); pilih kantong untuk grid box"),
+                ("blind", "Seluruh protein (blind docking)", "Kotak menutupi seluruh protein; lebih lama")):
+            b = QPushButton(t)
+            b.setToolTip(tip)
+            b.setMinimumWidth(40)
+            b.setStyleSheet("text-align:left; padding:5px 8px")
+            b.clicked.connect(lambda _=False, k=k: self.aksiKotak.emit(k))
+            bk.addWidget(b)
+            self.btn_kotak[k] = b
+        lay.addLayout(bk)
+        lay.addWidget(judul_seksi("Ukuran dan posisi"))
         gb = QWidget()
         g = QGridLayout(gb)
         g.setContentsMargins(10, 6, 10, 6)
@@ -210,52 +273,22 @@ class PanelDocking(QWidget):
         self.l_kotak.setWordWrap(True)
         self.l_kotak.setContentsMargins(10, 0, 10, 4)
         lay.addWidget(self.l_kotak)
-        bk = QGridLayout()
-        bk.setContentsMargins(10, 2, 10, 6)
-        bk.setSpacing(4)
-        for i, (k, t, tip) in enumerate((
-                ("ligan_asli", "Pusat ke ligan asli", "Pusatkan pada ligan kristal (ukuran = ligan + 10 Å, min 20 Å)"),
-                ("residu", "Pusat ke residu terpilih", "Pilih residu di Hierarki atau klik atom di viewport"),
-                ("sesuai", "Sesuaikan ke ligan +8 Å", "Ukuran = rentang ligan terpilih + 8 Å tiap sisi"),
-                ("blind", "Seluruh protein (blind)", "Kotak menutupi seluruh protein"))):
-            b = QPushButton(t)
-            b.setToolTip(tip)
-            b.setMinimumWidth(40)
-            b.setStyleSheet("padding:4px 6px")
-            b.clicked.connect(lambda _=False, k=k: self.aksiKotak.emit(k))
-            bk.addWidget(b, i // 2, i % 2)
-        lay.addLayout(bk)
-        self.c_tampil = QCheckBox("Tampilkan grid box di viewport")
+        self.c_tampil = QCheckBox("Tampilkan kotak di viewport")
         self.c_tampil.setChecked(True)
-        self.c_tampil.setContentsMargins(10, 0, 10, 0)
         self.c_tampil.toggled.connect(self.tampilKotak)
         h = QHBoxLayout()
-        h.setContentsMargins(10, 0, 10, 0)
+        h.setContentsMargins(10, 2, 10, 0)
         h.addWidget(self.c_tampil)
         lay.addLayout(h)
-        tip = QLabel("Di viewport: Shift + seret = geser kotak, Shift + gulir = ubah ukuran, "
-                     "Alt + gulir = ubah satu sumbu (X/Y/Z dipilih dengan tombol X, Y, Z).")
+        tip = QLabel("Di viewport: Shift + seret = geser kotak · Shift + gulir = ubah ukuran · "
+                     "Alt + gulir = satu sumbu (pilih dengan tombol X, Y, Z).")
         tip.setObjectName("muted")
         tip.setWordWrap(True)
-        tip.setContentsMargins(10, 4, 10, 4)
+        tip.setContentsMargins(10, 6, 10, 4)
         lay.addWidget(tip)
-
-        lay.addSpacing(8)
-        hr = QHBoxLayout()
-        hr.setContentsMargins(10, 0, 10, 0)
-        self.b_run = QPushButton("Jalankan docking")
-        self.b_run.setObjectName("primary")
-        self.b_run.clicked.connect(self.jalankan)
-        hr.addWidget(self.b_run)
-        lay.addLayout(hr)
         lay.addStretch(1)
+        self.hal_area = self._gulir(isi_a)
 
-        sc = QScrollArea()
-        sc.setWidgetResizable(True)
-        sc.setFrameShape(QScrollArea.NoFrame)
-        sc.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        sc.setWidget(isi)
-        luar.addWidget(sc)
         self.cmb_alat.setMinimumWidth(60)
         self.cmb_alat.setSizeAdjustPolicy(QComboBox.AdjustToMinimumContentsLengthWithIcon)
         self._t_kotak = QTimer(self)
@@ -269,6 +302,18 @@ class PanelDocking(QWidget):
         l = QLabel(t)
         l.setObjectName("muted")
         return l
+
+    def _gulir(self, isi):
+        sc = QScrollArea()
+        sc.setWidgetResizable(True)
+        sc.setFrameShape(QScrollArea.NoFrame)
+        sc.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        sc.setWidget(isi)
+        return sc
+
+    def _lipat(self, buka):
+        self.b_lanjutan.setArrowType(Qt.DownArrow if buka else Qt.RightArrow)
+        self.w_lanjutan.setVisible(buka)
 
     # --------------------------------------------------------- parameter
     def mesin(self):
@@ -291,7 +336,9 @@ class PanelDocking(QWidget):
         self.stack.adjustSize()
 
     def parameter(self):
-        return {"mesin": self.mesin(), "perangkat": self.cmb_alat.currentData() or "cpu",
+        alat = self.cmb_alat.currentData() or "cpu"
+        return {"mesin": self.mesin(), "perangkat": "gpu" if alat.startswith("gpu") else "cpu",
+                "devnum": int(alat.split(":")[1]) if alat.startswith("gpu:") else 0,
                 "nrun": self.sp_nrun.value() if self.mesin() == "adgpu" else self.sp_garun.value(),
                 "nev": self.sp_nev.value() if self.mesin() == "adgpu" else self.sp_evals.value(),
                 "heuristik": self.c_heur.isChecked(), "exhaustiveness": self.sp_exh.value(),
@@ -316,7 +363,7 @@ class PanelDocking(QWidget):
                 s.setValue(d[k])
         if "heuristik" in d:
             self.c_heur.setChecked(bool(d["heuristik"]))
-        i = self.cmb_alat.findData(d.get("perangkat"))
+        i = self._indeks_alat(d.get("perangkat"), d.get("devnum"))
         if i >= 0:
             self.cmb_alat.setCurrentIndex(i)
         self._diam = False
@@ -345,6 +392,19 @@ class PanelDocking(QWidget):
             self.cmb_preset.addItem(nama.strip())
         self.cmb_preset.setCurrentText(nama.strip())
 
+    def _indeks_alat(self, perangkat, devnum=None):
+        """Cocokkan 'gpu'/'cpu' (+ devnum) dengan isi combo ('gpu:N' / 'cpu'); GPU tak dikenal -> GPU pertama."""
+        if not perangkat:
+            return -1
+        if perangkat == "gpu" or str(perangkat).startswith("gpu"):
+            if devnum:
+                i = self.cmb_alat.findData(f"gpu:{devnum}")
+                if i >= 0:
+                    return i
+            return next((k for k in range(self.cmb_alat.count())
+                         if str(self.cmb_alat.itemData(k)).startswith("gpu")), -1)
+        return self.cmb_alat.findData(perangkat)
+
     def set_perangkat(self, daftar, pilih=None):
         """daftar: [(teks, data, ikon)]"""
         self._diam = True
@@ -352,7 +412,7 @@ class PanelDocking(QWidget):
         for t, d, ik in daftar:
             self.cmb_alat.addItem(ik, t, d) if ik else self.cmb_alat.addItem(t, d)
         if pilih is not None:
-            i = self.cmb_alat.findData(pilih)
+            i = self._indeks_alat(pilih)
             if i >= 0:
                 self.cmb_alat.setCurrentIndex(i)
         self._diam = False
@@ -361,9 +421,11 @@ class PanelDocking(QWidget):
         if not self._diam:
             self.parameterBerubah.emit(self.parameter())
 
-    def set_ringkasan(self, reseptor, n_lig, n_peringatan=0):
+    def set_ringkasan(self, reseptor, n_lig, n_peringatan=0, area=None):
         self.l_rec.setText(reseptor or "belum disiapkan")
         self.l_lig.setText(f"{n_lig}" + (f"  ({n_peringatan} dengan peringatan)" if n_peringatan else ""))
+        if area is not None:
+            self.l_area.setText(area or "belum diatur")
 
     # ------------------------------------------------------------- kotak
     def kotak(self):

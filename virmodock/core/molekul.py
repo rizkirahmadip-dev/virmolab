@@ -51,7 +51,7 @@ class Objek:
     info: dict = field(default_factory=dict)
     gaya: dict = field(default_factory=dict)     # reps, warna, permukaan, khusus
     induk: str = ""            # id objek asal (mis. pose -> ligan)
-    grup: str = ""             # grup di Hierarki (mis. "Ligan siap docking", "Hasil J...")
+    grup: str = ""             # grup di panel Objek (mis. "Ligan siap docking", "Hasil J...")
 
     def __post_init__(self):
         if not self.gaya:

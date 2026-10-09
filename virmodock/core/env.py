@@ -32,6 +32,7 @@ class GPU:
     driver: str = ""
     opencl: bool = False      # bisa dipakai AutoDock-GPU
     platform: str = ""
+    devnum: int = 0           # nilai --devnum AutoDock-GPU (platform*256 + perangkat + 1); 0 = tidak diketahui
 
 
 @dataclass
@@ -110,15 +111,15 @@ def _opencl(gpus, env):
         env.catatan.append("clinfo.exe tidak ada di folder program.")
         return
     kode, out, err = jalankan([clinfo, "-l"], timeout=30, cwd=str(paths.BIN))
-    platform = ""
+    platform, p_idx = "", 0
     for b in out.splitlines():
-        m = re.match(r"Platform #\d+:\s*(.+)", b)
+        m = re.match(r"Platform #(\d+):\s*(.+)", b)
         if m:
-            platform = m.group(1).strip()
+            p_idx, platform = int(m.group(1)), m.group(2).strip()
             continue
-        m = re.search(r"Device #\d+:\s*(.+)", b)
+        m = re.search(r"Device #(\d+):\s*(.+)", b)
         if m:
-            nama = m.group(1).strip()
+            d_idx, nama = int(m.group(1)), m.group(2).strip()
             # perangkat CPU OpenCL (mis. Intel CPU runtime) tidak dihitung sebagai GPU
             if re.search(r"\bCPU\b|Core\(TM\)|Ryzen", nama) and "Graphics" not in nama:
                 continue
@@ -127,6 +128,8 @@ def _opencl(gpus, env):
                 g = GPU(nama=nama)
                 gpus.append(g)
             g.opencl, g.platform = True, platform
+            # AutoDock-GPU: devnum-1 = perangkat + (platform << 8)
+            g.devnum = (p_idx << 8) + d_idx + 1
             env.opencl_ok = True
 
 

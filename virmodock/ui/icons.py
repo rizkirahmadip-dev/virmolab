@@ -15,6 +15,7 @@ PATH = {
     "pause": '<path d="M14 4h4v16h-4zM6 4h4v16H6z"/>',
     "stop": '<path d="M5 5h14v14H5z"/>',
     "queue": '<path d="M10 6h11M10 12h11M10 18h11M4 6h1v4M4 10h2M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/>',
+    "pin": '<path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/>',
     "ruler": '<path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z"/><path d="m14.5 12.5 2-2m-5-1 2-2m-5-1 2-2m7 11 2-2"/>',
     "hbond": '<path d="M4 12h2m3 0h2m3 0h2m3 0h1"/><circle cx="3" cy="12" r="1.5"/><circle cx="21" cy="12" r="1.5"/>',
     "camera": '<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/>',
@@ -48,6 +49,8 @@ PATH = {
     "log": '<path d="M4 6h16M4 12h10M4 18h13"/>',
     "dl": '<path d="M12 15V3M7 10l5 5 5-5M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>',
     "grid": '<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>',
+    "chart": '<path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-3"/>',
+    "smiles": '<path d="M4 7h3l2 10h3l2-10h3l2 10h1"/>',
     "logo": '<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><circle cx="12" cy="12" r="2.5"/><path d="M12 9.5V6M14.2 13.2l3 1.7M9.8 13.2l-3 1.7"/>',
 }
 
@@ -83,3 +86,23 @@ def ikon(nama, warna, warna_aktif=None, ukuran=16):
         ic.addPixmap(pixmap(nama, warna_aktif, ukuran), QIcon.Normal, QIcon.On)
     _cache[k] = ic
     return ic
+
+
+def ikon_nomor(n, warna, ukuran=18):
+    """Lingkaran bergaris dengan angka di tengah (status langkah yang belum selesai)."""
+    k = ("nomor", n, warna, ukuran)
+    if k in _cache:
+        return _cache[k]
+    teks = (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" '
+            f'fill="none" stroke="{warna}" stroke-width="1.6"/><text x="12" y="16.2" text-anchor="middle" '
+            f'font-family="Segoe UI, Arial" font-size="12" font-weight="600" fill="{warna}">{n}</text></svg>')
+    skala = 2.0
+    s = int(ukuran * skala)
+    pm = QPixmap(s, s)
+    pm.fill(Qt.transparent)
+    p = QPainter(pm)
+    QSvgRenderer(QByteArray(teks.encode())).render(p)
+    p.end()
+    pm.setDevicePixelRatio(skala)
+    _cache[k] = QIcon(pm)
+    return _cache[k]

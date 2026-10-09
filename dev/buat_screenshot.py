@@ -15,7 +15,7 @@ KERJA.mkdir(parents=True)
 OUT = Path("docs/gambar").resolve()
 OUT.mkdir(parents=True, exist_ok=True)
 st = QSettings("VirmoDock", "VirmoDock")
-for k in ("layout", "sesi_terbuka", "geometri"):
+for k in ("layout", "layout_v2", "sesi_terbuka", "geometri", "kolom_hasil", "proyek_terakhir"):
     st.remove(k)
 st.setValue("wizard_selesai", True)
 st.setValue("tema", "terang")
@@ -58,7 +58,8 @@ def hook():
         def l0(s):
             w = Wizard(s.env, str(KERJA), s)
             w.show()
-            QTimer.singleShot(600, lambda: (simpan(w, "01_wizard"), w.reject(), s.l1()))
+            QTimer.singleShot(600, lambda: (simpan(w, "01_wizard"), w.reject(),
+                                            QTimer.singleShot(800, lambda: (simpan(s, "00_sambutan"), s.l1()))))
 
         def l1(s):
             s.impor([str(Path("dev/uji/1HSG.pdb").resolve())])
@@ -90,10 +91,11 @@ def hook():
 
         def l5(s):
             s.aksi_kotak("ligan_asli")
-            s.d_param.raise_()
+            s.ke_langkah(2)
             s.param.set_parameter({"mesin": "adgpu", "perangkat": "gpu", "nrun_gpu": 20})
             s._param_berubah(s.param.parameter())
-            QTimer.singleShot(1500, lambda: (simpan(s, "06_parameter_gridbox"), s.l6()))
+            QTimer.singleShot(1500, lambda: (simpan(s, "06_parameter_gridbox"), s.ke_langkah(3),
+                                             QTimer.singleShot(1200, lambda: (simpan(s, "06b_jalankan"), s.l6()))))
 
         def l6(s):
             s.jalankan_docking()
@@ -107,6 +109,7 @@ def hook():
                 QTimer.singleShot(1500, s.l10)
 
         def l7(s):
+            s.atur_ruang("analisis")
             s.tab_tengah.setCurrentWidget(s.hasil)
             QTimer.singleShot(800, lambda: (simpan(s, "08_hasil"), s.l8()))
 
@@ -139,8 +142,16 @@ def hook():
             QTimer.singleShot(500, lambda: (simpan(d, "14_lapor"), d.reject(), s.l14()))
 
         def l14(s):
+            s.atur_ruang("analisis")
+            s.tab_tengah.setCurrentWidget(s.sifat)
+            QTimer.singleShot(2500, lambda: (simpan(s, "16_sifat"), s.tab_tengah.setCurrentWidget(s.statistik),
+                                             s.statistik.c_jenis.setCurrentIndex(1),
+                                             QTimer.singleShot(1500, lambda: (simpan(s, "17_statistik"), s.l15()))))
+
+        def l15(s):
+            s.atur_ruang("siapkan")
             s.terapkan_tema("gelap")
-            s.tab_tengah.setCurrentWidget(s.viewer)
+            s.tab_tengah.setCurrentWidget(s.w_view)
             QTimer.singleShot(2500, lambda: (simpan(s, "15_gelap"), s.terapkan_tema("terang"), QApplication.quit()))
 
     mainwindow.JendelaUtama = U

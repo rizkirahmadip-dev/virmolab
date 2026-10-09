@@ -4,6 +4,7 @@ Argumen:
   berkas...                 buka struktur (PDB/PDBQT/CIF/SDF/MOL2/SMILES), folder proyek .vmd, atau cadangan .vmdbackup
   --disable-gpu             viewport 3D memakai rendering perangkat lunak (driver grafis bermasalah)
   --uji-mandiri HASIL.json  jalankan uji komponen tanpa jendela, tulis hasil, keluar (kode 0 = semua lulus)
+  --qc-pekerja ALAMAT KUNCI (internal) proses pekerja PoseBusters, tersambung lewat named pipe
 """
 import os
 import sys
@@ -20,6 +21,11 @@ def siapkan_kimia():
 
 def main():
     arg = sys.argv[1:]
+    if arg[:1] == ["--qc-pekerja"]:      # proses pekerja PoseBusters (core/qc.py), tanpa jendela
+        siapkan_kimia()
+        from .core import qc
+        qc.layani(arg[1], arg[2])
+        return
     siapkan_kimia()
     if "--uji-mandiri" in arg:
         i = arg.index("--uji-mandiri")

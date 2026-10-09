@@ -4,8 +4,9 @@ import subprocess
 from pathlib import Path
 
 from PySide6.QtCore import QByteArray, QSettings, QSize, Qt, QTimer, QUrl
-from PySide6.QtGui import QAction, QActionGroup, QDesktopServices, QIcon, QKeySequence
-from PySide6.QtWidgets import (QApplication, QComboBox, QDockWidget, QFileDialog, QInputDialog, QLabel, QMainWindow,
+from PySide6.QtGui import QAction, QActionGroup, QDesktopServices, QGuiApplication, QIcon, QKeySequence
+from PySide6.QtWidgets import (QApplication, QButtonGroup, QComboBox, QDockWidget, QFileDialog, QHBoxLayout,
+                               QInputDialog, QLabel, QMainWindow, QPushButton, QStackedWidget,
                                QMenu, QMessageBox, QSystemTrayIcon, QTabWidget, QToolBar, QToolButton, QVBoxLayout,
                                QWidget)
 
@@ -16,6 +17,8 @@ from ..core import env as envmod
 from ..core import mesin as mesinmod
 from ..core import molekul, paths
 from ..core import prep_reseptor
+from ..core import sifat as sifat_mod
+from ..core import statistik as stat_mod
 from ..core.proyek import Proyek, nama_aman
 from . import icons, kerja, theme
 from .dialog_ligan import DialogLigan
@@ -26,6 +29,13 @@ from .dialog_ekspor import DialogEkspor
 from .panel_antrean import PanelAntrean
 from .panel_hasil import PanelHasil
 from .panel_interaksi import PanelInteraksi, TabDiagram
+from .tab_sifat import TabSifat
+from .tab_statistik import TabStatistik
+from .tab_uji import TabUji
+from .dialog_komposer import DialogKomposer
+from .dialog_animasi import DialogAnimasi
+from .panel_alur import DaftarLangkah, PanelLangkah
+from .halaman_awal import HalamanAwal
 from .tab_banding import TabBanding
 from .panel_docking import PanelDocking
 from .panels import PanelHierarki, PanelLog, PanelProperti, PanelTampilan
@@ -34,6 +44,9 @@ from .viewer_widget import Viewer
 from .. import __version__ as VERSI
 GRUP_LIGAN = "Ligan siap docking"
 MESIN_URUT = ["adgpu", "vina", "ad4"]
+KUNCI_LAYOUT = "layout_v2"      # v2: panel Langkah (struktur dock berbeda dari v1)
+RUANG = [("siapkan", "Siapkan"), ("docking", "Docking"), ("analisis", "Analisis")]
+UBIN_PX = 4096                  # gambar 3D lebih besar dari ini dirender per ubin (batas kanvas WebGL)
 
 
 class JendelaUtama(QMainWindow):
@@ -69,7 +82,25 @@ class JendelaUtama(QMainWindow):
         self.viewer.kotakDigeser.connect(self._kotak_dari_viewer)
         self.tab_tengah = QTabWidget()
         self.tab_tengah.setDocumentMode(True)
-        self.tab_tengah.addTab(self.viewer, "Viewport 3D")
+        self.w_view = QWidget()                 # tab viewport = halaman sambutan ATAU (bar gaya 3D + viewer)
+        vv = QVBoxLayout(self.w_view)
+        vv.setContentsMargins(0, 0, 0, 0)
+        vv.setSpacing(0)
+        hal3d = QWidget()
+        v3 = QVBoxLayout(hal3d)
+        v3.setContentsMargins(0, 0, 0, 0)
+        v3.setSpacing(0)
+        self.bar_view = QToolBar()
+        self.bar_view.setIconSize(QSize(16, 16))
+        v3.addWidget(self.bar_view)
+        v3.addWidget(self.viewer, 1)
+        self.awal = HalamanAwal()
+        self.awal.aksi.connect(self._aksi_awal)
+        self.stak_view = QStackedWidget()
+        self.stak_view.addWidget(hal3d)
+        self.stak_view.addWidget(self.awal)
+        vv.addWidget(self.stak_view)
+        self.tab_tengah.addTab(self.w_view, "Viewport 3D")
         self.hasil = PanelHasil()
         self.hasil.bukaPose.connect(lambda jid, lid, k: self.buka_pose(jid, lid, k))
         self.hasil.bandingkan.connect(self.bandingkan)
@@ -80,6 +111,22 @@ class JendelaUtama(QMainWindow):
         self.diagram.minta.connect(self._gambar_diagram)
         self.diagram.ekspor.connect(self._diagram_cepat)
         self.tab_tengah.addTab(self.diagram, "Diagram 2D")
+        self.sifat = TabSifat()
+        self.sifat.minta.connect(lambda: self._muat_sifat(paksa=True))
+        self.sifat.ekspor.connect(self._ekspor_sifat)
+        self.tab_tengah.addTab(self.sifat, "Sifat Ligan")
+        self.statistik = TabStatistik()
+        self.statistik.ekspor.connect(self._ekspor_statistik)
+        self.tab_tengah.addTab(self.statistik, "Statistik")
+        self.uji = TabUji()
+        self.uji.ekspor.connect(self._ekspor_uji)
+        self.uji.berubah.connect(self._uji_berubah)
+        self.uji.mintaDocking = self._uji_dari_docking
+        self.tab_tengah.addTab(self.uji, "Uji && Grafik")
+        self.komposer = None          # DialogKomposer, dibuat saat pertama dibuka
+        self.tab_tengah.currentChanged.connect(self._tab_berganti)
+        self._stat_kotor = True
+        self._sifat_kotor = True
         self.banding = None
         self._aktif_inter = None
         self._cache_mol, self._cache_rec = {}, {}
@@ -88,12 +135,10 @@ class JendelaUtama(QMainWindow):
         v = QVBoxLayout(tengah)
         v.setContentsMargins(0, 0, 0, 0)
         v.setSpacing(0)
-        self.bar_view = QToolBar()
-        self.bar_view.setIconSize(QSize(16, 16))
-        v.addWidget(self.bar_view)
         v.addWidget(self.tab_tengah)
         self.setCentralWidget(tengah)
 
+        self.setTabPosition(Qt.AllDockWidgetAreas, QTabWidget.North)   # tab panel di atas, bukan di bawah
         self._panel()
         self.viewer.pesanJs.connect(self.log.tulis)
         self._aksi()
@@ -110,12 +155,16 @@ class JendelaUtama(QMainWindow):
         else:
             self._ukuran_awal()
         self._pastikan_di_layar()
-        state = self.st.value("layout")
+        state = self.st.value(KUNCI_LAYOUT)
         if state:
             self.restoreState(state)
         else:
-            QTimer.singleShot(0, lambda: (self.resizeDocks([self.d_antre], [190], Qt.Vertical),
-                                          self.resizeDocks([self.d_hier, self.d_prop], [270, 330], Qt.Horizontal)))
+            QTimer.singleShot(0, self._ukuran_dock_awal)
+        self._ruang_aktif = None
+        QTimer.singleShot(0, lambda: self.atur_ruang("siapkan"))
+        # viewer harus TERLIHAT saat 3Dmol dibuat (membaca devicePixelRatio); sambutan baru tampil setelah siap
+        self.viewer.jembatan.siapSignal.connect(lambda: QTimer.singleShot(0, self._perbarui_awal))
+        self.segarkan_langkah()
         QTimer.singleShot(50, self.deteksi)
         QTimer.singleShot(400, self._cek_pemulihan)
 
@@ -129,36 +178,50 @@ class JendelaUtama(QMainWindow):
         return d
 
     def _panel(self):
+        # kiri: Langkah (atas) + Objek (bawah)
+        self.langkah = DaftarLangkah()
+        self.langkah.dipilih.connect(self.ke_langkah)
+        self.d_langkah = self._dock("Langkah", self.langkah, Qt.LeftDockWidgetArea, "dock_langkah")
         self.hier = PanelHierarki()
         self.hier.visibilitasBerubah.connect(self.set_tampil)
         self.hier.objekDipilih.connect(self.pilih_objek)
         self.hier.residuDipilih.connect(self.pilih_residu)
         self.hier.aksiKonteks.connect(self.aksi_konteks)
-        self.d_hier = self._dock("Hierarki", self.hier, Qt.LeftDockWidgetArea, "dock_hierarki")
-        self.d_hier.setMinimumWidth(240)
+        self.d_hier = self._dock("Objek", self.hier, Qt.LeftDockWidgetArea, "dock_hierarki")
+        self.d_hier.setMinimumWidth(230)
+        self.splitDockWidget(self.d_langkah, self.d_hier, Qt.Vertical)
 
-        self.prop = PanelProperti()
-        self.tampilan = PanelTampilan()
-        self.tampilan.gayaBerubah.connect(self.ubah_gaya)
-        self.d_prop = self._dock("Properti", self.prop, Qt.RightDockWidgetArea, "dock_properti")
-        self.d_tamp = self._dock("Tampilan", self.tampilan, Qt.RightDockWidgetArea, "dock_tampilan")
-        self.d_prop.setMinimumWidth(300)
+        # kanan: Panel kerja langkah | Tampilan | Interaksi (tab) + Properti (bawah)
         self.param = PanelDocking()
         self.param.parameterBerubah.connect(self._param_berubah)
         self.param.kotakBerubah.connect(self._kotak_dari_panel)
         self.param.aksiKotak.connect(self.aksi_kotak)
         self.param.tampilKotak.connect(lambda on: self.a_box.setChecked(on) or self.toggle_box(on))
         self.param.jalankan.connect(self.jalankan_docking)
-        self.d_param = self._dock("Parameter", self.param, Qt.RightDockWidgetArea, "dock_parameter")
-        self.tabifyDockWidget(self.d_tamp, self.d_param)
+        self.p_langkah = PanelLangkah(self.param.hal_area, self.param.hal_jalan)
+        self.p_langkah.aksi.connect(self._aksi_langkah)
+        self.p_langkah.berikutnya.connect(lambda i: self.ke_langkah(min(i, 4)))
+        self.d_kerja = self._dock("Panel kerja", self.p_langkah, Qt.RightDockWidgetArea, "dock_kerja")
+        self.d_kerja.setMinimumWidth(300)
+        self.d_param = self.d_kerja          # nama lama (kompatibel)
+        self.prop = PanelProperti()
+        self.d_prop = self._dock("Properti", self.prop, Qt.RightDockWidgetArea, "dock_properti")
+        self.splitDockWidget(self.d_kerja, self.d_prop, Qt.Vertical)   # dulu, sebelum ditab
+        self.tampilan = PanelTampilan()
+        self.tampilan.gayaBerubah.connect(self.ubah_gaya)
+        self.d_tamp = self._dock("Tampilan", self.tampilan, Qt.RightDockWidgetArea, "dock_tampilan")
+        self.tabifyDockWidget(self.d_kerja, self.d_tamp)
         self.p_inter = PanelInteraksi()
         self.p_inter.jenisBerubah.connect(self._tampilkan_interaksi)
         self.p_inter.opsiBerubah.connect(self._tampilkan_interaksi)
         self.p_inter.fokusResidu.connect(self._fokus_interaksi)
         self.d_inter = self._dock("Interaksi", self.p_inter, Qt.RightDockWidgetArea, "dock_interaksi")
-        self.tabifyDockWidget(self.d_param, self.d_inter)
-        self.d_param.raise_()
+        self.tabifyDockWidget(self.d_tamp, self.d_inter)
+        self.d_kerja.raise_()
+        for d in (self.d_kerja, self.d_tamp, self.d_inter):   # sudah ada tab di atas: tanpa judul ganda
+            d.setTitleBarWidget(QWidget())
 
+        # bawah: Antrean | Log | Pesan — tersembunyi; dibuka dari bilah status atau saat docking berjalan
         self.log = PanelLog()
         self.antrean = PanelAntrean()
         self.antrean.aksi.connect(self.aksi_antrean)
@@ -169,11 +232,181 @@ class JendelaUtama(QMainWindow):
         self.tabifyDockWidget(self.d_antre, self.d_log)
         self.tabifyDockWidget(self.d_log, self.d_pesan)
         self.d_antre.raise_()
-        self.resizeDocks([self.d_antre], [200], Qt.Vertical)
-        self.resizeDocks([self.d_hier, self.d_prop], [270, 320], Qt.Horizontal)
+        for d in (self.d_antre, self.d_log, self.d_pesan):
+            d.visibilityChanged.connect(lambda *_: self._sinkron_bawah())
+        self.t_langkah = QTimer(self)
+        self.t_langkah.setSingleShot(True)
+        self.t_langkah.setInterval(150)
+        self.t_langkah.timeout.connect(self._segarkan_langkah)
+
+    def _ukuran_dock_awal(self):
+        self.resizeDocks([self.d_langkah, self.d_hier], [230, 400], Qt.Vertical)
+        self.resizeDocks([self.d_hier, self.d_kerja], [250, 330], Qt.Horizontal)
+        tinggi = self.height()
+        self.resizeDocks([self.d_kerja, self.d_prop], [max(380, tinggi - 330), 120 if tinggi < 850 else 170],
+                         Qt.Vertical)
+        self.resizeDocks([self.d_antre], [180], Qt.Vertical)
+        for d in (self.d_antre, self.d_log, self.d_pesan):
+            d.hide()
+
+    # ------------------------------------------------------- alur langkah & ruang kerja
+    def ke_langkah(self, i):
+        """Tampilkan halaman langkah i (0..4) dan ruang kerja yang sesuai."""
+        self.langkah.pilih(i, kirim=False)
+        self.p_langkah.setCurrentIndex(i)
+        self.d_kerja.show()
+        self.d_kerja.raise_()
+        ruang = "siapkan" if i <= 2 else "docking" if i == 3 else "analisis"
+        if ruang != self._ruang_aktif:
+            self.atur_ruang(ruang, dari_langkah=True)
+        if i == 2 and not self.box.get("tampil", True):
+            self.a_box.setChecked(True)
+            self.toggle_box(True)
+
+    def atur_ruang(self, ruang, dari_langkah=False):
+        """Siapkan / Docking / Analisis: tab tengah dan panel yang relevan saja."""
+        self._ruang_aktif = ruang
+        for b in self.grp_ruang.buttons():
+            b.setChecked(b.property("ruang") == ruang)
+        tab = {"siapkan": {self.w_view}, "docking": {self.w_view, self.hasil}}.get(ruang)
+        for i in range(self.tab_tengah.count()):
+            w = self.tab_tengah.widget(i)
+            self.tab_tengah.setTabVisible(i, tab is None or w in tab)
+        if ruang == "analisis":
+            self.d_inter.show()
+            self.tab_tengah.setCurrentWidget(self.hasil)
+        else:
+            self.d_inter.hide()
+            self.tab_tengah.setCurrentWidget(self.w_view)
+        if ruang == "docking" and self.proyek and any(j["status"] in ("berjalan", "menunggu", "dijeda")
+                                                      for j in self.proyek.job):
+            self._tampil_bawah(True)
+        if not dari_langkah:
+            sekarang = self.langkah.aktif()
+            if ruang == "siapkan":
+                i = sekarang if sekarang <= 2 else self._langkah_belum()
+            else:
+                i = 3 if ruang == "docking" else 4
+            self.langkah.pilih(i, kirim=False)
+            self.p_langkah.setCurrentIndex(i)
+            self.d_kerja.raise_()
+
+    def _langkah_belum(self):
+        st = getattr(self, "_status_langkah", None) or []
+        return next((i for i, (s, _k) in enumerate(st[:3]) if s != "selesai"), 2)
+
+    def _aksi_langkah(self, k):
+        tab = {"tab_hasil": self.hasil, "tab_diagram": self.diagram, "tab_sifat": self.sifat,
+               "tab_statistik": self.statistik, "tab_uji": self.uji}
+        if k in tab:
+            self.atur_ruang("analisis", dari_langkah=True)
+            self.tab_tengah.setCurrentWidget(tab[k])
+            return
+        {"rcsb": lambda: self.ambil(0), "pubchem": lambda: self.ambil(1), "smiles": lambda: self.ambil(2),
+         "buka": self.buka_berkas, "reseptor": self.siapkan_reseptor, "ligan": self.siapkan_ligan,
+         "validasi": self.validasi_redocking, "ekspor": lambda: self.buka_ekspor(3),
+         "laporan": lambda: self.buka_ekspor(4)}[k]()
+
+    def segarkan_langkah(self):
+        self.t_langkah.start()
+
+    def _segarkan_langkah(self):
+        """Status tiap langkah dari keadaan proyek & viewer."""
+        pr = self.proyek
+        t = theme.TOKEN[self.mode]
+        ok = lambda x: f"<span style='color:{t['ok']}'>✓ {x}</span>"         # noqa: E731
+        catat = lambda x: f"<span style='color:{t['warn']}'>{x}</span>"      # noqa: E731
+        protein = [o for o in self.objek.values() if o.jenis == "protein" and not o.info.get("siap_docking")]
+        rec = pr.reseptor if pr and pr.reseptor and pr.p(pr.reseptor["pdbqt"]).exists() else None
+        if rec:
+            s1 = ("selesai", f"{rec.get('nama', '')} siap")
+            t1 = ok(f"Reseptor siap: {rec.get('nama', '')} · {rec.get('atom', 0)} atom") + \
+                "<br>Bisa disiapkan ulang bila protein diganti."
+        elif protein:
+            s1 = ("belum", f"{protein[0].nama} dimuat")
+            t1 = f"Protein dimuat: <b>{protein[0].nama}</b>. " + catat("Klik Siapkan reseptor.")
+        else:
+            s1 = ("belum", "belum ada")
+            t1 = "Belum ada protein. Ambil dari RCSB (mis. 1HSG) atau buka berkas."
+        siap = pr.ligan_siap() if pr else []
+        mentah = [o for o in self.objek.values() if o.jenis == "ligan" and not o.info.get("siap_docking")
+                  and not o.info.get("ligan_asli")]
+        asli = [o for o in self.objek.values() if o.jenis == "ligan" and o.info.get("ligan_asli")
+                and not o.info.get("siap_docking")]
+        n_war = sum(1 for l in siap if l.get("status") == "peringatan")
+        if siap:
+            s2 = ("selesai", f"{len(siap)} siap")
+            t2 = ok(f"{len(siap)} ligan siap docking") + (f" · {n_war} dengan peringatan" if n_war else "")
+            if mentah:
+                t2 += "<br>" + catat(f"{len(mentah)} ligan baru belum disiapkan.")
+        elif mentah or asli:
+            n = len(mentah) + len(asli)
+            s2 = ("belum", f"{n} dimuat")
+            t2 = f"{n} ligan dimuat. " + catat("Klik Siapkan ligan.")
+        else:
+            s2 = ("belum", "belum ada")
+            t2 = "Belum ada ligan. Ambil dari PubChem, ketik SMILES, atau buka berkas."
+        if self.box.get("pusat"):
+            u = self.box["ukuran"]
+            s3 = ("selesai", " × ".join(f"{x:.1f}".replace(".", ",").replace(",0", "") for x in u) + " Å")
+        else:
+            s3 = ("belum", "belum diatur")
+        jobs = pr.job if pr else []
+        jalan = next((j for j in jobs if j["status"] == "berjalan"), None)
+        n_hasil = sum(1 for j in jobs for l in j["ligan"] if l["status"] == "selesai")
+        if jalan:
+            k = sum(1 for l in jalan["ligan"] if l["status"] not in ("menunggu", "berjalan"))
+            s4 = ("belum", f"berjalan {k}/{len(jalan['ligan'])}")
+        elif n_hasil:
+            s4 = ("selesai", f"{len(jobs)} job")
+        else:
+            s4 = ("belum", "belum dijalankan")
+        if n_hasil:
+            dg = min(l["energi"] for j in jobs for l in j["ligan"] if l["status"] == "selesai")
+            s5 = ("selesai", f"{n_hasil} hasil")
+            t5 = ok(f"{n_hasil} hasil docking") + f" · ΔG terbaik {dg:.2f} kcal/mol"
+            if not getattr(pr, "validasi", None):
+                t5 += "<br>" + catat("Belum divalidasi (redocking).")
+        else:
+            s5 = ("belum", "belum ada")
+            t5 = "Belum ada hasil. Jalankan docking di langkah 4."
+        self._status_langkah = [s1, s2, s3, s4, s5]
+        self.langkah.set_status(self._status_langkah)
+        self.p_langkah.set_status(t1, t2, t5)
+        self.param.set_ringkasan(f"{rec.get('nama', '')} · {rec.get('atom', 0)} atom" if rec else None, len(siap),
+                                 n_war, s3[1] if self.box.get("pusat") else "")
+        siap_jalan = bool(rec and siap and self.box.get("pusat"))
+        self.param.b_run.setText("Jalankan docking" + (f" ({len(siap)} ligan)" if siap_jalan else ""))
+        self._sinkron_bawah()
+
+    # ------------------------------------------------------- panel bawah (antrean ringkas)
+    def _tampil_bawah(self, on):
+        for d in (self.d_antre, self.d_log, self.d_pesan):
+            d.setVisible(on)
+        if on:
+            self.d_antre.raise_()
+
+    def _sinkron_bawah(self):
+        if not hasattr(self, "b_antre"):
+            return
+        buka = any(d.isVisible() for d in (self.d_antre, self.d_log, self.d_pesan))
+        self.b_antre.blockSignals(True)
+        self.b_antre.setChecked(buka)
+        self.b_antre.blockSignals(False)
+        pr = self.proyek
+        jobs = pr.job if pr else []
+        jalan = next((j for j in jobs if j["status"] == "berjalan"), None)
+        if jalan:
+            n = len(jalan["ligan"])
+            k = sum(1 for l in jalan["ligan"] if l["status"] not in ("menunggu", "berjalan"))
+            teks = f"Docking {k}/{n} · {mesinmod.MESIN[jalan['mesin']]}"
+        else:
+            tunggu = sum(1 for j in jobs if j["status"] in ("menunggu", "dijeda"))
+            teks = f"{tunggu} job menunggu/dijeda" if tunggu else (f"{len(jobs)} job" if jobs else "kosong")
+        self.b_antre.setText(f"Antrean: {teks}  {'▾' if buka else '▴'}")
 
     # ------------------------------------------------------------- aksi
-    def _a(self, teks, ikon=None, fn=None, kunci=None, cek=False, tip=None):
+    def _a(self, teks, ikon=None, fn=None, kunci=None, tip=None, cek=False):
         a = QAction(teks, self)
         a.setData(ikon)
         if fn:
@@ -181,109 +414,370 @@ class JendelaUtama(QMainWindow):
         if kunci:
             a.setShortcut(QKeySequence(kunci))
         a.setCheckable(cek)
-        a.setToolTip(tip or teks)
+        a.setToolTip(tip or teks.replace("…", ""))
+        a.setStatusTip(tip or teks.replace("…", ""))      # keterangan di bilah status saat diarahkan di menu
         return a
 
     def _aksi(self):
         A = self._a
-        self.a_baru = A("Proyek baru…", "new", self.proyek_baru, "Ctrl+N")
-        self.a_buka_proyek = A("Buka proyek…", "folder", self.buka_proyek, "Ctrl+Shift+O",
-                               tip="Buka folder proyek VirmoDock (.vmd)")
-        self.a_buka = A("Buka…", "open", self.buka_berkas, "Ctrl+O", tip="Buka berkas struktur (PDB, PDBQT, CIF, SDF, MOL2, SMILES)")
-        self.a_simpan = A("Simpan proyek", "save", self.simpan, "Ctrl+S")
-        self.a_rcsb = A("Ambil dari RCSB PDB…", "import", lambda: self.ambil(0), "Ctrl+Shift+P")
-        self.a_pubchem = A("Ambil dari PubChem…", None, lambda: self.ambil(1))
-        self.a_smiles = A("Dari SMILES…", None, lambda: self.ambil(2))
-        self.a_keluar = A("Keluar", None, self.close, "Ctrl+Q")
-        self.a_rec = A("Siapkan reseptor…", "rec", self.siapkan_reseptor, tip="Hapus air/ligan, tambah hidrogen dan muatan, ekspor PDBQT")
-        self.a_lig = A("Siapkan ligan…", "lig", self.siapkan_ligan, tip="Tambah H, protonasi pH, minimisasi, torsi, PDBQT")
-        self.a_box = A("Grid box", "box", self.toggle_box, "G", cek=True, tip="Tampilkan / atur grid box")
-        self.a_run = A("Jalankan", "play", self.jalankan_docking, "F5", tip="Jalankan docking (F5)")
-        self.a_antre = A("Antrean job", "queue", lambda: (self.d_antre.show(), self.d_antre.raise_()))
-        self.a_param = A("Parameter docking", "sliders", lambda: (self.d_param.show(), self.d_param.raise_()), "Ctrl+D")
+        # --- berkas & proyek
+        self.a_baru = A("Proyek baru…", "new", self.proyek_baru, "Ctrl+N",
+                        "Buat folder proyek baru (.vmd) untuk menyimpan reseptor, ligan, dan hasil docking")
+        self.a_buka_proyek = A("Buka proyek…", "folder", lambda: self.buka_proyek(), "Ctrl+Shift+O",
+                               "Buka folder proyek VirmoDock (.vmd) yang tersimpan")
+        self.a_terakhir = A("Buka proyek terakhir", "rotate",
+                            lambda: self.buka_proyek(self.st.value("proyek_terakhir", "")), None,
+                            "Lanjutkan proyek yang terakhir dibuka")
+        self.a_simpan = A("Simpan proyek", "save", self.simpan, "Ctrl+S",
+                          "Simpan sekarang (proyek juga tersimpan otomatis setiap ada perubahan)")
+        self.a_buka = A("Buka berkas struktur…", "open", self.buka_berkas, "Ctrl+O",
+                        "Buka protein atau ligan dari komputer: PDB, CIF, PDBQT, SDF, MOL2, SMILES")
+        self.a_rcsb = A("Protein dari RCSB PDB…", "import", lambda: self.ambil(0), "Ctrl+Shift+P",
+                        "Unduh struktur protein dengan kode PDB (mis. 1HSG, 6LU7)")
+        self.a_pubchem = A("Ligan dari PubChem…", "search", lambda: self.ambil(1), "Ctrl+Shift+L",
+                           "Unduh senyawa dari PubChem dengan nama atau CID (bisa banyak sekaligus)")
+        self.a_smiles = A("Ligan dari SMILES…", "smiles", lambda: self.ambil(2), None,
+                          "Buat ligan 3D dari teks SMILES")
+        self.a_keluar = A("Keluar", None, self.close, "Ctrl+Q", "Tutup VirmoDock (docking berjalan akan dijeda)")
+        # --- ekspor
+        self.a_ekspor = A("Pusat ekspor…", "dl", lambda: self.buka_ekspor(3), "Ctrl+E",
+                          "Semua ekspor dalam satu jendela: gambar, diagram, struktur, tabel, laporan")
+        self.a_foto = A("Gambar 3D…", "camera", lambda: self.buka_ekspor(0), "Ctrl+Shift+S",
+                        "Gambar viewport resolusi tinggi (PNG/TIFF/JPEG, DPI pilihan, preset jurnal)")
+        self.a_animasi = A("Video / animasi 3D (MP4 4K, GIF)…", "rotate", self.ekspor_animasi, None,
+                           "Rekam viewport berputar, bergoyang, atau zoom masuk ke situs pengikatan: video MP4 "
+                           "Full HD/2K/4K untuk presentasi, atau GIF/WebP")
+        self.a_eks_2d = A("Diagram interaksi 2D…", "diagram", lambda: self.buka_ekspor(1), None,
+                          "Diagram 2D pose aktif sebagai SVG/PDF vektor atau PNG/TIFF")
+        self.a_eks_struk = A("Struktur (kompleks PDB, SDF, PDBQT)…", "cube", lambda: self.buka_ekspor(2), None,
+                             "Kompleks reseptor–ligan, SDF bertag, atau PDBQT pose")
+        self.a_eks_tabel = A("Tabel hasil (Excel/CSV)…", "table", lambda: self.buka_ekspor(3), None,
+                             "Ringkasan, semua pose, interaksi, sifat ligan, statistik")
+        self.a_eks_sesi = A("Sesi PyMOL / ChimeraX…", "ext", self.ekspor_sesi, None,
+                            "Skrip .pml dan .cxc untuk pose aktif: reseptor, ligan, residu kontak, garis interaksi")
+        self.a_lapor = A("Laporan (PDF, Word, HTML interaktif)…", "report", lambda: self.buka_ekspor(4),
+                         "Ctrl+Shift+R", "Laporan lengkap: validasi, metode, 15 hasil teratas, gambar, interaksi, "
+                                         "sitasi — PDF, Word yang bisa disunting, atau HTML dengan penjelajah 3D")
+        # --- siapkan
+        self.a_rec = A("Siapkan reseptor…", "rec", self.siapkan_reseptor, "Ctrl+Shift+1",
+                       "Buang air/ligan, tambah hidrogen dan muatan, simpan PDBQT reseptor")
+        self.a_lig = A("Siapkan ligan…", "lig", self.siapkan_ligan, "Ctrl+Shift+2",
+                       "Hidrogen, protonasi pH, struktur 3D, minimisasi, torsi, simpan PDBQT ligan")
+        self.a_box = A("Tampilkan kotak area docking", "box", self.toggle_box, "G", cek=True,
+                       tip="Tampilkan atau sembunyikan kotak biru (grid box) di viewport")
+        self.a_kotak_asli = A("Pusat di ligan asli", None, lambda: self.aksi_kotak("ligan_asli"), None,
+                              "Kotak di kantong tempat ligan kristal terikat (disarankan)")
+        self.a_kotak_res = A("Pusat di residu terpilih", None, lambda: self.aksi_kotak("residu"), None,
+                             "Pilih residu di panel Objek atau klik atom di viewport dulu")
+        self.a_kotak_sesuai = A("Sesuaikan ke ligan terpilih +8 Å", None, lambda: self.aksi_kotak("sesuai"), None,
+                                "Ukuran kotak = rentang ligan terpilih + 8 Å tiap sisi")
+        self.a_kotak_blind = A("Seluruh protein (blind docking)", None, lambda: self.aksi_kotak("blind"), None,
+                               "Kotak menutupi seluruh protein; lebih lama")
+        self.a_kotak_kantong = A("Deteksi kantong (P2Rank)…", "search", lambda: self.aksi_kotak("kantong"), None,
+                                 "Cari kantong pengikatan otomatis (P2Rank) lalu pilih untuk grid box")
+        # --- docking
+        self.a_run = A("Jalankan docking", "play", self.jalankan_docking, "F5",
+                       "Docking semua ligan siap (atau ligan terpilih di panel Objek)")
+        self.a_antre = A("Antrean job", "queue", lambda: self._tampil_bawah(True), "Ctrl+J",
+                         "Lihat progres, jeda, lanjut, atau batalkan docking")
+        self.a_param = A("Pengaturan docking…", "sliders", lambda: self.ke_langkah(3), "Ctrl+D",
+                         "Mesin, perangkat, ketelitian, dan parameter lanjutan (langkah 4)")
+        self.a_validasi = A("Validasi redocking…", "check", self.validasi_redocking, None,
+                            "Docking ulang ligan kristal dan hitung RMSD (≤ 2,0 Å = metode valid)")
+        # --- analisis & viewport
         self.a_ukur = A("Ukur jarak", "ruler", self.toggle_ukur, "M", cek=True, tip="Klik dua atom untuk mengukur jarak")
-        self.a_inter = A("Interaksi", "hbond", self._tampilkan_interaksi, "I", cek=True,
-                         tip="Tampilkan interaksi protein–ligan")
+        self.a_kontrib = A("Kontribusi energi per atom", "palette", self._tampilkan_kontribusi, "K", cek=True,
+                           tip="Bola hijau = atom ligan menguntungkan, merah = merugikan (suku Vina antarmolekul)")
+        self.a_inter = A("Interaksi 3D", "hbond", self._tampilkan_interaksi, "I", cek=True,
+                         tip="Tampilkan ikatan hidrogen, hidrofobik, π, dll. pada pose aktif")
         self.a_inter.setChecked(True)
-        self.a_foto = A("Ekspor gambar…", "camera", lambda: self.buka_ekspor(0), "Ctrl+Shift+S",
-                        tip="Gambar 3D resolusi tinggi (PNG/TIFF/JPEG, DPI pilihan)")
-        self.a_ekspor = A("Ekspor…", "dl", lambda: self.buka_ekspor(3), "Ctrl+E",
-                          tip="Pusat ekspor: gambar, diagram 2D, struktur, tabel, laporan")
-        self.a_lapor = A("Laporan PDF…", "report", lambda: self.buka_ekspor(4))
-        self.a_validasi = A("Validasi redocking…", "check", self.validasi_redocking,
-                            tip="Docking ulang ligan kristal dan hitung RMSD (≤ 2,0 Å = valid)")
-        self.a_fit = A("Sesuaikan tampilan", "fit", lambda: self.viewer.js("fokusSemua"), "F")
-        self.a_putar = A("Putar otomatis", "rotate", lambda on: self.viewer.js("spin", on), cek=True)
-        self.a_tema = A("Mode gelap", "moon", self.ganti_tema, "Ctrl+T", cek=True)
-        self.a_cek = A("Cek sistem / GPU…", "gpu", lambda: self.deteksi(wizard=True))
-        self.a_reset = A("Atur ulang layout", None, self.reset_layout)
+        self.a_qc = A("Periksa pose aktif (PoseBusters)…", "check", self.qc_pose_aktif, None,
+                      "Uji kewajaran fisik pose: geometri, tabrakan, jarak ke protein")
+        self.a_fit = A("Sesuaikan tampilan", "fit", lambda: self.viewer.js("fokusSemua"), "F",
+                       "Pusatkan dan perbesar semua objek yang terlihat")
+        self.a_putar = A("Putar otomatis", "rotate", lambda on: self.viewer.js("spin", on), None, cek=True)
+        self.a_tema = A("Mode gelap", "moon", self.ganti_tema, "Ctrl+T", cek=True, tip="Ganti tema terang / gelap")
+        self.a_cek = A("Cek sistem dan GPU…", "gpu", lambda: self.deteksi(wizard=True), None,
+                       "Deteksi ulang GPU/OpenCL, panduan driver, dan program pendukung")
+        self.a_reset = A("Atur ulang tata letak", None, self.reset_layout, None,
+                         "Kembalikan susunan panel ke bawaan")
+
+    def _judul_menu(self, menu, teks):
+        """Judul kelompok di dalam menu (QMenu.addSection tidak tampil dengan gaya tema ini)."""
+        from PySide6.QtWidgets import QWidgetAction
+        if menu.actions():
+            menu.addSeparator()
+        l = QLabel(teks.upper())
+        l.setObjectName("judulMenu")
+        wa = QWidgetAction(menu)
+        wa.setDefaultWidget(l)
+        wa.setEnabled(False)
+        menu.addAction(wa)
+
+    def _sub(self, menu, judul, aksi):
+        sub = menu.addMenu(judul)
+        sub.setToolTipsVisible(True)
+        for a in aksi:
+            sub.addSeparator() if a is None else sub.addAction(a)
+        return sub
 
     def _menu(self):
         mb = self.menuBar()
-        m = mb.addMenu("&File")
-        for a in (self.a_baru, self.a_buka_proyek, self.a_simpan):
-            m.addAction(a)
+        A = self._a
+
+        def menu(judul):
+            m = mb.addMenu(judul)
+            m.setToolTipsVisible(True)
+            return m
+
+        def isi(m, aksi):
+            for a in aksi:
+                m.addSeparator() if a is None else m.addAction(a)
+
+        # ---------------------------------------------------------------- Berkas
+        m = menu("&Berkas")
+        isi(m, (self.a_baru, self.a_buka_proyek, self.a_terakhir, self.a_simpan, None, self.a_buka))
+        self._sub(m, "Ambil dari internet", (self.a_rcsb, self.a_pubchem, self.a_smiles))
         m.addSeparator()
-        m.addAction(self.a_buka)
+        self._sub(m, "Ekspor", (self.a_ekspor, None, self.a_foto, self.a_animasi, self.a_eks_2d, self.a_eks_struk, self.a_eks_sesi,
+                                self.a_eks_tabel, self.a_lapor))
+        self._sub(m, "Pindah laptop", (
+            A("Ekspor pengaturan dan proyek…", None, self.ekspor_cadangan, None,
+              "Simpan pengaturan (dan proyek) ke satu berkas .vmdbackup untuk laptop lain"),
+            A("Impor pengaturan dan proyek…", None, self.impor_cadangan, None,
+              "Pulihkan dari berkas .vmdbackup")))
+        isi(m, (None, self.a_keluar))
+        m.aboutToShow.connect(lambda: self.a_terakhir.setEnabled(
+            bool(self.st.value("proyek_terakhir", "")) and Path(self.st.value("proyek_terakhir", "")).exists()))
+
+        # ---------------------------------------------------------------- Edit
+        m = menu("&Edit")
+        isi(m, (A("Salin gambar", "camera", self.salin_gambar, "Ctrl+Shift+C",
+                  "Salin gambar tab yang terbuka (viewport 3D, diagram 2D, BOILED-Egg, grafik) ke clipboard "
+                  "untuk ditempel di Word/PowerPoint"),
+                None,
+                A("Ganti nama objek…", None, lambda: self._aksi_objek("rename"), "F2",
+                  "Ganti nama objek terpilih di panel Objek"),
+                A("Ekspor objek terpilih…", None, lambda: self._aksi_objek("export"), None,
+                  "Simpan objek terpilih sebagai berkas struktur"),
+                A("Hapus objek terpilih", "trash", self.hapus_terpilih, QKeySequence.Delete,
+                  "Hapus objek terpilih dari viewport (berkas proyek tidak ikut terhapus)"),
+                None,
+                A("Pilih semua objek", None, lambda: self.hier.pohon.selectAll(), QKeySequence.SelectAll),
+                A("Cari objek, rantai, atau residu", "search",
+                  lambda: (self.d_hier.show(), self.hier.filter.setFocus()), "Ctrl+F",
+                  "Ketik di kotak filter panel Objek"),
+                None,
+                A("Hapus semua pengukuran", None, lambda: self.viewer.js("hapusUkur"), None)))
+
+        # ---------------------------------------------------------------- Tampilan
+        m = menu("&Tampilan")
+        self._sub(m, "Ruang kerja", [A(t, None, lambda _=False, k=k: self.atur_ruang(k), f"Ctrl+{i + 1}",
+                                       {"siapkan": "Protein, ligan, dan area docking (langkah 1–3)",
+                                        "docking": "Mesin, ketelitian, jalankan, antrean (langkah 4)",
+                                        "analisis": "Hasil, interaksi, diagram, sifat ligan, statistik (langkah 5)"}[k])
+                                     for i, (k, t) in enumerate(RUANG)])
+        self._sub(m, "Langkah", [A(f"{i + 1}. {t}", None, lambda _=False, i=i: self.ke_langkah(i), f"Alt+{i + 1}")
+                                 for i, t in enumerate(("Protein", "Ligan", "Area docking", "Jalankan", "Hasil"))])
         m.addSeparator()
-        sub = m.addMenu("Impor dari database")
-        for a in (self.a_rcsb, self.a_pubchem, self.a_smiles):
-            sub.addAction(a)
-        m.addSeparator()
-        m.addAction(self.a_ekspor)
-        m.addAction(self.a_foto)
-        m.addAction(self.a_lapor)
-        m.addSeparator()
-        sub = m.addMenu("Pindah laptop")
-        sub.addAction("Ekspor pengaturan & proyek…", self.ekspor_cadangan)
-        sub.addAction("Impor pengaturan & proyek…", self.impor_cadangan)
-        m.addSeparator()
-        m.addAction(self.a_keluar)
-        m = mb.addMenu("&Edit")
-        m.addAction("Hapus objek terpilih", self.hapus_terpilih, QKeySequence.Delete)
-        m.addAction("Pilih semua", lambda: self.hier.pohon.selectAll(), QKeySequence.SelectAll)
-        m = mb.addMenu("&View")
-        for d in (self.d_hier, self.d_prop, self.d_tamp, self.d_param, self.d_antre, self.d_log, self.d_pesan):
-            m.addAction(d.toggleViewAction())
-        m.addSeparator()
-        for a in (self.a_fit, self.a_putar, self.a_tema, self.a_reset):
-            m.addAction(a)
-        m = mb.addMenu("&Prepare")
-        for a in (self.a_rec, self.a_lig, self.a_box):
-            m.addAction(a)
-        m = mb.addMenu("&Dock")
-        m.addAction(self.a_param)
-        m.addAction(self.a_run)
-        m.addAction(self.a_antre)
-        m.addSeparator()
-        m.addAction("Tabel hasil", lambda: self.tab_tengah.setCurrentWidget(self.hasil))
-        m = mb.addMenu("&Analyze")
-        m.addAction(self.a_validasi)
-        m.addSeparator()
-        m.addAction("Diagram interaksi 2D", lambda: self.tab_tengah.setCurrentWidget(self.diagram))
-        m.addAction("Peta interaksi residu × ligan", self.peta_interaksi)
-        m.addAction("Hitung ulang analisis hasil", self.analisis_ulang)
-        m.addSeparator()
-        for a in (self.a_inter, self.a_ukur):
-            m.addAction(a)
-        m.addAction("Hapus pengukuran", lambda: self.viewer.js("hapusUkur"))
-        m = mb.addMenu("&Tools")
-        self.m_buka_di = m.addMenu("Buka di…")
-        m.addAction(self.a_cek)
-        m.addAction("Uji mandiri komponen…", self.uji_mandiri)
-        m = mb.addMenu("&Help")
-        m.addAction("Panduan pengguna", lambda: self.buka_panduan("panduan"), "F1")
-        m.addAction("Tutorial docking (PDF)", lambda: self.buka_panduan("Tutorial_Docking_VirmoDock.pdf"))
-        sub = m.addMenu("Dokumentasi")
-        for k, t in (("instalasi", "Instalasi"), ("pindah_laptop", "Pindah laptop"), ("gpu", "Setup GPU"),
-                     ("troubleshooting", "Troubleshooting"), ("metode", "Metode & kriteria")):
-            sub.addAction(t, lambda k=k: self.buka_panduan(k))
-        m.addSeparator()
-        m.addAction("Lapor masalah / kirim saran…", self.lapor_masalah)
-        m.addAction("Buka folder log", lambda: QDesktopServices.openUrl(QUrl.fromLocalFile(str(paths.LOG))))
-        m.addAction("Lisensi & cara mengutip…", lambda: DialogLisensi(VERSI, self).exec())
-        m.addSeparator()
-        m.addAction("Tentang VirmoDock", self.tentang)
+        self._sub(m, "Gaya molekul", [A(t, None, lambda _=False, k=k: self.gaya_cepat(k), None,
+                                        f"Tampilkan protein sebagai {t.lower()}")
+                                      for k, t in (("cartoon", "Kartun"), ("sticks", "Stick"),
+                                                   ("ballstick", "Bola–stick"), ("surface", "Permukaan"))])
+        self.m_render = m.addMenu("Render 3D")
+        self.m_render.setToolTipsVisible(True)
+        r = self._opsi_render()
+        self.a_tepi = QAction("Garis tepi", self, checkable=True)
+        self.a_tepi.setToolTip("Garis tepi gelap tipis pada kartun & stick, ala ilustrasi jurnal")
+        self.a_tepi.setChecked(r["tepi"])
+        self.a_ao = QAction("Bayangan sekitar (AO)", self, checkable=True)
+        self.a_ao.setToolTip("Ambient occlusion: celah & kantong lebih berdimensi (lebih berat di GPU lemah)")
+        self.a_ao.setChecked(r["ao"])
+        for a in (self.a_tepi, self.a_ao):
+            a.setStatusTip(a.toolTip())
+            a.toggled.connect(lambda _=False: self.gaya_render())
+            self.m_render.addAction(a)
+        mk = self.m_render.addMenu("Kabut kedalaman")
+        mk.setToolTipsVisible(True)
+        self.grp_kabut = QActionGroup(self)
+        for k, t, tip in (("mati", "Mati", "Tanpa kabut: warna penuh sampai bagian terjauh"),
+                          ("halus", "Halus (bawaan)", "Bagian terjauh sedikit memudar sebagai isyarat kedalaman"),
+                          ("kuat", "Kuat", "Kabut bawaan 3Dmol: kedalaman sangat terasa, warna belakang pucat")):
+            a = QAction(t, self, checkable=True)
+            a.setData(k)
+            a.setToolTip(tip)
+            a.setStatusTip(tip)
+            a.setChecked(k == r["kabut"])
+            a.triggered.connect(lambda _=False: self.gaya_render())
+            self.grp_kabut.addAction(a)
+            mk.addAction(a)
+        isi(m, (self.a_fit, self.a_putar, self.a_box, self.a_inter, None))
+        self._sub(m, "Panel", [d.toggleViewAction() for d in (
+            self.d_langkah, self.d_hier, self.d_kerja, self.d_prop, self.d_tamp, self.d_inter, self.d_antre,
+            self.d_log, self.d_pesan)])
+        isi(m, (self.a_tema, self.a_reset))
+
+        # ---------------------------------------------------------------- Siapkan
+        m = menu("&Siapkan")
+        self._judul_menu(m, "Langkah 1 · Protein")
+        isi(m, (self.a_rcsb, self.a_rec))
+        self._judul_menu(m, "Langkah 2 · Ligan")
+        isi(m, (self.a_pubchem, self.a_smiles, self.a_lig))
+        self._judul_menu(m, "Langkah 3 · Area docking")
+        isi(m, (self.a_kotak_asli, self.a_kotak_res, self.a_kotak_sesuai, self.a_kotak_kantong, self.a_kotak_blind,
+                self.a_box,
+                A("Atur ukuran dan posisi…", None, lambda: self.ke_langkah(2), None,
+                  "Buka langkah 3 untuk mengetik pusat, ukuran, dan spasi kotak")))
+
+        # ---------------------------------------------------------------- Docking
+        m = menu("&Docking")
+        isi(m, (self.a_run, self.a_param, None))
+        self.m_mesin = self._sub(m, "Mesin", [])
+        self.m_ketelitian = self._sub(m, "Ketelitian", [])
+        isi(m, (None, self.a_antre,
+                A("Jeda job berjalan", "pause", lambda: self._aksi_job("jeda"), None,
+                  "Berhenti setelah ligan yang sedang dikerjakan; bisa dilanjutkan"),
+                A("Lanjutkan job dijeda", "play", lambda: self._aksi_job("lanjut"), None),
+                A("Batalkan job berjalan", "stop", lambda: self._aksi_job("batal"), None,
+                  "Hentikan sekarang; ligan yang sudah selesai tetap tersimpan"),
+                None, self.a_validasi))
+        m.aboutToShow.connect(self._isi_menu_docking)
+
+        # ---------------------------------------------------------------- Analisis
+        m = menu("&Analisis")
+        tab = lambda w: lambda: (self.atur_ruang("analisis", dari_langkah=True), self.tab_tengah.setCurrentWidget(w))  # noqa: E731
+        isi(m, (A("Tabel hasil", "table", tab(self.hasil), "Ctrl+R", "Peringkat ΔG semua ligan; klik dua kali untuk pose"),
+                A("Diagram interaksi 2D", "diagram", tab(self.diagram), None, "Diagram 2D pose aktif"),
+                A("Bandingkan ligan dicentang", None, lambda: self.bandingkan(self.hasil.dicentang()), None,
+                  "Centang 2–4 ligan di tab Hasil, lalu bandingkan berdampingan"),
+                A("Peta interaksi residu × ligan", "grid", self.peta_interaksi, None,
+                  "Peta panas residu yang dikontak oleh semua ligan"),
+                None,
+                A("Sifat ligan dan BOILED-Egg", "lig", tab(self.sifat), None,
+                  "Lipinski, Veber, QED, PAINS, absorpsi GI, sawar darah otak"),
+                A("Uji statistik dan grafik publikasi", "chart", tab(self.uji), None,
+                  "Tempel data uji (in vitro, dll.) → t-test/ANOVA/post-hoc otomatis, braket signifikansi, IC₅₀"),
+                A("Statistik dan grafik", "chart", tab(self.statistik), None,
+                  "Histogram, korelasi, regresi, matriks korelasi"),
+                A("Komposer figur (panel A/B/C)…", "grid", self.buka_komposer, "Ctrl+Shift+F",
+                  "Gabungkan grafik, diagram 2D, dan gambar 3D menjadi satu figur berlabel A/B/C siap jurnal"),
+                None, self.a_validasi, self.a_qc,
+                A("Hitung ulang analisis hasil", "rotate", self.analisis_ulang, None,
+                  "Lengkapi interaksi, LE, RMSD kristal, dan PoseBusters untuk hasil lama"),
+                None, self.a_inter, self.a_kontrib, self.a_ukur,
+                A("Hapus pengukuran", None, lambda: self.viewer.js("hapusUkur"), None)))
+
+        # ---------------------------------------------------------------- Alat
+        m = menu("A&lat")
+        self.m_buka_di = m.addMenu("Buka di program lain")
+        self.m_buka_di.setToolTipsVisible(True)
+        isi(m, (A("Atur lokasi program lain…", None, self.atur_eksternal, None,
+                  "Lokasi PyMOL, ChimeraX, Discovery Studio Visualizer"),
+                None, self.a_cek,
+                A("Uji mandiri komponen…", None, self.uji_mandiri, None,
+                  "Periksa semua mesin docking dan pustaka kimia berfungsi"),
+                None,
+                A("Buka folder proyek", "folder", self._buka_folder_proyek, None),
+                A("Buka folder kerja", "folder", lambda: QDesktopServices.openUrl(QUrl.fromLocalFile(
+                    self.st.value("folder_kerja", str(paths.folder_kerja_bawaan())))), None,
+                  "Folder bawaan tempat proyek baru dibuat")))
+
+        # ---------------------------------------------------------------- Bantuan
+        m = menu("Ba&ntuan")
+        isi(m, (A("Panduan pengguna", "help", lambda: self.buka_panduan("panduan"), "F1"),
+                A("Tutorial docking (PDF)", "report", lambda: self.buka_panduan("Tutorial_Docking_VirmoDock.pdf"),
+                  None, "Langkah demi langkah dengan contoh 1HSG/MK1"),
+                A("Pintasan keyboard", None, self.pintasan, "Ctrl+/", "Daftar semua pintasan keyboard dan mouse")))
+        self._sub(m, "Dokumentasi", [A(t, None, lambda _=False, k=k: self.buka_panduan(k))
+                                     for k, t in (("instalasi", "Instalasi"), ("pindah_laptop", "Pindah laptop"),
+                                                  ("gpu", "Setup GPU"), ("troubleshooting", "Mengatasi masalah"),
+                                                  ("metode", "Metode dan kriteria"))])
+        isi(m, (None,
+                A("Lapor masalah atau kirim saran…", None, self.lapor_masalah, None,
+                  "Susun laporan beserta info sistem dan log (Anda yang mengirim)"),
+                A("Buka folder log", None, lambda: QDesktopServices.openUrl(QUrl.fromLocalFile(str(paths.LOG))), None),
+                A("Lisensi dan cara mengutip…", None, lambda: DialogLisensi(VERSI, self).exec(), None),
+                None,
+                A("Tentang VirmoDock", None, self.tentang, None)))
+
+    # ------------------------------------------------------------- bantu menu
+    def _aksi_objek(self, aksi):
+        oid = self.aktif
+        if not oid or oid not in self.objek:
+            self._galat("Pilih objek dulu di panel Objek.")
+            return
+        self.aksi_konteks(oid, aksi, None)
+
+    def _aksi_job(self, aksi):
+        jobs = self.proyek.job if self.proyek else []
+        status = {"jeda": ("berjalan",), "batal": ("berjalan", "menunggu"), "lanjut": ("dijeda", "gagal")}[aksi]
+        j = next((x for x in jobs if x["status"] in status), None)
+        if not j:
+            self._galat({"jeda": "Tidak ada job yang sedang berjalan.", "batal": "Tidak ada job yang berjalan.",
+                         "lanjut": "Tidak ada job yang dijeda."}[aksi])
+            return
+        self._tampil_bawah(True)
+        self.aksi_antrean(aksi, j["id"])
+
+    def _isi_menu_docking(self):
+        """Submenu Mesin & Ketelitian mengikuti panel langkah 4 (satu sumber kebenaran)."""
+        from .panel_docking import PRESET
+        p = self.param
+        self.m_mesin.clear()
+        for k, t in (("adgpu", "AutoDock-GPU (GPU, cepat)"), ("vina", "AutoDock Vina (CPU)"),
+                     ("ad4", "AutoDock4 (CPU, klasik)")):
+            a = self.m_mesin.addAction(t, lambda k=k: (p.btn_mesin[k].setChecked(True), self.ke_langkah(3)))
+            a.setCheckable(True)
+            a.setChecked(p.mesin() == k)
+            a.setEnabled(p.btn_mesin[k].isEnabled())
+        self.m_ketelitian.clear()
+        for nama in [p.cmb_preset.itemText(i) for i in range(p.cmb_preset.count())]:
+            a = self.m_ketelitian.addAction(nama, lambda n=nama: (p.cmb_preset.setCurrentText(n),
+                                                                  p.terapkan_preset(n)))
+            a.setCheckable(True)
+            a.setChecked(p.cmb_preset.currentText() == nama)
+            if nama in PRESET:
+                a.setStatusTip({"Cepat": "Uji coba cepat", "Standar": "Penelitian umum (disarankan)",
+                                "Teliti": "Hasil akhir / publikasi; lebih lama"}[nama])
+
+    def _buka_folder_proyek(self):
+        if not self.proyek:
+            self._galat("Belum ada proyek terbuka.")
+            return
+        QDesktopServices.openUrl(QUrl.fromLocalFile(str(self.proyek.folder)))
+
+    def pintasan(self):
+        """Daftar pintasan dari semua aksi (otomatis) + gerakan mouse viewport."""
+        from html import escape
+        baris = {}
+        for a in self.findChildren(QAction):
+            k = a.shortcut().toString(QKeySequence.NativeText)
+            if k and a.text():
+                baris[k] = a.text().replace("&", "").replace("…", "")
+        mouse = [("Seret kiri", "Putar molekul"), ("Seret kanan / gulir", "Perbesar / perkecil"),
+                 ("Seret tengah / Ctrl+seret", "Geser"), ("Klik atom", "Pilih atom (lihat Properti)"),
+                 ("Shift + seret", "Geser kotak area docking"), ("Shift + gulir", "Ubah ukuran kotak"),
+                 ("Alt + gulir", "Ubah satu sumbu kotak (pilih dengan X, Y, Z)")]
+        t = theme.TOKEN[self.mode]
+        h = [f"<style>td{{padding:3px 10px 3px 0;}} td.k{{font-family:Consolas,monospace;color:{t['acct']};"
+             "white-space:nowrap;}}</style><p><b>Keyboard</b></p><table>"]
+        h += [f"<tr><td class='k'>{escape(k)}</td><td>{escape(v)}</td></tr>"
+              for k, v in sorted(baris.items(), key=lambda x: x[1].lower())]
+        h.append("</table><p><b>Mouse di viewport 3D</b></p><table>")
+        h += [f"<tr><td class='k'>{escape(k)}</td><td>{escape(v)}</td></tr>" for k, v in mouse]
+        h.append("</table>")
+        from PySide6.QtWidgets import QDialog, QDialogButtonBox, QTextBrowser
+        d = QDialog(self)
+        d.setWindowTitle("Pintasan keyboard dan mouse")
+        d.resize(520, 620)
+        v = QVBoxLayout(d)
+        tb = QTextBrowser()
+        tb.setHtml("".join(h))
+        v.addWidget(tb)
+        bb = QDialogButtonBox(QDialogButtonBox.Close)
+        bb.rejected.connect(d.reject)
+        v.addWidget(bb)
+        d.exec()
 
     def _toolbar(self):
         tb = QToolBar("Utama")
@@ -301,29 +795,7 @@ class JendelaUtama(QMainWindow):
         ikon_saja(self.a_simpan)
         tb.addAction(self.a_rcsb)
         self.a_rcsb.setIconText("Impor")
-        tb.addSeparator()
-        self.a_rec.setIconText("Reseptor")
-        self.a_lig.setIconText("Ligan")
-        tb.addAction(self.a_rec)
-        tb.addAction(self.a_lig)
-        tb.addAction(self.a_box)
-        tb.addSeparator()
-        tb.addWidget(self._lbl(" Mesin "))
-        self.cmb_mesin = QComboBox()
-        for k in MESIN_URUT:
-            self.cmb_mesin.addItem(mesinmod.MESIN[k], k)
-        self.cmb_mesin.currentIndexChanged.connect(self._toolbar_mesin)
-        tb.addWidget(self.cmb_mesin)
-        tb.addWidget(self._lbl("  Perangkat "))
-        self.cmb_alat = QComboBox()
-        self.cmb_alat.addItem("Mendeteksi…")
-        self.cmb_alat.setMinimumWidth(210)
-        self.cmb_alat.setSizeAdjustPolicy(QComboBox.AdjustToContents)
-        self.cmb_alat.currentIndexChanged.connect(self._toolbar_alat)
-        tb.addWidget(self.cmb_alat)
-        tb.addAction(self.a_run)
-        tb.widgetForAction(self.a_run).setObjectName("run")
-        ikon_saja(self.a_antre)
+        self.a_rcsb.setToolTip("Impor protein dari RCSB PDB (Ctrl+Shift+P)")
         tb.addSeparator()
         for a in (self.a_inter, self.a_ukur, self.a_foto, self.a_lapor):
             ikon_saja(a)
@@ -334,9 +806,30 @@ class JendelaUtama(QMainWindow):
         self.btn_buka_di.setPopupMode(QToolButton.InstantPopup)
         self.btn_buka_di.setMenu(self.m_buka_di)
         tb.addWidget(self.btn_buka_di)
-        sp = QWidget()
-        sp.setSizePolicy(sp.sizePolicy().horizontalPolicy().Expanding, sp.sizePolicy().verticalPolicy().Preferred)
-        tb.addWidget(sp)
+        for _ in range(2):
+            sp = QWidget()
+            sp.setSizePolicy(sp.sizePolicy().horizontalPolicy().Expanding, sp.sizePolicy().verticalPolicy().Preferred)
+            if _ == 0:
+                tb.addWidget(sp)
+                ruang = QWidget()
+                h = QHBoxLayout(ruang)
+                h.setContentsMargins(0, 0, 0, 0)
+                h.setSpacing(0)
+                self.grp_ruang = QButtonGroup(self)
+                for k, t in RUANG:
+                    b = QPushButton(t)
+                    b.setObjectName("ruang")
+                    b.setCheckable(True)
+                    b.setProperty("ruang", k)
+                    b.setToolTip({"siapkan": "Protein, ligan, dan area docking (langkah 1–3)",
+                                  "docking": "Mesin, ketelitian, jalankan, antrean (langkah 4)",
+                                  "analisis": "Hasil, interaksi, diagram, sifat ligan, statistik (langkah 5)"}[k])
+                    b.clicked.connect(lambda _=False, k=k: self.atur_ruang(k))
+                    self.grp_ruang.addButton(b)
+                    h.addWidget(b)
+                tb.addWidget(ruang)
+            else:
+                tb.addWidget(sp)
         ikon_saja(self.a_tema)
 
         # toolbar kecil di atas viewport: gaya cepat
@@ -355,6 +848,13 @@ class JendelaUtama(QMainWindow):
         for a in (self.a_fit, self.a_putar):
             bv.addAction(a)
             bv.widgetForAction(a).setToolButtonStyle(Qt.ToolButtonIconOnly)
+        bv.addSeparator()
+        b = QToolButton()
+        b.setText("Render ▾")
+        b.setToolTip("Gaya render 3D: garis tepi ala ilustrasi jurnal dan bayangan sekitar (ambient occlusion)")
+        b.setPopupMode(QToolButton.InstantPopup)
+        b.setMenu(self.m_render)
+        bv.addWidget(b)
 
     def _lbl(self, t):
         l = QLabel(t)
@@ -367,10 +867,17 @@ class JendelaUtama(QMainWindow):
         self.s_prog = QLabel("")
         self.s_atom = QLabel("")
         self.s_folder = QLabel("")
+        self.b_antre = QToolButton()
+        self.b_antre.setObjectName("antreanRingkas")
+        self.b_antre.setCheckable(True)
+        self.b_antre.setText("Antrean: kosong  ▴")
+        self.b_antre.setToolTip("Tampilkan/sembunyikan panel Antrean, Log, dan Pesan")
+        self.b_antre.toggled.connect(self._tampil_bawah)
         sb.addWidget(self.s_gpu)
         sb.addWidget(self.s_prog)
         sb.addWidget(self.s_atom, 1)
         sb.addPermanentWidget(self.s_folder)
+        sb.addPermanentWidget(self.b_antre)
 
     # -------------------------------------------------------------- tema
     def terapkan_tema(self, mode):
@@ -392,6 +899,13 @@ class JendelaUtama(QMainWindow):
         self.hier.warna_ikon = warna
         self.antrean.terapkan_tema(mode)
         self.hasil.mode = self.p_inter.mode = mode
+        self.sifat.set_mode(mode)
+        self.statistik.set_mode(mode)
+        self.uji.set_mode(mode)
+        self.awal.set_mode(mode)
+        self.p_langkah.set_mode(mode)
+        self.langkah.mode = mode
+        self.langkah.segarkan()
         if self.proyek:
             self._muat_hasil()
         self._gambar_diagram()
@@ -399,6 +913,7 @@ class JendelaUtama(QMainWindow):
         self.param._info_kotak()
         self.viewer.page().setBackgroundColor(t["view"])
         self.viewer.js("tema", mode == "gelap", t["view"])
+        self.viewer.js("gayaRender", self._opsi_render())
         self.st.setValue("tema", mode)
 
     def ganti_tema(self):
@@ -415,16 +930,13 @@ class JendelaUtama(QMainWindow):
         self.env = e
         g = e.gpu_utama
         self._sinkron = True
-        self.cmb_alat.clear()
         alat = []
-        for x in e.gpu:
-            if x.opencl:
-                alat.append((f"GPU · {x.nama.replace('NVIDIA GeForce ', '')}", "gpu",
-                             icons.ikon("gpu", theme.TOKEN[self.mode]["ok"])))
-                break  # AutoDock-GPU memakai satu perangkat OpenCL (yang pertama)
+        # semua GPU OpenCL (mis. Intel + NVIDIA); GPU utama (VRAM terbesar) di atas sebagai bawaan
+        gpus = sorted([x for x in e.gpu if x.opencl], key=lambda x: x is not g)
+        for x in gpus:
+            alat.append((f"GPU · {x.nama.replace('NVIDIA GeForce ', '')}", f"gpu:{x.devnum}",
+                         icons.ikon("gpu", theme.TOKEN[self.mode]["ok"])))
         alat.append((f"CPU · {e.inti} thread", "cpu", icons.ikon("cpu", theme.TOKEN[self.mode]["ink2"])))
-        for t, d, ik in alat:
-            self.cmb_alat.addItem(ik, t, d)
         self.param.set_perangkat(alat)
         self._sinkron = False
         simpan = (self.proyek.parameter if self.proyek else None) or {}
@@ -461,7 +973,39 @@ class JendelaUtama(QMainWindow):
         self.s_folder.setText(self.st.value("folder_kerja", str(paths.folder_kerja_bawaan())))
 
     # ------------------------------------------------------------- objek
+    def _fokus(self, sel):
+        """Pusatkan kamera; bila tab Viewport tersembunyi, tampilkan dulu lalu fokus setelah kanvas aktif
+        (WebGL tidak merender benar saat tab tersembunyi)."""
+        if self.tab_tengah.currentWidget() is self.w_view and self.stak_view.currentIndex() == 0:
+            self.viewer.js("fokus", sel)
+            return
+        self.tab_tengah.setCurrentWidget(self.w_view)
+        QTimer.singleShot(250, lambda: (self.viewer.js("segarkanKanvas"), self.viewer.js("fokus", sel)))
+
+    def _perbarui_awal(self):
+        """Halaman sambutan saat belum ada objek; viewer 3D begitu ada struktur."""
+        if not self.viewer._siap:
+            return
+        kosong = not self.objek
+        dari_awal = self.stak_view.currentIndex() == 1
+        self.stak_view.setCurrentIndex(1 if kosong else 0)
+        if kosong:
+            self.awal.set_terakhir(self.st.value("proyek_terakhir", ""))
+        elif dari_awal:   # kanvas baru terlihat: ukur ulang lalu pusatkan (dua kali: sebelum & sesudah model dimuat)
+            for ms in (250, 900):
+                QTimer.singleShot(ms, lambda: self.viewer.js("ukurUlang"))
+
+    def _aksi_awal(self, k):
+        {"rcsb": lambda: self.ambil(0), "buka": self.buka_berkas, "proyek": lambda: self.buka_proyek(),
+         "terakhir": lambda: self.buka_proyek(self.st.value("proyek_terakhir", "")),
+         "tutorial": lambda: self.buka_panduan("Tutorial_Docking_VirmoDock.pdf"),
+         "panduan": lambda: self.buka_panduan("panduan")}[k]()
+
     def tambah_objek(self, daftar, fokus=True):
+        kosong = not self.objek
+        if daftar and not self.objek:
+            self.objek.update({o.id: o for o in daftar})
+            self._perbarui_awal()
         for o in daftar:
             self.objek[o.id] = o
             self.hier.tambah(o)
@@ -473,9 +1017,18 @@ class JendelaUtama(QMainWindow):
             self.box_ke_objek(max(asli, key=lambda o: o.info.get("atom_berat", 0)))
         if fokus and daftar:
             prot = next((o for o in daftar if o.jenis == "protein"), daftar[0])
-            self.viewer.js("fokus", {"id": prot.id})
+            terlihat = next((o for o in daftar if o.jenis == "protein" and o.tampil), None)
+            if kosong:
+                # sesi baru/proyek dibuka: pusatkan semua objek terlihat setelah kanvas berukuran final.
+                # (fokus beranimasi ke protein mentah yang tersembunyi dulu menimpa ukurUlang -> kamera meleset)
+                if self.tab_tengah.currentWidget() is not self.w_view:
+                    self.tab_tengah.setCurrentWidget(self.w_view)
+                QTimer.singleShot(1000, lambda: self.viewer.js("fokusSemua"))
+            else:
+                self._fokus({"id": (terlihat or prot).id})
             self.hier.pilih_objek(prot.id)
         self._hitung_atom()
+        self.segarkan_langkah()
 
     def _hitung_atom(self):
         n = sum(o.info.get("atom", 0) or 0 for o in self.objek.values())
@@ -535,6 +1088,14 @@ class JendelaUtama(QMainWindow):
                     baris.append(("RMSD ke masukan (Å)", f"{i['rmsd_ref']:.2f}"))
                 if i.get("rmsd_lb") or i.get("rmsd_ub"):
                     baris.append(("RMSD l.b. / u.b. (Å)", f"{i.get('rmsd_lb', 0):.2f} / {i.get('rmsd_ub', 0):.2f}"))
+                if i.get("peringkat") == 1 and self.proyek:
+                    j = self.pelaksana.cari(i.get("job"))
+                    lj = next((x for x in (j or {}).get("ligan", []) if x["id"] == i.get("lid")), None)
+                    q = (lj or {}).get("qc")
+                    if q:
+                        from ..core import qc
+                        baris.append(("PoseBusters", qc.teks_sel(q)))
+                        baris += [("  ✗", g) for g in q.get("gagal") or []]
         else:
             baris = [("Jenis", o.jenis.capitalize()), ("Jumlah", i.get("jumlah", "–"))]
         self.prop.tampil(f"{o.nama}", baris)
@@ -584,6 +1145,17 @@ class JendelaUtama(QMainWindow):
         o = self.objek.get(oid)
         if not o:
             return
+        if aksi == "sematkan":
+            on = not o.info.get("sematkan")
+            o.info["sematkan"] = on
+            self.hier.set_sematkan(oid, on)
+            if on and not o.tampil:
+                self.set_tampil(oid, True)
+                self.hier.set_centang(oid, True)
+            self.statusBar().showMessage(f"{o.info.get('ligan', '')} {o.nama}: "
+                                         + ("disematkan" if on else "tidak disematkan"), 4000)
+            self.minta_simpan()
+            return
         g = dict(o.gaya)
         g["reps"] = list(g["reps"])
         if aksi == "show":
@@ -609,11 +1181,11 @@ class JendelaUtama(QMainWindow):
             g["warna"] = {"mode": "solid", "val": c.name()}
         elif aksi == "zoom":
             if nilai[0] == "residu":
-                self.viewer.js("fokus", {"id": oid, "chain": nilai[2], "resi": nilai[3]})
+                self._fokus({"id": oid, "chain": nilai[2], "resi": nilai[3]})
             elif nilai[0] == "rantai":
-                self.viewer.js("fokus", {"id": oid, "chain": nilai[2]})
+                self._fokus({"id": oid, "chain": nilai[2]})
             else:
-                self.viewer.js("fokus", {"id": oid})
+                self._fokus({"id": oid})
             return
         elif aksi in ("res_sticks", "res_hide"):
             _, res = self.residu_terpilih
@@ -625,7 +1197,7 @@ class JendelaUtama(QMainWindow):
                 g["khusus"].append({"sel": sel, "rep": "sticks", "warna": {"mode": "element", "carbon": "#8a94a6"}})
         elif aksi == "grid_res":
             self.aksi_kotak("residu")
-            self.d_param.raise_()
+            self.ke_langkah(2)
             return
         elif aksi == "rantai_tampil":
             c, on = nilai
@@ -670,6 +1242,7 @@ class JendelaUtama(QMainWindow):
         self._cache_mol.pop(oid, None)
         if self._aktif_inter and self._aktif_inter["oid"] == oid:
             self.viewer.js("interaksi", [], {})
+            self.viewer.js("kontribusi", None, [])
             self._aktif_inter = None
             self.p_inter.kosong()
         if oid in self.objek:
@@ -677,6 +1250,8 @@ class JendelaUtama(QMainWindow):
             self.hier.hapus(oid)
             del self.objek[oid]
             self._hitung_atom()
+            self.segarkan_langkah()
+            self._perbarui_awal()
 
     def hapus_terpilih(self):
         for it in self.hier.pohon.selectedItems():
@@ -777,6 +1352,7 @@ class JendelaUtama(QMainWindow):
         self._gambar_box()
         self.param.set_kotak(self.box)
         self._simpan_kotak()
+        self.segarkan_langkah()
         if sumber:
             self.log.tulis(f"Grid box: {sumber} · pusat {self.box['pusat']} · ukuran {self.box['ukuran']}")
 
@@ -804,7 +1380,7 @@ class JendelaUtama(QMainWindow):
             o = self.objek.get(oid)
             xs = self._koordinat(o, set(res)) if o and res else []
             if not xs:
-                self._galat("Pilih residu dulu: klik atom di viewport atau pilih residu di panel Hierarki "
+                self._galat("Pilih residu dulu: klik atom di viewport atau pilih residu di panel Objek "
                             "(Ctrl+klik untuk beberapa residu).")
                 return
             c = [sum(p[i] for p in xs) / len(xs) for i in range(3)]
@@ -812,9 +1388,11 @@ class JendelaUtama(QMainWindow):
         elif k == "sesuai":
             o = self.objek.get(self.aktif)
             if not o or o.jenis not in ("ligan", "pose"):
-                self._galat("Pilih ligan di panel Hierarki dulu.")
+                self._galat("Pilih ligan di panel Objek dulu.")
                 return
             self.box_ke_objek(o, tepi=8.0)
+        elif k == "kantong":
+            self.deteksi_kantong()
         elif k == "blind":
             o = next((x for x in self.objek.values() if x.jenis == "protein" and x.info.get("siap_docking")), None) \
                 or next((x for x in self.objek.values() if x.jenis == "protein"), None)
@@ -830,6 +1408,76 @@ class JendelaUtama(QMainWindow):
             if sp > 0.375:
                 self.pesan.tulis(f"Blind docking: spasi grid dinaikkan ke {sp} Å agar ≤ 126 titik per sumbu. "
                                  "Untuk hasil lebih teliti gunakan Vina dengan exhaustiveness ≥ 32.")
+
+    def deteksi_kantong(self):
+        """P2Rank pada protein (siap docking diutamakan) -> dialog daftar kantong -> grid box."""
+        from ..core import p2rank
+        if not p2rank.tersedia():
+            self._galat("P2Rank atau Java (folder bin/p2rank, bin/jre) tidak ditemukan. Pasang ulang VirmoDock.")
+            return
+        o = next((x for x in self.objek.values() if x.jenis == "protein" and x.info.get("siap_docking")), None) \
+            or next((x for x in self.objek.values() if x.jenis == "protein"), None)
+        if not o:
+            self._galat("Belum ada protein. Muat protein di langkah 1.")
+            return
+        import tempfile
+        folder = Path(tempfile.mkdtemp(prefix="p2rank_", dir=str(paths.CACHE)))
+        self.statusBar().showMessage(f"P2Rank mencari kantong pada {o.nama}… (±10–60 detik)")
+        self.log.tulis(f"P2Rank: {o.nama}")
+        kerja.jalankan(lambda lapor: p2rank.prediksi(o.teks, folder),
+                       selesai=lambda h: self._kantong_siap(o, h),
+                       galat=lambda g: (self.statusBar().clearMessage(), self._galat(f"Deteksi kantong gagal: {g}")))
+
+    def _kantong_siap(self, o, kantong):
+        from PySide6.QtWidgets import (QAbstractItemView, QDialog, QDialogButtonBox, QTableWidget, QTableWidgetItem,
+                                       QVBoxLayout)
+        from ..core import p2rank
+        self.statusBar().showMessage(f"P2Rank: {len(kantong)} kantong ditemukan.", 6000)
+        if not kantong:
+            self._galat("P2Rank tidak menemukan kantong pada protein ini.")
+            return
+        self.log.tulis("P2Rank: " + "; ".join(f"#{k['peringkat']} skor {k['skor']:.2f} prob {k['prob']:.2f} "
+                                             f"({len(k['residu'])} residu)" for k in kantong[:5]))
+        # tampilkan pusat kantong di viewport (bola buram bernomor)
+        self.viewer.js("kantong", [{"pusat": k["pusat"], "nomor": k["peringkat"]} for k in kantong[:10]])
+        d = QDialog(self)
+        d.setWindowTitle("Kantong pengikatan (P2Rank)")
+        d.resize(640, 380)
+        v = QVBoxLayout(d)
+        t = QTableWidget(len(kantong), 5)
+        t.setHorizontalHeaderLabels(["#", "Skor", "Probabilitas", "Residu", "Residu kantong"])
+        t.setSelectionBehavior(QAbstractItemView.SelectRows)
+        t.setSelectionMode(QAbstractItemView.SingleSelection)
+        t.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        t.verticalHeader().setVisible(False)
+        t.horizontalHeader().setStretchLastSection(True)
+        lab = {}
+        for b in o.teks.splitlines():
+            if b.startswith("ATOM"):
+                lab[(b[21].strip(), b[22:26].strip())] = f"{b[17:20].strip()}{b[22:26].strip()}"
+        for i, k in enumerate(kantong):
+            for j, x in enumerate((str(k["peringkat"]), f"{k['skor']:.2f}", f"{k['prob']:.2f}", str(len(k["residu"])),
+                                   " ".join(lab.get(r, f"{r[0]}{r[1]}") for r in k["residu"][:30]))):
+                t.setItem(i, j, QTableWidgetItem(x))
+        t.resizeColumnsToContents()
+        t.selectRow(0)
+        v.addWidget(t)
+        bb = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        bb.button(QDialogButtonBox.Ok).setText("Pakai kantong ini untuk grid box")
+        bb.button(QDialogButtonBox.Cancel).setText("Tutup")
+        bb.accepted.connect(d.accept)
+        bb.rejected.connect(d.reject)
+        t.doubleClicked.connect(d.accept)
+        v.addWidget(bb)
+        ok = d.exec()
+        self.viewer.js("kantong", [])
+        if not ok:
+            return
+        k = kantong[max(0, t.currentRow())]
+        sel = {(r[0], int(r[1])) for r in k["residu"] if r[1].lstrip("-").isdigit()}
+        uk = p2rank.ukuran_kotak(k, self._koordinat(o, sel))
+        self._atur_kotak(list(k["pusat"]), list(uk),
+                         sumber=f"kantong P2Rank #{k['peringkat']} (skor {k['skor']:.2f}, {len(k['residu'])} residu)")
 
     def _kotak_dari_panel(self, k):
         self.box.update(pusat=k["pusat"], ukuran=k["ukuran"], spasi=k["spasi"])
@@ -879,6 +1527,9 @@ class JendelaUtama(QMainWindow):
             self.st.setValue("proyek_terakhir", str(pr.folder))
             self.st.setValue("sesi_terbuka", str(pr.folder))
         self.antrean.muat(pr.job if pr else [])
+        self.uji.muat(pr.uji_grafik if pr else {})
+        if self.komposer:
+            self.komposer.muat(self._komposer_dari_proyek())
         self._muat_hasil()
         self._ringkasan()
 
@@ -889,8 +1540,10 @@ class JendelaUtama(QMainWindow):
             rec = f"{pr.reseptor.get('nama', '')} · {pr.reseptor.get('atom', 0)} atom"
         lig = pr.ligan_siap() if pr else []
         self.param.set_ringkasan(rec, len(lig), sum(1 for l in lig if l.get("status") == "peringatan"))
+        self.segarkan_langkah()
 
     def minta_simpan(self):
+        self.segarkan_langkah()
         if self.proyek:
             self.t_simpan.start()
 
@@ -928,6 +1581,8 @@ class JendelaUtama(QMainWindow):
         if not ok:
             return
         self.pelaksana.hentikan_semua()
+        from ..core import qc
+        qc.tutup()
         self._simpan_diam()
         self._tutup_sesi()
         if nama.strip():
@@ -965,6 +1620,8 @@ class JendelaUtama(QMainWindow):
             QMessageBox.warning(self, "Buka proyek", str(e))
             return
         self.pelaksana.hentikan_semua()
+        from ..core import qc
+        qc.tutup()
         self._simpan_diam()
         self._tutup_sesi()
         objek, _ = pr.muat_objek()
@@ -978,15 +1635,18 @@ class JendelaUtama(QMainWindow):
             self.param.set_parameter(pr.parameter)
             self._param_berubah(self.param.parameter())
         self._isi_kristal()
-        if any(l["status"] == "selesai" and "le" not in l for j in pr.job for l in j["ligan"]):
-            self.analisis_ulang()
+        from ..core import qc
+        qc_ok = qc.tersedia()
+        if any(l["status"] == "selesai" and ("le" not in l or (qc_ok and (l.get("qc") or {}).get("v") != qc.VERSI))
+               for j in pr.job for l in j["ligan"]):
+            self.analisis_ulang()   # proyek lama: lengkapi LE/interaksi/RMSD + QC PoseBusters di latar
         dijeda = [j for j in pr.job if j["status"] == "dijeda"]
         self.log.tulis(f"Proyek dibuka: {pr.folder} · {len(objek)} objek · {len(pr.ligan_siap())} ligan siap · "
                        f"{len(pr.job)} job")
         if dijeda:
             self.pesan.tulis(f"{len(dijeda)} job terputus berstatus 'Dijeda'. Pilih job di panel Antrean lalu "
                              "klik Lanjut; ligan yang sudah selesai tidak diulang.")
-            self.d_antre.raise_()
+            self._tampil_bawah(True)
 
     def _cek_pemulihan(self):
         """E1: sesi sebelumnya tidak ditutup normal -> tawarkan pemulihan."""
@@ -1012,7 +1672,7 @@ class JendelaUtama(QMainWindow):
     def siapkan_reseptor(self):
         protein = [o for o in self.objek.values() if o.jenis == "protein" and not o.info.get("siap_docking")]
         if not protein:
-            self._galat("Belum ada protein. Impor struktur dulu (File › Buka atau Impor dari RCSB PDB).")
+            self._galat("Belum ada protein. Muat struktur dulu di langkah 1 (Ambil dari RCSB PDB atau Buka berkas).")
             return
         d = DialogReseptor(protein, {o.id: self._logam_dari(o) for o in protein}, self, self.aktif)
         if not d.exec():
@@ -1060,9 +1720,11 @@ class JendelaUtama(QMainWindow):
         for p in h.peringatan:
             self.pesan.tulis("Reseptor: " + p)
         if h.peringatan:
+            self._tampil_bawah(True)
             self.d_pesan.raise_()
         self._ringkasan()
         self.minta_simpan()
+        self.ke_langkah(1)   # berikutnya: ligan
 
     def siapkan_ligan(self):
         calon = [o for o in self.objek.values() if o.jenis == "ligan" and not o.info.get("siap_docking")]
@@ -1095,34 +1757,15 @@ class JendelaUtama(QMainWindow):
         self.log.tulis(f"{len(baru)} ligan siap docking disimpan di {pr.p('ligan', 'pdbqt')}")
         self._ringkasan()
         self.minta_simpan()
+        self.ke_langkah(3 if self.box.get("pusat") else 2)   # berikutnya: area (atau langsung jalankan)
 
     # ------------------------------------------------------------ docking
     def _param_berubah(self, p):
         if self._sinkron:
             return
-        self._sinkron = True
-        self.cmb_mesin.setCurrentIndex(MESIN_URUT.index(p["mesin"]))
-        i = self.cmb_alat.findData(p["perangkat"])
-        if i >= 0:
-            self.cmb_alat.setCurrentIndex(i)
-        self._sinkron = False
         if self.proyek:
             self.proyek.parameter = p
             self.minta_simpan()
-
-    def _toolbar_mesin(self, _i):
-        if not self._sinkron:
-            self._sinkron = True
-            self.param.set_parameter({"mesin": self.cmb_mesin.currentData()})
-            self._sinkron = False
-            self._param_berubah(self.param.parameter())
-
-    def _toolbar_alat(self, _i):
-        if not self._sinkron and self.cmb_alat.currentData():
-            self._sinkron = True
-            self.param.set_parameter({"perangkat": self.cmb_alat.currentData()})
-            self._sinkron = False
-            self._param_berubah(self.param.parameter())
 
     def _ligan_terpilih(self):
         lid = []
@@ -1135,15 +1778,17 @@ class JendelaUtama(QMainWindow):
     def jalankan_docking(self):
         pr = self.proyek
         if not pr or not pr.reseptor or not pr.p(pr.reseptor["pdbqt"]).exists():
-            self._galat("Reseptor belum disiapkan. Jalankan Prepare › Siapkan reseptor dulu.")
+            self._galat("Reseptor belum disiapkan. Buka langkah 1 Protein lalu klik Siapkan reseptor.")
+            self.ke_langkah(0)
             return
         siap = pr.ligan_siap()
         if not siap:
-            self._galat("Belum ada ligan siap docking. Jalankan Prepare › Siapkan ligan dulu.")
+            self._galat("Belum ada ligan siap docking. Buka langkah 2 Ligan lalu klik Siapkan ligan.")
+            self.ke_langkah(1)
             return
         if not self.box["pusat"]:
-            self._galat("Grid box belum diatur. Gunakan tombol di panel Parameter (mis. 'Pusat ke ligan asli').")
-            self.d_param.raise_()
+            self._galat("Area docking belum diatur. Pilih salah satu tombol di langkah 3 (mis. 'Pusat di ligan asli').")
+            self.ke_langkah(2)
             return
         pilih = set(self._ligan_terpilih())
         ligan = [l for l in siap if l["id"] in pilih] if pilih else siap
@@ -1166,8 +1811,8 @@ class JendelaUtama(QMainWindow):
         job = antreanmod.job_baru(pr, ligan, mesin, alat, par, {"pusat": k.pusat, "ukuran": k.ukuran,
                                                                 "spasi": k.spasi})
         self.pelaksana.tambah(job)
-        self.d_antre.show()
-        self.d_antre.raise_()
+        self._tampil_bawah(True)
+        self.segarkan_langkah()
 
     def _hubungkan_pelaksana(self):
         pl = self.pelaksana
@@ -1186,13 +1831,7 @@ class JendelaUtama(QMainWindow):
             self.antrean.perbarui(j)
         else:
             self.antrean.muat(self.proyek.job)
-        jalan = next((x for x in self.proyek.job if x["status"] == "berjalan"), None)
-        if jalan:
-            n = len(jalan["ligan"])
-            k = sum(1 for l in jalan["ligan"] if l["status"] not in ("menunggu", "berjalan"))
-            self.s_prog.setText(f"Docking {k}/{n} · {mesinmod.MESIN[jalan['mesin']]}")
-        else:
-            self.s_prog.setText("")
+        self.segarkan_langkah()
 
     def _job_selesai(self, jid):
         j = self.pelaksana.cari(jid)
@@ -1206,7 +1845,10 @@ class JendelaUtama(QMainWindow):
             terbaik = min(ok, key=lambda l: l["energi"])
             judul = "Docking selesai"
             isi = f"{len(ok)}/{len(j['ligan'])} ligan · terbaik {terbaik['nama']} {terbaik['energi']:.2f} kcal/mol"
-            self.tab_tengah.setCurrentWidget(self.hasil)
+            if not j.get("validasi"):
+                self.ke_langkah(4)
+            if not any(x["status"] in ("berjalan", "menunggu") for x in self.proyek.job):
+                self._tampil_bawah(False)   # sukses: antrean dilipat lagi (tetap di bilah status)
         elif j["status"] == "dibatalkan":
             judul, isi = "Docking dibatalkan", f"{j['id']} · {len(ok)} ligan sempat selesai"
         else:
@@ -1253,9 +1895,9 @@ class JendelaUtama(QMainWindow):
             self._galat("Berkas hasil tidak ditemukan.")
             return None
         grup = f"Hasil · {l['nama']} · {jid[-6:]}"
-        # grup hasil lain disembunyikan agar viewport bersih (tidak dihapus)
+        # grup hasil lain disembunyikan agar viewport bersih (tidak dihapus); pose tersemat tetap tampil
         for o in self.objek.values():
-            if o.jenis == "pose" and o.grup != grup and o.tampil:
+            if o.jenis == "pose" and o.grup != grup and o.tampil and not o.info.get("sematkan"):
                 self.set_tampil(o.id, False)
                 self.hier.set_centang(o.id, False)
         lama = [o for o in self.objek.values() if o.grup == grup]
@@ -1279,21 +1921,468 @@ class JendelaUtama(QMainWindow):
             self.tambah_objek(lama, fokus=False)
         sasaran = next((o for o in lama if o.info.get("peringkat") == k), lama[0] if lama else None)
         for o in lama:
-            on = o is sasaran
+            on = o is sasaran or bool(o.info.get("sematkan"))
             if o.tampil != on:
                 self.set_tampil(o.id, on)
                 self.hier.set_centang(o.id, on)
         if sasaran:
-            self.viewer.js("fokus", {"id": sasaran.id})
+            self._fokus({"id": sasaran.id})
             self.hier.pilih_objek(sasaran.id)
             self.pilih_objek(sasaran.id)
-        self.tab_tengah.setCurrentWidget(self.viewer)
+        else:
+            self.tab_tengah.setCurrentWidget(self.w_view)
         self.minta_simpan()
         return sasaran
 
     # ------------------------------------------------------------ analisis
     def _muat_hasil(self):
         self.hasil.muat(eksmod.baris_hasil(self.proyek) if self.proyek else [])
+        self.segarkan_langkah()
+        self._sifat_kotor = self._stat_kotor = True
+        self._tab_berganti()
+
+    def _tab_berganti(self, *_):
+        w = self.tab_tengah.currentWidget()
+        if w is self.w_view and self.viewer._siap:   # setelah tata letak tab final
+            for ms in (300, 1000):
+                QTimer.singleShot(ms, lambda: self.viewer.js("segarkanKanvas"))
+        if w is self.sifat:
+            self._muat_sifat()
+        elif w is self.statistik and self._stat_kotor:
+            self._muat_statistik()
+
+    def _muat_statistik(self):
+        self._stat_kotor = False
+        pr = self.proyek
+        if not pr:
+            self.statistik.muat([], [])
+            return
+        self._data_sifat()   # pastikan sifat tiap ligan proyek sudah dihitung (cache)
+        sif = {l["id"]: l.get("sifat") for l in pr.ligan if isinstance(l.get("sifat"), dict)}
+        baris = stat_mod.dataset(eksmod.baris_hasil(pr), sif)
+        jobs = [(j["id"], f"{j['id']} · {mesinmod.MESIN.get(j['mesin'], j['mesin'])}") for j in pr.job]
+        self.statistik.muat(baris, jobs)
+
+    def _ekspor_statistik(self, fmt):
+        st_ = self.statistik
+        if not st_.data:
+            self._galat("Belum ada data statistik (jalankan docking dulu).")
+            return
+        dasar = f"{nama_aman(self.proyek.nama)}_{st_.c_jenis.currentData()}"
+        if fmt == "csv":
+            f = self._path("Simpan data statistik", f"{dasar}_data.csv", "CSV (*.csv)")
+            if f:
+                Path(f).write_text(stat_mod.csv_teks(st_.data), encoding="utf-8")
+                self.log.tulis(f"Data statistik disimpan: {f}")
+            return
+        s, (w, h) = st_.svg(gelap=False)
+        if not s:
+            self._galat("Grafik kosong (data kurang).")
+            return
+        if fmt == "salin":
+            self._salin_svg(s, w, h, "Grafik")
+            return
+        if fmt == "svg":
+            f = self._path("Simpan grafik", f"{dasar}.svg", "SVG (*.svg);;PDF (*.pdf)")
+            jenis = "pdf" if f.lower().endswith(".pdf") else "svg"
+        else:
+            f = self._path("Simpan grafik", f"{dasar}.png", "PNG (*.png);;TIFF (*.tif)")
+            jenis = "tif" if f.lower().endswith((".tif", ".tiff")) else "png"
+        if f:
+            self._simpan_svg(s, f, jenis, w, h, mm=140, dpi=600)
+            self.log.tulis(f"Grafik disimpan: {f}")
+            self.statusBar().showMessage(f"Grafik disimpan: {f}", 5000)
+
+    def _sumber_sifat(self):
+        """[(kunci, nama, teks, fmt, dict ligan proyek | None)]: ligan proyek + ligan viewer yang belum disiapkan."""
+        hasil, lid_ada = [], set()
+        pr = self.proyek
+        for l in (pr.ligan if pr else []):
+            f = pr.p(l["sdf"]) if l.get("sdf") else None
+            if f and f.exists():
+                hasil.append((l["id"], l["nama"], f.read_text(encoding="utf-8"), "sdf", l))
+                lid_ada.add(l["nama"])
+        for o in self.objek.values():   # ligan yang sudah disiapkan punya nama sama dengan objek asalnya
+            if o.jenis == "ligan" and not o.info.get("siap_docking") and o.nama not in lid_ada:
+                hasil.append((o.id, o.nama, o.teks, o.fmt, None))
+        return hasil
+
+    def _muat_sifat(self, paksa=False):
+        if not paksa and not self._sifat_kotor:
+            return
+        self._sifat_kotor = False
+        self.sifat.muat(self._data_sifat(paksa))
+
+    def _data_sifat(self, paksa=False):
+        """[(nama, sifat dict | teks galat, ΔG terbaik)]; hasil disimpan di proyek.ligan[*]['sifat']."""
+        dg = {}
+        if self.proyek:
+            for b in eksmod.baris_hasil(self.proyek):
+                dg[b["lid"]] = min(dg.get(b["lid"], 0.0), b["energi"])
+        data, ubah = [], False
+        QApplication.setOverrideCursor(Qt.WaitCursor)
+        try:
+            for kunci, nama, teks, fmt, lig in self._sumber_sifat():
+                s = lig.get("sifat") if lig else None
+                if paksa or not s or s.get("v") != sifat_mod.VERSI:
+                    try:
+                        s = sifat_mod.dari_teks(teks, fmt)
+                    except Exception as e:
+                        s = str(e).strip().splitlines()[0] if str(e).strip() else type(e).__name__
+                    if lig is not None and isinstance(s, dict):
+                        lig["sifat"] = s
+                        ubah = True
+                data.append((nama, s, dg.get(kunci)))
+        finally:
+            QApplication.restoreOverrideCursor()
+        if ubah:
+            self.minta_simpan()
+        return data
+
+    def _uji_berubah(self):
+        if self.proyek:
+            self.proyek.uji_grafik = self.uji.ke_dict()
+            self.minta_simpan()
+
+    def _uji_dari_docking(self, mode):
+        """Isi lembar Uji & Grafik: ΔG per job (kolom = job) atau per mesin."""
+        baris = eksmod.baris_hasil(self.proyek) if self.proyek else []
+        if not baris:
+            self._galat("Belum ada hasil docking.")
+            return
+        kel = {}
+        for b in baris:
+            k = b["mesin"] if mode == "mesin" else f"{b['mesin']} · {b['job'][-6:]}"
+            kel.setdefault(k, []).append(b["energi"])
+        self.uji.isi(list(kel), list(kel.values()), "kolom")
+        self.uji.e_y.setText("ΔG (kcal/mol)")
+        self.uji.hitung()
+        self._uji_berubah()
+
+    def _ekspor_uji(self, fmt):
+        if fmt == "komposer":
+            self._komposer_tambah("uji")
+            return
+        s, (w, h) = self.uji.svg(gelap=False)
+        if not s:
+            self._galat("Grafik kosong: isi lembar data dulu.")
+            return
+        if fmt == "salin":
+            self._salin_svg(s, w, h, "Grafik")
+            return
+        dasar = nama_aman(self.proyek.nama) if self.proyek else "virmodock"
+        if fmt == "svg":
+            f = self._path("Simpan grafik", f"{dasar}_uji.svg", "SVG (*.svg);;PDF (*.pdf)")
+            jenis = "pdf" if f.lower().endswith(".pdf") else "svg"
+        else:
+            f = self._path("Simpan grafik", f"{dasar}_uji.png", "PNG (*.png);;TIFF (*.tif)")
+            jenis = "tif" if f.lower().endswith((".tif", ".tiff")) else "png"
+        if f:
+            self._simpan_svg(s, f, jenis, w, h, mm=85 if w <= 520 else 120, dpi=600)
+            self.log.tulis(f"Grafik uji disimpan: {f}")
+            self.statusBar().showMessage(f"Grafik disimpan: {f}", 5000)
+
+    def _opsi_render(self):
+        b = lambda k, d: str(self.st.value(k, d)).lower() in ("true", "1")   # noqa: E731
+        kabut = self.st.value("render_kabut", "halus")
+        return {"tepi": b("render_tepi", True), "ao": b("render_ao", False),
+                "kabut": kabut if kabut in ("mati", "halus", "kuat") else "halus"}
+
+    def gaya_render(self):
+        a = self.grp_kabut.checkedAction()
+        self.st.setValue("render_tepi", self.a_tepi.isChecked())
+        self.st.setValue("render_ao", self.a_ao.isChecked())
+        self.st.setValue("render_kabut", a.data() if a else "halus")
+        self.viewer.js("gayaRender", self._opsi_render())
+
+    # ------------------------------------------------------------ animasi
+    def ekspor_animasi(self):
+        if not self.objek:
+            self._galat("Viewport 3D kosong.")
+            return
+        if self.tab_tengah.currentWidget() is not self.w_view:
+            self.tab_tengah.setCurrentWidget(self.w_view)
+        dlg = DialogAnimasi(self, self.viewer.height() / max(1, self.viewer.width()))
+        if not dlg.exec():
+            return
+        d = dlg.data()
+        dasar = nama_aman(self.proyek.nama) if self.proyek else "virmodock"
+        if d["fmt"] == "png":
+            f = QFileDialog.getExistingDirectory(self, "Folder bingkai PNG",
+                                                 str(self.proyek.p("ekspor")) if self.proyek else "")
+            if f:
+                f = str(Path(f, f"{dasar}_animasi_{d['jenis']}"))
+        else:
+            f = self._path("Simpan animasi", f"{dasar}_{d['jenis']}.{d['fmt']}",
+                           {"gif": "GIF (*.gif)", "webp": "WebP (*.webp)"}.get(d["fmt"], "Video MP4 (*.mp4)"))
+        if f:
+            self.rekam_animasi(d, f)
+
+    def rekam_animasi(self, d, f, selesai=None):
+        """Rekam bingkai satu per satu dari viewport (asinkron). MP4: tiap bingkai langsung dialirkan ke encoder
+        H.264 (hemat memori, sampai 4K); GIF/WebP/PNG: ditampung lalu disandikan di latar belakang."""
+        from PySide6.QtGui import QImage
+        from PySide6.QtWidgets import QProgressDialog
+        from ..core import animasi as animod
+        import base64
+        n = max(2, round(d["durasi"] * d["fps"]))
+        video = d["fmt"] == "mp4"
+        if video:
+            from .perekam_video import RESOLUSI, PerekamVideo
+            lebar, tinggi = RESOLUSI.get(d.get("resolusi"), RESOLUSI["fhd"])[:2]
+        else:
+            lebar = int(d["lebar"]) // 2 * 2
+            tinggi = int(round(lebar * self.viewer.height() / max(1, self.viewer.width()))) // 2 * 2
+        latar = {"putih": "#ffffff", "hitam": "#000000"}.get(d["latar"], theme.TOKEN[self.mode]["view"])
+        # putar & goyang: bingkai terakhir != bingkai pertama agar putaran mulus saat diulang
+        langkah = ([i / n for i in range(n)] if d["jenis"] in ("putar", "goyang")
+                   else [i / (n - 1) for i in range(n)])
+        prog = QProgressDialog(f"Merekam animasi {lebar} × {tinggi}…", "Batal", 0, n + 1, self)
+        prog.setWindowTitle("Animasi 3D")
+        prog.setMinimumDuration(0)
+        prog.setValue(0)
+        bingkai = []
+        st = {"i": 0, "tunggu": False, "selesai": False}
+        rek = PerekamVideo(f, lebar, tinggi, d["fps"], self) if video else None
+
+        def akhiri(pesan=None):
+            st["selesai"] = True
+            self.viewer.js("animSelesai")
+            prog.close()
+            if rek:
+                rek.batal()
+            if pesan:
+                self._galat(pesan)
+
+        def berikut(_=None):
+            if st["selesai"] or st["tunggu"]:
+                return
+            if prog.wasCanceled():
+                akhiri()
+                if video:
+                    QTimer.singleShot(1500, lambda: Path(f).unlink(missing_ok=True))
+                return
+            if st["i"] >= n:
+                st["selesai"] = True
+                self.viewer.js("animSelesai")
+                prog.setLabelText("Menyelesaikan video…" if video else "Menyandikan…")
+                prog.setValue(n)
+                if video:
+                    rek.akhiri()
+                else:
+                    kerja.jalankan(lambda lapor: animod.simpan(bingkai, f, d["fmt"], d["fps"], lapor, (lebar, tinggi)),
+                                   selesai=selesai_sandi, galat=lambda g: akhiri(f"Animasi gagal: {g}"))
+                return
+            if video and not rek.boleh_lagi():
+                return                                  # encoder penuh: lanjut saat siap_lagi
+            st["tunggu"] = True
+            self.viewer.js("animBingkai", langkah[st["i"]], video, cb=terima)
+
+        def terima(url):
+            st["tunggu"] = False
+            if st["selesai"]:
+                return
+            if not url or "," not in url:
+                akhiri("Render bingkai gagal (WebGL).")
+                return
+            data = base64.b64decode(url.split(",", 1)[1])
+            if video:
+                rek.kirim(QImage.fromData(data))
+            else:
+                bingkai.append(data)
+            st["i"] += 1
+            prog.setValue(st["i"])
+            QTimer.singleShot(0, berikut)
+
+        def selesai_sandi(hasil):
+            prog.close()
+            ukuran = Path(hasil).stat().st_size if Path(hasil).is_file() else 0
+            self.log.tulis(f"Animasi disimpan: {hasil}" + (f" ({ukuran / 1e6:.1f} MB)" if ukuran else ""))
+            self.statusBar().showMessage(f"Animasi disimpan: {hasil}", 6000)
+            if selesai:
+                selesai(hasil)
+            elif d["fmt"] != "png":
+                QDesktopServices.openUrl(QUrl.fromLocalFile(hasil))
+
+        if rek:
+            rek.siap_lagi.connect(berikut)
+            rek.selesai.connect(selesai_sandi)
+            rek.galat.connect(lambda t: akhiri(f"Video gagal: {t}"))
+        sudut = 30 if d["jenis"] == "goyang" else 360
+        self.viewer.js("animMulai", lebar, tinggi, latar, d["jenis"], sudut, cb=lambda _: QTimer.singleShot(150, berikut))
+
+    # ------------------------------------------------------------ komposer figur
+    def buka_komposer(self):
+        if not self.komposer:
+            self.komposer = DialogKomposer(self)
+            self.komposer.minta.connect(self._komposer_tambah)
+            self.komposer.ekspor.connect(self._ekspor_komposer)
+            self.komposer.berubah.connect(self._komposer_berubah)
+            self.komposer.muat(self._komposer_dari_proyek())
+        self.komposer.show()
+        self.komposer.raise_()
+        self.komposer.activateWindow()
+
+    def _komposer_dari_proyek(self):
+        """proyek.komposer -> data dialog (panel raster dibaca dari komposer/*.png)."""
+        import base64
+        pr = self.proyek
+        d = (pr.komposer if pr else {}) or {}
+        panel = []
+        for p in d.get("panel") or []:
+            p = dict(p)
+            if p.get("jenis") == "png" and p.get("berkas"):
+                f = pr.p("komposer", p["berkas"])
+                if not f.exists():
+                    continue
+                p["isi"] = base64.b64encode(f.read_bytes()).decode("ascii")
+            panel.append(p)
+        return {"panel": panel, "opsi": d.get("opsi") or {}}
+
+    def _komposer_berubah(self):
+        import base64
+        import uuid
+        pr = self.proyek
+        if not pr or not self.komposer:
+            return
+        pr.p("komposer").mkdir(exist_ok=True)
+        simpan = []
+        for p in self.komposer.panel:
+            if p["jenis"] == "png":
+                if not p.get("berkas"):
+                    p["berkas"] = f"{uuid.uuid4().hex[:10]}.png"
+                f = pr.p("komposer", p["berkas"])
+                if not f.exists():
+                    f.write_bytes(base64.b64decode(p["isi"]))
+                simpan.append({k: v for k, v in p.items() if k != "isi"})
+            else:
+                simpan.append(dict(p))
+        pakai = {p.get("berkas") for p in simpan}
+        for f in pr.p("komposer").glob("*.png"):     # berkas panel yang sudah dihapus
+            if f.name not in pakai:
+                f.unlink(missing_ok=True)
+        pr.komposer = {"panel": simpan, "opsi": dict(self.komposer.opsi)}
+        self.minta_simpan()
+
+    def _komposer_tambah(self, sumber):
+        if not self.komposer:
+            self.buka_komposer()
+        ke = self.komposer.tambah
+        if sumber == "uji":
+            s, (w, h) = self.uji.svg(gelap=False)
+            nama = self.uji.e_judul.text().strip() or self.uji.c_data.currentText().split(" (")[0]
+        elif sumber == "statistik":
+            s, (w, h) = self.statistik.svg(gelap=False) if self.statistik.data else ("", (0, 0))
+            nama = self.statistik.c_jenis.currentText()
+        elif sumber == "diagram":
+            s, (w, h) = self._svg_diagram(gelap=False), (960, 720)
+            nama = "Diagram interaksi 2D"
+        elif sumber == "sifat":
+            s, (w, h) = (self.sifat.svg(gelap=False) if self.sifat.data else ""), (760, 600)
+            nama = "BOILED-Egg"
+        elif sumber == "3d":
+            if self.tab_tengah.currentWidget() is not self.w_view:
+                self.tab_tengah.setCurrentWidget(self.w_view)
+            # 3600 px: cukup untuk panel lebar penuh 174 mm @ 600 dpi tanpa diperbesar (di bawah batas kanvas 4096)
+            lebar = 3600
+            tinggi = round(lebar * self.viewer.height() / max(1, self.viewer.width()))
+
+            def taruh(url):
+                if not url or "," not in url:
+                    self._galat("Render gambar 3D gagal (WebGL).")
+                    return
+                import base64
+                from ..core.docx_ringan import ukuran_png
+                isi = url.split(",", 1)[1]
+                w_, h_ = ukuran_png(base64.b64decode(isi[:64]))     # ukuran nyata (layar HiDPI bisa lain)
+                ke({"nama": "Struktur 3D", "jenis": "png", "isi": isi, "w": w_, "h": h_})
+                self.statusBar().showMessage("Gambar 3D ditambahkan ke Komposer figur.", 4000)
+            QTimer.singleShot(250, lambda: self.viewer.js("gambar", lebar, tinggi, False, "#ffffff", cb=taruh))
+            return
+        else:
+            self._komposer_berkas()
+            return
+        if not s:
+            self._galat("Grafik/diagram sumber masih kosong.")
+            return
+        ke({"nama": nama, "jenis": "svg", "isi": s, "w": w, "h": h})
+        self.statusBar().showMessage(f"“{nama}” ditambahkan ke Komposer figur.", 4000)
+
+    def _komposer_berkas(self):
+        import base64
+        from PySide6.QtCore import QBuffer, QIODevice
+        from PySide6.QtGui import QImage
+        from PySide6.QtSvg import QSvgRenderer
+        f, _ = QFileDialog.getOpenFileName(self.komposer or self, "Tambah gambar ke komposer", "",
+                                           "Gambar (*.png *.jpg *.jpeg *.tif *.tiff *.bmp *.svg)")
+        if not f:
+            return
+        if f.lower().endswith(".svg"):
+            teks = Path(f).read_text(encoding="utf-8", errors="replace")
+            r = QSvgRenderer(QByteArray(teks.encode("utf-8")))
+            if not r.isValid():
+                self._galat("SVG tidak bisa dibaca.")
+                return
+            sz = r.defaultSize()
+            if "viewBox=" not in teks[:3000]:     # panel butuh viewBox untuk diskalakan
+                teks = teks.replace("<svg", f'<svg viewBox="0 0 {sz.width()} {sz.height()}"', 1)
+            self.komposer.tambah({"nama": Path(f).stem, "jenis": "svg", "isi": teks, "w": sz.width(),
+                                  "h": sz.height()})
+            return
+        img = QImage(f)
+        if img.isNull():
+            self._galat("Gambar tidak bisa dibaca.")
+            return
+        buf = QBuffer()
+        buf.open(QIODevice.WriteOnly)
+        img.save(buf, "PNG")
+        self.komposer.tambah({"nama": Path(f).stem, "jenis": "png", "w": img.width(), "h": img.height(),
+                              "isi": base64.b64encode(bytes(buf.data())).decode("ascii")})
+
+    def _ekspor_komposer(self, fmt):
+        s, (w, h) = self.komposer.svg()
+        if not s:
+            self._galat("Komposer masih kosong.")
+            return
+        if fmt == "salin":
+            self._salin_svg(s, w, h, "Figur")
+            return
+        dasar = nama_aman(self.proyek.nama) if self.proyek else "virmodock"
+        if fmt == "svg":
+            f = self._path("Simpan figur", f"{dasar}_figur.pdf", "PDF (*.pdf);;SVG (*.svg)")
+            jenis = "svg" if f.lower().endswith(".svg") else "pdf"
+        else:
+            f = self._path("Simpan figur", f"{dasar}_figur.tif", "TIFF (*.tif);;PNG (*.png)")
+            jenis = "png" if f.lower().endswith(".png") else "tif"
+        if f:
+            self._simpan_svg(s, f, jenis, w, h, mm=self.komposer.opsi["lebar_mm"], dpi=600)
+            self.log.tulis(f"Figur disimpan: {f}")
+            self.statusBar().showMessage(f"Figur disimpan: {f}", 5000)
+
+    def _ekspor_sifat(self, fmt):
+        if not self.sifat.data:
+            self._galat("Belum ada data sifat ligan.")
+            return
+        dasar = nama_aman(self.proyek.nama) if self.proyek else "virmodock"
+        if fmt == "csv":
+            f = self._path("Simpan tabel sifat ligan", f"{dasar}_sifat_ligan.csv", "CSV (*.csv)")
+            if f:
+                Path(f).write_text(sifat_mod.csv_teks(self.sifat.data), encoding="utf-8")
+                self.log.tulis(f"Tabel sifat ligan disimpan: {f}")
+            return
+        if fmt == "salin":
+            self._salin_svg(self.sifat.svg(gelap=False), 760, 600, "BOILED-Egg")
+            return
+        if fmt == "svg":
+            f = self._path("Simpan BOILED-Egg", f"{dasar}_boiled_egg.svg", "SVG (*.svg);;PDF (*.pdf)")
+            jenis = "pdf" if f.lower().endswith(".pdf") else "svg"
+        else:
+            f = self._path("Simpan BOILED-Egg", f"{dasar}_boiled_egg.png", "PNG (*.png);;TIFF (*.tif)")
+            jenis = "tif" if f.lower().endswith((".tif", ".tiff")) else "png"
+        if f:
+            self._simpan_svg(self.sifat.svg(gelap=False), f, jenis, 760, 600, mm=140, dpi=600)
+            self.log.tulis(f"BOILED-Egg disimpan: {f}")
+            self.statusBar().showMessage(f"BOILED-Egg disimpan: {f}", 5000)
 
     def _reseptor_objek(self):
         siap = [o for o in self.objek.values() if o.jenis == "protein" and o.info.get("siap_docking")]
@@ -1306,6 +2395,39 @@ class JendelaUtama(QMainWindow):
             if f.exists():
                 return analisis.pose_mol(f.read_text(), o.info["pdbqt"])
         return analisis.mol_dari_objek(o)
+
+    def _tampilkan_kontribusi(self, *_):
+        """Kontribusi energi per atom (fungsi skor Vina) untuk pose aktif -> bola berwarna di viewport."""
+        if not self.a_kontrib.isChecked():
+            self.viewer.js("kontribusi", None, [])
+            return
+        a = self._aktif_inter
+        o = self.objek.get(a["oid"]) if a else None
+        if not o or o.jenis != "pose" or not o.info.get("pdbqt"):
+            self.viewer.js("kontribusi", None, [])
+            self.statusBar().showMessage("Kontribusi per atom: pilih pose hasil docking dulu.", 5000)
+            return
+        j = self.pelaksana.cari(o.info.get("job")) if o.info.get("job") else None
+        rf = self.proyek.p(j["reseptor"]) if j and j.get("reseptor") else None
+        if not rf or not rf.exists():
+            self.statusBar().showMessage("Kontribusi per atom: berkas reseptor PDBQT job tidak ditemukan.", 5000)
+            return
+        from ..core import kontribusi
+        try:
+            daftar, total = kontribusi.per_atom(rf.read_text(), o.info["pdbqt"])
+        except Exception as e:
+            self._galat(f"Kontribusi per atom gagal: {e}")
+            return
+        self.viewer.js("kontribusi", o.id, daftar, {"label": True},
+                       cb=lambda n: n == 0 and self.statusBar().showMessage(
+                           "Kontribusi per atom: atom pose tidak cocok dengan objek di viewport.", 6000))
+        urut = sorted(daftar, key=lambda x: x["energi"])
+        baik = ", ".join(f"{x['nama']} {x['energi']:.2f}" for x in urut[:3])
+        buruk = ", ".join(f"{x['nama']} {x['energi']:+.2f}" for x in urut[::-1][:2] if x["energi"] > 0)
+        self.statusBar().showMessage(f"Kontribusi Vina antarmolekul {total:.2f} kcal/mol · terbaik: {baik}"
+                                     + (f" · merugikan: {buruk}" if buruk else ""), 15000)
+        self.log.tulis(f"Kontribusi per atom {o.info.get('ligan', '')} {o.nama}: total {total:.2f} kcal/mol; "
+                       + "; ".join(f"{x['nama']} {x['energi']:.2f}" for x in urut))
 
     def analisis_objek(self, o):
         """Interaksi pose/ligan aktif -> panel Interaksi, viewport, diagram 2D."""
@@ -1328,6 +2450,8 @@ class JendelaUtama(QMainWindow):
         self.p_inter.muat(self._aktif_inter["judul"], daftar)
         self._tampilkan_interaksi()
         self._gambar_diagram()
+        if self.a_kontrib.isChecked():
+            self._tampilkan_kontribusi()
 
     def _tampilkan_interaksi(self, *_):
         a = self._aktif_inter
@@ -1354,7 +2478,7 @@ class JendelaUtama(QMainWindow):
             sel = {"id": a["rec"], "resi": h["resi"]}
             if h["rantai"]:
                 sel["chain"] = h["rantai"]
-            self.viewer.js("fokus", sel)
+            self._fokus(sel)
 
     def _svg_diagram(self, vdw=True, jarak=True, transparan=False, judul=True, lebar=960, tinggi=720, gelap=None):
         a = self._aktif_inter
@@ -1382,6 +2506,48 @@ class JendelaUtama(QMainWindow):
                                           n and self.log.tulis(f"Analisis dilengkapi untuk {n} ligan.")),
                        galat=self._galat)
 
+    def qc_pose_aktif(self):
+        """PoseBusters lengkap untuk pose/ligan yang sedang dianalisis (pose mana pun), hasil di dialog."""
+        from ..core import qc
+        if not qc.tersedia():
+            self._galat("Paket posebusters tidak terpasang.")
+            return
+        a = self._aktif_inter
+        o = self.objek.get(a["oid"]) if a else None
+        prot = qc.jalur_protein(self.proyek) if self.proyek else None
+        if not o or prot is None:
+            self._galat("Pilih pose dulu (klik dua kali baris di tab Hasil) dan pastikan reseptor sudah disiapkan.")
+            return
+        mol = a["mol"]
+        self.s_prog.setText("PoseBusters…")
+        kerja.jalankan(lambda lapor=None: qc.periksa_proses(mol, prot), log=self.log.tulis,
+                       selesai=lambda h: (self.s_prog.setText(""), self._tampil_qc(a["judul"], h)),
+                       galat=lambda e: (self.s_prog.setText(""), self._galat(f"PoseBusters gagal: {e}")))
+
+    def _tampil_qc(self, judul, h):
+        from html import escape
+        from ..core import qc
+        t = theme.TOKEN[self.mode]
+        o = [f"<p><b>{escape(judul)}</b></p><p>{h['n_uji'] - len(h['gagal'])}/{h['n_uji']} uji lulus — "
+             + (f"<span style='color:{t['ok']}'><b>pose wajar secara fisik (PB-valid)</b></span>" if h["lulus"] else
+                f"<span style='color:{t['bad']}'><b>ada uji yang gagal</b></span>") + "</p><table>"]
+        kel = None
+        for _k, nama, g, ok in h["uji"]:
+            if g != kel:
+                o.append(f"<tr><td colspan=2><b>{g}</b></td></tr>")
+                kel = g
+            o.append(f"<tr><td>{escape(nama)}</td><td style='color:{t['ok'] if ok else t['bad']}'>"
+                     f"{'lulus' if ok else 'GAGAL'}</td></tr>")
+        o.append("</table><p>")
+        o += [f"{escape(qc.ANGKA[k])}: {v}<br>" for k, v in h["angka"].items()]
+        o.append(f"</p><p style='color:{t['mut']}'>{escape(qc.SITASI)}</p>")
+        box = QMessageBox(self)
+        box.setWindowTitle("PoseBusters — kontrol kualitas pose")
+        box.setTextFormat(Qt.RichText)
+        box.setText("".join(o))
+        box.exec()
+        self.log.tulis(f"PoseBusters {judul}: " + ("lulus semua uji" if h["lulus"] else "gagal: " + ", ".join(h["gagal"])))
+
     def _isi_kristal(self):
         """Proyek lama: simpan koordinat ligan kristal untuk RMSD redocking."""
         pr = self.proyek
@@ -1397,7 +2563,7 @@ class JendelaUtama(QMainWindow):
     def validasi_redocking(self):
         pr = self.proyek
         if not pr or not pr.reseptor:
-            self._galat("Siapkan reseptor dulu (Prepare › Siapkan reseptor).")
+            self._galat("Siapkan reseptor dulu (langkah 1 › Siapkan reseptor).")
             return
         asli = [o for o in self.objek.values() if o.jenis == "ligan" and o.fmt == "pdb" and o.info.get("ligan_asli")]
         if not asli:
@@ -1449,7 +2615,7 @@ class JendelaUtama(QMainWindow):
         job["kristal_objek"] = o.nama
         self.pelaksana.tambah(job)
         self.log.tulis(f"Validasi redocking dimulai: {o.nama} dengan {mesinmod.MESIN[mesin]}")
-        self.d_antre.raise_()
+        self._tampil_bawah(True)
 
     def _hasil_validasi(self, j):
         l = j["ligan"][0]
@@ -1503,6 +2669,7 @@ class JendelaUtama(QMainWindow):
             v = viewer[i]
             v.js("clear")
             v.js("tema", self.mode == "gelap", t["view"])
+            v.js("gayaRender", self._opsi_render())
             r = molekul.Objek(nama="rec", jenis="protein", teks=rec.teks, id=f"b{i}r")
             r.gaya = {"reps": ["cartoon"], "warna": {"mode": "solid", "val": "#c9d1dc" if self.mode == "terang"
                                                       else "#4a5363"}, "opacity": 0.85, "permukaan": None, "khusus": []}
@@ -1541,7 +2708,7 @@ class JendelaUtama(QMainWindow):
         baris = [(f"{b['ligan']} · {b['mesin'].replace('AutoDock-GPU', 'AD-GPU').replace('AutoDock ', '')}",
                   b["energi"], b["residu"]) for b in eksmod.baris_hasil(self.proyek) if b["residu"]][:200]
         if not baris:
-            self._galat("Belum ada data interaksi. Jalankan Analyze › Hitung ulang analisis hasil.")
+            self._galat("Belum ada data interaksi. Jalankan Analisis › Hitung ulang analisis hasil.")
             return
         semua = self.banding.peta.muat(baris)
         frek = {r: sum(1 for b in baris if b[2].get(r) and b[2][r] != "vdw") for r in semua}
@@ -1593,7 +2760,7 @@ class JendelaUtama(QMainWindow):
         t = theme.TOKEN[self.mode]
         latar = {"putih": "#ffffff", "hitam": "#000000", "tema": t["view"], "transparan": t["view"]}[d["latar"]]
         self.statusBar().showMessage(f"Merender {d['lebar']} × {d['tinggi']} px…")
-        self.tab_tengah.setCurrentWidget(self.viewer)  # WebGL hanya merender benar bila viewport terlihat
+        self.tab_tengah.setCurrentWidget(self.w_view)  # WebGL hanya merender benar bila viewport terlihat
 
         def simpan(url):
             import base64
@@ -1606,8 +2773,59 @@ class JendelaUtama(QMainWindow):
                                       ukuran=(d["lebar"], d["tinggi"]))
             self.statusBar().showMessage(f"Gambar disimpan: {f}", 5000)
             self.log.tulis(f"Gambar 3D {uk[0]}×{uk[1]} px @ {d['dpi']} dpi: {f}")
+        if max(d["lebar"], d["tinggi"]) > UBIN_PX:
+            QTimer.singleShot(250, lambda: self._render_ubin(d["lebar"], d["tinggi"], d["latar"] == "transparan",
+                                                             latar, simpan))
+            return
         QTimer.singleShot(250, lambda: self.viewer.js("gambar", d["lebar"], d["tinggi"], d["latar"] == "transparan",
                                                       latar, cb=simpan))
+
+    def _render_ubin(self, lebar, tinggi, transparan, latar, selesai):
+        """Gambar > UBIN_PX: render n x n ubin di WebGL lalu satukan; `selesai` menerima data URL PNG."""
+        import base64
+        import math
+        from PySide6.QtCore import QBuffer, QIODevice
+        from PySide6.QtGui import QImage, QPainter
+        n = math.ceil(max(lebar, tinggi) / UBIN_PX)
+        ubin = {}
+
+        def gagal(pesan):
+            self.viewer.js("ubinSelesai")
+            self._galat(pesan)
+
+        def satukan():
+            tw = max(im.width() for im in ubin.values())
+            th = max(im.height() for im in ubin.values())
+            img = QImage(tw * n, th * n, QImage.Format_ARGB32)
+            img.fill(0)
+            p = QPainter(img)
+            for (i, j), im in ubin.items():
+                p.drawImage(i * tw, j * th, im)
+            p.end()
+            if (img.width(), img.height()) != (lebar, tinggi):
+                img = img.scaled(lebar, tinggi, Qt.IgnoreAspectRatio, Qt.SmoothTransformation)
+            buf = QBuffer()
+            buf.open(QIODevice.WriteOnly)
+            img.save(buf, "PNG")
+            selesai("data:image/png;base64," + base64.b64encode(bytes(buf.data())).decode())
+
+        urutan = [(i, j) for j in range(n) for i in range(n)]
+
+        def ambil(k=0):
+            if k == len(urutan):
+                self.viewer.js("ubinSelesai", cb=lambda _: satukan())
+                return
+            i, j = urutan[k]
+            self.statusBar().showMessage(f"Merender {lebar} × {tinggi} px: ubin {k + 1}/{len(urutan)}…")
+
+            def terima(url):
+                if not url or "," not in url:
+                    return gagal("Render ubin gagal (WebGL). Coba ukuran lebih kecil.")
+                ubin[(i, j)] = QImage.fromData(base64.b64decode(url.split(",", 1)[1]), "PNG")
+                QTimer.singleShot(0, lambda: ambil(k + 1))
+            self.viewer.js("ubin", i, j, cb=terima)
+        self.viewer.js("ubinMulai", lebar, tinggi, n, transparan, latar, cb=lambda ok: ambil() if ok else
+                       gagal("Render ubin gagal dimulai."))
 
     def _ekspor_diagram(self, d):
         if not self._aktif_inter:
@@ -1619,43 +2837,99 @@ class JendelaUtama(QMainWindow):
             self._simpan_diagram(f, fmt, d["mm"], d["dpi"], d["vdw"], d["transparan"], d["judul"])
 
     def _simpan_diagram(self, f, fmt, mm=120, dpi=600, vdw=True, transparan=False, judul=True):
+        s = self._svg_diagram(vdw, True, transparan, judul, gelap=False)
+        self._simpan_svg(s, f, fmt, 960, 720, mm, dpi, transparan)
+        self.log.tulis(f"Diagram 2D disimpan: {f}")
+        self.statusBar().showMessage(f"Diagram disimpan: {f}", 5000)
+
+    @staticmethod
+    def _svg_ke_qimage(s, lebar_px, tinggi_px, px, latar="#ffffff"):
+        from PySide6.QtCore import QByteArray
+        from PySide6.QtGui import QColor, QImage, QPainter
+        from PySide6.QtSvg import QSvgRenderer
+        img = QImage(px, int(px * tinggi_px / lebar_px), QImage.Format_ARGB32)
+        img.fill(QColor(latar) if latar else 0)
+        p = QPainter(img)
+        p.setRenderHint(QPainter.Antialiasing)
+        QSvgRenderer(QByteArray(s.encode("utf-8"))).render(p)
+        p.end()
+        return img
+
+    def _salin_svg(self, s, w, h, nama):
+        """Grafik SVG -> gambar 2400 px berlatar putih di clipboard (setara 200 mm @ 300 dpi)."""
+        img = self._svg_ke_qimage(s, w, h, 2400)
+        img.setDotsPerMeterX(round(300 / 0.0254))
+        img.setDotsPerMeterY(round(300 / 0.0254))
+        QGuiApplication.clipboard().setImage(img)
+        self.statusBar().showMessage(f"{nama} disalin ke clipboard ({img.width()} × {img.height()} px).", 5000)
+
+    def salin_gambar(self):
+        """Salin isi tab tengah yang aktif ke clipboard."""
+        w = self.tab_tengah.currentWidget()
+        if w is self.diagram:
+            return self._diagram_cepat("salin")
+        if w is self.sifat:
+            return self._ekspor_sifat("salin")
+        if w is self.statistik:
+            return self._ekspor_statistik("salin")
+        if w is self.uji:
+            return self._ekspor_uji("salin")
+        if w is not self.w_view:
+            self.tab_tengah.setCurrentWidget(self.w_view)
+        rasio = 2
+        lebar, tinggi = self.viewer.width() * rasio, self.viewer.height() * rasio
+        latar = theme.TOKEN[self.mode]["view"]
+
+        def taruh(url):
+            import base64
+            from PySide6.QtGui import QImage
+            if not url or "," not in url:
+                self._galat("Render gambar gagal (WebGL).")
+                return
+            img = QImage.fromData(base64.b64decode(url.split(",", 1)[1]), "PNG")
+            QGuiApplication.clipboard().setImage(img)
+            self.statusBar().showMessage(f"Gambar viewport disalin ke clipboard ({img.width()} × {img.height()} px).",
+                                         5000)
+        QTimer.singleShot(150, lambda: self.viewer.js("gambar", lebar, tinggi, False, latar, cb=taruh))
+
+    def _simpan_svg(self, s, f, fmt, lebar_px, tinggi_px, mm=120, dpi=600, transparan=False):
+        """SVG -> svg (ukuran mm) / pdf (vektor) / png / tif ber-DPI."""
         from PySide6.QtCore import QBuffer, QByteArray, QIODevice, QMarginsF, QRectF, QSizeF
         from PySide6.QtGui import QImage, QPageSize, QPainter, QPdfWriter
         from PySide6.QtSvg import QSvgRenderer
-        s = self._svg_diagram(vdw, True, transparan, judul, gelap=False)
-        lebar_px, tinggi_px = 960, 720
         if fmt == "svg":
             s = s.replace(f'width="{lebar_px}" height="{tinggi_px}"',
                           f'width="{mm:.1f}mm" height="{mm * tinggi_px / lebar_px:.1f}mm"', 1)
             Path(f).write_text(s, encoding="utf-8")
-        else:
-            r = QSvgRenderer(QByteArray(s.encode("utf-8")))
-            if fmt == "pdf":
-                w = QPdfWriter(f)
-                w.setPageSize(QPageSize(QSizeF(mm, mm * tinggi_px / lebar_px), QPageSize.Millimeter))
-                w.setPageMargins(QMarginsF(0, 0, 0, 0))
-                w.setResolution(600)
-                p = QPainter(w)
-                r.render(p, QRectF(0, 0, w.width(), w.height()))
-                p.end()
-            else:
-                px = eksmod.mm_ke_px(mm, dpi)
-                img = QImage(px, int(px * tinggi_px / lebar_px), QImage.Format_ARGB32)
-                img.fill(0)
-                p = QPainter(img)
-                p.setRenderHint(QPainter.Antialiasing)
-                r.render(p)
-                p.end()
-                buf = QBuffer()
-                buf.open(QIODevice.WriteOnly)
-                img.save(buf, "PNG")
-                eksmod.simpan_gambar(bytes(buf.data()), f, dpi, fmt, latar=None if transparan else "#ffffff")
-        self.log.tulis(f"Diagram 2D disimpan: {f}")
-        self.statusBar().showMessage(f"Diagram disimpan: {f}", 5000)
+            return
+        r = QSvgRenderer(QByteArray(s.encode("utf-8")))
+        if fmt == "pdf":
+            w = QPdfWriter(f)
+            w.setPageSize(QPageSize(QSizeF(mm, mm * tinggi_px / lebar_px), QPageSize.Millimeter))
+            w.setPageMargins(QMarginsF(0, 0, 0, 0))
+            w.setResolution(600)
+            p = QPainter(w)
+            r.render(p, QRectF(0, 0, w.width(), w.height()))
+            p.end()
+            return
+        px = eksmod.mm_ke_px(mm, dpi)
+        img = QImage(px, int(px * tinggi_px / lebar_px), QImage.Format_ARGB32)
+        img.fill(0)
+        p = QPainter(img)
+        p.setRenderHint(QPainter.Antialiasing)
+        r.render(p)
+        p.end()
+        buf = QBuffer()
+        buf.open(QIODevice.WriteOnly)
+        img.save(buf, "PNG")
+        eksmod.simpan_gambar(bytes(buf.data()), f, dpi, fmt, latar=None if transparan else "#ffffff")
 
     def _diagram_cepat(self, fmt):
         if not self._aktif_inter:
             self._galat("Belum ada diagram.")
+            return
+        if fmt == "salin":
+            self._salin_svg(self._svg_diagram(True, True, False, True, gelap=False), 960, 720, "Diagram 2D")
             return
         if fmt == "svg":
             f = self._path("Simpan diagram 2D", f"{self._nama_dasar()}_2d.svg", "SVG (*.svg)")
@@ -1764,6 +3038,7 @@ class JendelaUtama(QMainWindow):
         info = {"Proyek": pr.nama, "Folder": str(pr.folder), "VirmoDock": VERSI,
                 "Reseptor": (pr.reseptor or {}).get("nama"), "Metode reseptor": (pr.reseptor or {}).get("metode"),
                 "Perangkat": self.s_gpu.text().lstrip("● ")}
+        sifat_lig = [x for x in self._data_sifat() if isinstance(x[1], dict)]   # di thread GUI (cursor)
 
         def kerjakan(lapor):
             inter = {}
@@ -1775,7 +3050,7 @@ class JendelaUtama(QMainWindow):
                     p = mesinmod.baca_hasil(j["mesin"], pr.p(l["keluaran"]))[0]
                     inter[(b["ligan"], b["job"])] = analisis.interaksi(
                         r, analisis.pose_mol(pr.p(l["pdbqt"]).read_text(), p.pdbqt))
-            eksmod.simpan_xlsx(f, pr, baris, inter, info)
+            eksmod.simpan_xlsx(f, pr, baris, inter, info, sifat_lig)
             return f
         self.s_prog.setText("Menyusun Excel…")
         kerja.jalankan(kerjakan, selesai=lambda x: (self.s_prog.setText(""), self.log.tulis(f"Tabel Excel disimpan: {x}")),
@@ -1787,7 +3062,10 @@ class JendelaUtama(QMainWindow):
         if not pr or not pr.job:
             self._galat("Belum ada hasil docking untuk dilaporkan.")
             return
-        f = self._path("Simpan laporan PDF", f"{nama_aman(pr.nama)}_laporan.pdf", "PDF (*.pdf)")
+        fmt = d.get("fmt", "pdf")
+        ext, filt = {"docx": ("docx", "Dokumen Word (*.docx)"), "html": ("html", "HTML interaktif (*.html)")}.get(
+            fmt, ("pdf", "PDF (*.pdf)"))
+        f = self._path("Simpan laporan", f"{nama_aman(pr.nama)}_laporan.{ext}", filt)
         if not f:
             return
         baris = eksmod.baris_hasil(pr)
@@ -1818,35 +3096,109 @@ class JendelaUtama(QMainWindow):
         from PySide6.QtGui import QImage, QPageLayout, QPageSize, QPainter, QPdfWriter, QTextDocument
         from PySide6.QtSvg import QSvgRenderer
         pr = self.proyek
-        doc = QTextDocument()
-        if img3d:
-            doc.addResource(QTextDocument.ImageResource, QUrl("img3d"), QImage.fromData(img3d))
+        fmt = d.get("fmt", "pdf")
+        img2d = None
         if svg2d:
             r = QSvgRenderer(QByteArray(svg2d.encode("utf-8")))
-            img = QImage(1600, 1200, QImage.Format_ARGB32)
-            img.fill(0xffffffff)
-            p = QPainter(img)
+            img2d = QImage(1600, 1200, QImage.Format_ARGB32)
+            img2d.fill(0xffffffff)
+            p = QPainter(img2d)
             p.setRenderHint(QPainter.Antialiasing)
             r.render(p)
             p.end()
-            doc.addResource(QTextDocument.ImageResource, QUrl("img2d"), img)
         inter = self._aktif_inter["daftar"] if (self._aktif_inter and baris) else None
         info = {"versi": VERSI, "perangkat": self.s_gpu.text().lstrip("● ")}
-        doc.setHtml(laporan.html(pr, baris, info, inter, bool(img3d), bool(svg2d), d.get("penulis", "")))
+        sifat_lap = {n: x for n, x, _ in self._data_sifat() if isinstance(x, dict)}
+        html = laporan.html(pr, baris, info, inter, bool(img3d), bool(svg2d), d.get("penulis", ""), sifat_lap)
+        judul = f"Laporan docking {pr.nama}"
+
+        def selesai(_=None):
+            self.statusBar().showMessage(f"Laporan disimpan: {f}", 6000)
+            self.log.tulis(f"Laporan {fmt.upper()} disimpan: {f}")
+            if not pr.validasi:
+                self.pesan.tulis("Laporan dibuat tanpa validasi redocking. Jalankan Docking › Validasi redocking agar "
+                                 "metode dapat dipertanggungjawabkan.")
+            QDesktopServices.openUrl(QUrl.fromLocalFile(f))
+
+        if fmt == "docx":
+            from ..core import docx_ringan
+            gambar = {"img3d": img3d} if img3d else {}
+            if img2d is not None:
+                gambar["img2d"] = self._qimage_png(img2d)
+            docx_ringan.simpan(html, f, gambar, judul, d.get("penulis", ""))
+            selesai()
+            return
+        if fmt == "html":
+            self._tulis_laporan_html(f, html, baris, img3d, svg2d, d, selesai)
+            return
+        doc = QTextDocument()
+        if img3d:
+            doc.addResource(QTextDocument.ImageResource, QUrl("img3d"), QImage.fromData(img3d))
+        if img2d is not None:
+            doc.addResource(QTextDocument.ImageResource, QUrl("img2d"), img2d)
+        doc.setHtml(html)
         w = QPdfWriter(f)
         w.setPageLayout(QPageLayout(QPageSize(QPageSize.A4), QPageLayout.Portrait, QMarginsF(16, 14, 16, 14),
                                     QPageLayout.Millimeter))
         w.setResolution(150)
-        w.setTitle(f"Laporan docking {pr.nama}")
+        w.setTitle(judul)
         w.setCreator(f"VirmoDock {VERSI}")
         doc.setPageSize(w.pageLayout().paintRectPixels(150).size().toSizeF())
         doc.print_(w)
-        self.statusBar().showMessage(f"Laporan disimpan: {f}", 6000)
-        self.log.tulis(f"Laporan PDF disimpan: {f}")
-        if not pr.validasi:
-            self.pesan.tulis("Laporan dibuat tanpa validasi redocking. Jalankan Analyze › Validasi redocking agar "
-                             "metode dapat dipertanggungjawabkan.")
-        QDesktopServices.openUrl(QUrl.fromLocalFile(f))
+        selesai()
+
+    @staticmethod
+    def _qimage_png(img):
+        from PySide6.QtCore import QBuffer, QIODevice
+        buf = QBuffer()
+        buf.open(QIODevice.WriteOnly)
+        img.save(buf, "PNG")
+        return bytes(buf.data())
+
+    def _tulis_laporan_html(self, f, html, baris, img3d, svg2d, d, selesai):
+        """Laporan HTML interaktif: pose 30 ligan teratas + interaksi dihitung di latar belakang."""
+        from datetime import datetime
+        from rdkit import Chem
+        from ..core import laporan_interaktif
+        pr = self.proyek
+        rec = self._reseptor_objek()
+        if not rec:
+            self._galat("Reseptor tidak ditemukan di sesi; buka proyek dengan reseptor siap docking.")
+            return
+        rec_teks, rec_fmt = rec.teks, rec.fmt
+        lapor_baris = [dict(b) for b in baris]
+        jobs = {b["job"]: self.pelaksana.cari(b["job"]) for b in lapor_baris}
+
+        def kerjakan(lapor):
+            r = analisis.baca_reseptor(rec_teks)
+            pose = []
+            for b in lapor_baris[:30]:
+                try:
+                    j = jobs[b["job"]]
+                    l = next(x for x in j["ligan"] if x["id"] == b["lid"])
+                    p = mesinmod.baca_hasil(j["mesin"], pr.p(l["keluaran"]))[0]
+                    m = analisis.pose_mol(pr.p(l["pdbqt"]).read_text(), p.pdbqt)
+                    daftar = analisis.interaksi(r, m)
+                except Exception as e:      # satu ligan rusak tidak menggagalkan laporan
+                    lapor.log.emit(f"Pose {b['ligan']} dilewati: {e}")
+                    continue
+                b["_pose"] = len(pose)
+                pose.append({"ligan": b["ligan"], "energi": b["energi"], "peringkat": 1, "mesin": b["mesin"],
+                             "sdf": Chem.MolToMolBlock(m),
+                             "kontak": sorted({(h["rantai"], int(h["resi"])) for h in daftar if h.get("resi") is not None}),
+                             "interaksi": [{"jenis": h["jenis"], "residu": h["residu"], "atom": h["atom_p"],
+                                            "jarak": h["jarak"], "p": h["p"], "l": h["l"]} for h in daftar]})
+            js = (paths.VIEWER / "3Dmol-min.js").read_text(encoding="utf-8")
+            n = datetime.now()
+            sub = (f"{n:%d-%m-%Y %H:%M} · VirmoDock {VERSI}" + (f" · {d.get('penulis')}" if d.get("penulis") else "")
+                   + f" · {len(lapor_baris)} hasil")
+            teks = laporan_interaktif.buat(f"Laporan docking — {pr.nama}", html, lapor_baris, pose, rec_teks,
+                                           rec_fmt, js, [(k, analisis.NAMA_JENIS[k]) for k in analisis.URUT_JENIS],
+                                           img3d, svg2d, sub)
+            Path(f).write_text(teks, encoding="utf-8")
+            return f
+        self.statusBar().showMessage("Menyusun laporan HTML interaktif…")
+        kerja.jalankan(kerjakan, selesai=selesai, galat=self._galat)
 
     # -------------------------------------------------------------- tray
     def _tray(self):
@@ -1879,11 +3231,53 @@ class JendelaUtama(QMainWindow):
             Path(f).write_text(o.teks)
             self.log.tulis(f"Diekspor: {f}")
 
+    def _tulis_sesi(self, folder):
+        """Skrip sesi untuk pose/ligan aktif; None bila belum ada."""
+        from ..core import sesi_eksternal
+        a = self._aktif_inter
+        o = self.objek.get(a["oid"]) if a else None
+        rec = self.objek.get(a["rec"]) if a else None
+        if not o or not rec or a.get("mol") is None:
+            return None
+        return sesi_eksternal.tulis(folder, self._nama_dasar(), rec.teks, a["mol"], a["daftar"], a.get("judul", ""))
+
+    def ekspor_sesi(self):
+        if not self._aktif_inter:
+            self._galat("Pilih pose dulu (klik dua kali baris di tab Hasil).")
+            return
+        awal = str(self.proyek.p("ekspor")) if self.proyek else ""
+        if self.proyek:
+            self.proyek.p("ekspor").mkdir(exist_ok=True)
+        d = QFileDialog.getExistingDirectory(self, "Folder untuk sesi PyMOL / ChimeraX", awal)
+        if not d:
+            return
+        try:
+            hasil = self._tulis_sesi(Path(d) / f"{self._nama_dasar()}_sesi")
+        except Exception as e:
+            self._galat(f"Gagal menulis sesi: {e}")
+            return
+        if hasil:
+            self.log.tulis(f"Sesi PyMOL/ChimeraX disimpan: {hasil[0].parent}")
+            self.statusBar().showMessage(f"Sesi disimpan: {hasil[0].parent}", 5000)
+            QDesktopServices.openUrl(QUrl.fromLocalFile(str(hasil[0].parent)))
+
     def buka_di(self, nama):
         if not self.env or nama not in self.env.eksternal:
             return
         tmp = paths.CACHE / "buka"
         tmp.mkdir(exist_ok=True)
+        if nama in ("PyMOL", "ChimeraX") and self._aktif_inter:
+            # pose aktif: buka sebagai sesi lengkap (residu kontak + garis interaksi)
+            try:
+                hasil = self._tulis_sesi(tmp / "sesi")
+            except Exception as e:
+                hasil = None
+                self.log.tulis(f"Sesi {nama} gagal dibuat ({e}); membuka berkas biasa.")
+            if hasil:
+                skrip = hasil[0] if nama == "PyMOL" else hasil[1]
+                subprocess.Popen([self.env.eksternal[nama], str(skrip)], cwd=str(skrip.parent), creationflags=0)
+                self.log.tulis(f"Dibuka di {nama}: sesi pose aktif ({skrip.name})")
+                return
         berkas = []
         for o in self.objek.values():
             if not o.tampil:
@@ -1911,8 +3305,12 @@ class JendelaUtama(QMainWindow):
             self.deteksi()
 
     def reset_layout(self):
-        self.st.remove("layout")
-        QMessageBox.information(self, "Layout", "Layout bawaan dipakai lagi saat VirmoDock dibuka berikutnya.")
+        self.st.remove(KUNCI_LAYOUT)
+        for d in (self.d_langkah, self.d_hier, self.d_kerja, self.d_prop, self.d_tamp, self.d_inter):
+            d.setFloating(False)
+            d.show()
+        self._ukuran_dock_awal()
+        self.atur_ruang(self._ruang_aktif or "siapkan")
 
     def tentang(self):
         from PySide6.QtWidgets import QDialog, QDialogButtonBox
@@ -1963,7 +3361,7 @@ class JendelaUtama(QMainWindow):
             self._simpan_diam()
             ikut = [self.proyek.folder]
         self.st.setValue("geometri", self.saveGeometry())
-        self.st.setValue("layout", self.saveState())
+        self.st.setValue(KUNCI_LAYOUT, self.saveState())
         f, _ = QFileDialog.getSaveFileName(self, "Ekspor pengaturan & proyek",
                                            str(Path.home() / f"VirmoDock_{datetime.now():%Y%m%d}.vmdbackup"),
                                            "Cadangan VirmoDock (*.vmdbackup)")
@@ -1973,7 +3371,7 @@ class JendelaUtama(QMainWindow):
                        selesai=lambda m: (self.log.tulis(f"Cadangan disimpan: {f}"),
                                           QMessageBox.information(self, "Pindah laptop",
                                                                   f"Cadangan tersimpan:\n{f}\n\nSalin berkas ini ke "
-                                                                  "laptop baru, lalu File › Pindah laptop › Impor.")))
+                                                                  "laptop baru, lalu Berkas › Pindah laptop › Impor.")))
 
     def impor_cadangan(self, f=None):
         from ..core import pindah
@@ -2018,6 +3416,7 @@ class JendelaUtama(QMainWindow):
 
     def uji_mandiri(self):
         from ..core import ujimandiri
+        self._tampil_bawah(True)
         self.d_log.raise_()
         self.log.tulis("Uji mandiri dimulai…")
 
@@ -2026,7 +3425,7 @@ class JendelaUtama(QMainWindow):
             teks = "\n".join(f"{'✓' if x['ok'] else '✗'}  {x['uji']}: {x['detail']}" for x in h)
             (QMessageBox.information if not gagal else QMessageBox.warning)(
                 self, "Uji mandiri", ("Semua komponen berfungsi.\n\n" if not gagal else
-                                      f"{len(gagal)} uji gagal — lihat Help › Dokumentasi › Troubleshooting.\n\n")
+                                      f"{len(gagal)} uji gagal — lihat Bantuan › Dokumentasi › Mengatasi masalah.\n\n")
                 + teks)
         kerja.jalankan(ujimandiri.uji, selesai=selesai, galat=self._galat, log=self.log.tulis)
 
@@ -2034,12 +3433,13 @@ class JendelaUtama(QMainWindow):
         DialogLapor(VERSI, self.env, self).exec()
 
     def _belum(self):
-        self.pesan.tulis("Fitur ini sedang dibangun di tahap berikutnya.")
-        self.d_pesan.raise_()
+        self._galat("Fitur ini sedang dibangun di tahap berikutnya.")
 
     def _galat(self, g):
         self.pesan.tulis(g)
+        self._tampil_bawah(True)
         self.d_pesan.raise_()
+        self.statusBar().showMessage(g.splitlines()[0][:160] if g else "", 8000)
 
     def closeEvent(self, e):
         if self.pelaksana.sibuk():
@@ -2051,9 +3451,11 @@ class JendelaUtama(QMainWindow):
                 e.ignore()
                 return
         self.pelaksana.hentikan_semua()
+        from ..core import qc
+        qc.tutup()
         self._simpan_diam()
         self.st.setValue("geometri", self.saveGeometry())
-        self.st.setValue("layout", self.saveState())
+        self.st.setValue(KUNCI_LAYOUT, self.saveState())
         self.st.remove("sesi_terbuka")  # ditutup normal: tidak perlu pemulihan
         if self.tray:
             self.tray.hide()

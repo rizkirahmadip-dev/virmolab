@@ -4,11 +4,16 @@ from PySide6.QtGui import QColor
 from PySide6.QtWidgets import (QHBoxLayout, QHeaderView, QLabel, QLineEdit, QPushButton,
                                QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget)
 
+from ..core import qc
 from . import theme
 
 KOLOM = ["#", "Ligan", "ΔG (kcal/mol)", "Ki perkiraan", "LE", "Klaster", "RMSD kristal (Å)", "RMSD ref (Å)",
-         "H", "HF", "π", "Lain", "Mesin", "Job"]
-NUM = {0, 2, 4, 5, 6, 7, 8, 9, 10, 11}
+         "PoseBusters", "H", "HF", "π", "Lain", "Mesin", "Job", "IFP vs kristal"]
+NUM = {0, 2, 4, 5, 6, 7, 9, 10, 11, 12, 15}
+K_IFP = 15
+K_QC = 8
+# kolom tampil bawaan (sisanya lewat klik kanan pada judul kolom)
+TAMPIL_BAWAAN = {0, 1, 2, 4, 6, K_QC, 9, K_IFP}
 
 
 class ItemAngka(QTreeWidgetItem):
@@ -73,6 +78,9 @@ class PanelHasil(QWidget):
         self.pohon.setIndentation(14)
         self.pohon.setAlternatingRowColors(False)
         h = self.pohon.header()
+        h.setContextMenuPolicy(Qt.CustomContextMenu)
+        h.customContextMenuRequested.connect(self._menu_kolom)
+        h.setToolTip("Klik kanan untuk memilih kolom")
         h.setSectionResizeMode(QHeaderView.ResizeToContents)
         h.setSectionResizeMode(1, QHeaderView.Stretch)
         h.setStretchLastSection(False)
@@ -80,14 +88,59 @@ class PanelHasil(QWidget):
         self.pohon.itemActivated.connect(self._klik)
         self.pohon.itemChanged.connect(lambda *_: self._hitung_centang())
         lay.addWidget(self.pohon, 1)
+        self.l_kosong = QLabel("Belum ada hasil docking.\nIkuti langkah 1–4 di panel kiri, lalu klik "
+                               "Jalankan docking. Hasil muncul di sini otomatis.")
+        self.l_kosong.setObjectName("muted")
+        self.l_kosong.setAlignment(Qt.AlignCenter)
+        lay.addWidget(self.l_kosong, 1)
+        self._terapkan_kolom()
         cat = QLabel("Hasil docking adalah prediksi komputasi, bukan bukti aktivitas biologis; konfirmasi dengan "
                      "uji eksperimen. Ki dihitung dari ΔG (perkiraan, 298 K). LE = −ΔG / atom berat. "
                      "H = ikatan hidrogen, HF = hidrofobik, π = π–π, Lain = π–kation, garam, halogen, logam. "
+                     "Klik kanan judul kolom untuk menampilkan kolom lain. "
+                     "PoseBusters = uji kewajaran fisik pose terbaik (arahkan kursor untuk rincian). "
                      "Klik dua kali baris untuk memuat pose.")
         cat.setObjectName("muted")
         cat.setWordWrap(True)
         cat.setContentsMargins(8, 4, 8, 4)
         lay.addWidget(cat)
+
+    def _kolom_tampil(self):
+        from ..core import paths
+        v = paths.settings().value("kolom_hasil")
+        try:
+            return {int(x) for x in v} if v else set(TAMPIL_BAWAAN)
+        except (TypeError, ValueError):
+            return set(TAMPIL_BAWAAN)
+
+    def _terapkan_kolom(self):
+        tampil = self._kolom_tampil() | {1}
+        for k in range(len(KOLOM)):
+            self.pohon.setColumnHidden(k, k not in tampil)
+
+    def _menu_kolom(self, pos):
+        from PySide6.QtWidgets import QMenu
+        from ..core import paths
+        m = QMenu(self)
+        tampil = self._kolom_tampil()
+        for k, t in enumerate(KOLOM):
+            if k == 1:
+                continue
+            a = m.addAction(t)
+            a.setCheckable(True)
+            a.setChecked(k in tampil)
+            a.setData(k)
+        m.addSeparator()
+        a_bawaan = m.addAction("Kolom bawaan")
+        pilih = m.exec(self.pohon.header().mapToGlobal(pos))
+        if not pilih:
+            return
+        if pilih is a_bawaan:
+            tampil = set(TAMPIL_BAWAAN)
+        else:
+            tampil ^= {pilih.data()}
+        paths.settings().setValue("kolom_hasil", sorted(tampil))
+        self._terapkan_kolom()
 
     def _sel(self, it, k, v, fmt="{:.2f}"):
         it.setData(k, Qt.UserRole, v)
@@ -98,6 +151,7 @@ class PanelHasil(QWidget):
     def muat(self, baris):
         """baris: dari core.ekspor.baris_hasil."""
         t = theme.TOKEN[self.mode]
+        qc_ada = qc.tersedia()
         self.pohon.blockSignals(True)
         self.pohon.setSortingEnabled(False)
         self.pohon.clear()
@@ -117,12 +171,23 @@ class PanelHasil(QWidget):
                 it.setForeground(6, QColor(t["ok"] if b["rmsd_kristal"] <= 2.0 else t["bad"]))
                 it.setToolTip(6, "≤ 2,0 Å: redocking valid" if b["rmsd_kristal"] <= 2.0 else "> 2,0 Å: tidak valid")
             self._sel(it, 7, b["rmsd"])
-            self._sel(it, 8, b["hbond"])
-            self._sel(it, 9, b["hidrofobik"])
-            self._sel(it, 10, b["pi"])
-            self._sel(it, 11, b["pikation"] + b["garam"] + b["halogen"] + b["logam"])
-            it.setText(12, b["mesin"])
-            it.setText(13, b["job"])
+            q = b.get("qc")
+            it.setText(K_QC, qc.teks_sel(q) if q else "…" if qc_ada else "")
+            it.setData(K_QC, Qt.UserRole, (0 if q.get("lulus") else 1 + len(q.get("gagal") or [])) if q and
+                       not q.get("galat") else None)
+            it.setToolTip(K_QC, qc.tooltip(q) if q else ("Sedang/akan diperiksa PoseBusters" if qc_ada else
+                                                         "PoseBusters tidak terpasang"))
+            if q and not q.get("galat"):
+                it.setForeground(K_QC, QColor(t["ok"] if q["lulus"] else t["bad"]))
+            self._sel(it, 9, b["hbond"])
+            self._sel(it, 10, b["hidrofobik"])
+            self._sel(it, 11, b["pi"])
+            self._sel(it, 12, b["pikation"] + b["garam"] + b["halogen"] + b["logam"])
+            it.setText(13, b["mesin"])
+            it.setText(14, b["job"])
+            self._sel(it, K_IFP, b.get("ifp_sim"))
+            it.setToolTip(K_IFP, "Kemiripan Tanimoto sidik jari interaksi (residu × jenis, tanpa vdW) pose terbaik "
+                                 "terhadap pose kristal ligan asli; 1 = pola interaksi sama persis")
             for p in b["pose"]:
                 c = ItemAngka(it)
                 c.setData(1, Qt.UserRole + 1, (b["job"], b["lid"], p["peringkat"]))
@@ -136,6 +201,8 @@ class PanelHasil(QWidget):
                     c.setForeground(k, QColor(t["ink2"]))
         self.pohon.setSortingEnabled(True)
         self.pohon.sortItems(2, Qt.AscendingOrder)
+        self.pohon.setVisible(bool(baris))
+        self.l_kosong.setVisible(not baris)
         self.pohon.blockSignals(False)
         self._saring()
         self._hitung_centang()
@@ -150,7 +217,7 @@ class PanelHasil(QWidget):
         for i in range(self.pohon.topLevelItemCount()):
             it = self.pohon.topLevelItem(i)
             e = it.data(2, Qt.UserRole)
-            tampil = (not teks or teks in it.text(1).lower() or teks in it.text(13).lower()) and \
+            tampil = (not teks or teks in it.text(1).lower() or teks in it.text(14).lower()) and \
                      (batas is None or (e is not None and e <= batas))
             it.setHidden(not tampil)
             n += tampil

@@ -396,6 +396,20 @@ def residu_kontak(daftar, jenis_min=True):
     return hasil
 
 
+# ------------------------------------------------- sidik jari interaksi (IFP)
+def sidik_jari(daftar):
+    """IFP gaya ProLIF: himpunan bit 'residu|jenis' (tanpa vdW), diurutkan agar stabil di proyek.json."""
+    return sorted({f"{h['residu']}|{h['jenis']}" for h in daftar if h["jenis"] != "vdw"})
+
+
+def tanimoto(a, b):
+    """Kemiripan Tanimoto dua IFP (0–1); None bila salah satu kosong/tidak ada."""
+    if not a or not b:
+        return None
+    a, b = set(a), set(b)
+    return round(len(a & b) / len(a | b), 3)
+
+
 # --------------------------------------------------------------- RMSD & LE
 def _graf_umum(mol):
     """Salinan atom berat dengan semua ikatan tunggal & tanpa muatan: cocok lintas protonasi/orde ikatan."""
@@ -469,14 +483,22 @@ def ringkas_ligan(proyek, l, pose, rec):
             I = interaksi(rec, terbaik)
             l["interaksi"] = hitung(I)
             l["residu"] = residu_kontak(I)
+            l["ifp"] = sidik_jari(I)
+    if rec is not None and kr is not None:
+        try:   # IFP pose kristal = acuan kolom 'IFP vs kristal'
+            l["ifp_kristal"] = sidik_jari(interaksi(rec, kr))
+        except Exception:
+            pass
     if l["pose"] and "rmsd_kristal" in l["pose"][0]:
         l["rmsd_kristal"] = l["pose"][0]["rmsd_kristal"]
         l["rmsd_kristal_min"] = min(p.get("rmsd_kristal", 99) for p in l["pose"])
 
 
 def analisis_ulang(proyek, lapor=None):
-    """Lengkapi ringkasan (LE, interaksi, RMSD kristal) untuk ligan selesai yang belum punya. Untuk proyek lama."""
+    """Lengkapi ringkasan (LE, interaksi, RMSD kristal, QC PoseBusters) untuk ligan selesai yang belum punya."""
     from . import mesin as M
+    from . import qc
+    qc_ok = qc.tersedia()
     rec_cache = {}
     n = 0
     for j in proyek.job:
@@ -486,13 +508,21 @@ def analisis_ulang(proyek, lapor=None):
         if str(rf) not in rec_cache:
             rec_cache[str(rf)] = baca_reseptor(rf.read_text())
         for l in j["ligan"]:
-            if l["status"] != "selesai" or ("le" in l and "interaksi" in l):
+            perlu_qc = qc_ok and (not l.get("qc") or l["qc"].get("v") != qc.VERSI)
+            lengkap = "le" in l and "interaksi" in l and "ifp" in l
+            if l["status"] != "selesai" or (lengkap and not perlu_qc):
                 continue
             out = proyek.p(l["keluaran"]) if l.get("keluaran") else None
             if not out or not out.exists():
                 continue
             try:
-                ringkas_ligan(proyek, l, M.baca_hasil(j["mesin"], out), rec_cache[str(rf)])
+                pose = M.baca_hasil(j["mesin"], out)
+                if not lengkap:
+                    ringkas_ligan(proyek, l, pose, rec_cache[str(rf)])
+                if perlu_qc:
+                    h = qc.periksa_ligan(proyek, j, l, pose)
+                    if h is not None:
+                        l["qc"] = h
                 n += 1
             except Exception as e:
                 if lapor:

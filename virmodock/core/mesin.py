@@ -60,6 +60,7 @@ class Parameter:
     cpu: int = 0                   # Vina thread (0 = otomatis)
     pop: int = 150                 # AD4 ga_pop_size
     seed: int = 42                 # 0 = acak
+    devnum: int = 0                # GPU OpenCL untuk AD-GPU (0 = bawaan/perangkat pertama)
 
     def ke_dict(self):
         return asdict(self)
@@ -159,6 +160,7 @@ def hash_teks(t):
 
 # --------------------------------------------------------------- perintah
 def perintah_adgpu(fld, lig, basis, p, devnum=None):
+    devnum = devnum or getattr(p, "devnum", 0) or None
     cmd = [paths.program("autodock_gpu.exe"), "--ffile", str(fld), "--lfile", str(lig), "--nrun", str(p.nrun),
            "--resnam", str(basis), "--xmloutput", "0", "--heuristics", "1" if p.heuristik else "0"]
     if not p.heuristik:  # heuristik aktif: jumlah evaluasi ditentukan AD-GPU dari ukuran ligan

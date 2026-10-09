@@ -19,6 +19,9 @@ vendor/_unduh/
 vendor/dl/
 vendor/innosetup/
 vendor/opencl/
+# P2Rank + Java (±262 MB; cara pasang di README)
+vendor/bin/jre/
+vendor/bin/p2rank/
 
 # Hasil build AutoDock-GPU (sumber & proyek VS tetap ikut)
 vendor/adgpu_src/bin/

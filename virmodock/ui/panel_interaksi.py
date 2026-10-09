@@ -10,6 +10,10 @@ from . import icons, theme
 from .panels import judul_seksi
 
 
+TEKS_KOSONG = ("Belum ada pose yang dipilih. Setelah docking, klik dua kali baris di tab Hasil "
+               "(atau pilih ligan/pose di panel Objek) untuk melihat interaksinya di sini.")
+
+
 class PanelInteraksi(QWidget):
     jenisBerubah = Signal(set)          # jenis yang ditampilkan di viewport
     fokusResidu = Signal(dict)          # interaksi yang diklik
@@ -23,7 +27,7 @@ class PanelInteraksi(QWidget):
         lay.setSpacing(0)
         self.judul = judul_seksi("Interaksi")
         lay.addWidget(self.judul)
-        self.l_info = QLabel("Pilih pose atau ligan di Hierarki / klik dua kali baris di tab Hasil.")
+        self.l_info = QLabel(TEKS_KOSONG)
         self.l_info.setObjectName("muted")
         self.l_info.setWordWrap(True)
         self.l_info.setContentsMargins(10, 6, 10, 6)
@@ -39,20 +43,21 @@ class PanelInteraksi(QWidget):
             cb.toggled.connect(lambda *_: self.jenisBerubah.emit(self.jenis_tampil()))
             g.addWidget(cb, i // 2, i % 2)
             self.cek[j] = cb
-        lay.addLayout(g)
-        h = QHBoxLayout()
-        h.setContentsMargins(10, 0, 10, 6)
         self.c_jarak = QCheckBox("Label jarak")
         self.c_jarak.setChecked(True)
         self.c_label = QCheckBox("Label residu")
         self.c_label.setChecked(True)
         self.c_stick = QCheckBox("Residu sebagai stick")
         self.c_stick.setChecked(True)
-        for c in (self.c_jarak, self.c_label, self.c_stick):
+        n = len(URUT_JENIS)
+        baris0 = (n + 1) // 2 + 1                      # satu baris kosong sebagai pemisah
+        for i, c in enumerate((self.c_jarak, self.c_label, self.c_stick)):
             c.toggled.connect(lambda *_: self.opsiBerubah.emit())
-            h.addWidget(c)
-        h.addStretch(1)
-        lay.addLayout(h)
+            g.addWidget(c, baris0 + i // 2, i % 2)       # grid 2 kolom: tidak saling tumpuk di panel sempit
+        g.setRowMinimumHeight(baris0 - 1, 4)
+        self.w_opsi = QWidget()
+        self.w_opsi.setLayout(g)
+        lay.addWidget(self.w_opsi)
         self.pohon = QTreeWidget()
         self.pohon.setColumnCount(3)
         self.pohon.setHeaderLabels(["Interaksi", "Jarak (Å)", "Sudut"])
@@ -71,6 +76,12 @@ class PanelInteraksi(QWidget):
         cat.setWordWrap(True)
         cat.setContentsMargins(10, 4, 10, 6)
         lay.addWidget(cat)
+        self.w_detail = [self.w_opsi, self.pohon, cat]
+        self._tampil_detail(False)
+
+    def _tampil_detail(self, on):
+        for w in self.w_detail:
+            w.setVisible(on)
 
     def jenis_tampil(self):
         return {j for j, c in self.cek.items() if c.isChecked()}
@@ -79,6 +90,7 @@ class PanelInteraksi(QWidget):
         t = theme.TOKEN[self.mode]
         warna = theme.INTERAKSI
         self.judul.setText(f"INTERAKSI · {judul}".upper())
+        self._tampil_detail(True)
         self.pohon.clear()
         n = {}
         for h in daftar:
@@ -106,7 +118,8 @@ class PanelInteraksi(QWidget):
     def kosong(self):
         self.pohon.clear()
         self.judul.setText("INTERAKSI")
-        self.l_info.setText("Pilih pose atau ligan di Hierarki / klik dua kali baris di tab Hasil.")
+        self.l_info.setText(TEKS_KOSONG)
+        self._tampil_detail(False)
 
     def _klik(self, it, _k):
         h = it.data(0, Qt.UserRole)
@@ -142,7 +155,7 @@ class KanvasSvg(QWidget):
 
 class TabDiagram(QWidget):
     minta = Signal()           # gambar ulang (opsi berubah)
-    ekspor = Signal(str)       # svg | png
+    ekspor = Signal(str)       # salin | svg | png
 
     def __init__(self):
         super().__init__()
@@ -162,7 +175,7 @@ class TabDiagram(QWidget):
         sp = QWidget()
         sp.setSizePolicy(sp.sizePolicy().horizontalPolicy().Expanding, sp.sizePolicy().verticalPolicy().Preferred)
         bar.addWidget(sp)
-        for k, t in (("svg", "Simpan SVG…"), ("png", "Simpan PNG/TIFF…")):
+        for k, t in (("salin", "Salin"), ("svg", "Simpan SVG…"), ("png", "Simpan PNG/TIFF…")):
             b = QPushButton(t)
             b.clicked.connect(lambda _=False, k=k: self.ekspor.emit(k))
             bar.addWidget(b)

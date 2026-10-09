@@ -43,6 +43,8 @@ class Proyek:
         self.ligan = []               # list dict: id, nama, sumber, status, alasan, sdf, pdbqt, rumus, mw, torsi, atom, tipe, objek
         self.kotak = None             # dict: pusat, ukuran, spasi
         self.parameter = {}
+        self.uji_grafik = {}          # data & pengaturan tab Uji & Grafik
+        self.komposer = {}            # Komposer figur: {panel, opsi}; panel raster disimpan di komposer/*.png
         self.job = []                 # list dict (lihat core/antrean.py)
         self.objek = []               # list dict objek viewer
         self.catatan = ""
@@ -63,7 +65,8 @@ class Proyek:
     def ke_dict(self):
         return {"format": VERSI_FORMAT, "aplikasi": "VirmoDock", "nama": self.nama, "dibuat": self.dibuat,
                 "diubah": datetime.now().isoformat(timespec="seconds"), "reseptor": self.reseptor,
-                "ligan": self.ligan, "kotak": self.kotak, "parameter": self.parameter, "job": self.job,
+                "ligan": self.ligan, "kotak": self.kotak, "parameter": self.parameter, "uji_grafik": self.uji_grafik,
+                "komposer": self.komposer, "job": self.job,
                 "objek": self.objek, "catatan": self.catatan, "validasi": self.validasi}
 
     def simpan(self):
@@ -97,6 +100,8 @@ class Proyek:
         pr.catatan = pr.catatan or ""
         pr.ligan = d.get("ligan") or []
         pr.parameter = d.get("parameter") or {}
+        pr.uji_grafik = d.get("uji_grafik") or {}
+        pr.komposer = d.get("komposer") or {}
         pr.job = d.get("job") or []
         pr.objek = d.get("objek") or []
         pr.validasi = d.get("validasi") or {}

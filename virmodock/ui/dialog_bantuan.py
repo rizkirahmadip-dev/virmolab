@@ -8,6 +8,8 @@ from PySide6.QtWidgets import (QDialog, QHBoxLayout, QLabel, QPlainTextEdit, QPu
 
 from ..core import catat, paths
 from ..core.laporan import SITASI
+from ..core.qc import SITASI as SITASI_QC
+from ..core.sifat import SITASI as SITASI_SIFAT
 
 
 def _ket(t):
@@ -68,7 +70,9 @@ class DialogLisensi(QDialog):
             "<h3>Mengutip VirmoDock dan perangkat lunak di dalamnya</h3>"
             f"<p>VirmoDock {versi}. Aplikasi desktop molecular docking (open-source, GPL-3.0-or-later).</p>"
             "<p>Kutip juga mesin dan pustaka yang Anda pakai (laporan PDF VirmoDock mencantumkannya otomatis):</p><ol>"
-            + "".join(f"<li>{v}</li>" for v in SITASI.values()) + "</ol>")
+            + "".join(f"<li>{v}</li>" for v in SITASI.values()) + "</ol>"
+            "<p>Bila memakai kontrol kualitas pose, sifat ligan, atau BOILED-Egg:</p><ol>"
+            + "".join(f"<li>{v}</li>" for v in [SITASI_QC] + SITASI_SIFAT) + "</ol>")
         tab.addTab(kutip, "Cara mengutip")
         lis = QTextBrowser()
         lis.setOpenExternalLinks(True)

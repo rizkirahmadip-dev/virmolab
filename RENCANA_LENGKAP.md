@@ -591,7 +591,7 @@ Disepakati pengguna (8 Okt 2026): tidak menambah fitur baru lagi; mulai membangu
 | Versi | Isi |
 |---|---|
 | **v1.0** | MVP (E3) |
-| v1.1 | Grid box drag mouse, PoseBusters QC, drug-likeness RDKit + BOILED-Egg, statistik dasar (histogram, korelasi, LE), ekspor Excel penuh |
+| v1.1 | Grid box drag mouse, PoseBusters QC, drug-likeness RDKit + BOILED-Egg, statistik dasar (histogram, korelasi, LE), ekspor Excel penuh — **SELESAI 8 Okt 2026**, dikerjakan sebelum rilis 1.0 atas permintaan pengguna (rincian CATATAN_TAHAP2.md §4e) |
 | v1.2 | Modul grafik & statistik ala Prism (A7b) bertahap, ProLIF heatmap + kemiripan IFP, pewarnaan kontribusi per atom |
 | v1.3 | P2Rank deteksi kantong, Asisten Alur, wizard preparasi protein penuh + optimasi ikatan H, ChEMBL validasi & korelasi |
 | v1.4 | Konsensus skor + ROC/EF/BEDROC, laporan Word & HTML interaktif, komposer figur, animasi |

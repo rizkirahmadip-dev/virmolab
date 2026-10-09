@@ -35,6 +35,15 @@ py -3.14 -m venv .venv
 Biner mesin docking ada di `vendor/bin/` (AutoDock-GPU dibangun sendiri dari `vendor/adgpu_src/`,
 proyek Visual Studio dengan OpenCL; Vina, AutoGrid4, AutoDock4, Open Babel dari rilis resminya).
 
+Deteksi kantong memakai P2Rank + Java yang **tidak ikut repo** (±262 MB). Pasang manual:
+
+- `vendor/bin/p2rank/` — P2Rank 2.5.1 (https://github.com/rdk/p2rank/releases); cukup `bin/`, `config/`,
+  dan model `default`, `alphafold`, `_score_transform` (data uji & model lain boleh dibuang).
+- `vendor/bin/jre/` — Eclipse Temurin JRE 21 (Windows x64, zip) dari https://adoptium.net, diekstrak
+  sehingga ada `vendor/bin/jre/bin/java.exe`.
+
+Uji mandiri (`python -m virmodock --uji-mandiri hasil.json`) memeriksa keduanya.
+
 ## Membuat rilis
 
 1. Pasang [Inno Setup 6](https://jrsoftware.org/isinfo.php) ke `vendor/innosetup/`.

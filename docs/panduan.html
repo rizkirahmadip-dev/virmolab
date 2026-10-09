@@ -1,125 +1,195 @@
-<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Panduan pengguna · VirmoDock</title><link rel="stylesheet" href="gaya.css"><link rel="icon" href="gambar/ikon.png"></head><body><header><img src="gambar/logo_putih.svg" alt="VirmoDock" style="height:30px;margin-right:6px"><span style="color:#9fb4d3;font-size:13px;margin-right:10px">0.9.0</span><a href="panduan.html" class="aktif">Panduan pengguna</a><a href="instalasi.html">Instalasi</a><a href="pindah_laptop.html">Pindah laptop</a><a href="gpu.html">Setup GPU</a><a href="troubleshooting.html">Troubleshooting</a><a href="metode.html">Metode &amp; kriteria</a></header><main><h1>Panduan pengguna</h1>
-<p class="lead">Alur lengkap docking di VirmoDock, dari mengimpor protein sampai laporan PDF — semuanya di dalam satu aplikasi.</p>
+<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Panduan pengguna · VirmoDock</title><link rel="stylesheet" href="gaya.css"><link rel="icon" href="gambar/ikon.png"></head><body><header><img src="gambar/logo_putih.svg" alt="VirmoDock" style="height:30px;margin-right:6px"><span style="color:#9fb4d3;font-size:13px;margin-right:10px">0.9.0</span><a href="panduan.html" class="aktif">Panduan pengguna</a><a href="instalasi.html">Instalasi</a><a href="pindah_laptop.html">Pindah laptop</a><a href="gpu.html">Setup GPU</a><a href="troubleshooting.html">Mengatasi masalah</a><a href="metode.html">Metode &amp; kriteria</a></header><main><h1>Panduan pengguna</h1>
+<p class="lead">Alur lengkap docking di VirmoDock, dari mengimpor protein sampai laporan PDF — semuanya di dalam satu aplikasi, dipandu lima langkah.</p>
 
 <nav class="isi"><b>Isi:</b>
-<a href="#tampilan">Tampilan</a> · <a href="#impor">1. Impor</a> · <a href="#reseptor">2. Reseptor</a> ·
-<a href="#ligan">3. Ligan</a> · <a href="#grid">4. Grid box</a> · <a href="#docking">5. Docking</a> ·
-<a href="#hasil">6. Hasil</a> · <a href="#interaksi">7. Interaksi</a> · <a href="#diagram">8. Diagram 2D</a> ·
-<a href="#validasi">9. Validasi</a> · <a href="#banding">10. Bandingkan</a> · <a href="#ekspor">11. Ekspor &amp; laporan</a> ·
+<a href="#tampilan">Tampilan</a> · <a href="#mulai">Mulai</a> · <a href="#protein">1. Protein</a> ·
+<a href="#ligan">2. Ligan</a> · <a href="#area">3. Area docking</a> · <a href="#jalankan">4. Jalankan</a> ·
+<a href="#hasil">5. Hasil</a> · <a href="#interaksi">Interaksi</a> · <a href="#diagram">Diagram 2D</a> ·
+<a href="#validasi">Validasi</a> · <a href="#qc">PoseBusters</a> · <a href="#banding">Bandingkan</a> ·
+<a href="#sifat">Sifat ligan</a> · <a href="#statistik">Statistik</a> · <a href="#ekspor">Ekspor &amp; laporan</a> ·
 <a href="#proyek">Proyek</a> · <a href="#pintasan">Pintasan</a></nav>
 
 <h2 id="tampilan">Tampilan jendela</h2>
-<figure><img src="gambar/02_impor.png" alt="Jendela utama"><figcaption>Jendela utama setelah mengimpor 1HSG.</figcaption></figure>
+<figure><img src="gambar/02_impor.png" alt="Jendela utama"><figcaption>Jendela utama setelah protein 1HSG dimuat.</figcaption></figure>
 <table>
-<tr><th>Bagian</th><th>Fungsi</th></tr>
-<tr><td>Menu &amp; toolbar (atas)</td><td>Semua perintah. Toolbar: impor, siapkan reseptor/ligan, grid box, pilihan mesin &amp; perangkat, tombol <b>Jalankan</b>.</td></tr>
-<tr><td>Hierarki (kiri)</td><td>Semua objek: protein → rantai → residu, ligan, air, ion, ligan siap docking, hasil pose. Centang = tampil/sembunyi; klik kanan = gaya, warna, fokus, ekspor, hapus.</td></tr>
-<tr><td>Viewport 3D / Hasil / Diagram 2D (tengah)</td><td>Tampilan 3D (putar: seret kiri; geser: seret kanan; zoom: gulir), tabel hasil, diagram interaksi 2D.</td></tr>
-<tr><td>Properti, Tampilan, Parameter, Interaksi (kanan)</td><td>Info objek terpilih, gaya ala PyMOL, parameter docking &amp; grid box, daftar interaksi.</td></tr>
-<tr><td>Antrean job, Log, Pesan (bawah)</td><td>Progres docking; catatan kerja; peringatan dan galat beserta apa yang harus dilakukan.</td></tr>
-<tr><td>Status bar</td><td>GPU &amp; driver yang terdeteksi, progres, jumlah atom, folder proyek.</td></tr>
+<tr><th style="width:28%">Bagian</th><th>Fungsi</th></tr>
+<tr><td>Menu (atas)</td><td>Delapan menu: <b>Berkas, Edit, Tampilan, Siapkan, Docking, Analisis, Alat, Bantuan</b>. Arahkan tetikus ke sebuah item untuk melihat keterangannya di bilah status.</td></tr>
+<tr><td>Toolbar</td><td>Buka berkas, simpan, ambil dari RCSB, interaksi 3D, ukur jarak, gambar 3D, laporan PDF, “Buka di…” program lain; di tengah tombol <b>ruang kerja</b> <i>Siapkan · Docking · Analisis</i>; di kanan mode gelap.</td></tr>
+<tr><td>Langkah (kiri atas)</td><td>Lima langkah: <b>1 Protein → 2 Ligan → 3 Area docking → 4 Jalankan → 5 Hasil</b>. Tanda centang = langkah selesai; teks kecil = status (mis. “3 siap”). Klik untuk membuka langkah itu.</td></tr>
+<tr><td>Objek (kiri bawah)</td><td>Semua objek: protein → rantai → residu, ligan, air, ion, <i>Ligan siap docking</i>, hasil pose. Centang = tampil/sembunyi; klik kanan = gaya, warna, fokus, ganti nama, ekspor, hapus.</td></tr>
+<tr><td>Tengah</td><td>Tab <b>Viewport 3D</b>, <b>Hasil</b>, <b>Diagram 2D</b>, <b>Sifat Ligan</b>, <b>Statistik</b> (tab yang tampil mengikuti ruang kerja).</td></tr>
+<tr><td>Panel kerja (kanan)</td><td>Isi langkah aktif: penjelasan satu kalimat, tombol aksi, tombol utama biru, dan tautan <i>Berikutnya ›</i>. Tab <b>Tampilan</b> berisi gaya ala PyMOL; tab <b>Interaksi</b> muncul di ruang Analisis. <b>Properti</b> di bawahnya menampilkan rincian objek terpilih.</td></tr>
+<tr><td>Bilah status (bawah)</td><td>GPU dan driver, jumlah objek/atom, folder proyek, dan tombol <b>Antrean: … ▴</b> untuk membuka panel Antrean job / Log / Pesan.</td></tr>
 </table>
-<p>Semua panel bisa dipindah, ditumpuk sebagai tab, atau dilepas. Tata letak tersimpan otomatis; kembalikan lewat <b>View › Atur ulang layout</b>. Mode gelap: <kbd>Ctrl</kbd>+<kbd>T</kbd>.</p>
+<h3>Ruang kerja</h3>
+<p>Tiga ruang kerja mengatur tab dan panel yang tampil agar layar tidak penuh: <b>Siapkan</b> (<kbd>Ctrl</kbd>+<kbd>1</kbd>, langkah 1–3), <b>Docking</b> (<kbd>Ctrl</kbd>+<kbd>2</kbd>, langkah 4 + tab Hasil), <b>Analisis</b> (<kbd>Ctrl</kbd>+<kbd>3</kbd>, semua tab + panel Interaksi). Ruang kerja berpindah otomatis mengikuti langkah, dan sebaliknya.</p>
+<p>Panel bisa dipindah, ditumpuk, atau dilepas; tata letak tersimpan otomatis. Kembalikan dengan <b>Tampilan › Atur ulang tata letak</b>. Panel yang tertutup dibuka lagi dari <b>Tampilan › Panel</b>. Mode gelap: <kbd>Ctrl</kbd>+<kbd>T</kbd>.</p>
 
-<h2 id="impor">1. Impor struktur</h2>
-<ul>
-<li><b>File › Buka</b> (<kbd>Ctrl</kbd>+<kbd>O</kbd>) atau seret berkas/folder ke jendela: PDB, PDBQT, mmCIF, SDF, MOL2, SMILES.</li>
-<li><b>Impor dari RCSB PDB</b> (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>): ketik ID, mis. <code>1HSG</code>. Struktur dipecah otomatis menjadi protein, ligan asli, air, dan ion.</li>
-<li><b>PubChem</b>: satu nama atau CID per baris (struktur 3D; bila tidak ada, dibuat dari 2D). <b>SMILES</b>: struktur 3D dibuat lalu diminimisasi MMFF.</li>
-</ul>
-<p>Grid box otomatis dipusatkan pada ligan asli terbesar (aditif kristalisasi seperti GOL, EDO, SO4 diabaikan).</p>
+<h2 id="mulai">Halaman sambutan</h2>
+<figure><img src="gambar/00_sambutan.png" alt="Halaman sambutan"><figcaption>Saat belum ada struktur, viewport menampilkan halaman sambutan.</figcaption></figure>
+<p>Pilih <b>Ambil protein dari RCSB</b>, <b>Buka berkas</b> (atau seret berkas ke jendela), <b>Buka proyek</b>, atau <b>Proyek terakhir</b>. Tautan di bawahnya membuka tutorial PDF dan panduan ini.</p>
 
-<h2 id="reseptor">2. Siapkan reseptor</h2>
-<figure><img src="gambar/03_dialog_reseptor.png" alt="Dialog reseptor" style="max-width:560px"><figcaption>Prepare › Siapkan reseptor.</figcaption></figure>
+<h2 id="protein">Langkah 1 · Protein</h2>
 <ol class="langkah">
-<li>Pilih protein dan rantai yang dipakai.</li>
-<li>Atur pembersihan: hapus air, hapus ligan asli &amp; aditif, pertahankan ion logam (Zn, Mg, Ca, Mn, Fe, Cu, Co, Ni) dalam radius dari ligan asli (0 = semua).</li>
-<li>Konformasi alternatif: okupansi tertinggi (disarankan) atau selalu altloc A.</li>
-<li>Muatan: Gasteiger dihitung Meeko (disarankan) atau muatan templat residu. Muatan Kollman tidak tersedia (hanya di MGLTools).</li>
-<li>Klik <b>Siapkan</b>. Hasilnya objek <i>“… (siap)”</i>; berkas <code>reseptor/reseptor.pdbqt</code> dan <code>laporan_prep.txt</code> tersimpan di proyek.</li>
+<li>Muat protein: <b>Ambil dari RCSB PDB…</b> di Panel kerja (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>, ketik mis. <code>1HSG</code>) atau <b>Buka berkas…</b> (<kbd>Ctrl</kbd>+<kbd>O</kbd>: PDB, PDBQT, mmCIF, SDF, MOL2, SMILES). Struktur dipecah otomatis menjadi protein, ligan asli, air, dan ion.</li>
+<li>Klik tombol biru <b>Siapkan reseptor…</b> (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>1</kbd>).</li>
 </ol>
-<div class="catatan">Residu yang atomnya tidak lengkap dibuang dan didaftar di panel <b>Pesan</b>. Bila Meeko gagal, VirmoDock otomatis memakai Open Babel.</div>
-
-<h2 id="ligan">3. Siapkan ligan (banyak sekaligus)</h2>
-<figure><img src="gambar/05_dialog_ligan.png" alt="Dialog ligan"><figcaption>Prepare › Siapkan ligan: status tiap ligan dan alasannya.</figcaption></figure>
+<figure><img src="gambar/03_dialog_reseptor.png" alt="Dialog reseptor" style="max-width:560px"><figcaption>Dialog Siapkan reseptor.</figcaption></figure>
 <ul>
-<li>Ligan di sesi ini muncul di tabel; tambah dari berkas, folder, PubChem, atau SMILES langsung di dialog.</li>
-<li>Opsi: protonasi pada pH (bawaan 7,4), minimisasi MMFF94, makrosiklik kaku/fleksibel.</li>
+<li>Pilih protein dan rantai; hapus air, hapus ligan asli &amp; aditif, pertahankan ion logam (Zn, Mg, Ca, Mn, Fe, Cu, Co, Ni) dalam radius dari ligan asli (0 = semua).</li>
+<li>Konformasi alternatif: okupansi tertinggi (disarankan) atau selalu altloc A. Muatan: Gasteiger dihitung Meeko (disarankan) atau muatan templat residu.</li>
+<li>Hasilnya objek <i>“… (siap)”</i>; berkas <code>reseptor/reseptor.pdbqt</code> dan <code>laporan_prep.txt</code> tersimpan di proyek. Residu yang atomnya tidak lengkap dibuang dan dilaporkan; bila Meeko gagal, Open Babel dipakai otomatis.</li>
+</ul>
+<figure><img src="gambar/04_reseptor_siap.png" alt="Reseptor siap"><figcaption>Langkah 1 selesai (centang); aplikasi berpindah ke langkah 2.</figcaption></figure>
+
+<h2 id="ligan">Langkah 2 · Ligan</h2>
+<p>Panel kerja menyediakan <b>Ambil dari PubChem…</b> (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd>, satu nama/CID per baris), <b>Dari SMILES…</b>, dan <b>Buka berkas / folder…</b>. Lalu klik <b>Siapkan ligan…</b> (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>2</kbd>).</p>
+<figure><img src="gambar/05_dialog_ligan.png" alt="Dialog ligan"><figcaption>Dialog Siapkan ligan: status dan alasan untuk tiap ligan.</figcaption></figure>
+<ul>
+<li>Opsi: protonasi pada pH (bawaan 7,4) dengan <b>Open Babel</b> atau <b>Dimorphite-DL</b>, minimisasi MMFF94, makrosiklik kaku/fleksibel.</li>
+<li><b>Dimorphite-DL</b> memakai aturan pKa per gugus. <i>varian ≤ 1</i> = satu keadaan pada pH tepat; <i>varian ≤ 2–8</i> = semua keadaan protonasi pada pH ± 1, masing-masing jadi ligan terpisah bernama <code>nama [v1]</code>, <code>[v2]</code>, … sehingga bisa didocking semua dan dibandingkan. Catatan: Dimorphite-DL cenderung menganggap fenol/katekol terdeprotonasi; untuk flavonoid, Open Babel biasanya lebih wajar. Periksa kolom muatan.</li>
 <li>Status: <span style="color:var(--ok)">siap</span>, <span style="color:var(--warn)">peringatan</span> (mis. &gt; 32 torsi atau &gt; 256 atom — tidak bisa di AutoDock-GPU, pakai Vina), <span style="color:var(--bad)">gagal</span> (dengan alasan). Satu ligan gagal tidak menghentikan yang lain.</li>
-<li>Ligan siap masuk grup <b>Ligan siap docking</b> di Hierarki.</li>
+<li>Ligan siap masuk grup <b>Ligan siap docking</b> di panel Objek.</li>
 </ul>
 
-<h2 id="grid">4. Grid box</h2>
-<figure><img src="gambar/06_parameter_gridbox.png" alt="Grid box"><figcaption>Grid box biru di viewport dan angka di panel Parameter.</figcaption></figure>
+<h2 id="area">Langkah 3 · Area docking (grid box)</h2>
+<figure><img src="gambar/06_parameter_gridbox.png" alt="Area docking"><figcaption>Kotak biru di viewport; tombol penentuan dan angka ukuran di Panel kerja.</figcaption></figure>
 <ul>
-<li>Angka pusat/ukuran/spasi di panel <b>Parameter</b>; titik grid dan peringatan (&gt; 126 titik per sumbu, &gt; 30 Å) tampil langsung.</li>
-<li>Tombol: <b>Pusat ke ligan asli</b>, <b>Pusat ke residu terpilih</b> (klik atom atau pilih residu di Hierarki, <kbd>Ctrl</kbd>+klik untuk banyak), <b>Sesuaikan ke ligan +8 Å</b>, <b>Seluruh protein (blind)</b>.</li>
-<li>Dengan mouse di viewport: <kbd>Shift</kbd>+seret = geser kotak; <kbd>Shift</kbd>+gulir = ukuran; <kbd>Alt</kbd>+gulir = satu sumbu (pilih sumbu dengan tombol <kbd>X</kbd>/<kbd>Y</kbd>/<kbd>Z</kbd>).</li>
+<li>Bila struktur berisi ligan asli, kotak dipusatkan otomatis padanya (aditif kristalisasi seperti GOL, EDO, SO4 diabaikan).</li>
+<li>Tombol: <b>Pusat di ligan asli (disarankan)</b>, <b>Pusat di residu terpilih</b> (klik atom atau pilih residu di Objek, <kbd>Ctrl</kbd>+klik untuk banyak), <b>Sesuaikan ke ligan terpilih +8 Å</b>, <b>Deteksi kantong (P2Rank)…</b>, <b>Seluruh protein (blind docking)</b>. Semua juga ada di menu <b>Siapkan</b>.</li>
+<li><b>Deteksi kantong (P2Rank)</b>: untuk protein tanpa ligan asli (mis. model AlphaFold atau struktur apo). P2Rank (pembelajaran mesin) mencari kantong pengikatan dalam ±5–30 detik; kantong ditandai bola oranye bernomor di viewport dan dicantumkan dalam tabel (skor, probabilitas, residu). Pilih satu lalu <i>Pakai kantong ini</i>: kotak dipusatkan di kantong, ukuran = sebaran residu kantong + 4 Å (16–30 Å). Pada 1HSG, kantong #1 berjarak 0,8 Å dari pusat indinavir kristal.</li>
+<li><b>Ukuran dan posisi</b>: pusat X/Y/Z, ukuran, spasi, jumlah titik grid. Peringatan muncul bila &gt; 126 titik per sumbu atau &gt; 30 Å.</li>
+<li>Dengan mouse di viewport: <kbd>Shift</kbd>+seret = geser kotak; <kbd>Shift</kbd>+gulir = ukuran; <kbd>Alt</kbd>+gulir = satu sumbu (pilih sumbu dengan <kbd>X</kbd>/<kbd>Y</kbd>/<kbd>Z</kbd>). <kbd>G</kbd> menampilkan/menyembunyikan kotak.</li>
 </ul>
 
-<h2 id="docking">5. Docking &amp; antrean</h2>
-<figure><img src="gambar/07_antrean.png" alt="Antrean"><figcaption>Job di panel Antrean; tiap ligan punya status dan progres.</figcaption></figure>
+<h2 id="jalankan">Langkah 4 · Jalankan docking</h2>
+<figure><img src="gambar/06b_jalankan.png" alt="Jalankan docking"><figcaption>Langkah 4: ringkasan masukan, mesin, perangkat, ketelitian, dan tombol Jalankan.</figcaption></figure>
 <table>
-<tr><th>Mesin</th><th>Kapan dipakai</th><th>Parameter utama</th></tr>
-<tr><td>AutoDock-GPU</td><td>Laptop dengan GPU (OpenCL). Sangat cepat; cocok untuk screening.</td><td>Jumlah run (bawaan 50), evaluasi heuristik</td></tr>
-<tr><td>AutoDock Vina</td><td>Tanpa GPU, atau ligan besar (&gt; 32 torsi).</td><td>Exhaustiveness (8–32), jumlah pose, rentang energi</td></tr>
-<tr><td>AutoDock4</td><td>Perbandingan dengan penelitian lama (lambat).</td><td>ga_run, ga_pop_size, ga_num_evals</td></tr>
+<tr><th>Mesin</th><th>Kapan dipakai</th></tr>
+<tr><td>AD-GPU (AutoDock-GPU)</td><td>Laptop dengan GPU OpenCL. Sangat cepat; cocok untuk banyak ligan.</td></tr>
+<tr><td>Vina (AutoDock Vina)</td><td>Tanpa GPU, atau ligan besar (&gt; 32 torsi).</td></tr>
+<tr><td>AD4 (AutoDock4)</td><td>Perbandingan dengan penelitian lama (lambat).</td></tr>
 </table>
 <ul>
-<li>Preset <b>Cepat / Standar / Teliti</b>, atau simpan preset sendiri. Seed tetap = hasil bisa diulang.</li>
-<li><b>Jalankan</b> (<kbd>F5</kbd>) memakai semua ligan siap, atau hanya yang dipilih di Hierarki.</li>
-<li>Panel Antrean: <b>Jeda</b> (setelah ligan yang sedang berjalan), <b>Lanjut</b>, <b>Batal</b>, buka folder hasil/log. Jendela boleh di-minimize; notifikasi Windows muncul saat selesai.</li>
-<li>Bila GPU gagal (OpenCL), job otomatis dilanjutkan dengan Vina di CPU dan alasannya ditulis di panel Pesan.</li>
+<li><b>Ketelitian</b>: <i>Cepat</i>, <i>Standar</i>, atau <i>Teliti</i> (atau preset tersimpan Anda) — langsung diterapkan.</li>
+<li><b>Lanjutan ▸</b> membuka parameter rinci (jumlah run, evaluasi, exhaustiveness, jumlah pose, rentang energi, thread CPU, seed) dan tombol simpan preset. Seed tetap = hasil bisa diulang. Jendela pengaturan yang sama: <b>Docking › Pengaturan docking…</b> (<kbd>Ctrl</kbd>+<kbd>D</kbd>).</li>
+<li><b>Perangkat</b>: bila laptop punya lebih dari satu GPU OpenCL (mis. Intel + NVIDIA), semuanya muncul; GPU dengan VRAM terbesar dipilih sebagai bawaan.</li>
+<li>Klik <b>Jalankan docking (n ligan)</b> atau tekan <kbd>F5</kbd>. Semua ligan siap didocking; untuk sebagian saja, pilih ligan itu di panel Objek dulu.</li>
+</ul>
+<h3>Antrean job</h3>
+<figure><img src="gambar/07_antrean.png" alt="Antrean"><figcaption>Panel Antrean terbuka otomatis saat docking dimulai.</figcaption></figure>
+<ul>
+<li>Panel Antrean (tombol <b>Antrean: … ▴</b> di bilah status atau <kbd>Ctrl</kbd>+<kbd>J</kbd>) menampilkan status, progres, ΔG terbaik, waktu, dan perkiraan sisa per ligan. Panel menutup sendiri bila semua job sukses.</li>
+<li><b>Jeda</b> (setelah ligan yang sedang berjalan), <b>Lanjut</b>, <b>Batal</b> — di panel atau menu <b>Docking</b>. Jendela boleh di-minimize; notifikasi Windows muncul saat selesai.</li>
+<li>Bila GPU gagal (OpenCL), job otomatis dilanjutkan dengan Vina di CPU; alasannya ditulis di panel Pesan.</li>
 <li>Menutup aplikasi saat docking: job menjadi <i>Dijeda</i> dan bisa dilanjutkan tanpa mengulang ligan yang sudah selesai.</li>
 </ul>
 
-<h2 id="hasil">6. Tabel hasil</h2>
+<h2 id="hasil">Langkah 5 · Hasil</h2>
 <figure><img src="gambar/08_hasil.png" alt="Hasil"><figcaption>Tab Hasil: satu baris per ligan; panah membuka semua pose.</figcaption></figure>
-<p>Kolom: ΔG (kcal/mol), Ki perkiraan, LE (efisiensi ligan), ukuran klaster, RMSD ke kristal (hijau ≤ 2 Å), RMSD referensi, jumlah ikatan H (H), hidrofobik (HF), π, dan interaksi lain. Sortir dengan klik judul kolom; saring dengan nama atau batas ΔG. <b>Klik dua kali</b> baris untuk memuat pose ke viewport.</p>
+<ul>
+<li>Kolom bawaan: <b>#</b>, <b>Ligan</b>, <b>ΔG</b> (kcal/mol), <b>LE</b> (efisiensi ligan), <b>RMSD kristal</b> (hijau ≤ 2 Å), <b>PoseBusters</b>, <b>H</b> (ikatan hidrogen). <b>Klik kanan judul kolom</b> untuk menampilkan kolom lain: Ki perkiraan, klaster, RMSD referensi, hidrofobik, π, interaksi lain, mesin, job.</li>
+<li>Sortir dengan klik judul kolom; saring dengan nama atau batas ΔG. <b>Klik dua kali</b> baris untuk memuat pose ke viewport.</li>
+<li>Menu <b>Analisis › Tabel hasil</b> (<kbd>Ctrl</kbd>+<kbd>R</kbd>).</li>
+</ul>
 
-<h2 id="interaksi">7. Interaksi 3D</h2>
+<h2 id="interaksi">Interaksi 3D</h2>
 <figure><img src="gambar/09_interaksi.png" alt="Interaksi"><figcaption>Garis putus-putus berwarna per jenis interaksi; residu kontak sebagai stick.</figcaption></figure>
-<p>Panel <b>Interaksi</b> menampilkan daftar per jenis beserta jarak dan sudut; klik baris untuk memfokuskan residu. Centang jenis yang ingin ditampilkan. Warna: <span style="color:#2e9e5b">ikatan hidrogen</span>, <span style="color:#c98a12">hidrofobik</span>, <span style="color:#7b5cd6">π–π</span>, <span style="color:#2f8fd6">π–kation</span>, <span style="color:#cf3f3f">jembatan garam</span>, <span style="color:#1aa3a3">ikatan halogen</span>, <span style="color:#7d80b0">logam</span>. Kriteria lengkap: <a href="metode.html">Metode &amp; kriteria</a>.</p>
+<p>Tab <b>Interaksi</b> (kanan, ruang Analisis) menampilkan daftar per jenis beserta jarak dan sudut; klik baris untuk memfokuskan residu. Centang jenis yang ingin ditampilkan; opsi label jarak, label residu, residu sebagai stick. <kbd>I</kbd> menampilkan/menyembunyikan interaksi. Warna: <span style="color:#2e9e5b">ikatan hidrogen</span>, <span style="color:#c98a12">hidrofobik</span>, <span style="color:#7b5cd6">π–π</span>, <span style="color:#2f8fd6">π–kation</span>, <span style="color:#cf3f3f">jembatan garam</span>, <span style="color:#1aa3a3">ikatan halogen</span>, <span style="color:#7d80b0">logam</span>. Kriteria: <a href="metode.html">Metode &amp; kriteria</a>.</p>
 
-<h2 id="diagram">8. Diagram interaksi 2D</h2>
+<h3>Kontribusi energi per atom</h3>
+<p><b>Analisis › Kontribusi energi per atom</b> (<kbd>K</kbd>) mewarnai atom pose aktif: <span style="color:#1f8a4c">hijau</span> = menguntungkan, <span style="color:#c62828">merah</span> = merugikan; bola makin besar makin besar kontribusinya. Dihitung dari suku antarmolekul fungsi skor AutoDock Vina (gauss, repulsi, hidrofobik, ikatan H) per atom ligan; totalnya mendekati “Final Intermolecular Energy” Vina. Berguna untuk melihat bagian molekul yang perlu dimodifikasi.</p>
+
+<h3>Sematkan pose</h3>
+<p>Membuka pose lain biasanya menyembunyikan pose sebelumnya. Klik kanan pose di panel Objek › <b>Sematkan</b> agar pose itu tetap tampil (ikon pin) — mis. untuk membandingkan pose terbaik dua ligan di satu viewport.</p>
+
+<h2 id="diagram">Diagram interaksi 2D</h2>
 <figure><img src="gambar/10_diagram2d.png" alt="Diagram 2D"><figcaption>Tab Diagram 2D untuk pose yang dipilih.</figcaption></figure>
-<p>Simpan sebagai SVG/PDF (vektor, bisa diedit di Inkscape, Illustrator, Word) atau PNG/TIFF dengan DPI pilihan.</p>
+<p>Simpan sebagai SVG/PDF (vektor, bisa diedit di Inkscape, Illustrator, Word) atau PNG/TIFF dengan DPI pilihan. Tombol <b>Salin</b> menaruh gambar di clipboard untuk langsung ditempel ke Word/PowerPoint.</p>
 
-<h2 id="validasi">9. Validasi redocking</h2>
+<h2 id="validasi">Validasi redocking</h2>
 <figure><img src="gambar/11_validasi.png" alt="Validasi"><figcaption>Kristal (karbon magenta) vs pose terbaik (karbon biru).</figcaption></figure>
-<p><b>Analyze › Validasi redocking</b> men-docking ulang ligan kristal dengan parameter yang sama, dimulai dari konformasi kristal tanpa minimisasi, lalu menghitung RMSD pose terbaik terhadap kristal. <b>RMSD ≤ 2,0 Å = metode valid.</b> Hasil disimpan di proyek dan dikutip di laporan PDF. Lakukan sebelum menafsirkan hasil screening.</p>
+<p><b>Docking › Validasi redocking…</b> (juga di menu Analisis) men-docking ulang ligan kristal dengan parameter yang sama, dimulai dari konformasi kristal tanpa minimisasi, lalu menghitung RMSD pose terbaik terhadap kristal. <b>RMSD ≤ 2,0 Å = metode valid.</b> Hasil disimpan di proyek dan dikutip di laporan PDF. Lakukan sebelum menafsirkan hasil screening.</p>
 
-<h2 id="banding">10. Bandingkan ligan &amp; peta interaksi</h2>
-<figure><img src="gambar/12_bandingkan.png" alt="Bandingkan"><figcaption>Centang 2–4 ligan di tab Hasil lalu klik Bandingkan.</figcaption></figure>
-<p>Empat viewport berdampingan (tombol <i>Samakan sudut pandang</i>), daftar residu yang berinteraksi dengan semua ligan, dan peta panas residu × ligan. Tombol <b>Peta interaksi</b> menampilkan peta untuk semua hasil.</p>
+<h2 id="qc">Pemeriksaan pose (PoseBusters)</h2>
+<p>Setiap pose terbaik diperiksa otomatis dengan PoseBusters (22 uji: geometri ikatan dan sudut, planaritas cincin, stereokimia, energi internal, jarak minimum ke protein, dll.). Hasilnya di kolom <b>PoseBusters</b> tab Hasil (arahkan tetikus untuk melihat uji yang gagal) dan di Properti pose. <b>Analisis › Periksa pose aktif (PoseBusters)…</b> menampilkan semua uji untuk pose mana pun.</p>
 
-<h2 id="ekspor">11. Ekspor &amp; laporan</h2>
-<figure><img src="gambar/13_ekspor.png" alt="Ekspor" style="max-width:720px"><figcaption>File › Ekspor (<kbd>Ctrl</kbd>+<kbd>E</kbd>).</figcaption></figure>
+<h2 id="banding">Bandingkan ligan &amp; peta interaksi</h2>
+<figure><img src="gambar/12_bandingkan.png" alt="Bandingkan"><figcaption>Centang 2–4 ligan di tab Hasil lalu Analisis › Bandingkan ligan dicentang.</figcaption></figure>
+<p>Viewport berdampingan (tombol <i>Samakan sudut pandang</i>), daftar residu yang berinteraksi dengan semua ligan, dan peta panas residu × ligan. <b>Analisis › Peta interaksi residu × ligan</b> menampilkan peta untuk semua hasil.</p>
+<p><b>Sidik jari interaksi (IFP)</b>: tiap pose terbaik diringkas sebagai himpunan “residu × jenis interaksi” (tanpa vdW). Kolom <b>IFP vs kristal</b> di tab Hasil = kemiripan Tanimoto terhadap pose kristal ligan asli (1 = pola interaksi sama persis; berguna untuk memilih ligan yang meniru ligan asli). Tab Statistik › <i>Kemiripan interaksi (IFP)</i> menampilkan matriks kemiripan antar ligan; Excel berisi lembar <i>Sidik jari interaksi</i> (0/1 per residu × jenis).</p>
+
+<h2 id="sifat">Sifat ligan &amp; BOILED-Egg</h2>
+<figure><img src="gambar/16_sifat.png" alt="Sifat ligan"><figcaption>Tab Sifat Ligan.</figcaption></figure>
+<p><b>Analisis › Sifat ligan dan BOILED-Egg</b>: MW, WLOGP, TPSA, donor/akseptor, ikatan rotasi, QED; aturan Lipinski, Ghose, Veber, Egan, Muegge; peringatan PAINS dan Brenk; grafik BOILED-Egg (perkiraan absorpsi usus dan penetrasi otak). Ekspor CSV atau grafik SVG/PDF/PNG/TIFF.</p>
+
+<h2 id="statistik">Statistik &amp; grafik</h2>
+<figure><img src="gambar/17_statistik.png" alt="Statistik"><figcaption>Tab Statistik.</figcaption></figure>
+<p><b>Analisis › Statistik dan grafik</b>: histogram ΔG, diagram sebar dengan regresi dan korelasi Pearson/Spearman (beserta p), batang ΔG teratas, matriks korelasi antar variabel (ΔG, LE, pKi, interaksi, sifat ligan). Pilih job tertentu atau “Semua job”. Ekspor grafik dan data.</p>
+
+<h2 id="uji">Uji statistik &amp; grafik publikasi</h2>
+<p>Tab <b>Uji &amp; Grafik</b> (<b>Analisis › Uji statistik dan grafik publikasi</b>) untuk data penelitian Anda sendiri, mis. hasil uji in vitro. Alurnya: lembar data → analisis → grafik, semuanya diperbarui otomatis saat data diubah dan tersimpan di proyek.</p>
+<ul>
+<li><b>Data Kolom</b>: satu kolom per grup, baris = ulangan. Tempel langsung dari Excel (<kbd>Ctrl</kbd>+<kbd>V</kbd>; baris judul ikut terbaca), impor CSV, atau <i>Isi data ▾ › ΔG per job / per mesin</i> dari hasil docking. Klik dua kali judul kolom untuk mengganti nama.</li>
+<li><b>Uji otomatis</b> memeriksa normalitas (Shapiro–Wilk) dan homogenitas varians (Brown–Forsythe), lalu memilih: 2 grup → t-test Welch / Mann–Whitney (berpasangan: t berpasangan / Wilcoxon); ≥ 3 grup → ANOVA + Tukey, ANOVA Welch + Games–Howell, atau Kruskal–Wallis + Dunn (Holm). Bisa juga dipilih manual, termasuk ANOVA + Dunnett terhadap kolom pertama (kontrol).</li>
+<li>Hasil: statistik deskriptif (n, rerata, SD, SEM, median, rentang), statistik uji, df, p, ukuran efek (Cohen d/Hedges g, η², ε², r), tabel uji lanjut, <b>paragraf interpretasi</b> dan <b>paragraf Metode</b> siap tempel (tombol <i>Salin hasil &amp; paragraf metode</i>), serta peringatan bila asumsi tidak terpenuhi.</li>
+<li><b>Grafik</b>: batang + titik, titik (rerata ± SD/SEM/CI 95%), kotak & kumis (Tukey), titik (median ± IQR); braket signifikansi otomatis bertingkat (ns/*/**/***/**** atau p eksak); palet Okabe–Ito (ramah buta warna), biru, atau abu-abu untuk cetak.</li>
+<li><b>Data XY dosis–respons</b>: kolom pertama konsentrasi, kolom berikutnya ulangan respons. Regresi nonlinear 4 parameter (log[inhibitor] vs respons, kemiringan bebas) → IC₅₀/EC₅₀ dengan CI 95%, Hill slope, R²; grafik sumbu x logaritmik.</li>
+<li><b>Data ROC</b>: kolom 1 = skor kelompok negatif (decoy/kontrol), kolom 2 = skor kelompok positif (aktif/kasus). Untuk ΔG docking pilih <i>Skor rendah = positif</i>. Hasil: AUC dengan CI 95% (DeLong), p, titik potong optimal (indeks Youden) beserta sensitivitas &amp; spesifisitas, dan faktor pengayaan EF1%/5%/10% — cocok untuk validasi penapisan virtual aktif vs decoy.</li>
+<li><b>Data Kontingensi</b>: kolom pertama = nama kelompok, kolom berikutnya = frekuensi tiap kategori (mis. Membaik / Tidak membaik). Tabel 2 × 2 → uji eksak Fisher, χ² Yates, rasio odds &amp; risiko relatif dengan CI 95%; tabel lebih besar → χ² Pearson (otomatis Fisher eksak r × c bila frekuensi harapan kecil); Cramér V. Grafik batang bertumpuk 100%.</li>
+<li>Ekspor SVG/PDF (vektor), PNG/TIFF 600 dpi, <b>Salin</b> ke clipboard, atau <b>＋ Komposer</b> untuk dijadikan panel figur.</li>
+</ul>
+<h3>Format grafik (klik elemen)</h3>
+<p>Panel <b>Format</b> di kanan (tombol <i>Format ◂/▸</i>) mengatur tampilan grafik. Arahkan mouse ke grafik: bagian yang bisa diformat disorot; klik untuk membukanya di panel — <b>judul</b>, <b>label sumbu Y</b>, <b>sumbu Y</b> (minimum, maksimum, jarak tik, skala log₁₀, <b>patah sumbu</b> untuk melompati rentang kosong bila satu grup jauh lebih besar), <b>sumbu X</b> (label, nama grup miring), <b>grup</b> (warna per grup, bentuk &amp; ukuran penanda, opasitas, lebar batang), dan <b>tanda signifikansi</b>. Klik latar grafik untuk pengaturan umum (ukuran, huruf, tebal garis, palet, kisi, titik individual).</p>
+<p><b>Gaya tersimpan</b>: simpan tampilan favorit (huruf, warna, ukuran, penanda) dengan <i>Simpan…</i>, lalu pakai di grafik lain dengan <i>Terapkan</i> — teks dan rentang sumbu tidak ikut berubah. Tersedia gaya bawaan: <i>Jurnal hitam-putih</i>, <i>Kolom jurnal (ringkas)</i>, dan <i>Presentasi (huruf besar)</i>.</p>
+
+<h2 id="komposer">Komposer figur (panel A/B/C)</h2>
+<p><b>Analisis › Komposer figur</b> (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd>) menggabungkan beberapa gambar menjadi satu figur jurnal berlabel A, B, C. Tambahkan panel dari <i>＋ Tambah ▾</i>: grafik Uji &amp; Grafik, grafik Statistik, diagram interaksi 2D, BOILED-Egg, gambar viewport 3D, atau berkas gambar (PNG/JPG/SVG). Urutkan dengan menyeret atau tombol ↑ ↓; centang <i>Lebar penuh</i> agar panel (mis. gambar 3D) memakai satu baris sendiri.</p>
+<ul>
+<li>Atur jumlah kolom, jarak antar panel, gaya label (A / a / (A) / (a) / A.), ukuran label, dan lebar cetak (85 / 120 / 174 mm).</li>
+<li><i>Samakan skala huruf antar grafik</i> (bawaan) memperkecil semua grafik dengan faktor yang sama sehingga ukuran huruf seragam di seluruh figur.</li>
+<li>Simpan sebagai PDF/SVG vektor atau TIFF/PNG 600 dpi, atau salin ke clipboard. Isi komposer tersimpan di proyek.</li>
+</ul>
+
+<h2 id="ekspor">Ekspor &amp; laporan</h2>
+<figure><img src="gambar/13_ekspor.png" alt="Ekspor" style="max-width:720px"><figcaption>Berkas › Ekspor › Pusat ekspor (<kbd>Ctrl</kbd>+<kbd>E</kbd>).</figcaption></figure>
 <table>
-<tr><th>Kategori</th><th>Isi</th></tr>
-<tr><td>Gambar 3D</td><td>PNG, TIFF (LZW/tanpa kompresi), JPEG, WebP; preset jurnal 85/120/180 mm @ 600 dpi, slide 1920×1080/4K, poster; latar putih/transparan. Gambar dirender ulang pada resolusi penuh (maks. 8192 px).</td></tr>
+<tr><th style="width:22%">Kategori</th><th>Isi</th></tr>
+<tr><td>Gambar 3D</td><td>PNG, TIFF (LZW/tanpa kompresi), JPEG, WebP; preset jurnal 85/120/180 mm @ 600 dpi, slide 1920×1080/4K, poster; latar putih/transparan. Dirender ulang pada resolusi penuh; di atas 4096 px dirender per ubin lalu disatukan (maks. 16384 px). Pintasan <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd>.</td></tr>
 <tr><td>Diagram 2D</td><td>SVG/PDF vektor, PNG/TIFF ber-DPI.</td></tr>
 <tr><td>Struktur</td><td>Kompleks PDB (reseptor + pose, ligan di rantai L), kompleks semua ligan, SDF bertag (ΔG, Ki, LE, RMSD, interaksi, SMILES), PDBQT.</td></tr>
-<tr><td>Tabel</td><td>Excel (.xlsx: Ringkasan, Semua pose, Interaksi, Parameter, Info) atau CSV (titik koma &amp; desimal koma untuk Excel Indonesia).</td></tr>
-<tr><td>Laporan PDF</td><td>Validasi, reseptor, parameter &amp; perangkat, 15 hasil teratas, gambar 3D dan diagram 2D ligan terbaik, interaksi, metode, sitasi software.</td></tr>
+<tr><td>Tabel</td><td>Excel (.xlsx: Ringkasan, Semua pose, Interaksi, Sifat ligan, Statistik, Parameter, Info) atau CSV (titik koma &amp; desimal koma untuk Excel Indonesia).</td></tr>
+<tr><td>Laporan</td><td>Validasi, reseptor, parameter &amp; perangkat, hasil teratas, gambar 3D dan diagram 2D ligan terbaik, interaksi, PoseBusters, sifat ligan, metode, sitasi software. Tiga format: <b>PDF</b> (siap cetak), <b>Word .docx</b> (judul, tabel, dan gambar bisa disunting), dan <b>HTML interaktif</b> — satu berkas yang bisa dibuka offline di peramban mana pun: penjelajah 3D (klik baris tabel untuk melihat pose 30 ligan teratas beserta residu kontak dan garis interaksi; permukaan kantong, putar, simpan PNG), tabel hasil lengkap yang bisa dicari &amp; diurutkan, dan laporan lengkap. Pintasan <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd>.</td></tr>
 </table>
+<p><b>Berkas › Ekspor › Video / animasi 3D…</b> merekam viewport seperti tampil sekarang: <i>Putar 360°</i>, <i>Goyang ±30°</i>, atau <i>Zoom masuk ke situs pengikatan</i> (beralih mulus dari seluruh protein ke pandangan saat ini). Setiap bingkai dirender ulang pada resolusi penuh (bukan rekaman layar), termasuk label residu. Format: <b>Video MP4 H.264</b> — Full HD 1920×1080, 2K 2560×1440, 4K 3840×2160, kotak 1080×1080, atau tegak 1080×1920 (Reels/Story) pada 24/30/60 bingkai/detik, kualitas tinggi (4K30 ± 40 Mbps); cocok untuk PowerPoint, YouTube, dan media sosial. Rekaman 4K 8 detik butuh ± 1 menit. Juga tersedia GIF (WhatsApp/web, 256 warna), WebP animasi, dan folder bingkai PNG untuk editor video.</p>
+<p><b>Label 3D</b> (residu, jarak interaksi, pengukuran, kantong) digambar ulang pada resolusi kanvas yang sebenarnya — tetap tajam di layar HiDPI dan pada ekspor/video 4K. Label residu berbentuk pil: nama residu tebal, nomor abu-abu, dan titik warna jenis interaksinya.</p>
+<p><b>Salin gambar</b> (<b>Edit › Salin gambar</b>, <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>C</kbd>) menyalin isi tab yang terbuka — viewport 3D, diagram 2D, BOILED-Egg, atau grafik — ke clipboard untuk ditempel ke Word/PowerPoint.</p>
+<p><b>Berkas › Ekspor › Sesi PyMOL / ChimeraX…</b> menulis folder berisi reseptor, pose aktif, serta skrip <code>.pml</code> dan <code>.cxc</code> yang langsung menampilkan residu kontak (berlabel) dan garis interaksi berwarna sama dengan VirmoDock. <b>Alat › Buka di program lain</b> membuka sesi ini di PyMOL/ChimeraX bila ada pose aktif; selain itu mengirim objek yang tampil (juga ke Discovery Studio Visualizer).</p>
 
 <h2 id="proyek">Proyek, simpan otomatis, pemulihan</h2>
 <ul>
-<li>Proyek adalah folder <code>Nama.vmd</code> berisi <code>proyek.json</code>, reseptor, ligan, grid, dan hasil (log asli mesin selalu disimpan). Dibuat otomatis saat preparasi pertama; ganti lewat <b>File › Proyek baru</b> / <b>Buka proyek</b> / <b>Simpan</b> (<kbd>Ctrl</kbd>+<kbd>S</kbd>).</li>
+<li>Proyek adalah folder <code>Nama.vmd</code> berisi <code>proyek.json</code>, reseptor, ligan, grid, dan hasil (log asli mesin selalu disimpan). Dibuat otomatis saat preparasi pertama; kelola lewat <b>Berkas › Proyek baru</b> / <b>Buka proyek</b> / <b>Buka proyek terakhir</b> / <b>Simpan proyek</b> (<kbd>Ctrl</kbd>+<kbd>S</kbd>).</li>
 <li>Simpan otomatis setiap perubahan penting dan setiap 3 menit, dengan 5 cadangan terakhir di <code>.cadangan</code>.</li>
 <li>Bila VirmoDock tertutup tidak normal (listrik mati), saat dibuka lagi muncul tawaran <i>Pulihkan pekerjaan terakhir</i>.</li>
+<li><b>Alat › Buka folder proyek</b> membuka folder proyek aktif di Explorer.</li>
 </ul>
 
 <h2 id="pintasan">Pintasan keyboard</h2>
+<p>Daftar lengkap: <b>Bantuan › Pintasan keyboard</b> (<kbd>Ctrl</kbd>+<kbd>/</kbd>). Yang paling sering dipakai:</p>
 <table>
 <tr><th>Tombol</th><th>Aksi</th><th>Tombol</th><th>Aksi</th></tr>
-<tr><td><kbd>Ctrl</kbd>+<kbd>O</kbd></td><td>Buka berkas</td><td><kbd>F5</kbd></td><td>Jalankan docking</td></tr>
-<tr><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd></td><td>Impor RCSB</td><td><kbd>G</kbd></td><td>Tampil/sembunyi grid box</td></tr>
-<tr><td><kbd>Ctrl</kbd>+<kbd>S</kbd></td><td>Simpan proyek</td><td><kbd>I</kbd></td><td>Tampil/sembunyi interaksi</td></tr>
-<tr><td><kbd>Ctrl</kbd>+<kbd>E</kbd></td><td>Ekspor</td><td><kbd>M</kbd></td><td>Ukur jarak (klik dua atom)</td></tr>
-<tr><td><kbd>Ctrl</kbd>+<kbd>D</kbd></td><td>Panel Parameter</td><td><kbd>F</kbd></td><td>Sesuaikan tampilan</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>O</kbd></td><td>Buka berkas struktur</td><td><kbd>F5</kbd></td><td>Jalankan docking</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd></td><td>Protein dari RCSB</td><td><kbd>Ctrl</kbd>+<kbd>J</kbd></td><td>Antrean job</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd></td><td>Ligan dari PubChem</td><td><kbd>Ctrl</kbd>+<kbd>R</kbd></td><td>Tabel hasil</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>1</kbd> / <kbd>2</kbd></td><td>Siapkan reseptor / ligan</td><td><kbd>Ctrl</kbd>+<kbd>D</kbd></td><td>Pengaturan docking</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>1</kbd> … <kbd>5</kbd></td><td>Buka langkah 1–5</td><td><kbd>Ctrl</kbd>+<kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd></td><td>Ruang kerja Siapkan / Docking / Analisis</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>S</kbd></td><td>Simpan proyek</td><td><kbd>G</kbd></td><td>Tampil/sembunyi kotak area docking</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>E</kbd></td><td>Pusat ekspor</td><td><kbd>I</kbd></td><td>Interaksi 3D</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd></td><td>Laporan (PDF/Word/HTML)</td><td><kbd>M</kbd></td><td>Ukur jarak (klik dua atom)</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>F</kbd></td><td>Cari objek/residu</td><td><kbd>F</kbd></td><td>Sesuaikan tampilan</td></tr>
 <tr><td><kbd>Ctrl</kbd>+<kbd>T</kbd></td><td>Mode gelap/terang</td><td><kbd>F1</kbd></td><td>Panduan ini</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>C</kbd></td><td>Salin gambar ke clipboard</td><td><kbd>K</kbd></td><td>Kontribusi energi per atom</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd></td><td>Komposer figur</td><td></td><td></td></tr>
 </table>
 <div class="peringatan">Hasil docking adalah prediksi komputasi, bukan bukti aktivitas biologis; konfirmasi dengan uji eksperimen. Ki dihitung dari ΔG sebagai perkiraan.</div>
 <footer>VirmoDock 0.9.0 · dokumentasi offline · GPL-3.0-or-later</footer></main></body></html>

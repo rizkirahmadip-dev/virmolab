@@ -87,6 +87,9 @@ class PanelHierarki(QWidget):
                 "pose": f"{o.info.get('energi', 0):.2f}" if "energi" in o.info else ""}.get(o.jenis, "")
         induk = self._grup(o.grup) if getattr(o, "grup", "") else self.pohon
         it = self._baru(induk, o.nama, info, ("obj", o.id), o.tampil, IKON_JENIS.get(o.jenis))
+        it.setData(0, Qt.UserRole + 1, o.jenis)
+        if o.info.get("sematkan"):
+            self.set_sematkan(o.id, True)
         if induk is not self.pohon:
             induk.setText(1, str(induk.childCount()))
         if o.info.get("siap_docking"):
@@ -149,6 +152,15 @@ class PanelHierarki(QWidget):
             self._diam = True
             it.setCheckState(0, Qt.Checked if on else Qt.Unchecked)
             self._diam = False
+
+    def set_sematkan(self, oid, on):
+        """Pose tersemat: ikon pin + tooltip; tetap tampil saat pose lain dibuka."""
+        it = self._item.get(oid)
+        if not it:
+            return
+        it.setIcon(0, icons.ikon("pin" if on else IKON_JENIS.get(it.data(0, Qt.UserRole + 1), "lig"),
+                                 self.warna_ikon))
+        it.setToolTip(0, "Disematkan: tetap tampil saat membuka pose lain" if on else "")
 
     def ganti_nama(self, oid, nama):
         if oid in self._item:
@@ -243,6 +255,11 @@ class PanelHierarki(QWidget):
             wr.addAction("Pilih warna…", lambda: self.aksiKonteks.emit(oid, "color_pick", None))
             m.addSeparator()
             m.addAction(icons.ikon("fit", self.warna_ikon), "Fokuskan", lambda: self.aksiKonteks.emit(oid, "zoom", d))
+            if d[0] == "obj" and it.data(0, Qt.UserRole + 1) == "pose":
+                a = m.addAction(icons.ikon("pin", self.warna_ikon), "Sematkan (tetap tampil saat buka pose lain)",
+                                lambda: self.aksiKonteks.emit(oid, "sematkan", None))
+                a.setCheckable(True)
+                a.setChecked(it.toolTip(0).startswith("Disematkan"))
             if d[0] == "obj":
                 m.addAction("Ganti nama…", lambda: self.aksiKonteks.emit(oid, "rename", None))
                 m.addAction(icons.ikon("dl", self.warna_ikon), "Ekspor…", lambda: self.aksiKonteks.emit(oid, "export", None))
@@ -281,7 +298,7 @@ class PanelProperti(QWidget):
     def kosong(self):
         self._bersih()
         self.judul.setText("PROPERTI")
-        l = QLabel("Pilih objek, rantai, atau residu di panel Hierarki atau klik atom di viewport.")
+        l = QLabel("Klik objek, rantai, atau residu di panel Objek, atau klik atom di viewport, untuk melihat rinciannya.")
         l.setObjectName("muted")
         l.setWordWrap(True)
         self.form.addRow(l)
