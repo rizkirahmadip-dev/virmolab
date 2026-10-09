@@ -13,7 +13,7 @@ dan ekspor siap publikasi dalam satu jendela berbahasa Indonesia.
 - **Ekspor**: gambar 3D/2D ber-DPI (PNG/TIFF/SVG/PDF), kompleks PDB, SDF, CSV, XLSX, laporan PDF.
 - **Distribusi**: installer per-pengguna tanpa admin, versi portable, pindah laptop (`.vmdbackup`).
 
-Status: **0.9.0 pra-rilis** — menunggu uji relawan di GPU AMD/Intel dan komputer tanpa GPU.
+Status: **0.9.1 pra-rilis** (lihat CHANGELOG.md) — menunggu uji relawan di GPU AMD/Intel dan komputer tanpa GPU.
 
 ## Unduh
 

@@ -95,3 +95,43 @@ class DialogLisensi(QDialog):
         h.addStretch(1)
         h.addWidget(t)
         lay.addLayout(h)
+
+
+def catatan_perubahan(sejak=None):
+    """Isi CHANGELOG.md; sejak = versi terakhir yang sudah dilihat -> hanya bagian versi yang lebih baru."""
+    f = paths.AKAR / "CHANGELOG.md"
+    if not f.exists():
+        return ""
+    teks = f.read_text(encoding="utf-8")
+    bagian = teks.split("\n## ")
+    kepala, versi = bagian[0], ["## " + b for b in bagian[1:]]
+    if sejak:
+        def v(t):
+            return tuple(int(x) for x in t.split("[", 1)[1].split("]", 1)[0].split(".") if x.isdigit())
+        try:
+            batas = tuple(int(x) for x in sejak.split("."))
+            versi = [b for b in versi if v(b) > batas] or versi[:1]
+        except (ValueError, IndexError):
+            versi = versi[:1]
+    import re
+    return re.sub(r"(?m)^## \[([^\]]+)\]", r"## Versi \1", "\n\n".join(versi))
+
+
+class DialogApaBaru(QDialog):
+    """Ringkasan perubahan (CHANGELOG.md). Non-modal: muncul sekali setelah pembaruan, juga dari menu Bantuan."""
+
+    def __init__(self, versi, parent=None, sejak=None):
+        super().__init__(parent)
+        self.setWindowTitle(f"Apa yang baru di VirmoDock {versi}")
+        self.resize(720, 620)
+        lay = QVBoxLayout(self)
+        tb = QTextBrowser()
+        tb.setOpenExternalLinks(True)
+        tb.setMarkdown(catatan_perubahan(sejak) or "Catatan perubahan tidak ditemukan.")
+        lay.addWidget(tb)
+        h = QHBoxLayout()
+        h.addWidget(_ket("Panduan lengkap: Bantuan › Panduan pengguna (F1)."), 1)
+        b = QPushButton("Tutup")
+        b.clicked.connect(self.close)
+        h.addWidget(b)
+        lay.addLayout(h)

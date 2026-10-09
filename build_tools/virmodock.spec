@@ -18,6 +18,7 @@ datas = [(str(AKAR / "virmodock" / "viewer"), "virmodock/viewer"),
          (str(AKAR / "docs"), "docs"),
          (str(AKAR / "licenses"), "licenses"),
          (str(AKAR / "LICENSE"), "."),
+         (str(AKAR / "CHANGELOG.md"), "."),
          (str(AKAR / "LISENSI_PIHAK_KETIGA.txt"), ".")]
 # program mesin & Open Babel (dipanggil sebagai proses terpisah) -> _internal/bin
 for f in (AKAR / "vendor" / "bin").rglob("*"):

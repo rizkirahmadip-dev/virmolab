@@ -1,4 +1,4 @@
-<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Metode &amp; kriteria · VirmoDock</title><link rel="stylesheet" href="gaya.css"><link rel="icon" href="gambar/ikon.png"></head><body><header><img src="gambar/logo_putih.svg" alt="VirmoDock" style="height:30px;margin-right:6px"><span style="color:#9fb4d3;font-size:13px;margin-right:10px">0.9.0</span><a href="panduan.html">Panduan pengguna</a><a href="instalasi.html">Instalasi</a><a href="pindah_laptop.html">Pindah laptop</a><a href="gpu.html">Setup GPU</a><a href="troubleshooting.html">Mengatasi masalah</a><a href="metode.html" class="aktif">Metode &amp; kriteria</a></header><main><h1>Metode &amp; kriteria</h1>
+<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Metode &amp; kriteria · VirmoDock</title><link rel="stylesheet" href="gaya.css"><link rel="icon" href="gambar/ikon.png"></head><body><header><img src="gambar/logo_putih.svg" alt="VirmoDock" style="height:30px;margin-right:6px"><span style="color:#9fb4d3;font-size:13px;margin-right:10px">0.9.1</span><a href="panduan.html">Panduan pengguna</a><a href="instalasi.html">Instalasi</a><a href="pindah_laptop.html">Pindah laptop</a><a href="gpu.html">Setup GPU</a><a href="troubleshooting.html">Mengatasi masalah</a><a href="metode.html" class="aktif">Metode &amp; kriteria</a></header><main><h1>Metode &amp; kriteria</h1>
 <p class="lead">Rincian ilmiah yang dipakai VirmoDock, untuk ditulis di bagian Metode naskah.</p>
 
 <h2>Preparasi</h2>
@@ -82,6 +82,15 @@
 </ul>
 <p>Korelasi menunjukkan hubungan, bukan sebab-akibat. Ekspor: grafik SVG/PDF (vektor) atau PNG/TIFF ber-DPI, data CSV (untuk Excel/SPSS/R/GraphPad Prism), dan lembar "Statistik" (deskriptif per job) di XLSX.</p>
 
+<h2>Konsensus skor</h2>
+<ul>
+<li>Kolom skor: ΔG terbaik tiap ligan per job (mesin/parameter), dan rescoring pose terbaik dengan AutoDock Vina 1.2 <code>--score_only --autobox</code> memakai fungsi skor Vina dan Vinardo (tanpa optimasi pose).</li>
+<li>Per kolom: peringkat rata-rata untuk ties (1 = ΔG terendah) dan z-score dibalik (makin besar makin baik). Hanya ligan yang punya nilai di semua kolom yang dianalisis.</li>
+<li>Urutan konsensus = rata-rata peringkat (z-score rata-rata sebagai pemisah). Konsisten = peringkat ≤ ⌈n × persentil⌉ di semua kolom.</li>
+<li>Kesepakatan: Kendall W dengan koreksi ties, uji χ² = m(n − 1)W, df = n − 1 (setara uji Friedman; diverifikasi identik dengan SciPy); Spearman ρ antar pasangan kolom.</li>
+<li>Rujukan Vinardo: Quiroga R, Villarreal MA. Vinardo: a scoring function based on AutoDock Vina improves scoring, docking, and virtual screening. <i>PLoS One.</i> 2016;11(5):e0155183. doi:10.1371/journal.pone.0155183</li>
+</ul>
+
 <h2>Uji statistik (tab Uji &amp; Grafik)</h2>
 <ul>
 <li>Normalitas: Shapiro–Wilk per grup (n ≥ 3). Homogenitas varians: Brown–Forsythe (Levene berbasis median). α = 0,05.</li>
@@ -89,11 +98,17 @@
 <li>Ukuran efek: Cohen d dan Hedges g (dua grup), Cohen dz (berpasangan), r = z/√N (Mann–Whitney), η² (ANOVA), ε² (Kruskal–Wallis).</li>
 <li>Dosis–respons: regresi nonlinear kuadrat terkecil model logistik 4 parameter Y = Bawah + (Atas − Bawah) / (1 + 10^((logIC₅₀ − X)·Hill)), X = log₁₀ konsentrasi; CI 95% IC₅₀ dari galat baku logIC₅₀ (distribusi t, df = n − 4) lalu ditransformasi balik.</li>
 <li>ROC: AUC = statistik Mann–Whitney U/(n₁·n₀) (ties = ½); galat baku dan CI 95% metode DeLong (komponen penempatan); p dari uji Mann–Whitney dua sisi (H₀: AUC = 0,5). Ambang: skor ≥ t → positif (atau ≤ t untuk “skor rendah = positif”, mis. ΔG). Titik potong optimal = indeks Youden maksimum (sensitivitas + spesifisitas − 1). Faktor pengayaan EF<sub>x%</sub> = (aktif di x% teratas / jumlah x% teratas) / (aktif total / jumlah total).</li>
+<li>Pengayaan dini: <b>BEDROC</b> (α = 20, 80 % bobot pada ±8 % teratas; Truchon & Bayly 2007, dicocokkan identik dengan RDKit) dan <b>logAUC</b> = rata-rata sensitivitas pada sumbu log₁₀ FPR 0,001–1 ×100 % (acak 14,46 %; logAUC terkoreksi = logAUC − 14,46; Mysinger & Shoichet 2010). Skor sama diurutkan negatif dulu (konservatif). CI 95 % EF1%, EF5%, BEDROC: bootstrap persentil terstratifikasi (1000 ulangan, benih tetap). Grafik: ROC, ROC semilog, kurva pengayaan (dengan garis ideal & acak).</li>
 <li>Kontingensi: 2 × 2 → uji eksak Fisher dua sisi (utama), χ² dengan koreksi Yates, rasio odds (CI 95% Woolf) dan risiko relatif (CI 95% Katz) baris pertama vs kedua, koreksi Haldane–Anscombe (+0,5) bila ada sel nol. r × c → χ² Pearson; bila > 20% sel berfrekuensi harapan &lt; 5 atau ada yang &lt; 1, dipakai uji eksak Fisher r × c (SciPy). Ukuran efek Cramér V. Diperiksa: AUC = U/(n₁·n₀) persis; contoh “tea tasting” Fisher p = 0,4857, OR = 9 (sesuai rujukan).</li>
+<li>Koreksi perbandingan ganda: Holm, Bonferroni, Šidák (1 − (1 − p)<sup>m</sup>), Benjamini–Hochberg (FDR; identik dengan <code>scipy.stats.false_discovery_control</code>).</li>
+<li>Pengukuran berulang (≥ 3 kolom berpasangan): ANOVA satu faktor dalam-subjek, SS kondisi/subjek/galat; ε Greenhouse–Geisser dari matriks kovarians yang dipusatkan ganda, p dari F dengan df × ε (diverifikasi: F identik dengan model OLS subjek + kondisi). Nonparametrik: Friedman (identik SciPy) dengan ukuran efek Kendall W; uji lanjut t berpasangan atau Wilcoxon bertanda + koreksi pilihan.</li>
+<li>ANOVA dua arah: model OLS dengan kode efek (sum-to-zero), jumlah kuadrat tipe III lewat perbandingan model penuh vs tanpa efek (sah untuk data tak seimbang; pada data seimbang identik dengan rumus klasik), η²ₚ = SS/(SS + SS galat). Uji lanjut: beda level A di tiap level B, t dengan MS galat gabungan, CI 95 %, koreksi Šidák (bawaan) atau pilihan. Residu: Shapiro–Wilk; varians antar sel: Brown–Forsythe.</li>
+<li>Normalitas tambahan: D'Agostino–Pearson K² (n ≥ 8). Q–Q plot: kuantil normal teoretis posisi Blom ((i − 0,375)/(n + 0,25)) vs nilai terstandar. Pencilan: Grubbs dua sisi G = maks|x − x̄|/s, p = min(1; 2n·P(T<sub>n−2</sub> &gt; t)) (G = 2,290 untuk n = 10 memberi p = 0,05, sesuai tabel nilai kritis).</li>
+<li>Pemilihan model dosis–respons: 3PL = 4PL dengan Hill tetap ±1. Uji F extra sum-of-squares F = (SS₃ − SS₄)/(SS₄/(n − 4)), df (1; n − 4); AICc = n·ln(SS/n) + 2K + 2K(K + 1)/(n − K − 1) dengan K = jumlah parameter + 1; bobot Akaike untuk peluang model. Mode Otomatis memakai 4PL bila p &lt; 0,05.</li>
 <li>Validasi terhadap R (data PlantGrowth): ANOVA F(2; 27) = 4,846, p = 0,0159; Tukey p = 0,391 / 0,198 / 0,012; Kruskal–Wallis H = 7,988, p = 0,0184; ANOVA Welch F = 5,181, df₂ = 17,13, p = 0,0174 — identik.</li>
 </ul>
 
-<p>Rujukan metode ROC: DeLong ER, DeLong DM, Clarke-Pearson DL. Comparing the areas under two or more correlated receiver operating characteristic curves: a nonparametric approach. <i>Biometrics.</i> 1988;44(3):837–845. doi:10.2307/2531595 · Youden WJ. Index for rating diagnostic tests. <i>Cancer.</i> 1950;3(1):32–35. doi:10.1002/1097-0142(1950)3:1&lt;32::AID-CNCR2820030106&gt;3.0.CO;2-3</p>
+<p>Rujukan metode ROC: DeLong ER, DeLong DM, Clarke-Pearson DL. Comparing the areas under two or more correlated receiver operating characteristic curves: a nonparametric approach. <i>Biometrics.</i> 1988;44(3):837–845. doi:10.2307/2531595 · Youden WJ. Index for rating diagnostic tests. <i>Cancer.</i> 1950;3(1):32–35. doi:10.1002/1097-0142(1950)3:1&lt;32::AID-CNCR2820030106&gt;3.0.CO;2-3 · Truchon JF, Bayly CI. Evaluating virtual screening methods: good and bad metrics for the “early recognition” problem. <i>J Chem Inf Model.</i> 2007;47(2):488–508. doi:10.1021/ci600426e · Mysinger MM, Shoichet BK. Rapid context-dependent ligand desolvation in molecular docking. <i>J Chem Inf Model.</i> 2010;50(9):1561–1573. doi:10.1021/ci100214a</p>
 
 <h2>Perangkat lunak yang perlu dikutip</h2>
 <ol>
@@ -111,4 +126,4 @@
 </ol>
 <p>Laporan PDF VirmoDock mencantumkan sitasi sesuai mesin yang benar-benar dipakai.</p>
 <div class="peringatan">Hasil docking adalah prediksi komputasi, bukan bukti aktivitas biologis; konfirmasi dengan uji eksperimen.</div>
-<footer>VirmoDock 0.9.0 · dokumentasi offline · GPL-3.0-or-later</footer></main></body></html>
+<footer>VirmoDock 0.9.1 · dokumentasi offline · GPL-3.0-or-later</footer></main></body></html>

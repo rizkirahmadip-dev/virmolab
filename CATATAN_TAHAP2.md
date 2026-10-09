@@ -4,7 +4,7 @@ Untuk sesi baru: baca seluruh file ini dulu. Pengguna berbahasa Indonesia; UI da
 (Nama file historis — isinya mencakup semua tahap. Jangan diganti namanya: dirujuk dari `CLAUDE.md`.)
 
 **Status singkat:** Tahap 1–4 (MVP v1.0, Lampiran E3) **selesai** + **v1.1 selesai** (§4e) + UI/UX & menu dirombak (§4f) + Kelompok A, Dimorphite, P2Rank (§4g) + **sisa fitur v1.x selesai** (§4h: Format grafik, patah sumbu, ROC, kontingensi, komposer figur, gaya tersimpan, laporan Word/HTML interaktif, animasi). Versi kode 0.9.0 (pra-rilis).
-Rilis 0.9.0 di `rilis/` sudah build terbaru (9 Okt). Berikutnya: sisa §5 (relawan E5, GitHub publik, SignPath).
+Versi kode 0.9.1 (§4i). Berikutnya: sisa E4 (ChEMBL, PROPKA/PDB2PQR, pustaka ligan, Ketcher, ADMET-AI, bahasa Inggris, v2.0) atau §5 (relawan, GitHub, SignPath).
 
 ## 1. Tujuan proyek (ringkasan permintaan pengguna)
 Aplikasi desktop Windows **VirmoDock** (.exe + installer + versi portable) untuk molecular docking, pengganti AutoDockTools.
@@ -203,6 +203,16 @@ Tanpa paket baru (Pillow, SciPy, 3Dmol sudah ada).
   Sesudah build: angka laporan gaya Indonesia (`laporan._id/_n`: koma desimal, minus U+2212; Ki di HTML juga); uji mandiri item 17 'Perekam video (MP4 H.264)'; perekam video tak lagi memancarkan 'selesai' saat dibatalkan/gagal (`_batal`); 4PL: galat bila respons datar + peringatan ekstrapolasi/CI lebar/tak sigmoid/R² rendah; ROC: peringatan AUC < 0,5 & n kecil. Format angka Indonesia juga di UI (tabel Hasil, Interaksi, Properti, Antrean, Bandingkan; `laporan.id_angka`; urutan tabel tetap numerik via UserRole). Statistik: bawaan 'Semua job' bila job terbaru < 3 ligan + petunjuk grafik kosong (IFP proyek lama -> Hitung ulang analisis). Gambar docs 00–20 & t04 diperbarui (+18_uji_format, 19_komposer, 20_video). Regresi total `dev/regresi.py` 38/38 (uji membaca proyek kerja_docs terbaru, bukan nama tetap). Build final: Setup 320 MB / Portable 436 MB, uji mandiri 17/17 di dist, terpasang, dan portable; copot bersih.
 - **Video MP4 H.264** `ui/perekam_video.py` (Qt Multimedia: QVideoFrameInput -> QMediaCaptureSession -> QMediaRecorder; FFmpeg 7.1.5 LGPL bawaan PySide6 + encoder Media Foundation Windows; QtMultimedia dikeluarkan dari `excludes` spec, + ±21 MB). JEBAKAN: `QVideoFrameInput(format)` tak pernah siap -> pakai konstruktor polos; pompa bingkai lewat `QTimer.singleShot(0)` (panggilan langsung kirim->pompa->siap_lagi = stack overflow). Bingkai dialirkan (antre ≤ 3), JS mengirim JPEG q0,97 (`animBingkai(t, jpeg)`). Resolusi: fhd/qhd/uhd/kotak/tegak, 24/30/60 fps; 4K 120 bingkai ± 32 s. Lisensi: `licenses/FFmpeg_LICENSE_LGPL-2.1.txt`. Uji `dev/uji_video.py`, `dev/uji_animasi.py` (termasuk MP4 4K, resolusi dibaca balik).
 - Uji: `dev/uji_grafik_lanjut.py` (klik elemen, patah sumbu, log, ROC, kontingensi, preset, simpan/muat). Docs: panduan (Format grafik, Komposer, Laporan 3 format, Animasi, pintasan), metode (ROC, kontingensi).
+
+## 4i. Versi 0.9.1 (9 Okt 2026, permintaan pengguna: rencana E4 nomor 2 → 1 → 8 → 3 → 5 → 4)
+- **BEDROC/logAUC** (`uji.bedroc`, `faktor_pengayaan`, `log_auc`, `_bootstrap_skrining`): BEDROC & EF identik RDKit (`rdkit.ML.Scoring`); skor seri diurutkan negatif dulu (konservatif, `_urutan`); CI bootstrap terstratifikasi 1000×. Grafik `grafik_roc(mode=roc|semilog|enrich)`, pilihan `c_kurva`. Sitasi Truchon & Bayly 2007, Mysinger & Shoichet 2010 (Crossref).
+- **Konsensus skor** `core/konsensus.py` + `ui/dialog_konsensus.py` (Analisis › Konsensus skor…): kolom = job (bawaan: job dengan ligan selesai terbanyak per mesin) + rescoring Vina/Vinardo pose terbaik (`vina --score_only --autobox --scoring`, JEBAKAN: tanpa --autobox galat "ligand outside grid box"); disimpan `l["rescore"]` di job. Kunci ligan = `l["id"]`. Kendall W koreksi ties (= Friedman). Sitasi Vinardo (Quiroga 2016).
+- **CHANGELOG.md** (ikut dibundel, spec) + `DialogApaBaru` non-modal: muncul sekali bila QSettings `versi_dilihat` != versi (pemasangan baru: diset tanpa dialog); Bantuan › Apa yang baru. Versi -> **0.9.1**.
+- **Statistik lanjut** (`uji.py`): `koreksi_p` (holm/bonferroni/sidak/bh), `_anova_berulang` (GG ε), `_friedman`, `grubbs`, D'Agostino di deskriptif, `anova_dua_arah` (OLS kode efek, SS tipe III, uji lanjut per level B). UI: `c_koreksi`, jenis data `dua_faktor` (kolom 0 = faktor A), grafik `qq` & `grafik_dua_faktor`, legenda `_legenda`. JEBAKAN: teks '< 0,0001' di HTML harus di-escape (`_p_html`) — sebelumnya p kecil hilang dari tabel.
+- **Model IC₅₀**: `dosis_respons(model=auto|4pl|3pl)`; uji F extra SS + AICc + bobot Akaike; pilihan di `c_uji` (data XY).
+- **Grafik**: gaya `acuan` ('nilai=label; …'), `anotasi` ('|' = baris baru), `pos_anotasi`; `_hiasan()` dipanggil semua grafik. Sumbu kedua & EPS sengaja tidak dibuat (tak relevan / Qt tak menulis EPS).
+- Uji baru: `dev/uji_statistik_lanjut.py` (13 validasi silang), `dev/uji_konsensus.py`.
+- Regresi 40/40. Build 0.9.1 (Setup 320 MB, Portable 436 MB): uji mandiri 17/17 di dist, terpasang, portable; CHANGELOG ikut terbundel; copot bersih.
 
 ## 5. BELUM DIKERJAKAN
 

@@ -23,7 +23,7 @@ from ..core.proyek import Proyek, nama_aman
 from . import icons, kerja, theme
 from .dialog_ligan import DialogLigan
 from .dialog_reseptor import DialogReseptor
-from .dialog_bantuan import DialogLapor, DialogLisensi
+from .dialog_bantuan import DialogApaBaru, DialogLapor, DialogLisensi
 from .dialogs import DialogAmbil, Wizard
 from .dialog_ekspor import DialogEkspor
 from .panel_antrean import PanelAntrean
@@ -652,6 +652,9 @@ class JendelaUtama(QMainWindow):
                   "Centang 2–4 ligan di tab Hasil, lalu bandingkan berdampingan"),
                 A("Peta interaksi residu × ligan", "grid", self.peta_interaksi, None,
                   "Peta panas residu yang dikontak oleh semua ligan"),
+                A("Konsensus skor…", "table", self.buka_konsensus, None,
+                  "Gabungkan beberapa mesin/fungsi skor (termasuk rescoring Vina & Vinardo) menjadi peringkat "
+                  "konsensus + Kendall W"),
                 None,
                 A("Sifat ligan dan BOILED-Egg", "lig", tab(self.sifat), None,
                   "Lipinski, Veber, QED, PAINS, absorpsi GI, sawar darah otak"),
@@ -687,7 +690,8 @@ class JendelaUtama(QMainWindow):
         isi(m, (A("Panduan pengguna", "help", lambda: self.buka_panduan("panduan"), "F1"),
                 A("Tutorial docking (PDF)", "report", lambda: self.buka_panduan("Tutorial_Docking_VirmoDock.pdf"),
                   None, "Langkah demi langkah dengan contoh 1HSG/MK1"),
-                A("Pintasan keyboard", None, self.pintasan, "Ctrl+/", "Daftar semua pintasan keyboard dan mouse")))
+                A("Pintasan keyboard", None, self.pintasan, "Ctrl+/", "Daftar semua pintasan keyboard dan mouse"),
+                A("Apa yang baru", None, lambda: self.apa_baru(), None, "Ringkasan perubahan tiap versi")))
         self._sub(m, "Dokumentasi", [A(t, None, lambda _=False, k=k: self.buka_panduan(k))
                                      for k, t in (("instalasi", "Instalasi"), ("pindah_laptop", "Pindah laptop"),
                                                   ("gpu", "Setup GPU"), ("troubleshooting", "Mengatasi masalah"),
@@ -745,6 +749,11 @@ class JendelaUtama(QMainWindow):
             self._galat("Belum ada proyek terbuka.")
             return
         QDesktopServices.openUrl(QUrl.fromLocalFile(str(self.proyek.folder)))
+
+    def apa_baru(self, sejak=None):
+        d = DialogApaBaru(VERSI, self, sejak)
+        d.setAttribute(Qt.WA_DeleteOnClose)
+        d.show()
 
     def pintasan(self):
         """Daftar pintasan dari semua aksi (otomatis) + gerakan mouse viewport."""
@@ -970,6 +979,10 @@ class JendelaUtama(QMainWindow):
                 self.st.setValue("folder_kerja", w.ed_folder.text())
                 Path(w.ed_folder.text()).mkdir(parents=True, exist_ok=True)
             self.st.setValue("wizard_selesai", True)
+            self.st.setValue("versi_dilihat", VERSI)      # pemasangan baru: tak perlu 'Apa yang baru'
+        elif self.st.value("versi_dilihat", "") != VERSI:
+            QTimer.singleShot(1200, lambda: self.apa_baru(self.st.value("versi_dilihat", "") or None))
+            self.st.setValue("versi_dilihat", VERSI)
         self.s_folder.setText(self.st.value("folder_kerja", str(paths.folder_kerja_bawaan())))
 
     # ------------------------------------------------------------- objek
@@ -2210,6 +2223,13 @@ class JendelaUtama(QMainWindow):
             rek.galat.connect(lambda t: akhiri(f"Video gagal: {t}"))
         sudut = 30 if d["jenis"] == "goyang" else 360
         self.viewer.js("animMulai", lebar, tinggi, latar, d["jenis"], sudut, cb=lambda _: QTimer.singleShot(150, berikut))
+
+    def buka_konsensus(self):
+        if not self.proyek or not self.proyek.job:
+            self._galat("Belum ada hasil docking.")
+            return
+        from .dialog_konsensus import DialogKonsensus
+        DialogKonsensus(self).exec()
 
     # ------------------------------------------------------------ komposer figur
     def buka_komposer(self):

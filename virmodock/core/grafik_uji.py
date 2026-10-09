@@ -17,7 +17,7 @@ PALET = {"okabe": ["#0072B2", "#E69F00", "#009E73", "#CC79A7", "#56B4E9", "#D55E
          "biru": ["#1f4e8c", "#2b6fd6", "#5b9af0", "#9cc2f5", "#173b6c", "#4a7fc0", "#7aa7e0", "#c4d9f7"],
          "abu": ["#222222", "#555555", "#888888", "#aaaaaa", "#333333", "#666666", "#999999", "#bbbbbb"]}
 JENIS_GRAFIK = {"batang": "Batang + titik (rerata ± galat)", "titik": "Titik (rerata ± galat)",
-                "kotak": "Kotak & kumis (Tukey)", "median": "Titik (median ± IQR)"}
+                "kotak": "Kotak & kumis (Tukey)", "median": "Titik (median ± IQR)", "qq": "Q–Q plot (cek normalitas)"}
 GALAT = {"sd": "SD", "sem": "SEM", "ci": "CI 95%"}
 BENTUK = {"lingkaran": "Lingkaran", "kotak": "Kotak", "segitiga": "Segitiga", "berlian": "Belah ketupat"}
 
@@ -26,7 +26,9 @@ GAYA = {"lebar": 0, "tinggi": 470, "font": 12, "font_label": 13, "font_judul": 1
         "tebal": 1.4, "titik": True, "ukuran_titik": 3.4, "bentuk": "lingkaran", "opasitas": 0.28,
         "lebar_batang": 0.55, "kisi": False, "miring": False, "label_x": "",
         "y_min": None, "y_maks": None, "y_langkah": None, "y_log": False, "patah_dari": None, "patah_sampai": None,
-        "warna": {}}
+        "warna": {}, "acuan": "", "anotasi": "", "pos_anotasi": "kanan_atas"}
+POSISI_ANOTASI = {"kiri_atas": "Kiri atas", "kanan_atas": "Kanan atas", "kiri_bawah": "Kiri bawah",
+                  "kanan_bawah": "Kanan bawah"}
 # kunci yang ikut 'gaya tersimpan' (tampilan saja; teks & rentang sumbu milik data)
 KUNCI_PRESET = ("lebar", "tinggi", "font", "font_label", "font_judul", "font_tanda", "tebal", "titik", "ukuran_titik",
                 "bentuk", "opasitas", "lebar_batang", "kisi", "miring", "warna")
@@ -206,6 +208,50 @@ def _tinggi_judul(judul, gaya):
     return (22 + gaya["font_judul"] * 1.4) if judul else 20
 
 
+def baca_acuan(teks):
+    """'−8,2=Ligan asli; −7' -> [(−8.2, 'Ligan asli'), (−7.0, '')]."""
+    out = []
+    for bag in (teks or "").split(";"):
+        nilai, _, label = bag.partition("=")
+        t = nilai.strip().replace("−", "-").replace(",", ".")
+        try:
+            out.append((float(t), label.strip()))
+        except ValueError:
+            continue
+    return out
+
+
+def _hiasan(c, gaya, s=None):
+    """Garis acuan horizontal (gaya['acuan']) dan anotasi teks di pojok area plot. s: skala Y (SkalaY atau Kanvas
+    yang punya Y, y0, y1)."""
+    w = c.w
+    f = gaya["font"]
+    if s is not None:
+        y0, y1 = min(s.y0, s.y1), max(s.y0, s.y1)
+        celah = s.celah() if hasattr(s, "celah") else None
+        for v, label in baca_acuan(gaya.get("acuan")):
+            if not y0 <= v <= y1:
+                continue
+            y = s.Y(v)
+            if celah and celah[0] < y < celah[1]:
+                continue
+            c.out.append(f'<line x1="{c.kiri:.1f}" y1="{y:.1f}" x2="{c.kiri + c.pw:.1f}" y2="{y:.1f}" '
+                         f'stroke="{w["tinta2"]}" stroke-width="{max(1.0, gaya["tebal"] * 0.8):.2f}" '
+                         f'stroke-dasharray="6 4"/>')
+            teks = (label + " " if label else "") + fmt(v, 2)
+            c.teks(c.kiri + c.pw - 4, y - 5, teks, f - 1, "end", warna_=w["tinta2"])
+    a = (gaya.get("anotasi") or "").strip()
+    if a:
+        pos = gaya.get("pos_anotasi") or "kanan_atas"
+        kanan = pos.startswith("kanan")
+        x = c.kiri + c.pw - 8 if kanan else c.kiri + 10
+        baris = [b.strip() for b in a.split("|") if b.strip()]
+        tinggi = len(baris) * (f + 4)
+        y = c.atas + 8 + f if pos.endswith("atas") else c.atas + c.ph - 8 - tinggi + f
+        for k, b in enumerate(baris):
+            c.teks(x, y + k * (f + 4), b, f, "end" if kanan else "start")
+
+
 def grafik_grup(nama, kelompok, jenis="batang", galat="sd", posthoc=None, tanda="bintang", tampil_ns=False,
                 palet="okabe", label_y="", judul="", gelap=False, transparan=False, lebar=None, gaya=None,
                 daerah=None):
@@ -328,6 +374,7 @@ def grafik_grup(nama, kelompok, jenis="batang", galat="sd", posthoc=None, tanda=
         daerah.append(("sumbu_x", c.kiri, bawah_px + 2, c.kiri + c.pw, c.tinggi - 2))
     if gaya["label_x"]:
         c.teks(c.kiri + c.pw / 2, c.tinggi - 10, gaya["label_x"], gaya["font_label"], "middle")
+    _hiasan(c, gaya, s)
     # braket signifikansi: urut dari jarak terpendek, ditumpuk agar tidak bertabrakan
     terpasang = []
     for i, j, p in sorted(sig, key=lambda t: (abs(t[1] - t[0]), t[0])):
@@ -414,6 +461,7 @@ def grafik_dosis(h, label_x="Konsentrasi", label_y="Respons (%)", judul="", gela
                              f'y2="{s.Y(e):.1f}" stroke="{w["tinta"]}" stroke-width="1.3"/>')
         c.out.append(penanda(gaya["bentuk"], c.X(ux), s.Y(m), gaya["ukuran_titik"] * 1.35, warna_, w["latar"], 1, 1))
     # IC50
+    _hiasan(c, gaya, s)
     xi = h["log_ic50"] if h["log_x"] else h["ic50"]
     if c.x0 <= xi <= c.x1:
         yi = (h["atas"] + h["bawah"]) / 2
@@ -430,8 +478,14 @@ def grafik_dosis(h, label_x="Konsentrasi", label_y="Respons (%)", judul="", gela
     return c.selesai(), (W, H)
 
 
-def grafik_roc(h, judul="", gelap=False, transparan=False, gaya=None, daerah=None):
-    """h: hasil uji.roc. Kurva ROC + diagonal acak + AUC (CI 95 %) + titik potong Youden."""
+KURVA_ROC = {"roc": "Kurva ROC", "semilog": "ROC semilog (logAUC, pengayaan dini)",
+             "enrich": "Kurva pengayaan (enrichment)"}
+
+
+def grafik_roc(h, judul="", gelap=False, transparan=False, gaya=None, daerah=None, mode="roc"):
+    """h: hasil uji.roc. mode 'roc': ROC + diagonal acak + AUC (CI 95 %) + titik Youden; 'semilog': sumbu FPR
+    log10 0,1–100 % (menonjolkan pengayaan dini) + logAUC; 'enrich': % positif ditemukan vs % data teratas,
+    dengan garis ideal & acak, penanda EF1%/EF5% + BEDROC."""
     gaya = gaya_lengkap(gaya)
     f = gaya["font"]
     warna_ = (gaya.get("warna") or {}).get("0") or "#0072B2"
@@ -445,24 +499,87 @@ def grafik_roc(h, judul="", gelap=False, transparan=False, gaya=None, daerah=Non
         c.teks(c.kiri, c.atas + 30, h["galat"], 13)
         return c.selesai(), (W, H)
     c.f_tik = f
-    c.sumbu([0, 100], [0, 100], "", "", 0, 0, kisi=gaya["kisi"], tik_x=[0, 20, 40, 60, 80, 100])
     w = c.w
-    c.teks(c.kiri + c.pw / 2, c.tinggi - 12, gaya["label_x"] or "100 − Spesifisitas (%)", gaya["font_label"], "middle")
-    _ly = 18 + gaya["font_label"] * 0.2
-    c.teks(_ly, c.atas + c.ph / 2, "Sensitivitas (%)", gaya["font_label"], "middle", putar=-90)
-    c.out.append(f'<line x1="{c.X(0):.1f}" y1="{c.Y(0):.1f}" x2="{c.X(100):.1f}" y2="{c.Y(100):.1f}" '
-                 f'stroke="{w["tinta2"]}" stroke-dasharray="5 4" stroke-width="1"/>')
-    pts = " ".join(f"{c.X(100 * a):.1f},{c.Y(100 * b):.1f}" for a, b in zip(h["fpr"], h["tpr"]))
-    c.out.append(f'<polyline points="{pts}" fill="none" stroke="{warna_}" stroke-width="{1.6 * gaya["tebal"]:.1f}" '
-                 f'stroke-linejoin="round"/>')
-    yx, yy = 100 * (1 - h["spes"]), 100 * h["sens"]
-    c.out.append(penanda(gaya["bentuk"], c.X(yx), c.Y(yy), gaya["ukuran_titik"] * 1.5, warna_, w["latar"], 1, 1.2))
-    c.teks(c.X(yx) + 9, c.Y(yy) + 14, f"potong {fmt(h['potong'], 2)}", f - 1, warna_=w["tinta2"])
-    ci = h.get("ci")
-    t = f"AUC = {fmt(h['auc'], 3)}" + (f" (CI 95% {fmt(ci[0], 3)}–{fmt(ci[1], 3)})" if ci else "")
-    c.teks(c.X(100) - 8, c.Y(0) - 12 - f * 1.5, t, f, "end", tebal=True)
-    c.teks(c.X(100) - 8, c.Y(0) - 12, f"n positif = {h['n1']} · n negatif = {h['n0']}", f - 1, "end",
-           warna_=w["tinta2"])
+    tebal = 1.6 * gaya["tebal"]
+    bawah = c.atas + c.ph
+    if mode == "semilog":
+        c.x0, c.x1, c.y0, c.y1 = -3, 0, 0, 100
+        if gaya["kisi"]:
+            for v in (20, 40, 60, 80):
+                c.out.append(f'<line x1="{c.kiri}" y1="{c.Y(v):.1f}" x2="{c.kiri + c.pw}" y2="{c.Y(v):.1f}" '
+                             f'stroke="{w["kisi"]}"/>')
+        c.out.append(f'<line x1="{c.kiri}" y1="{bawah}" x2="{c.kiri + c.pw}" y2="{bawah}" stroke="{w["garis"]}"/>')
+        c.out.append(f'<line x1="{c.kiri}" y1="{c.atas}" x2="{c.kiri}" y2="{bawah}" stroke="{w["garis"]}"/>')
+        for k, t in ((-3, "0,1"), (-2, "1"), (-1, "10"), (0, "100")):
+            c.out.append(f'<line x1="{c.X(k):.1f}" y1="{bawah}" x2="{c.X(k):.1f}" y2="{bawah + 5}" stroke="{w["garis"]}"/>')
+            c.teks(c.X(k), bawah + 8 + f, t, f, "middle")
+            for m in range(2, 10):
+                if k < 0:
+                    xv = k + math.log10(m)
+                    c.out.append(f'<line x1="{c.X(xv):.1f}" y1="{bawah}" x2="{c.X(xv):.1f}" y2="{bawah + 3}" '
+                                 f'stroke="{w["garis"]}"/>')
+        for v in (0, 20, 40, 60, 80, 100):
+            c.out.append(f'<line x1="{c.kiri - 5}" y1="{c.Y(v):.1f}" x2="{c.kiri}" y2="{c.Y(v):.1f}" stroke="{w["garis"]}"/>')
+            c.teks(c.kiri - 8, c.Y(v) + 4, str(v), f, "end")
+        lx = lambda a: max(-3.0, math.log10(a)) if a > 0 else -3.0   # noqa: E731
+        acak = " ".join(f"{c.X(u):.1f},{c.Y(100 * 10 ** u):.1f}" for u in np.linspace(-3, 0, 120))
+        c.out.append(f'<polyline points="{acak}" fill="none" stroke="{w["tinta2"]}" stroke-dasharray="5 4" '
+                     f'stroke-width="1"/>')
+        titik, lalu = [], 0.0
+        for a, b in zip(h["fpr"], h["tpr"]):      # kurva tangga pada skala log
+            titik += [(lx(a), lalu), (lx(a), b)]
+            lalu = b
+        titik.append((0, lalu))
+        pts = " ".join(f"{c.X(a):.1f},{c.Y(100 * b):.1f}" for a, b in titik)
+        c.out.append(f'<polyline points="{pts}" fill="none" stroke="{warna_}" stroke-width="{tebal:.1f}" '
+                     f'stroke-linejoin="round"/>')
+        lbl_x, lbl_y = "FPR = 100 − spesifisitas (%, skala log)", "Sensitivitas (%)"
+        from .uji import LOGAUC_ACAK
+        t1 = f"logAUC = {fmt(h['logauc'], 1)} % (acak {fmt(LOGAUC_ACAK, 1)} %)"
+        t2 = f"logAUC terkoreksi = {fmt(h['logauc'] - LOGAUC_ACAK, 1)} % · AUC = {fmt(h['auc'], 3)}"
+        c.teks(c.kiri + 10, c.atas + 6 + f, t1, f, tebal=True)
+        c.teks(c.kiri + 10, c.atas + 8 + f * 2.4, t2, f - 1, warna_=w["tinta2"])
+    elif mode == "enrich":
+        c.sumbu([0, 100], [0, 100], "", "", 0, 0, kisi=gaya["kisi"], tik_x=[0, 20, 40, 60, 80, 100])
+        n1, N = h["n1"], h["n0"] + h["n1"]
+        ra = n1 / N * 100
+        c.out.append(f'<line x1="{c.X(0):.1f}" y1="{c.Y(0):.1f}" x2="{c.X(100):.1f}" y2="{c.Y(100):.1f}" '
+                     f'stroke="{w["tinta2"]}" stroke-dasharray="5 4" stroke-width="1"/>')
+        c.out.append(f'<polyline points="{c.X(0):.1f},{c.Y(0):.1f} {c.X(ra):.1f},{c.Y(100):.1f} '
+                     f'{c.X(100):.1f},{c.Y(100):.1f}" fill="none" stroke="{w["tinta2"]}" stroke-width="1" '
+                     f'stroke-dasharray="2 3"/>')
+        c.teks(c.X(ra) + 6, c.Y(100) + 14, "ideal", f - 1, warna_=w["tinta2"])
+        xs, ys = h["kurva_ef"]
+        pts = " ".join(f"{c.X(100 * a):.1f},{c.Y(100 * b):.1f}" for a, b in zip(xs, ys))
+        c.out.append(f'<polyline points="{pts}" fill="none" stroke="{warna_}" stroke-width="{tebal:.1f}" '
+                     f'stroke-linejoin="round"/>')
+        for persen in (1, 5):
+            xv = c.X(persen)
+            c.out.append(f'<line x1="{xv:.1f}" y1="{c.atas}" x2="{xv:.1f}" y2="{bawah}" stroke="{w["tinta2"]}" '
+                         f'stroke-width="0.8" stroke-dasharray="1 3"/>')
+        lbl_x, lbl_y = "Data teratas yang diperiksa (%)", "Positif ditemukan (%)"
+        c.teks(c.X(100) - 8, c.Y(0) - 12 - f * 1.5, f"BEDROC (α = 20) = {fmt(h['bedroc'], 3)}", f, "end", tebal=True)
+        c.teks(c.X(100) - 8, c.Y(0) - 12, f"EF1% = {fmt(h['ef'][1], 1)} · EF5% = {fmt(h['ef'][5], 1)} · "
+                                          f"EF10% = {fmt(h['ef'][10], 1)}", f - 1, "end", warna_=w["tinta2"])
+    else:
+        c.sumbu([0, 100], [0, 100], "", "", 0, 0, kisi=gaya["kisi"], tik_x=[0, 20, 40, 60, 80, 100])
+        c.out.append(f'<line x1="{c.X(0):.1f}" y1="{c.Y(0):.1f}" x2="{c.X(100):.1f}" y2="{c.Y(100):.1f}" '
+                     f'stroke="{w["tinta2"]}" stroke-dasharray="5 4" stroke-width="1"/>')
+        pts = " ".join(f"{c.X(100 * a):.1f},{c.Y(100 * b):.1f}" for a, b in zip(h["fpr"], h["tpr"]))
+        c.out.append(f'<polyline points="{pts}" fill="none" stroke="{warna_}" stroke-width="{tebal:.1f}" '
+                     f'stroke-linejoin="round"/>')
+        yx, yy = 100 * (1 - h["spes"]), 100 * h["sens"]
+        c.out.append(penanda(gaya["bentuk"], c.X(yx), c.Y(yy), gaya["ukuran_titik"] * 1.5, warna_, w["latar"], 1, 1.2))
+        c.teks(c.X(yx) + 9, c.Y(yy) + 14, f"potong {fmt(h['potong'], 2)}", f - 1, warna_=w["tinta2"])
+        ci = h.get("ci")
+        t = f"AUC = {fmt(h['auc'], 3)}" + (f" (CI 95% {fmt(ci[0], 3)}–{fmt(ci[1], 3)})" if ci else "")
+        c.teks(c.X(100) - 8, c.Y(0) - 12 - f * 1.5, t, f, "end", tebal=True)
+        c.teks(c.X(100) - 8, c.Y(0) - 12, f"n positif = {h['n1']} · n negatif = {h['n0']}", f - 1, "end",
+               warna_=w["tinta2"])
+        lbl_x, lbl_y = "100 − Spesifisitas (%)", "Sensitivitas (%)"
+    _hiasan(c, gaya)
+    c.teks(c.kiri + c.pw / 2, c.tinggi - 12, gaya["label_x"] or lbl_x, gaya["font_label"], "middle")
+    c.teks(18 + gaya["font_label"] * 0.2, c.atas + c.ph / 2, lbl_y, gaya["font_label"], "middle", putar=-90)
     if daerah is not None:
         daerah.append(("data", c.kiri + 4, c.atas + 4, c.kiri + c.pw, c.atas + c.ph - 2))
         daerah.append(("sumbu_x", c.kiri, c.atas + c.ph + 2, c.kiri + c.pw, c.tinggi - 2))
@@ -511,6 +628,7 @@ def grafik_kontingensi(h, label_y="Persentase (%)", judul="", gelap=False, trans
             c.teks(cx + 4, s.bawah + 6 + f, baris[i], f, "end", putar=-40)
         else:
             c.teks(cx, s.bawah + 8 + f, baris[i], f, "middle")
+    _hiasan(c, gaya, s)
     for j, t in enumerate(kolom):
         y = c.atas + 6 + j * (f + 10)
         x = c.kiri + c.pw + 18
@@ -524,3 +642,133 @@ def grafik_kontingensi(h, label_y="Persentase (%)", judul="", gelap=False, trans
     if daerah is not None:
         daerah.append(("sumbu_x", c.kiri, s.bawah + 2, c.kiri + c.pw, c.tinggi - 2))
     return c.selesai(), (W, gaya["tinggi"])
+
+
+def _legenda(c, gaya, entri, palet, daerah, x=None, y=None):
+    """entri: [(teks, indeks warna)] di pojok kanan atas area plot."""
+    f = gaya["font"]
+    lebar = max((len(t) for t, _ in entri), default=0) * f * 0.58 + f + 14
+    x = c.kiri + c.pw - lebar if x is None else x
+    y = c.atas + 4 if y is None else y
+    for k, (t, i) in enumerate(entri):
+        yy = y + k * (f + 8)
+        c.out.append(f'<rect x="{x:.1f}" y="{yy:.1f}" width="{f}" height="{f}" rx="2" '
+                     f'fill="{warna_grup(gaya, palet, i)}" fill-opacity="{min(1, gaya["opasitas"] + 0.5):.2f}" '
+                     f'stroke="{warna_grup(gaya, palet, i)}"/>')
+        c.teks(x + f + 6, yy + f * 0.85, t, f)
+        if daerah is not None:
+            daerah.append((f"grup:{i}", x - 2, yy - 3, x + lebar, yy + f + 3))
+
+
+def grafik_qq(nama, kelompok, judul="", gelap=False, transparan=False, palet="okabe", gaya=None, daerah=None):
+    """Q–Q plot normal: kuantil teoretis (posisi Blom) vs nilai terstandar tiap grup; garis y = x."""
+    from scipy import stats
+    gaya = gaya_lengkap(gaya)
+    f = gaya["font"]
+    W = gaya["lebar"] or 560
+    sisi = W - (50 + f * 2.4 + gaya["font_label"]) - 24
+    H = _tinggi_judul(judul, gaya) + sisi + 30 + f * 2.6 + gaya["font_label"] * 1.6
+    c = Kanvas(W, H, gelap, transparan, "", kiri=50 + f * 2.4 + gaya["font_label"], kanan=24,
+               atas=_tinggi_judul(judul, gaya), bawah=30 + f * 2.6 + gaya["font_label"] * 1.6)
+    _judul(c, judul, gaya, daerah)
+    c.f_tik = f
+    titik = []
+    for i, g in enumerate(kelompok):
+        a = np.sort(np.asarray(g, float))
+        if len(a) < 3 or a.std(ddof=1) == 0:
+            continue
+        n = len(a)
+        teori = stats.norm.ppf((np.arange(1, n + 1) - 0.375) / (n + 0.25))
+        titik.append((i, teori, (a - a.mean()) / a.std(ddof=1)))
+    if not titik:
+        c.teks(c.kiri, c.atas + 30, "Butuh n ≥ 3 per grup untuk Q–Q plot.", 13)
+        return c.selesai(), (W, H)
+    batas = max(2.5, max(float(np.abs(np.concatenate([t[1], t[2]])).max()) for t in titik) * 1.08)
+    c.sumbu([-batas, batas], [-batas, batas], "", "", 0, 0, kisi=gaya["kisi"])
+    w = c.w
+    c.out.append(f'<line x1="{c.X(c.x0):.1f}" y1="{c.Y(c.x0):.1f}" x2="{c.X(c.x1):.1f}" y2="{c.Y(c.x1):.1f}" '
+                 f'stroke="{w["tinta2"]}" stroke-dasharray="5 4" stroke-width="1"/>')
+    for i, tx, ty in titik:
+        col = warna_grup(gaya, palet, i)
+        for a, b in zip(tx, ty):
+            c.out.append(penanda(gaya["bentuk"], c.X(a), c.Y(b), gaya["ukuran_titik"] * 1.1, col, w["latar"]))
+    _legenda(c, gaya, [(nama[i], i) for i, _x, _y in titik], palet, daerah, x=c.kiri + 10)
+    _hiasan(c, gaya)
+    c.teks(c.kiri + c.pw / 2, c.tinggi - 14 - f, gaya["label_x"] or "Kuantil normal teoretis", gaya["font_label"],
+           "middle")
+    c.teks(18 + gaya["font_label"] * 0.2, c.atas + c.ph / 2, "Nilai terstandar (z)", gaya["font_label"], "middle",
+           putar=-90)
+    c.catatan("Titik mendekati garis putus-putus = sebaran mendekati normal")
+    if daerah is not None:
+        daerah.append(("sumbu_x", c.kiri, c.atas + c.ph + 2, c.kiri + c.pw, c.tinggi - 2))
+    return c.selesai(), (W, H)
+
+
+def grafik_dua_faktor(h, galat="sd", palet="okabe", label_y="", judul="", gelap=False, transparan=False,
+                      gaya=None, daerah=None):
+    """Batang berkelompok: sumbu x = level faktor A (baris), warna = level faktor B (kolom); rerata ± galat +
+    titik individu; legenda faktor B."""
+    gaya = gaya_lengkap(gaya)
+    la, lb = h["level_a"], h["level_b"]
+    f = gaya["font"]
+    pjg = max((len(t) for t in la), default=0)
+    lebar = gaya["lebar"] or max(520, 140 + len(la) * (60 + 46 * len(lb)))
+    bawah = (18 + f * 1.6 + (pjg * f * 0.45 if gaya["miring"] else 0)
+             + (gaya["font_label"] * 1.8 if gaya["label_x"] else 0))
+    kiri = 50 + f * 2.4 + gaya["font_label"]
+    c = Kanvas(lebar, gaya["tinggi"], gelap, transparan, "", kiri=kiri, kanan=20, atas=_tinggi_judul(judul, gaya)
+               + (f + 8) * len(lb) * 0, bawah=bawah)
+    _judul(c, judul, gaya, daerah)
+    data = h["data_sel"]
+    des = h["sel"]
+    semua = [v for xs in data.values() for v in xs]
+    ujung = []
+    for d in des.values():
+        lo, hi = _galat(d, galat)
+        ujung += [d["rerata"] - lo, d["rerata"] + hi]
+    lo_y, hi_y = min(semua + ujung + [0.0]), max(semua + ujung + [0.0])
+    rentang = (hi_y - lo_y) or 1.0
+    s = SkalaY(lo_y, hi_y + 0.18 * rentang, c.atas, c.ph, gaya, batang=True)   # ruang untuk legenda
+    c.x0, c.x1, c.y0, c.y1 = 0, len(la), s.y0, s.y1
+    w = c.w
+    c.out.append(f'<line x1="{c.kiri}" y1="{s.bawah}" x2="{c.kiri + c.pw}" y2="{s.bawah}" stroke="{w["garis"]}" '
+                 f'stroke-width="{gaya["tebal"]}"/>')
+    _sumbu_y(c, s, gaya, label_y, daerah)
+    lk = c.pw / len(la)
+    bw = min(48, lk * 0.8 / len(lb))
+    rng = np.random.default_rng(7)
+    for i, a in enumerate(la):
+        cx0 = c.kiri + (i + 0.5) * lk
+        if gaya["miring"]:
+            c.teks(cx0 + 4, s.bawah + 6 + f, a, f, "end", putar=-40)
+        else:
+            c.teks(cx0, s.bawah + 8 + f, a, f, "middle")
+        for j, b in enumerate(lb):
+            k = f"{a}|{b}"
+            d, xs = des[k], data[k]
+            cx = cx0 + (j - (len(lb) - 1) / 2) * bw * 1.08
+            col = warna_grup(gaya, palet, j)
+            dasar = max(s.y0, min(0.0, s.y1))
+            ya, yb = sorted((s.Y(dasar), s.Y(d["rerata"])))
+            for p0, p1 in s.potong(ya, yb):
+                c.out.append(f'<rect x="{cx - bw / 2:.1f}" y="{p0:.1f}" width="{bw:.1f}" height="{max(1.0, p1 - p0):.1f}" '
+                             f'fill="{col}" fill-opacity="{gaya["opasitas"] + 0.12:.2f}" stroke="{col}" stroke-width="1.3"/>')
+            if gaya["titik"]:
+                for v in xs:
+                    c.out.append(penanda(gaya["bentuk"], cx + (rng.random() - 0.5) * bw * 0.55, s.Y(v),
+                                         gaya["ukuran_titik"] * 0.9, col, w["latar"]))
+            lo, hi = _galat(d, galat)
+            if lo or hi:
+                for p0, p1 in s.potong(s.Y(d["rerata"] + hi), s.Y(d["rerata"] - lo)):
+                    c.out.append(f'<line x1="{cx:.1f}" y1="{p0:.1f}" x2="{cx:.1f}" y2="{p1:.1f}" stroke="{w["tinta"]}" '
+                                 f'stroke-width="1.3"/>')
+                for v in (d["rerata"] - lo, d["rerata"] + hi):
+                    c.out.append(f'<line x1="{cx - bw / 5:.1f}" y1="{s.Y(v):.1f}" x2="{cx + bw / 5:.1f}" y2="{s.Y(v):.1f}" '
+                                 f'stroke="{w["tinta"]}" stroke-width="1.3"/>')
+    _hiasan(c, gaya, s)
+    _legenda(c, gaya, [(b, j) for j, b in enumerate(lb)], palet, daerah)
+    if gaya["label_x"]:
+        c.teks(c.kiri + c.pw / 2, c.tinggi - 10, gaya["label_x"], gaya["font_label"], "middle")
+    if daerah is not None:
+        daerah.append(("sumbu_x", c.kiri, s.bawah + 2, c.kiri + c.pw, c.tinggi - 2))
+    return c.selesai(), (c.lebar, c.tinggi)
