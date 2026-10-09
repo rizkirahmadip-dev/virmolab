@@ -183,6 +183,8 @@ class PanelLangkah(QStackedWidget):
         self.s_ligan = _status()
         isi = _kolom(A("pubchem", _tombol("Ambil dari PubChem…", ikon="search", tip="Nama senyawa atau CID, bisa banyak sekaligus")),
                      A("smiles", _tombol("Dari SMILES…", ikon="smiles")),
+                     A("pustaka", _tombol("Pustaka ligan / ChEMBL…", ikon="lig",
+                                          tip="Obat disetujui, bahan alam COCONUT, ZINC; aktif dikenal dari ChEMBL")),
                      A("buka", _tombol("Buka berkas / folder…", ikon="open", tip="SDF, MOL2, PDB, PDBQT, SMILES; bisa seret-lepas")),
                      8, self.s_ligan, 4,
                      A("ligan", _tombol("Siapkan ligan…", True, ikon="lig", tip="Hidrogen, protonasi pH, 3D, minimisasi, PDBQT")))

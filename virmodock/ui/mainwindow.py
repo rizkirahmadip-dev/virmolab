@@ -303,7 +303,7 @@ class JendelaUtama(QMainWindow):
             self.tab_tengah.setCurrentWidget(tab[k])
             return
         {"rcsb": lambda: self.ambil(0), "pubchem": lambda: self.ambil(1), "smiles": lambda: self.ambil(2),
-         "buka": self.buka_berkas, "reseptor": self.siapkan_reseptor, "ligan": self.siapkan_ligan,
+         "pustaka": self.buka_pustaka, "buka": self.buka_berkas, "reseptor": self.siapkan_reseptor, "ligan": self.siapkan_ligan,
          "validasi": self.validasi_redocking, "ekspor": lambda: self.buka_ekspor(3),
          "laporan": lambda: self.buka_ekspor(4)}[k]()
 
@@ -438,6 +438,13 @@ class JendelaUtama(QMainWindow):
                            "Unduh senyawa dari PubChem dengan nama atau CID (bisa banyak sekaligus)")
         self.a_smiles = A("Ligan dari SMILES…", "smiles", lambda: self.ambil(2), None,
                           "Buat ligan 3D dari teks SMILES")
+        self.a_chembl = A("Ligan dari ChEMBL (aktif dikenal)…", "search", lambda: self.buka_chembl(0), None,
+                          "Cari target di ChEMBL lalu impor senyawa aktif (pChEMBL) sebagai ligan pembanding/validasi")
+        self.a_ketcher = A("Gambar ligan (Ketcher)…", "edit", lambda: self.gambar_ligan(), "Ctrl+Shift+K",
+                           "Gambar struktur 2D di editor Ketcher (offline) lalu jadikan ligan 3D")
+        self.a_pustaka = A("Pustaka ligan (obat, bahan alam, ZINC)…", "lig", self.buka_pustaka, None,
+                           "3.200 obat disetujui (offline), ±700 ribu bahan alam COCONUT, ZINC22; saring sifat & "
+                           "kemiripan lalu impor")
         self.a_keluar = A("Keluar", None, self.close, "Ctrl+Q", "Tutup VirmoDock (docking berjalan akan dijeda)")
         # --- ekspor
         self.a_ekspor = A("Pusat ekspor…", "dl", lambda: self.buka_ekspor(3), "Ctrl+E",
@@ -488,6 +495,8 @@ class JendelaUtama(QMainWindow):
         self.a_ukur = A("Ukur jarak", "ruler", self.toggle_ukur, "M", cek=True, tip="Klik dua atom untuk mengukur jarak")
         self.a_kontrib = A("Kontribusi energi per atom", "palette", self._tampilkan_kontribusi, "K", cek=True,
                            tip="Bola hijau = atom ligan menguntungkan, merah = merugikan (suku Vina antarmolekul)")
+        self.a_farma = A("Farmakofor pose aktif", "target", self._tampilkan_farmakofor, "P", cek=True,
+                         tip="Donor/akseptor ikatan H, aromatik, hidrofobik, muatan pada pose aktif (fitur RDKit)")
         self.a_inter = A("Interaksi 3D", "hbond", self._tampilkan_interaksi, "I", cek=True,
                          tip="Tampilkan ikatan hidrogen, hidrofobik, π, dll. pada pose aktif")
         self.a_inter.setChecked(True)
@@ -537,7 +546,8 @@ class JendelaUtama(QMainWindow):
         # ---------------------------------------------------------------- Berkas
         m = menu("&Berkas")
         isi(m, (self.a_baru, self.a_buka_proyek, self.a_terakhir, self.a_simpan, None, self.a_buka))
-        self._sub(m, "Ambil dari internet", (self.a_rcsb, self.a_pubchem, self.a_smiles))
+        self._sub(m, "Ambil dari internet", (self.a_rcsb, self.a_pubchem, self.a_smiles, self.a_chembl, self.a_pustaka,
+                                             self.a_ketcher))
         m.addSeparator()
         self._sub(m, "Ekspor", (self.a_ekspor, None, self.a_foto, self.a_animasi, self.a_eks_2d, self.a_eks_struk, self.a_eks_sesi,
                                 self.a_eks_tabel, self.a_lapor))
@@ -616,13 +626,21 @@ class JendelaUtama(QMainWindow):
             self.d_langkah, self.d_hier, self.d_kerja, self.d_prop, self.d_tamp, self.d_inter, self.d_antre,
             self.d_log, self.d_pesan)])
         isi(m, (self.a_tema, self.a_reset))
+        m_bhs = m.addMenu("Bahasa / Language")
+        grup = QActionGroup(m_bhs)
+        kini = self.st.value("bahasa", "id")
+        for kode, nama in (("id", "Bahasa Indonesia"), ("en", "English")):
+            a = m_bhs.addAction(nama, lambda k=kode: self.ganti_bahasa(k))
+            a.setCheckable(True)
+            a.setChecked(kini == kode)
+            grup.addAction(a)
 
         # ---------------------------------------------------------------- Siapkan
         m = menu("&Siapkan")
         self._judul_menu(m, "Langkah 1 · Protein")
         isi(m, (self.a_rcsb, self.a_rec))
         self._judul_menu(m, "Langkah 2 · Ligan")
-        isi(m, (self.a_pubchem, self.a_smiles, self.a_lig))
+        isi(m, (self.a_pubchem, self.a_smiles, self.a_ketcher, self.a_chembl, self.a_pustaka, self.a_lig))
         self._judul_menu(m, "Langkah 3 · Area docking")
         isi(m, (self.a_kotak_asli, self.a_kotak_res, self.a_kotak_sesuai, self.a_kotak_kantong, self.a_kotak_blind,
                 self.a_box,
@@ -655,7 +673,16 @@ class JendelaUtama(QMainWindow):
                 A("Konsensus skor…", "table", self.buka_konsensus, None,
                   "Gabungkan beberapa mesin/fungsi skor (termasuk rescoring Vina & Vinardo) menjadi peringkat "
                   "konsensus + Kendall W"),
+                A("Korelasi dengan data eksperimen (ChEMBL)…", "chart", lambda: self.buka_chembl(1), None,
+                  "Cocokkan ligan hasil docking dengan pChEMBL target (IC50/Ki/Kd) → grafik ΔG vs pChEMBL, Pearson/"
+                  "Spearman"),
+                A("Kemiripan, ruang kimia, farmakofor…", "similar", self.buka_kemiripan, None,
+                  "Tanimoto (ECFP4/FCFP4/MACCS/farmakofor 2D), klaster Butina, peta ruang kimia, cari ligan mirip, "
+                  "farmakofor bersama pose teratas"),
                 None,
+                A("Prediksi ADMET (ADMET-AI)…", "lig", self.buka_admet, None,
+                  "Absorpsi, distribusi, metabolisme (CYP), ekskresi, toksisitas (hERG, Ames, DILI) — model "
+                  "pembelajaran mesin, berjalan offline"),
                 A("Sifat ligan dan BOILED-Egg", "lig", tab(self.sifat), None,
                   "Lipinski, Veber, QED, PAINS, absorpsi GI, sawar darah otak"),
                 A("Uji statistik dan grafik publikasi", "chart", tab(self.uji), None,
@@ -667,7 +694,7 @@ class JendelaUtama(QMainWindow):
                 None, self.a_validasi, self.a_qc,
                 A("Hitung ulang analisis hasil", "rotate", self.analisis_ulang, None,
                   "Lengkapi interaksi, LE, RMSD kristal, dan PoseBusters untuk hasil lama"),
-                None, self.a_inter, self.a_kontrib, self.a_ukur,
+                None, self.a_inter, self.a_kontrib, self.a_farma, self.a_ukur,
                 A("Hapus pengukuran", None, lambda: self.viewer.js("hapusUkur"), None)))
 
         # ---------------------------------------------------------------- Alat
@@ -735,11 +762,12 @@ class JendelaUtama(QMainWindow):
             a.setChecked(p.mesin() == k)
             a.setEnabled(p.btn_mesin[k].isEnabled())
         self.m_ketelitian.clear()
-        for nama in [p.cmb_preset.itemText(i) for i in range(p.cmb_preset.count())]:
-            a = self.m_ketelitian.addAction(nama, lambda n=nama: (p.cmb_preset.setCurrentText(n),
-                                                                  p.terapkan_preset(n)))
+        for i in range(p.cmb_preset.count()):
+            nama = p.cmb_preset.itemData(i)
+            a = self.m_ketelitian.addAction(p.cmb_preset.itemText(i), lambda n=nama: (
+                p.cmb_preset.setCurrentIndex(p.cmb_preset.findData(n)), p.terapkan_preset(n)))
             a.setCheckable(True)
-            a.setChecked(p.cmb_preset.currentText() == nama)
+            a.setChecked(p.cmb_preset.currentData() == nama)
             if nama in PRESET:
                 a.setStatusTip({"Cepat": "Uji coba cepat", "Standar": "Penelitian umum (disarankan)",
                                 "Teliti": "Hasil akhir / publikasi; lebih lama"}[nama])
@@ -1221,6 +1249,9 @@ class JendelaUtama(QMainWindow):
         elif aksi == "pilih_rantai":
             self.viewer.js("sorot", oid, {"chain": nilai})
             return
+        elif aksi == "ketcher":
+            self.gambar_ligan(o)
+            return
         elif aksi == "rename":
             nama, ok = QInputDialog.getText(self, "Ganti nama", "Nama baru:", text=o.nama)
             if ok and nama.strip():
@@ -1682,21 +1713,32 @@ class JendelaUtama(QMainWindow):
                         nama.append(f"{b[17:20].strip()} {b[21]}{b[22:26].strip()}")
         return nama
 
+    def _teks_sumber_reseptor(self, o):
+        """Protein + ion + ligan asli dari sumber yang sama (untuk radius ion logam & pemeriksaan struktur)."""
+        if o.fmt != "pdb":
+            return o.teks
+        bagian = [o.teks] + [x.teks for x in self.objek.values()
+                             if x.sumber == o.sumber and x.id != o.id and x.fmt == "pdb"
+                             and (x.jenis == "ion" or (x.jenis == "ligan" and x.info.get("ligan_asli")))]
+        return "\n".join(b for t in bagian for b in t.splitlines()
+                         if b.startswith(("ATOM", "HETATM", "TER", "CRYST1"))) + "\nEND\n"
+
     def siapkan_reseptor(self):
         protein = [o for o in self.objek.values() if o.jenis == "protein" and not o.info.get("siap_docking")]
         if not protein:
             self._galat("Belum ada protein. Muat struktur dulu di langkah 1 (Ambil dari RCSB PDB atau Buka berkas).")
             return
-        d = DialogReseptor(protein, {o.id: self._logam_dari(o) for o in protein}, self, self.aktif)
+        d = DialogReseptor(protein, {o.id: self._logam_dari(o) for o in protein}, self, self.aktif,
+                           teks_sumber=self._teks_sumber_reseptor)
+        d.r_baku.setChecked(self.st.value("prep/protonasi", "propka") == "templat")
+        d.r_propka.setChecked(self.st.value("prep/protonasi", "propka") == "propka")
+        d.sp_ph.setValue(float(self.st.value("prep/ph", 7.4)))
         if not d.exec():
             return
         o, opsi = d.objek(), d.opsi()
-        # gabungkan kembali protein + ion + ligan asli dari sumber yang sama (untuk radius ion logam)
-        bagian = [o.teks] + [x.teks for x in self.objek.values()
-                             if x.sumber == o.sumber and x.id != o.id and x.fmt == "pdb"
-                             and (x.jenis == "ion" or (x.jenis == "ligan" and x.info.get("ligan_asli")))]
-        teks = "\n".join(b for t in bagian for b in t.splitlines()
-                         if b.startswith(("ATOM", "HETATM", "TER", "CRYST1"))) + "\nEND\n"
+        self.st.setValue("prep/protonasi", opsi.protonasi)
+        self.st.setValue("prep/ph", opsi.ph)
+        teks = self._teks_sumber_reseptor(o)
         self.statusBar().showMessage("Menyiapkan reseptor…", 4000)
         self.s_prog.setText("Preparasi reseptor…")
         kerja.jalankan(prep_reseptor.siapkan, teks, opsi, selesai=lambda h: self._reseptor_siap(o, h, opsi),
@@ -1710,10 +1752,21 @@ class JendelaUtama(QMainWindow):
         pr.p("reseptor", "bersih.pdb").write_text(h.pdb_bersih, encoding="utf-8")
         pr.p("reseptor", "reseptor.pdbqt").write_text(h.pdbqt, encoding="utf-8")
         pr.p("reseptor", "laporan_prep.txt").write_text(h.laporan, encoding="utf-8")
+        hp = getattr(h, "protonasi", None)
+        if hp is not None:
+            from ..core import protonasi
+            pr.p("reseptor", "pka.csv").write_text(protonasi.csv_pka(hp), encoding="utf-8-sig")
+            pr.p("reseptor", "protonasi.pqr").write_text(hp.pqr, encoding="utf-8")
         pr.reseptor = {"nama": asal.nama, "sumber": asal.sumber, "pdbqt": "reseptor/reseptor.pdbqt",
                        "bersih": "reseptor/bersih.pdb", "asli": "reseptor/asli.pdb", "metode": h.metode,
                        "atom": h.atom, "residu": h.residu, "dibuang": h.dibuang, "logam": h.logam,
                        "opsi": vars(opsi)}
+        if hp is not None:
+            pr.reseptor["protonasi"] = {"ph": hp.ph, "keadaan": [list(k) for k in hp.keadaan],
+                                        "dilengkapi": hp.diperbaiki, "pka": "reseptor/pka.csv"}
+            if hp.keadaan:
+                self.pesan.tulis(f"Reseptor (PROPKA pH {hp.ph:.1f}): " + ", ".join(
+                    f"{l} = {k}" for l, _n, k in hp.keadaan))
         for x in [x for x in self.objek.values() if x.jenis == "protein" and x.info.get("siap_docking")]:
             self.hapus_objek(x.id)
         teks = prep_reseptor.pdbqt_ke_pdb(h.pdbqt)
@@ -1971,7 +2024,8 @@ class JendelaUtama(QMainWindow):
             self.statistik.muat([], [])
             return
         self._data_sifat()   # pastikan sifat tiap ligan proyek sudah dihitung (cache)
-        sif = {l["id"]: l.get("sifat") for l in pr.ligan if isinstance(l.get("sifat"), dict)}
+        sif = {l["id"]: dict(l.get("sifat") if isinstance(l.get("sifat"), dict) else {}, pchembl=l.get("pchembl"))
+               for l in pr.ligan}
         baris = stat_mod.dataset(eksmod.baris_hasil(pr), sif)
         jobs = [(j["id"], f"{j['id']} · {mesinmod.MESIN.get(j['mesin'], j['mesin'])}") for j in pr.job]
         self.statistik.muat(baris, jobs)
@@ -2224,6 +2278,66 @@ class JendelaUtama(QMainWindow):
         sudut = 30 if d["jenis"] == "goyang" else 360
         self.viewer.js("animMulai", lebar, tinggi, latar, d["jenis"], sudut, cb=lambda _: QTimer.singleShot(150, berikut))
 
+    def gambar_ligan(self, o=None):
+        """Editor Ketcher; o = objek ligan untuk diedit (struktur dimuat, hasil jadi ligan baru)."""
+        from .dialog_ketcher import DialogKetcher
+        awal, nama = None, ""
+        if o is not None:
+            try:
+                from rdkit import Chem
+                from ..core import kemiripan
+                awal = Chem.MolToSmiles(kemiripan.mol_dari(o.teks, o.fmt))
+                nama = f"{o.nama}_edit"
+            except Exception:
+                awal = None
+        d = DialogKetcher(self, awal, nama)
+        if d.exec():
+            try:
+                ob = molekul.dari_smiles(d.hasil_smiles, d.hasil_nama)
+            except Exception as e:
+                self._galat(f"Struktur tidak dapat dibuat 3D: {e}")
+                return
+            self.tambah_objek(ob, fokus=True)
+            self.log.tulis(f"Ligan digambar (Ketcher): {d.hasil_nama} {d.hasil_smiles}")
+
+    def ganti_bahasa(self, kode):
+        if self.st.value("bahasa", "id") == kode:
+            return
+        self.st.setValue("bahasa", kode)
+        QMessageBox.information(self, "Bahasa / Language",
+                                "Bahasa antarmuka akan berganti setelah VirmoDock dibuka ulang.\n"
+                                "The interface language will change after VirmoDock is restarted.")
+
+    def buka_admet(self):
+        if not self._sumber_sifat():
+            self._galat("Belum ada ligan. Impor atau siapkan ligan dulu.")
+            return
+        from .dialog_admet import DialogAdmet
+        d = DialogAdmet(self)
+        d.setAttribute(Qt.WA_DeleteOnClose)
+        d.show()
+
+    def buka_pustaka(self):
+        from .dialog_pustaka import DialogPustaka
+        d = DialogPustaka(self)
+        d.setAttribute(Qt.WA_DeleteOnClose)
+        d.show()
+
+    def buka_chembl(self, tab=0):
+        from .dialog_chembl import DialogChembl
+        d = DialogChembl(self, tab)
+        d.setAttribute(Qt.WA_DeleteOnClose)
+        d.show()
+
+    def buka_kemiripan(self):
+        from .dialog_kemiripan import DialogKemiripan
+        if len(self._sumber_sifat()) < 2:
+            self._galat("Butuh minimal 2 ligan (impor atau siapkan ligan dulu).")
+            return
+        d = DialogKemiripan(self)
+        d.setAttribute(Qt.WA_DeleteOnClose)
+        d.show()
+
     def buka_konsensus(self):
         if not self.proyek or not self.proyek.job:
             self._galat("Belum ada hasil docking.")
@@ -2416,6 +2530,27 @@ class JendelaUtama(QMainWindow):
                 return analisis.pose_mol(f.read_text(), o.info["pdbqt"])
         return analisis.mol_dari_objek(o)
 
+    def _tampilkan_farmakofor(self, *_):
+        """Fitur farmakofor 3D pose/ligan aktif -> bola kerangka berwarna di viewport."""
+        if not self.a_farma.isChecked():
+            self.viewer.js("farmakofor", [])
+            return
+        a = self._aktif_inter
+        if not a or a["oid"] not in self.objek:
+            self.viewer.js("farmakofor", [])
+            self.statusBar().showMessage("Farmakofor: pilih pose hasil docking atau ligan dulu.", 5000)
+            return
+        from ..core import kemiripan
+        try:
+            fs = kemiripan.fitur(a["mol"])
+        except Exception as e:
+            self._galat(f"Farmakofor gagal: {e}")
+            return
+        self._farma_aktif = fs
+        self.viewer.js("farmakofor", fs, {"label": False})
+        self.statusBar().showMessage(f"Farmakofor {a['judul']}: {kemiripan.ringkas_fitur(fs)}", 12000)
+        self.log.tulis(f"Farmakofor {a['judul']}: {kemiripan.ringkas_fitur(fs)}")
+
     def _tampilkan_kontribusi(self, *_):
         """Kontribusi energi per atom (fungsi skor Vina) untuk pose aktif -> bola berwarna di viewport."""
         if not self.a_kontrib.isChecked():
@@ -2472,6 +2607,8 @@ class JendelaUtama(QMainWindow):
         self._gambar_diagram()
         if self.a_kontrib.isChecked():
             self._tampilkan_kontribusi()
+        if self.a_farma.isChecked():
+            self._tampilkan_farmakofor()
 
     def _tampilkan_interaksi(self, *_):
         a = self._aktif_inter

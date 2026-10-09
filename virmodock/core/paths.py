@@ -16,6 +16,7 @@ PAKET = AKAR / "virmodock" if (AKAR / "virmodock").exists() else Path(__file__).
 BIN = AKAR / "bin" if (AKAR / "bin").exists() else AKAR / "vendor" / "bin"
 VIEWER = PAKET / "viewer"
 DOCS = AKAR / "docs"
+KETCHER = AKAR / "ketcher" if (AKAR / "ketcher").exists() else AKAR / "vendor" / "ketcher"
 
 PORTABLE = (FOLDER_APP / "portable.flag").exists()
 APPDATA = FOLDER_APP / "data" if PORTABLE else Path(os.environ.get("LOCALAPPDATA", Path.home())) / "VirmoDock"

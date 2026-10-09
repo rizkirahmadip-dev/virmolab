@@ -44,6 +44,10 @@ Deteksi kantong memakai P2Rank + Java yang **tidak ikut repo** (±262 MB). Pasan
 
 Uji mandiri (`python -m virmodock --uji-mandiri hasil.json`) memeriksa keduanya.
 
+Editor struktur Ketcher juga **tidak ikut repo** (±30 MB): unduh `ketcher-standalone-3.18.0.zip` dari
+https://github.com/epam/ketcher/releases (SHA-256 `484e7f10…a3e7e`) lalu ekstrak ke `vendor/ketcher/` cukup
+`index.html`, `favicon*`, `static/css/main.*.css`, dan `static/js/main.*.js`, `114.*`, `127.*`, `609.*` (chunk).
+
 ## Membuat rilis
 
 1. Pasang [Inno Setup 6](https://jrsoftware.org/isinfo.php) ke `vendor/innosetup/`.

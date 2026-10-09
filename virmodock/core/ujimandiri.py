@@ -179,6 +179,50 @@ def uji(lapor=None):
             raise RuntimeError("encoder H.264 tidak tersedia (video MP4 tidak bisa dibuat; GIF/WebP tetap bisa)")
         return "MP4 H.264 siap (Qt Multimedia + FFmpeg)"
     cek("Perekam video (MP4 H.264)", video)
+
+    def propka_uji():
+        from . import prep_reseptor as R
+        teks = Path(__file__).resolve().parents[1] / "aset" / "uji_1hsg.pdb"
+        if not teks.exists():
+            raise RuntimeError("struktur uji tidak ada")
+        h = R.siapkan(teks.read_text(), R.OpsiReseptor(protonasi="propka"))
+        if not h.protonasi:
+            raise RuntimeError("; ".join(h.peringatan) or "PROPKA tidak berjalan")
+        return f"{len(h.protonasi.pka)} gugus pKa, {len(h.protonasi.keadaan)} keadaan tak-baku, {h.atom} atom"
+    cek("Protonasi reseptor PROPKA/PDB2PQR", propka_uji)
+
+    def kemiripan_uji():
+        from rdkit import Chem
+        from rdkit.Chem import AllChem
+        from . import kemiripan as K
+        m = [K.mol_dari(s, "smi") for s in ("CC(=O)Oc1ccccc1C(=O)O", "OC(=O)c1ccccc1O", "Cn1cnc2c1c(=O)n(C)c(=O)n2C")]
+        M = K.matriks([K.sidik_jari(x, "gobbi") for x in m])
+        h = Chem.AddHs(m[0])
+        AllChem.EmbedMolecule(h, randomSeed=1)
+        return f"Tanimoto aspirin–salisilat {M[0][1]:.2f}; farmakofor: {K.ringkas_fitur(K.fitur(h))}"
+    cek("Kemiripan & farmakofor (RDKit)", kemiripan_uji)
+
+    def pustaka_uji():
+        from . import pustaka
+        n = len(pustaka.obat())
+        if n < 1000:
+            raise RuntimeError(f"pustaka obat hanya {n}")
+        return f"{n} obat disetujui; COCONUT {'terpasang' if pustaka.coconut_ada() else 'belum diunduh'}"
+    cek("Pustaka ligan", pustaka_uji)
+
+    def ketcher_uji():
+        f = paths.KETCHER / "index.html"
+        js = list((paths.KETCHER / "static" / "js").glob("609.*.js"))
+        if not f.exists() or not js:
+            raise RuntimeError(f"Ketcher tidak lengkap di {paths.KETCHER}")
+        return "Ketcher 3.18.0 standalone"
+    cek("Editor struktur (Ketcher)", ketcher_uji)
+
+    def admet_uji():
+        from . import admet
+        r = admet.prediksi(["CC(=O)Oc1ccccc1C(=O)O"])
+        return f"aspirin HIA {r[0]['HIA_Hou']:.2f}, hERG {r[0]['hERG']:.2f}"
+    cek("Prediksi ADMET (ADMET-AI, proses terpisah)", admet_uji)
     return hasil
 
 

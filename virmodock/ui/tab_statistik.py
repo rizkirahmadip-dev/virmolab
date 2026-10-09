@@ -11,9 +11,10 @@ from . import theme
 from .panel_interaksi import KanvasSvg
 
 JENIS = [("hist", "Histogram"), ("sebar", "Sebar + regresi"), ("batang", "Batang ΔG teratas"),
-         ("matriks", "Matriks korelasi"), ("ifp", "Kemiripan interaksi (IFP)")]
+         ("matriks", "Matriks korelasi"), ("ifp", "Kemiripan interaksi (IFP)"),
+         ("peta_ifp", "Peta sidik jari interaksi")]
 MATRIKS_BAWAAN = ["energi", "le", "mw", "wlogp", "tpsa", "hbd", "hba", "rotb", "atom_berat", "qed", "hbond",
-                  "hidrofobik", "interaksi"]
+                  "hidrofobik", "interaksi", "pchembl"]
 SEMUA = "__semua__"
 
 
@@ -49,11 +50,16 @@ class TabStatistik(QWidget):
         self.c_metode = QComboBox()
         self.c_metode.addItem("Pearson", "pearson")
         self.c_metode.addItem("Spearman", "spearman")
+        self.c_frek = QComboBox()
+        for t, v in (("Semua residu", 0.0), ("Frekuensi ≥ 10 %", 0.1), ("Frekuensi ≥ 25 %", 0.25),
+                     ("Frekuensi ≥ 50 %", 0.5)):
+            self.c_frek.addItem(t, v)
+        self.c_frek.setToolTip("Sembunyikan kolom residu × interaksi yang jarang muncul")
         self.c_label = QCheckBox("Label")
         self.c_label.setToolTip("Nama ligan di titik (nomor bila > 25 titik)")
         self._aksi = {}         # widget di QToolBar disembunyikan lewat QAction-nya
         for w in (QLabel("Job "), self.c_job, QLabel("   Grafik "), self.c_jenis, self.l_x, self.c_x, self.l_y,
-                  self.c_y, self.l_n, self.s_n, self.c_metode, self.c_label):
+                  self.c_y, self.l_n, self.s_n, self.c_metode, self.c_frek, self.c_label):
             self._aksi[w] = bar.addWidget(w)
         self.c_x.setMaximumWidth(180)
         self.c_y.setMaximumWidth(180)
@@ -84,7 +90,7 @@ class TabStatistik(QWidget):
         cat.setContentsMargins(8, 4, 8, 4)
         lay.addWidget(cat)
         self.c_job.currentIndexChanged.connect(self._pilih_job)
-        for w in (self.c_jenis, self.c_x, self.c_y, self.c_metode):
+        for w in (self.c_jenis, self.c_x, self.c_y, self.c_metode, self.c_frek):
             w.currentIndexChanged.connect(self._gambar)
         self.s_n.valueChanged.connect(self._gambar)
         self.c_label.toggled.connect(self._gambar)
@@ -131,8 +137,9 @@ class TabStatistik(QWidget):
         j = self.c_jenis.currentData()
         tampil = {self.l_x: j in ("hist", "sebar"), self.c_x: j in ("hist", "sebar"),
                   self.l_y: j == "sebar", self.c_y: j == "sebar",
-                  self.l_n: j in ("hist", "batang", "ifp"), self.s_n: j in ("hist", "batang", "ifp"),
-                  self.c_metode: j == "matriks", self.c_label: j == "sebar"}
+                  self.l_n: j in ("hist", "batang", "ifp", "peta_ifp"),
+                  self.s_n: j in ("hist", "batang", "ifp", "peta_ifp"),
+                  self.c_metode: j == "matriks", self.c_frek: j == "peta_ifp", self.c_label: j == "sebar"}
         for w, on in tampil.items():
             self._aksi[w].setVisible(on)
         self.l_x.setText(" Variabel " if j == "hist" else " X ")
@@ -184,6 +191,24 @@ class TabStatistik(QWidget):
             import re
             mm = re.search(r'width="(\d+)" height="(\d+)"', s)
             return s, (int(mm.group(1)), int(mm.group(2)))
+        if j == "peta_ifp":
+            from ..core.analisis import NAMA_JENIS, URUT_JENIS
+            from ..core.diagram2d import WARNA
+            n = self.s_n.value() or 20
+            top = [r for r in sorted(d, key=lambda r: r["energi"]) if r.get("ifp")][:n]
+            if not top:
+                return "", (0, 0)
+            s = grafik.peta_ifp([r["ligan"] for r in top], [set(r["ifp"]) for r in top],
+                                "Peta sidik jari interaksi" if judul else "", g, transparan,
+                                catatan=f"{len(top)} ligan ΔG terendah (urut dari atas); kolom = residu × jenis "
+                                        "interaksi pose terbaik (tanpa vdW)",
+                                warna_jenis=WARNA, nama_jenis=NAMA_JENIS, urut_jenis=URUT_JENIS,
+                                min_frek=self.c_frek.currentData())
+            if not s:
+                return "", (0, 0)
+            import re
+            mm = re.search(r'width="(\d+)" height="(\d+)"', s)
+            return s, (int(mm.group(1)), int(mm.group(2)))
         kun = [k for k in MATRIKS_BAWAAN if len(st.kolom(d, k)) > 2 and len(set(st.kolom(d, k))) > 1]
         if len(kun) < 2:
             return "", (0, 0)
@@ -217,7 +242,7 @@ class TabStatistik(QWidget):
         if not self.svg()[0]:
             saran = (" Pilih <b>Semua job</b> di kotak Job." if self.c_job.findData(SEMUA) >= 0
                      and self.c_job.currentData() != SEMUA else "")
-            if self.c_jenis.currentData() == "ifp" and not any(x.get("ifp") for x in d):
+            if self.c_jenis.currentData() in ("ifp", "peta_ifp") and not any(x.get("ifp") for x in d):
                 saran = (" Sidik jari interaksi belum dihitung untuk hasil ini (proyek lama): jalankan "
                          "<b>Analisis › Hitung ulang analisis hasil</b>.")
             self.info.setHtml("".join(o) + f"<p class='m'>Grafik ini butuh lebih banyak data: {len(d)} ligan pada pilihan "

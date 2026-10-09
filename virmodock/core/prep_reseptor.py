@@ -35,6 +35,9 @@ class OpsiReseptor:
     altloc: str = "tertinggi"        # "A" | "tertinggi"
     muatan: str = "gasteiger"        # gasteiger | templat
     hidrogen: str = "polar"          # polar | semua (PDBQT AD4 selalu H polar; 'semua' disimpan di PDB)
+    protonasi: str = "templat"       # templat (keadaan baku Meeko) | propka (PDB2PQR + PROPKA pada pH)
+    ph: float = 7.4
+    optimasi_h: bool = True          # PDB2PQR: optimasi jaringan ikatan H + flip His/Asn/Gln
 
 
 @dataclass
@@ -48,6 +51,7 @@ class HasilReseptor:
     logam: list = field(default_factory=list)       # ion yang dipertahankan
     peringatan: list = field(default_factory=list)
     laporan: str = ""
+    protonasi: object = None                        # protonasi.HasilProtonasi bila memakai PROPKA
 
 
 class GalatPrep(Exception):
@@ -232,8 +236,28 @@ def siapkan(teks, opsi=None, fmt="pdb", lapor=None):
     log(f"Struktur bersih: {len(bersih[0])} rantai, {n_res} residu, {bersih[0].count_atom_sites()} atom berat")
     peringatan, dibuang = [], []
     metode = "Meeko (Gasteiger)" if opsi.muatan == "gasteiger" else "Meeko (muatan templat)"
+    hp = None
+    pdb_meeko = pdb
+    if opsi.protonasi == "propka":
+        from . import protonasi
+        try:
+            hp = protonasi.jalankan(pdb, opsi.ph, opsi.optimasi_h, lapor=lapor)
+            pdb_meeko = hp.pdb
+            if logam:       # His pengikat logam: tautomer ditetapkan dari geometri koordinasi
+                pdb_meeko, his = protonasi.sesuaikan_his_logam(pdb_meeko, [p for _, _, _, p, _, _ in logam])
+                if his:
+                    kunci = lambda t: tuple(t.split()[1:3])     # noqa: E731  (nomor, rantai)
+                    lama = {kunci(x) for x in his}
+                    hp.keadaan = [k for k in hp.keadaan if kunci(k[0]) not in lama]
+                    hp.keadaan += [(x.split(" (")[0], x.split()[0], "His pengikat logam") for x in his]
+                    log("His pengikat logam: " + ", ".join(his))
+            metode += f", PROPKA/PDB2PQR pH {opsi.ph:.1f}"
+            peringatan += [f"PDB2PQR: {m}" for m in hp.peringatan[:10]]
+        except Exception as e:
+            log(f"PROPKA/PDB2PQR gagal ({e}); memakai keadaan protonasi baku templat Meeko")
+            peringatan.append(f"PROPKA/PDB2PQR gagal ({str(e)[:160]}); protonasi baku templat dipakai.")
     try:
-        pdbqt, dibuang, keluaran = _meeko(pdb, opsi)
+        pdbqt, dibuang, keluaran = _meeko(pdb_meeko, opsi)
         if not hitung_atom(pdbqt):
             raise GalatPrep("Meeko tidak menghasilkan atom.")
         if dibuang:
@@ -251,7 +275,8 @@ def siapkan(teks, opsi=None, fmt="pdb", lapor=None):
         log("Ion logam dipertahankan: " + ", ".join(f"{r} {c}{i}" for r, _, _, _, c, i in logam))
     pdbqt = "\n".join(baris) + "\n"
     h = HasilReseptor(pdbqt=pdbqt, pdb_bersih=pdb, metode=metode, atom=hitung_atom(pdbqt), residu=n_res - len(dibuang),
-                      dibuang=dibuang, logam=[f"{r} {c}{i}" for r, _, _, _, c, i in logam], peringatan=peringatan)
+                      dibuang=dibuang, logam=[f"{r} {c}{i}" for r, _, _, _, c, i in logam], peringatan=peringatan,
+                      protonasi=hp)
     jumlah_h = sum(1 for b in baris if b.startswith(("ATOM", "HETATM")) and b[77:].split()[:1] == ["HD"])
     q_total = sum(float(b[70:76]) for b in baris if b.startswith(("ATOM", "HETATM")) and _angka(b[70:76]))
     h.laporan = "\n".join([
@@ -267,8 +292,21 @@ def siapkan(teks, opsi=None, fmt="pdb", lapor=None):
         f"Altloc       : {'A' if opsi.altloc == 'A' else 'okupansi tertinggi'}",
         f"Ion logam    : {', '.join(h.logam) or '-'}",
         f"Residu dibuang ({len(dibuang)}): {', '.join(dibuang) or '-'}",
-    ] + ([""] + ["Peringatan: " + p for p in peringatan] if peringatan else [])) + "\n"
+    ] + (_laporan_protonasi(hp) if hp else ["Protonasi    : keadaan baku templat Meeko (Asp/Glu −, Lys/Arg +, "
+                                             "His netral)"])
+      + ([""] + ["Peringatan: " + p for p in peringatan] if peringatan else [])) + "\n"
     return h
+
+
+def _laporan_protonasi(hp):
+    from .protonasi import ringkas_pka
+    o = [f"Protonasi    : PROPKA 3 + PDB2PQR pada pH {hp.ph:.1f} ({hp.detik:.1f} s)",
+         f"Keadaan tak-baku ({len(hp.keadaan)}): " + (", ".join(f"{l} [{k}]" for l, _n, k in hp.keadaan) or "-"),
+         f"Atom/residu dilengkapi ({len(hp.diperbaiki)}): " + ("; ".join(hp.diperbaiki[:12]) or "-")]
+    r = ringkas_pka(hp)
+    if r:
+        o += ["pKa penting (pergeseran ≥ 1 atau dekat pH):"] + ["  " + x for x in r]
+    return o
 
 
 def _angka(s):

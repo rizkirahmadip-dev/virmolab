@@ -13,6 +13,7 @@ dev/*.png
 dev/*.svg
 dev/*.log
 dev/*.json
+!dev/i18n_tambahan.json
 
 # Unduhan & alat pihak ketiga (dipasang terpisah, lihat README)
 vendor/_unduh/
@@ -22,6 +23,9 @@ vendor/opencl/
 # P2Rank + Java (±262 MB; cara pasang di README)
 vendor/bin/jre/
 vendor/bin/p2rank/
+# Ketcher standalone (±30 MB; unduh rilis epam/ketcher v3.18.0, lihat README)
+vendor/ketcher/
+vendor/unduhan_ketcher/
 
 # Hasil build AutoDock-GPU (sumber & proyek VS tetap ikut)
 vendor/adgpu_src/bin/

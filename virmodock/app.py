@@ -5,6 +5,7 @@ Argumen:
   --disable-gpu             viewport 3D memakai rendering perangkat lunak (driver grafis bermasalah)
   --uji-mandiri HASIL.json  jalankan uji komponen tanpa jendela, tulis hasil, keluar (kode 0 = semua lulus)
   --qc-pekerja ALAMAT KUNCI (internal) proses pekerja PoseBusters, tersambung lewat named pipe
+  --admet MASUK KELUAR      (internal) prediksi ADMET-AI di proses terpisah (JSON masuk/keluar)
 """
 import os
 import sys
@@ -26,6 +27,9 @@ def main():
         from .core import qc
         qc.layani(arg[1], arg[2])
         return
+    if arg[:1] == ["--admet"]:           # proses prediksi ADMET-AI (core/admet.py), tanpa jendela
+        from .core import admet
+        sys.exit(admet.jalankan_cli(arg[1], arg[2]))
     siapkan_kimia()
     if "--uji-mandiri" in arg:
         i = arg.index("--uji-mandiri")
@@ -53,6 +57,8 @@ def main():
     ikon = paths.PAKET / "aset" / "virmodock.ico"
     if ikon.exists():
         app.setWindowIcon(QIcon(str(ikon)))
+    from . import i18n
+    i18n.pasang(app)          # bahasa antarmuka (sebelum modul UI diimpor)
     from .ui.mainwindow import JendelaUtama
     w = JendelaUtama()
     w.show()

@@ -162,6 +162,7 @@ class PanelHierarki(QWidget):
         it.setIcon(0, icons.ikon("pin" if on else IKON_JENIS.get(it.data(0, Qt.UserRole + 1), "lig"),
                                  self.warna_ikon))
         it.setToolTip(0, "Disematkan: tetap tampil saat membuka pose lain" if on else "")
+        it.setData(0, Qt.UserRole + 2, bool(on))
 
     def ganti_nama(self, oid, nama):
         if oid in self._item:
@@ -260,7 +261,10 @@ class PanelHierarki(QWidget):
                 a = m.addAction(icons.ikon("pin", self.warna_ikon), "Sematkan (tetap tampil saat buka pose lain)",
                                 lambda: self.aksiKonteks.emit(oid, "sematkan", None))
                 a.setCheckable(True)
-                a.setChecked(it.toolTip(0).startswith("Disematkan"))
+                a.setChecked(bool(it.data(0, Qt.UserRole + 2)))
+            if d[0] == "obj" and it.data(0, Qt.UserRole + 1) in ("ligan", "pose"):
+                m.addAction(icons.ikon("edit", self.warna_ikon), "Edit struktur di Ketcher…",
+                            lambda: self.aksiKonteks.emit(oid, "ketcher", None))
             if d[0] == "obj":
                 m.addAction("Ganti nama…", lambda: self.aksiKonteks.emit(oid, "rename", None))
                 m.addAction(icons.ikon("dl", self.warna_ikon), "Ekspor…", lambda: self.aksiKonteks.emit(oid, "export", None))

@@ -592,10 +592,10 @@ Disepakati pengguna (8 Okt 2026): tidak menambah fitur baru lagi; mulai membangu
 |---|---|
 | **v1.0** | MVP (E3) |
 | v1.1 | Grid box drag mouse, PoseBusters QC, drug-likeness RDKit + BOILED-Egg, statistik dasar (histogram, korelasi, LE), ekspor Excel penuh — **SELESAI 8 Okt 2026**, dikerjakan sebelum rilis 1.0 atas permintaan pengguna (rincian CATATAN_TAHAP2.md §4e) |
-| v1.2 | Modul grafik & statistik ala Prism (A7b) bertahap, ProLIF heatmap + kemiripan IFP, pewarnaan kontribusi per atom |
-| v1.3 | P2Rank deteksi kantong, Asisten Alur, wizard preparasi protein penuh + optimasi ikatan H, ChEMBL validasi & korelasi |
+| v1.2 | Modul grafik & statistik ala Prism (A7b) bertahap, ProLIF heatmap + kemiripan IFP, pewarnaan kontribusi per atom — **SELESAI (0.9.0–0.9.2)** |
+| v1.3 | P2Rank deteksi kantong, Asisten Alur, wizard preparasi protein penuh + optimasi ikatan H, ChEMBL validasi & korelasi — **SELESAI (0.9.0–0.9.2)** |
 | v1.4 | Konsensus skor + ROC/EF/BEDROC, laporan Word & HTML interaktif, komposer figur, animasi |
-| v1.5 | ADMET-AI (paket opsional), Ketcher, kemiripan/farmakofor, pustaka ZINC/obat FDA/COCONUT, bahasa Inggris |
+| v1.5 | ADMET-AI (paket opsional), Ketcher, kemiripan/farmakofor, pustaka ZINC/obat FDA/COCONUT, bahasa Inggris — **SELESAI 9 Okt 2026 (0.9.2)**; ZINC hanya tautan situs (anti-bot) |
 | v2.0 | MD adaptif + MM/GBSA (OpenMM, A8a), flexres/kovalen, plugin & konsol Python, baris perintah, AlphaFold DB |
 | v2.x | Eksperimental: GNINA (WSL), Boltz-2, edit ligan dalam kantong, asisten LLM lokal |
 

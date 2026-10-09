@@ -14,7 +14,7 @@ const KD = {ILE: 4.5, VAL: 4.2, LEU: 3.8, PHE: 2.8, CYS: 2.5, MET: 1.9, ALA: 1.8
 const MUATAN = {ASP: -1, GLU: -1, LYS: 1, ARG: 1, HIS: 0.3};
 
 const VM = {
-  v: null, py: null, models: {}, shapes: {box: [], inter: [], ukur: [], sel: [], kontrib: [], kantong: []}, labels: {inter: [], ukur: [], res: [], kontrib: [], kantong: []},
+  v: null, py: null, models: {}, shapes: {box: [], inter: [], ukur: [], sel: [], kontrib: [], kantong: [], farma: []}, labels: {inter: [], ukur: [], res: [], kontrib: [], kantong: [], farma: []},
   bgc: '#ffffff', mode: 'putar', ukurAtom: [], dark: false,
 
   init() {
@@ -78,7 +78,7 @@ const VM = {
     delete this.models[id];
     this.v.render();
   },
-  clear() { Object.keys(this.models).forEach(id => this.remove(id)); this.clearShapes('box'); this.clearShapes('inter'); this.clearShapes('ukur'); this.clearShapes('sel'); this.v.render(); },
+  clear() { Object.keys(this.models).forEach(id => this.remove(id)); this.clearShapes('box'); this.clearShapes('inter'); this.clearShapes('ukur'); this.clearShapes('sel'); this.clearShapes('farma'); this.v.render(); },
 
   /* --------------------------------------------- warna & representasi */
   warna(c) {
@@ -278,6 +278,25 @@ const VM = {
         alignment: 'center'}));
     });
     this.v.render();
+  },
+  /* farmakofor: bola kerangka berwarna per fitur (bentuk transparan 3Dmol tidak tergambar di sini) + titik pusat
+     buram kecil; label opsional (nama fitur / frekuensi). daftar kosong = hapus. */
+  farmakofor(daftar, opsi) {
+    this.clearShapes('farma');
+    opsi = opsi || {};
+    (daftar || []).forEach(f => {
+      const c = this.xyz(f.xyz);
+      this.shapes.farma.push(this.v.addSphere({center: c, radius: f.radius, color: f.warna, wireframe: true,
+        linewidth: 1.2}));
+      this.shapes.farma.push(this.v.addSphere({center: c, radius: 0.16, color: f.warna}));
+      if (opsi.label)
+        this.labels.farma.push(this.v.addLabel(f.label || f.nama, {position: c, fontSize: 10, font: 'Segoe UI',
+          berat: 600, fontColor: f.warna, backgroundColor: this.bgc, backgroundOpacity: 0.85, borderColor: f.warna,
+          borderOpacity: 0.4, borderThickness: 1, bayang: false, padX: 4, padY: 0.5, inFront: true,
+          alignment: 'bottomCenter'}));
+    });
+    this.v.render();
+    return (daftar || []).length;
   },
   _kontribId: null,
   kontribusi(id, daftar, opsi) {

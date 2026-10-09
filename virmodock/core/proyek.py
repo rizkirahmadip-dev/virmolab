@@ -49,6 +49,7 @@ class Proyek:
         self.objek = []               # list dict objek viewer
         self.catatan = ""
         self.validasi = {}            # hasil validasi redocking terakhir
+        self.eksperimen = {}          # data aktivitas eksperimen (ChEMBL): target, aktivitas [{chembl, nama, smiles, inchikey, pchembl, …}]
 
     # ------------------------------------------------------------- jalur
     def p(self, *bag):
@@ -67,7 +68,8 @@ class Proyek:
                 "diubah": datetime.now().isoformat(timespec="seconds"), "reseptor": self.reseptor,
                 "ligan": self.ligan, "kotak": self.kotak, "parameter": self.parameter, "uji_grafik": self.uji_grafik,
                 "komposer": self.komposer, "job": self.job,
-                "objek": self.objek, "catatan": self.catatan, "validasi": self.validasi}
+                "objek": self.objek, "catatan": self.catatan, "validasi": self.validasi,
+                "eksperimen": self.eksperimen}
 
     def simpan(self):
         self.siapkan_folder()
@@ -105,6 +107,7 @@ class Proyek:
         pr.job = d.get("job") or []
         pr.objek = d.get("objek") or []
         pr.validasi = d.get("validasi") or {}
+        pr.eksperimen = d.get("eksperimen") or {}
         # job yang terputus (aplikasi ditutup/crash) bisa dilanjutkan
         for j in pr.job:
             if j.get("status") in ("berjalan", "menunggu"):

@@ -1,0 +1,35 @@
+{
+ "teks": {
+  "Alat": "Tools",
+  "Bantuan": "Help",
+  "A&lat": "&Tools",
+  "Ba&ntuan": "&Help",
+  "Lanjutkan": "Resume",
+  "Hasil": "Results",
+  "Protein": "Protein",
+  "Area docking": "Docking area",
+  "Jalankan": "Run",
+  "belum ada": "none yet",
+  "Siapkan": "Prepare",
+  "Docking": "Docking",
+  "Edit": "Edit",
+  "Tampilan": "View",
+  "Berkas": "File",
+  "Kartun": "Cartoon",
+  "Bola–stick": "Ball & stick",
+  "Bola-stick": "Ball & stick",
+  "Pita": "Ribbon"
+ },
+ "pola": {
+  "{0} siap": "{0} ready",
+  "{0} dimuat": "{0} loaded",
+  "berjalan {0}": "running {0}",
+  "Jalankan docking ({0} ligan)": "Run docking ({0} ligands)",
+  "{0} job": "{0} jobs",
+  "Reseptor siap: {0} · {1} atom": "Receptor ready: {0} · {1} atoms",
+  "Bisa disiapkan ulang bila protein diganti.": "Can be prepared again if the protein is replaced.",
+  "Air ({0})": "Water ({0})",
+  "{0} atom": "{0} atoms",
+  "{0} objek · {1} atom": "{0} objects · {1} atoms"
+ }
+}

@@ -105,11 +105,12 @@ class PanelDocking(QWidget):
         self.cmb_alat.currentIndexChanged.connect(self._ubah)
         fp.addRow(self._m("Perangkat"), self.cmb_alat)
         self.cmb_preset = QComboBox()
-        self.cmb_preset.addItems(list(PRESET) + list((self.st.value("preset_kustom", {}) or {}).keys()))
-        self.cmb_preset.setCurrentText("Standar")
+        for n in list(PRESET) + list((self.st.value("preset_kustom", {}) or {}).keys()):
+            self.cmb_preset.addItem(n, n)        # data = kunci preset (teks tampilan bisa diterjemahkan)
+        self.cmb_preset.setCurrentIndex(self.cmb_preset.findData("Standar"))
         self.cmb_preset.setMinimumWidth(60)
         self.cmb_preset.setToolTip("Cepat = uji coba; Standar = penelitian umum; Teliti = hasil akhir/publikasi")
-        self.cmb_preset.textActivated.connect(self.terapkan_preset)   # langsung diterapkan saat dipilih
+        self.cmb_preset.activated.connect(lambda i: self.terapkan_preset(self.cmb_preset.itemData(i)))   # langsung diterapkan saat dipilih
         fp.addRow(self._m("Ketelitian"), self.cmb_preset)
         v.addLayout(fp)
         lay.addWidget(w)
@@ -388,9 +389,9 @@ class PanelDocking(QWidget):
         kustom = dict(self.st.value("preset_kustom", {}) or {})
         kustom[nama.strip()] = self.parameter()
         self.st.setValue("preset_kustom", kustom)
-        if self.cmb_preset.findText(nama.strip()) < 0:
-            self.cmb_preset.addItem(nama.strip())
-        self.cmb_preset.setCurrentText(nama.strip())
+        if self.cmb_preset.findData(nama.strip()) < 0:
+            self.cmb_preset.addItem(nama.strip(), nama.strip())
+        self.cmb_preset.setCurrentIndex(self.cmb_preset.findData(nama.strip()))
 
     def _indeks_alat(self, perangkat, devnum=None):
         """Cocokkan 'gpu'/'cpu' (+ devnum) dengan isi combo ('gpu:N' / 'cpu'); GPU tak dikenal -> GPU pertama."""

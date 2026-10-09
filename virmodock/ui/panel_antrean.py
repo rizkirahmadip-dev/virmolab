@@ -35,7 +35,7 @@ class PanelAntrean(QWidget):
         self.bar = QToolBar()
         self.bar.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
         self.a = {}
-        for k, t, ik in (("jeda", "Jeda", "pause"), ("lanjut", "Lanjut", "play"), ("batal", "Batal", "stop"),
+        for k, t, ik in (("jeda", "Jeda", "pause"), ("lanjut", "Lanjutkan", "play"), ("batal", "Batal", "stop"),
                          ("folder", "Folder hasil", "folder"), ("hapus_selesai", "Hapus selesai", "trash")):
             a = self.bar.addAction(t)
             a.setData(ik)

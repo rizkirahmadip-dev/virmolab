@@ -27,10 +27,20 @@ for f in (AKAR / "vendor" / "bin").rglob("*"):
 datas += collect_data_files("meeko") + collect_data_files("rdkit", includes=["Data/*.fdef", "Data/*.txt"])
 datas += collect_data_files("posebusters")   # config/*.yml (konfigurasi uji)
 datas += collect_data_files("dimorphite_dl")  # smarts/site_substructures.smarts (aturan pKa)
+datas += collect_data_files("pdb2pqr") + collect_data_files("propka")   # topologi/forcefield & parameter pKa
+datas += collect_data_files("admet_ai") + collect_data_files("chemprop") + collect_data_files("descriptastorus")
+datas += collect_data_files("lightning") + collect_data_files("lightning_fabric")
+datas += [(str(AKAR / "virmodock" / "i18n" / "en.json"), "virmodock/i18n")]
+# Ketcher standalone (editor struktur, Apache-2.0) -> _internal/ketcher
+for f in (AKAR / "vendor" / "ketcher").rglob("*"):
+    if f.is_file():
+        datas.append((str(f), str(Path("ketcher") / f.parent.relative_to(AKAR / "vendor" / "ketcher"))))
 hidden = collect_submodules("meeko") + collect_submodules("dimorphite_dl") + ["gemmi", "openpyxl", "rdkit.Chem.ChemicalFeatures"]
+hidden += collect_submodules("pdb2pqr") + collect_submodules("propka") + collect_submodules("admet_ai")
+hidden += collect_submodules("chemprop") + ["rdkit.Chem.Pharm2D.Gobbi_Pharm2D", "rdkit.Chem.Pharm2D.Generate"]
 
 a = Analysis([str(AKAR / "VirmoDock.pyw")], pathex=[str(AKAR)], datas=datas, hiddenimports=hidden,
-             excludes=["openbabel", "tkinter", "matplotlib", "IPython", "pytest", "PySide6.Qt3DCore", "PySide6.QtCharts",
+             excludes=["openbabel", "tkinter", "IPython", "pytest", "PySide6.Qt3DCore", "PySide6.QtCharts",
                        "PySide6.QtDataVisualization", "PySide6.QtQuick3D", "PySide6.QtSql", "PySide6.QtMultimediaWidgets",
                        "PySide6.QtTest", "PySide6.QtBluetooth", "PySide6.QtNfc", "PySide6.QtSensors",
                        "PySide6.QtSerialPort", "PySide6.QtDesigner", "PySide6.QtHelp", "PySide6.QtLocation",
@@ -42,6 +52,9 @@ def buang(tujuan):
     """Berkas Qt yang tidak dipakai VirmoDock (hemat ± 150 MB)."""
     d = tujuan.replace("\\", "/")
     if d.startswith("PySide6/qml/") or d.startswith("docs/_sumber"):
+        return True
+    # data DrugBank (CC BY-NC) tidak dipakai (drugbank_path=None); PaDEL (Java) tidak dipakai ADMET-AI
+    if d.endswith("admet_ai/resources/data/drugbank_approved.csv") or d.startswith("padelpy/PaDEL"):
         return True
     if re.search(r"PySide6/resources/.*\.debug\.(pak|bin)$", d) or "qtwebengine_devtools_resources" in d:
         return True

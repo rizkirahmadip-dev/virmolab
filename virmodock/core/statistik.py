@@ -25,6 +25,7 @@ VARIABEL = [
     ("atom_berat", "Atom berat", "Atom berat", 0),
     ("fsp3", "Fsp3", "Fsp3", 2),
     ("qed", "QED", "QED", 2),
+    ("pchembl", "pChEMBL eksperimen (ChEMBL)", "pChEMBL", 2),
 ]
 LABEL = {k: l for k, l, _, _ in VARIABEL}
 PENDEK = {k: p for k, _, p, _ in VARIABEL}
@@ -46,7 +47,7 @@ def dataset(baris, sifat_per_lid):
              "interaksi": sum(b.get(k) or 0 for k in ("hbond", "hidrofobik", "pi", "pikation", "garam", "halogen",
                                                      "logam")),
              "rmsd_kristal": b.get("rmsd_kristal"), "ifp": b.get("ifp") or [], "ifp_sim": b.get("ifp_sim")}
-        for k in ("mw", "wlogp", "tpsa", "hbd", "hba", "rotb", "atom_berat", "fsp3", "qed"):
+        for k in ("mw", "wlogp", "tpsa", "hbd", "hba", "rotb", "atom_berat", "fsp3", "qed", "pchembl"):
             d[k] = s.get(k)
         out.append(d)
     return out
