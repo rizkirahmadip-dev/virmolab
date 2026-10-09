@@ -24,13 +24,17 @@ datas = [(str(AKAR / "virmodock" / "viewer"), "virmodock/viewer"),
 for f in (AKAR / "vendor" / "bin").rglob("*"):
     if f.is_file():
         datas.append((str(f), str(Path("bin") / f.parent.relative_to(AKAR / "vendor" / "bin"))))
-datas += collect_data_files("meeko") + collect_data_files("rdkit", includes=["Data/*.fdef", "Data/*.txt"])
+datas += collect_data_files("meeko") + collect_data_files("rdkit", includes=["Data/*.fdef", "Data/*.txt", "Data/*.csv"])  # csv: deskriptor fr_* (ADMET-AI)
 datas += collect_data_files("posebusters")   # config/*.yml (konfigurasi uji)
 datas += collect_data_files("dimorphite_dl")  # smarts/site_substructures.smarts (aturan pKa)
 datas += collect_data_files("pdb2pqr") + collect_data_files("propka")   # topologi/forcefield & parameter pKa
 datas += collect_data_files("admet_ai") + collect_data_files("chemprop") + collect_data_files("descriptastorus")
 datas += collect_data_files("lightning") + collect_data_files("lightning_fabric")
 datas += [(str(AKAR / "virmodock" / "i18n" / "en.json"), "virmodock/i18n")]
+# cuik_molmaker (chemprop; Apache-2.0) memuat .pyd lewat os.listdir di folder paketnya -> salin apa adanya
+_cuik = Path(__import__("cuik_molmaker").__file__).parent
+binaries = [(str(f), "cuik_molmaker") for f in _cuik.iterdir() if f.suffix in (".pyd", ".dll")]
+datas += collect_data_files("cuik_molmaker")
 # Ketcher standalone (editor struktur, Apache-2.0) -> _internal/ketcher
 for f in (AKAR / "vendor" / "ketcher").rglob("*"):
     if f.is_file():
@@ -39,7 +43,7 @@ hidden = collect_submodules("meeko") + collect_submodules("dimorphite_dl") + ["g
 hidden += collect_submodules("pdb2pqr") + collect_submodules("propka") + collect_submodules("admet_ai")
 hidden += collect_submodules("chemprop") + ["rdkit.Chem.Pharm2D.Gobbi_Pharm2D", "rdkit.Chem.Pharm2D.Generate"]
 
-a = Analysis([str(AKAR / "VirmoDock.pyw")], pathex=[str(AKAR)], datas=datas, hiddenimports=hidden,
+a = Analysis([str(AKAR / "VirmoDock.pyw")], pathex=[str(AKAR)], datas=datas, binaries=binaries, hiddenimports=hidden,
              excludes=["openbabel", "tkinter", "IPython", "pytest", "PySide6.Qt3DCore", "PySide6.QtCharts",
                        "PySide6.QtDataVisualization", "PySide6.QtQuick3D", "PySide6.QtSql", "PySide6.QtMultimediaWidgets",
                        "PySide6.QtTest", "PySide6.QtBluetooth", "PySide6.QtNfc", "PySide6.QtSensors",

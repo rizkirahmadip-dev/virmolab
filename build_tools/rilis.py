@@ -54,6 +54,8 @@ def sha256(f):
 
 
 def main():
+    # Konsol/berkas log Windows bisa cp1252; detail uji memuat karakter seperti '−' (U+2212).
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     RILIS.mkdir(exist_ok=True)
     langkah("Dokumentasi")
     jalan([PY, "dev/buat_docs.py"])

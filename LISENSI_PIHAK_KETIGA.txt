@@ -75,6 +75,7 @@ Ketcher (standalone) 3.18.0      Apache-2.0 (EPAM Systems)       licenses/Ketche
 ADMET-AI             2.0.1       MIT (Swanson dkk.)              https://github.com/swansonk14/admet_ai
   (model terlatih ikut paket; data pembanding DrugBank (CC BY-NC) TIDAK dibundel dan tidak dipakai)
 Chemprop             2.3.1       MIT
+cuik-molmaker        2026.3.6    Apache-2.0 (NVIDIA)             dependensi Chemprop (featurisasi molekul)
 PyTorch              2.14.1      BSD-3-Clause + Apache-2.0 + MIT (komponen)
 Lightning            2.6.6       Apache-2.0
 scikit-learn 1.9.1, seaborn 0.13.2, descriptastorus 2.8.0, mordredcommunity 2.0.7, networkx 3.7,
