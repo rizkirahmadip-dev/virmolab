@@ -70,6 +70,17 @@ class PanelDocking(QWidget):
         f0.addRow(self._m("Reseptor"), self.l_rec)
         f0.addRow(self._m("Ligan siap"), self.l_lig)
         f0.addRow(self._m("Area"), self.l_area)
+        hf = QHBoxLayout()
+        hf.setSpacing(6)
+        self.l_flex = QLabel("kaku")
+        self.l_flex.setObjectName("mono")
+        self.l_flex.setWordWrap(True)
+        b_flex = QPushButton("Atur…")
+        b_flex.setToolTip("Pilih rantai samping kantong yang boleh bergerak saat docking (AD-GPU, Vina)")
+        b_flex.clicked.connect(lambda: self.aksiKotak.emit("fleksibel"))
+        hf.addWidget(self.l_flex, 1)
+        hf.addWidget(b_flex)
+        f0.addRow(self._m("Residu fleksibel"), hf)
         lay.addLayout(f0)
 
         lay.addWidget(judul_seksi("Mesin dan perangkat"))
@@ -421,6 +432,9 @@ class PanelDocking(QWidget):
     def _ubah(self, *_):
         if not self._diam:
             self.parameterBerubah.emit(self.parameter())
+
+    def set_fleksibel(self, residu):
+        self.l_flex.setText(", ".join(residu) if residu else "kaku")
 
     def set_ringkasan(self, reseptor, n_lig, n_peringatan=0, area=None):
         self.l_rec.setText(reseptor or "belum disiapkan")

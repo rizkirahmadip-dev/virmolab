@@ -14,7 +14,7 @@ IKON_JENIS = {"protein": "rec", "ligan": "lig", "air": "water", "ion": "ion", "p
 REPS = [("cartoon", "Kartun"), ("ribbon", "Pita"), ("sticks", "Stick"), ("lines", "Garis"),
         ("ballstick", "Bola–stick"), ("spheres", "Bola"), ("surface", "Permukaan"), ("mesh", "Mesh")]
 WARNA_MODE = [("element", "Elemen (karbon pilihan)"), ("chain", "Per rantai"), ("spectrum", "Pelangi N→C"),
-              ("ss", "Struktur sekunder"), ("bfactor", "B-faktor"), ("hydro", "Hidrofobisitas"),
+              ("ss", "Struktur sekunder"), ("bfactor", "B-faktor"), ("plddt", "pLDDT (AlphaFold)"), ("hydro", "Hidrofobisitas"),
               ("muatan", "Muatan residu"), ("solid", "Warna tunggal")]
 PERMUKAAN = [("ses", "Molekuler (SES)"), ("sas", "Terjangkau pelarut (SAS)"), ("vdw", "van der Waals")]
 

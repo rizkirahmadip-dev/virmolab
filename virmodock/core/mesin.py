@@ -75,6 +75,7 @@ class Pose:
     klaster: int = 0               # ukuran klaster (AutoDock)
     rmsd_ref: float = -1.0         # AutoDock: RMSD terhadap koordinat ligan masukan (redocking)
     pdbqt: str = ""                # koordinat pose (blok MODEL)
+    flex: str = ""                 # residu fleksibel pada pose ini (BEGIN_RES…END_RES), kosong bila reseptor kaku
 
     @property
     def ki(self):
@@ -84,6 +85,7 @@ class Pose:
         d = asdict(self)
         if not dengan_koordinat:
             d.pop("pdbqt")
+            d.pop("flex")
         return d
 
 
@@ -159,7 +161,7 @@ def hash_teks(t):
 
 
 # --------------------------------------------------------------- perintah
-def perintah_adgpu(fld, lig, basis, p, devnum=None):
+def perintah_adgpu(fld, lig, basis, p, devnum=None, flex=None):
     devnum = devnum or getattr(p, "devnum", 0) or None
     cmd = [paths.program("autodock_gpu.exe"), "--ffile", str(fld), "--lfile", str(lig), "--nrun", str(p.nrun),
            "--resnam", str(basis), "--xmloutput", "0", "--heuristics", "1" if p.heuristik else "0"]
@@ -169,10 +171,12 @@ def perintah_adgpu(fld, lig, basis, p, devnum=None):
         cmd += ["--seed", str(p.seed)]
     if devnum:
         cmd += ["--devnum", str(devnum)]
+    if flex:
+        cmd += ["--flexres", str(flex)]
     return cmd
 
 
-def perintah_vina(rec, lig, keluaran, kotak, p):
+def perintah_vina(rec, lig, keluaran, kotak, p, flex=None):
     c, s = kotak.pusat, kotak.ukuran
     cmd = [paths.program("vina.exe"), "--receptor", str(rec), "--ligand", str(lig),
            "--center_x", f"{c[0]:.3f}", "--center_y", f"{c[1]:.3f}", "--center_z", f"{c[2]:.3f}",
@@ -183,6 +187,8 @@ def perintah_vina(rec, lig, keluaran, kotak, p):
         cmd += ["--seed", str(p.seed)]
     if p.cpu:
         cmd += ["--cpu", str(p.cpu)]
+    if flex:
+        cmd += ["--flex", str(flex)]
     return cmd
 
 
@@ -263,19 +269,25 @@ def baca_dlg(path):
 
     Ditambah RMSD terhadap pusat klaster & ukuran klaster dari tabel histogram.
     """
-    pose_run, energi, run, atom = {}, None, None, []
+    pose_run, energi, run, atom, flex, di_flex = {}, None, None, [], [], False
     klaster, ranking = [], []
     with open(path, errors="replace") as f:
         for b in f:
             if b.startswith("DOCKED:"):
                 isi = b[8:].rstrip("\n")
                 if isi.startswith("MODEL"):
-                    energi, run, atom = None, None, []
+                    energi, run, atom, flex, di_flex = None, None, [], [], False
+                elif isi.startswith("BEGIN_RES"):      # residu fleksibel (dipisah dari pose ligan)
+                    di_flex = True
+                    flex.append(isi)
+                elif isi.startswith("END_RES"):
+                    flex.append(isi)
+                    di_flex = False
                 elif isi.startswith(("ATOM", "HETATM", "ROOT", "ENDROOT", "BRANCH", "ENDBRANCH", "TORSDOF")):
-                    atom.append(isi)
+                    (flex if di_flex else atom).append(isi)
                 elif isi.startswith("ENDMDL"):
                     if energi is not None and atom:
-                        pose_run[run or len(pose_run) + 1] = (energi, "\n".join(atom))
+                        pose_run[run or len(pose_run) + 1] = (energi, "\n".join(atom), "\n".join(flex))
                 else:
                     m = RE_ENERGI.search(isi)
                     if m:
@@ -300,13 +312,13 @@ def baca_dlg(path):
             wakil = anggota[0] if anggota else None
             run_w = wakil[1] if wakil else run_terbaik
             if run_w in pose_run:
-                e, teks = pose_run[run_w]
+                e, teks, fx = pose_run[run_w]
                 hasil.append(Pose(peringkat=rank, energi=wakil[2] if wakil else e,
                                   rmsd_lb=wakil[3] if wakil else 0.0, rmsd_ref=wakil[4] if wakil else -1.0,
-                                  klaster=n, pdbqt=teks))
+                                  klaster=n, pdbqt=teks, flex=fx))
     if not hasil:
-        for i, (e, teks) in enumerate(sorted(pose_run.values(), key=lambda x: x[0]), 1):
-            hasil.append(Pose(peringkat=i, energi=e, pdbqt=teks))
+        for i, (e, teks, fx) in enumerate(sorted(pose_run.values(), key=lambda x: x[0]), 1):
+            hasil.append(Pose(peringkat=i, energi=e, pdbqt=teks, flex=fx))
     hasil.sort(key=lambda p: p.energi)
     for i, p in enumerate(hasil, 1):
         p.peringkat = i
@@ -314,20 +326,26 @@ def baca_dlg(path):
 
 
 def baca_vina(path):
-    hasil, teks, e, lb, ub = [], [], None, 0.0, 0.0
+    hasil, teks, flex, e, lb, ub, di_flex = [], [], [], None, 0.0, 0.0, False
     with open(path, errors="replace") as f:
         for b in f:
             if b.startswith("MODEL"):
-                teks, e = [], None
+                teks, flex, e, di_flex = [], [], None, False
+            elif b.startswith("BEGIN_RES"):           # residu fleksibel (Vina --flex)
+                di_flex = True
+                flex.append(b.rstrip("\n"))
+            elif b.startswith("END_RES"):
+                flex.append(b.rstrip("\n"))
+                di_flex = False
             elif b.startswith("REMARK VINA RESULT:"):
                 s = b.split()
                 e, lb, ub = float(s[3]), float(s[4]), float(s[5])
             elif b.startswith("ENDMDL"):
                 if e is not None:
                     hasil.append(Pose(peringkat=len(hasil) + 1, energi=e, rmsd_lb=lb, rmsd_ub=ub,
-                                      pdbqt="\n".join(teks)))
+                                      pdbqt="\n".join(teks), flex="\n".join(flex)))
             elif not b.startswith("REMARK"):
-                teks.append(b.rstrip("\n"))
+                (flex if di_flex else teks).append(b.rstrip("\n"))
     return hasil
 
 
@@ -345,6 +363,53 @@ def pose_ke_pdb(pdbqt, resn="LIG"):
         el = ELEMEN.get(tipe.upper(), "C" if re.match(r"^C?G\d$", tipe) else tipe[:2].capitalize())
         baris.append(("HETATM" + b[6:17] + f"{resn:>3}" + b[20:66]).ljust(76) + el.rjust(2))
     return "\n".join(baris) + "\nEND\n"
+
+
+def flex_ke_pdb(flex):
+    """Blok residu fleksibel PDBQT -> PDB (ATOM, nama residu asli) untuk viewer."""
+    baris = []
+    for b in flex.splitlines():
+        if not b.startswith(("ATOM", "HETATM")):
+            continue
+        tipe = b[77:].split()[0] if len(b) > 77 and b[77:].split() else "C"
+        el = ELEMEN.get(tipe.upper(), tipe[:2].capitalize())
+        baris.append(("ATOM  " + b[6:66]).ljust(76) + el.rjust(2))
+    return "\n".join(baris) + "\nEND\n"
+
+
+def terapkan_flex(teks_pdb, flex):
+    """Ganti koordinat atom residu fleksibel (cocok rantai/nomor/nama atom) di teks PDB reseptor dengan posisi pose."""
+    pos = {}
+    for b in flex.splitlines():
+        if b.startswith(("ATOM", "HETATM")):
+            try:
+                pos[(b[21].strip(), int(b[22:26]), b[12:16].strip())] = b[30:54]
+            except ValueError:
+                pass
+    if not pos:
+        return teks_pdb
+    keluar = []
+    for b in teks_pdb.splitlines():
+        if b.startswith(("ATOM", "HETATM")) and len(b) >= 54:
+            try:
+                k = (b[21].strip(), int(b[22:26]), b[12:16].strip())
+            except ValueError:
+                k = None
+            if k in pos:
+                b = b[:30] + pos[k] + b[54:]
+        keluar.append(b)
+    return "\n".join(keluar) + "\n"
+
+
+def residu_flex(flex):
+    """['THR199 A', …] dari blok flex (urut kemunculan)."""
+    out = []
+    for b in flex.splitlines():
+        if b.startswith("BEGIN_RES"):
+            s = b.split()
+            if len(s) >= 4:
+                out.append(f"{s[1]}{s[3]} {s[2]}")
+    return out
 
 
 def ringkas_galat(teks, n=600):

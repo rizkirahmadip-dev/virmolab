@@ -89,6 +89,19 @@ def baca_reseptor(teks):
     return rec
 
 
+def gabung_flex(rec, flex):
+    """Reseptor kaku + rantai samping fleksibel pada posisi pose (analisis interaksi docking flexres)."""
+    if rec is None or not flex or not flex.strip():
+        return rec
+    f = baca_reseptor(flex)
+    if not len(f.nama):
+        return rec
+    g = Reseptor(rec.nama + f.nama, rec.resn + f.resn, rec.rantai + f.rantai, rec.resi + f.resi, rec.el + f.el,
+                 np.vstack([rec.xyz, f.xyz]))
+    g.punya_h = rec.punya_h
+    return g
+
+
 # ------------------------------------------------------------------- ligan
 def pose_mol(pdbqt_ligan_masukan, pose_pdbqt):
     """Bangun RDKit Mol (dengan H, orde ikatan & muatan benar) dari blok pose memakai REMARK SMILES masukan."""
@@ -475,6 +488,8 @@ def ringkas_ligan(proyek, l, pose, rec):
                 l["pose"][i]["rmsd_kristal"] = round(rmsd_simetri(m, kr), 2)
             except ValueError:
                 kr = None
+    if pose and pose[0].flex:
+        rec = gabung_flex(rec, pose[0].flex)
     if terbaik is not None:
         n_berat = terbaik.GetNumHeavyAtoms()
         l["atom_berat"] = n_berat

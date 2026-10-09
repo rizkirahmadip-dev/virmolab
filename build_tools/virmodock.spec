@@ -43,7 +43,9 @@ hidden = collect_submodules("meeko") + collect_submodules("dimorphite_dl") + ["g
 hidden += collect_submodules("pdb2pqr") + collect_submodules("propka") + collect_submodules("admet_ai")
 hidden += collect_submodules("chemprop") + ["rdkit.Chem.Pharm2D.Gobbi_Pharm2D", "rdkit.Chem.Pharm2D.Generate"]
 
-a = Analysis([str(AKAR / "VirmoDock.pyw")], pathex=[str(AKAR)], datas=datas, binaries=binaries, hiddenimports=hidden,
+# dua titik masuk berbagi satu PYZ/_internal: VirmoDock.exe (jendela) + VirmoDock-cli.exe (konsol, virmodock/cli.py)
+a = Analysis([str(AKAR / "VirmoDock.pyw"), str(AKAR / "VirmoDock_cli.py")], pathex=[str(AKAR)], datas=datas,
+             binaries=binaries, hiddenimports=hidden,
              excludes=["openbabel", "tkinter", "IPython", "pytest", "PySide6.Qt3DCore", "PySide6.QtCharts",
                        "PySide6.QtDataVisualization", "PySide6.QtQuick3D", "PySide6.QtSql", "PySide6.QtMultimediaWidgets",
                        "PySide6.QtTest", "PySide6.QtBluetooth", "PySide6.QtNfc", "PySide6.QtSensors",
@@ -73,7 +75,13 @@ def buang(tujuan):
 a.datas = [x for x in a.datas if not buang(x[0])]
 a.binaries = [x for x in a.binaries if not buang(x[0])]
 pyz = PYZ(a.pure)
-exe = EXE(pyz, a.scripts, [], exclude_binaries=True, name="VirmoDock", console=False,
+# a.scripts = hook runtime + kedua skrip; tiap EXE hanya menjalankan skrip miliknya
+skrip_gui = [s for s in a.scripts if s[0] != "VirmoDock_cli"]
+skrip_cli = [s for s in a.scripts if s[0] != "VirmoDock"]
+exe = EXE(pyz, skrip_gui, [], exclude_binaries=True, name="VirmoDock", console=False,
           icon=str(AKAR / "virmodock" / "aset" / "virmodock.ico"), version=str(AKAR / "build" / "versi.txt"),
           upx=False)
-coll = COLLECT(exe, a.binaries, a.datas, name="VirmoDock", upx=False)
+exe_cli = EXE(pyz, skrip_cli, [], exclude_binaries=True, name="VirmoDock-cli", console=True,
+              icon=str(AKAR / "virmodock" / "aset" / "virmodock.ico"), version=str(AKAR / "build" / "versi.txt"),
+              upx=False)
+coll = COLLECT(exe, exe_cli, a.binaries, a.datas, name="VirmoDock", upx=False)

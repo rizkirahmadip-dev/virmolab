@@ -173,6 +173,8 @@ class PanelLangkah(QStackedWidget):
         # 1 Protein
         self.s_protein = _status()
         isi = _kolom(A("rcsb", _tombol("Ambil dari RCSB PDB…", ikon="import", tip="Unduh struktur dengan kode PDB, mis. 1HSG")),
+                     A("alphafold", _tombol("Ambil dari AlphaFold DB…", ikon="import",
+                                            tip="Struktur prediksi lewat kode UniProt atau nama protein/gen")),
                      A("buka", _tombol("Buka berkas…", ikon="open", tip="PDB, CIF, PDBQT dari komputer")),
                      8, self.s_protein, 4,
                      A("reseptor", _tombol("Siapkan reseptor…", True, ikon="rec", tip=

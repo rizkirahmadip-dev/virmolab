@@ -14,10 +14,10 @@ AKAR = Path(__file__).resolve().parents[1]
 OUT = AKAR / "dev" / "uji" / "regresi"
 OUT.mkdir(parents=True, exist_ok=True)
 # butuh internet / sangat lama / membuat proyek docking baru (jalankan terpisah bila perlu)
-LEWATI = {"uji_pubchem", "uji_alur", "uji_responsif", "uji_chembl"}
+LEWATI = {"uji_pubchem", "uji_alur", "uji_responsif", "uji_chembl", "uji_alphafold"}
 LAMA = {"uji_tahap3": 900, "uji_animasi": 600, "uji_laporan": 400, "uji_mesin": 600, "uji_qc_antrean": 600,
         "uji_video": 300, "uji_p2rank": 300, "uji_antrean": 600,
-        "uji_kemiripan": 300, "uji_admet": 300, "uji_wizard_reseptor": 300}
+        "uji_kemiripan": 300, "uji_admet": 300, "uji_wizard_reseptor": 300, "uji_fleksibel": 600, "uji_cli": 400}
 ABAIKAN = re.compile(r"GL_INVALID|gl_utils|^js:|DevTools|MFT name|handler_name|vendor_id|\[h264_mf|\[hevc_mf")
 BURUK = re.compile(r"Traceback|\bGAGAL\b|\bGALAT\b|\bTIMEOUT\b|fatal exception")
 

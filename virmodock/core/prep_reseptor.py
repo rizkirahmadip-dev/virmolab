@@ -52,6 +52,7 @@ class HasilReseptor:
     peringatan: list = field(default_factory=list)
     laporan: str = ""
     protonasi: object = None                        # protonasi.HasilProtonasi bila memakai PROPKA
+    pdb_meeko: str = ""                             # PDB masukan Meeko (setelah protonasi) — dasar residu fleksibel
 
 
 class GalatPrep(Exception):
@@ -175,7 +176,9 @@ def _tebak_elemen(nama):
 _RE_RES = re.compile(r"([A-Za-z0-9]+):(-?\d+)([A-Za-z]?)")
 
 
-def _meeko(pdb, opsi):
+def _meeko(pdb, opsi, fleksibel=None):
+    """PDB -> (PDBQT kaku, residu dibuang, keluaran log[, PDBQT fleksibel, residu fleksibel gagal]).
+    fleksibel: ['A:42', …] -> rantai samping dipisah ke blok BEGIN_RES/END_RES (Vina --flex, AD-GPU --flexres)."""
     from meeko import MoleculePreparation, Polymer, PDBQTWriterLegacy, ResidueChemTemplates
     cfg = {"compute_charges": opsi.muatan == "gasteiger"}
     if opsi.muatan == "gasteiger":
@@ -189,8 +192,23 @@ def _meeko(pdb, opsi):
             warnings.simplefilter("ignore")
             pol = Polymer.from_pdb_string(pdb, templat, mk_prep, allow_bad_res=True)
     dibuang = sorted(pol.get_ignored_monomers().keys())
-    rigid, _flex = PDBQTWriterLegacy.write_from_polymer(pol)
-    return rigid, dibuang, buf.getvalue()
+    if fleksibel is None:
+        rigid, _flex = PDBQTWriterLegacy.write_from_polymer(pol)
+        return rigid, dibuang, buf.getvalue()
+    gagal = []
+    sah = pol.get_valid_monomers()
+    for rid in fleksibel:
+        if rid not in sah:
+            gagal.append(f"{rid} (residu tidak ada/dibuang)")
+            continue
+        try:
+            with redirect_stdout(buf), redirect_stderr(buf):
+                pol.flexibilize_sidechain(rid, mk_prep)
+        except Exception as e:
+            gagal.append(f"{rid} ({str(e).strip().splitlines()[0][:80] if str(e).strip() else type(e).__name__})")
+    rigid, flex = PDBQTWriterLegacy.write_from_polymer(pol)
+    teks_flex = "".join(flex.values()) if isinstance(flex, dict) else (flex or "")
+    return rigid, dibuang, buf.getvalue(), teks_flex, gagal
 
 
 def _openbabel(pdb):
@@ -276,7 +294,7 @@ def siapkan(teks, opsi=None, fmt="pdb", lapor=None):
     pdbqt = "\n".join(baris) + "\n"
     h = HasilReseptor(pdbqt=pdbqt, pdb_bersih=pdb, metode=metode, atom=hitung_atom(pdbqt), residu=n_res - len(dibuang),
                       dibuang=dibuang, logam=[f"{r} {c}{i}" for r, _, _, _, c, i in logam], peringatan=peringatan,
-                      protonasi=hp)
+                      protonasi=hp, pdb_meeko=pdb_meeko if metode.startswith("Meeko") else "")
     jumlah_h = sum(1 for b in baris if b.startswith(("ATOM", "HETATM")) and b[77:].split()[:1] == ["HD"])
     q_total = sum(float(b[70:76]) for b in baris if b.startswith(("ATOM", "HETATM")) and _angka(b[70:76]))
     h.laporan = "\n".join([
@@ -315,6 +333,42 @@ def _angka(s):
         return True
     except ValueError:
         return False
+
+
+# AD-GPU: jumlah atom & torsi ligan + residu fleksibel dibatasi (MAX_NUM_OF_ATOMS 256, MAX_NUM_OF_ROTBONDS 32)
+MAKS_FLEKSIBEL = 8
+
+
+def buat_fleksibel(pdb_meeko, pdbqt_lama, residu, opsi=None):
+    """Bagi reseptor menjadi bagian kaku + residu fleksibel (Meeko). Ion logam dari PDBQT lama dipertahankan.
+    -> (pdbqt_kaku, pdbqt_flex, residu_berhasil, gagal)."""
+    opsi = opsi or OpsiReseptor()
+    if not pdb_meeko:
+        raise GalatPrep("Data preparasi Meeko tidak tersedia. Siapkan ulang reseptor (langkah 1) lalu coba lagi.")
+    residu = [r.strip() for r in residu if r.strip()]
+    if not residu:
+        raise GalatPrep("Pilih minimal satu residu fleksibel.")
+    if len(residu) > MAKS_FLEKSIBEL:
+        raise GalatPrep(f"Maksimal {MAKS_FLEKSIBEL} residu fleksibel (ruang pencarian membesar cepat; "
+                        "praktik umum 2–6 residu kantong).")
+    rigid, _dibuang, _log, flex, gagal = _meeko(pdb_meeko, opsi, fleksibel=residu)
+    if not flex.strip():
+        raise GalatPrep("Tidak ada residu yang bisa dibuat fleksibel: " + "; ".join(gagal))
+    logam = [b for b in pdbqt_lama.splitlines() if b.startswith("HETATM") and b[17:20].strip().upper() in LOGAM]
+    baris = [b for b in rigid.splitlines() if b.strip() and not b.startswith(("END", "TER"))]
+    rigid = "\n".join(baris + logam) + "\n"
+    berhasil = []
+    for b in flex.splitlines():
+        if b.startswith("BEGIN_RES"):
+            s = b.split()
+            if len(s) >= 4:
+                berhasil.append(f"{s[2]}:{s[3]}")
+    return rigid, flex if flex.endswith("\n") else flex + "\n", berhasil, gagal
+
+
+def torsi_flex(flex):
+    """Jumlah ikatan rotasi pada blok residu fleksibel (BRANCH)."""
+    return sum(1 for b in flex.splitlines() if b.startswith("BRANCH"))
 
 
 def pdbqt_ke_pdb(pdbqt):

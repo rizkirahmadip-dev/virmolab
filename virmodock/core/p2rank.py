@@ -25,12 +25,12 @@ def tersedia():
     return bool(_java() and _akar())
 
 
-def perintah(pdb, keluar, thread=None):
+def perintah(pdb, keluar, thread=None, konfigurasi=None):
     akar = _akar()
     cp = os.pathsep.join([str(akar / "bin" / "p2rank.jar"), str(akar / "bin" / "lib" / "*")])
     return [str(_java()), "-Xmx2048m", "-cp", cp, "cz.siret.prank.program.Main", "predict",
             "-f", str(pdb), "-o", str(keluar), "-threads", str(thread or max(1, (os.cpu_count() or 2) // 2)),
-            "-visualizations", "0"]
+            "-visualizations", "0"] + (["-c", konfigurasi] if konfigurasi else [])
 
 
 def baca_prediksi(f):
@@ -50,8 +50,9 @@ def baca_prediksi(f):
     return sorted(out, key=lambda x: x["peringkat"])
 
 
-def prediksi(teks_pdb, folder, thread=None, timeout=600):
-    """Jalankan P2Rank untuk teks PDB protein. Kembalikan daftar kantong."""
+def prediksi(teks_pdb, folder, thread=None, timeout=600, konfigurasi=None):
+    """Jalankan P2Rank untuk teks PDB protein. Kembalikan daftar kantong.
+    konfigurasi='alphafold' untuk model prediksi (AlphaFold/NMR/cryo-EM): tanpa fitur B-factor."""
     folder = Path(folder).resolve()   # P2Rank berjalan dengan cwd = folder P2Rank
     folder.mkdir(parents=True, exist_ok=True)
     pdb = folder / "protein.pdb"
@@ -59,7 +60,7 @@ def prediksi(teks_pdb, folder, thread=None, timeout=600):
                    encoding="utf-8")
     keluar = folder / "p2rank"
     flags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
-    r = subprocess.run(perintah(pdb, keluar, thread), cwd=str(_akar()), capture_output=True, text=True,
+    r = subprocess.run(perintah(pdb, keluar, thread, konfigurasi), cwd=str(_akar()), capture_output=True, text=True,
                        timeout=timeout, creationflags=flags)
     f = keluar / "protein.pdb_predictions.csv"
     if not f.exists():

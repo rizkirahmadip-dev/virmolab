@@ -92,6 +92,48 @@ def uji(lapor=None):
             return "docking kecil berhasil"
     cek("Docking Vina mini", vina_dock)
 
+    def flex_dock():
+        """Tripeptida Gly-Ser-Gly: Ser2 fleksibel (Meeko) -> Vina --flex -> pose ligan + rantai samping terpisah."""
+        from rdkit import Chem
+        from rdkit.Chem import AllChem
+        from . import mesin as M
+        from . import prep_ligan
+        from . import prep_reseptor as R
+        m = Chem.AddHs(Chem.MolFromSequence("GSG"), addCoords=True)
+        AllChem.EmbedMolecule(m, randomSeed=7)
+        AllChem.MMFFOptimizeMolecule(m)
+        h = R.siapkan(Chem.MolToPDBBlock(Chem.RemoveHs(m)), R.OpsiReseptor(protonasi="templat"))
+        kaku, flex, ok, _g = R.buat_fleksibel(h.pdb_meeko, h.pdbqt, ["A:2"])
+        lig = prep_ligan.siapkan_satu("asetat", "CC(=O)O", "smiles", prep_ligan.OpsiLigan(protonasi=False))
+        xyz = [(float(b[30:38]), float(b[38:46]), float(b[46:54])) for b in flex.splitlines() if b.startswith("ATOM")]
+        c = [sum(p[i] for p in xyz) / len(xyz) for i in range(3)]
+        with tempfile.TemporaryDirectory() as d:
+            d = Path(d)
+            for n, t in (("r", kaku), ("f", flex), ("l", lig.pdbqt)):
+                (d / f"{n}.pdbqt").write_text(t)
+            p = M.Parameter(mesin="vina", exhaustiveness=1, num_modes=1, seed=1, cpu=1)
+            kode, out = _jalan(M.perintah_vina(d / "r.pdbqt", d / "l.pdbqt", d / "o.pdbqt",
+                                               M.Kotak(pusat=c, ukuran=[14, 14, 14]), p, flex=d / "f.pdbqt"), 120)
+            pose = M.baca_vina(d / "o.pdbqt") if (d / "o.pdbqt").exists() else []
+            if not pose or not pose[0].flex:
+                raise RuntimeError(out.strip().splitlines()[-1] if out.strip() else f"kode {kode}")
+            return f"Meeko {', '.join(ok)} ({R.torsi_flex(flex)} torsi) + Vina --flex: {', '.join(M.residu_flex(pose[0].flex))}"
+    cek("Residu fleksibel (Meeko + Vina)", flex_dock)
+
+    def cli_uji():
+        import sys
+        if getattr(sys, "frozen", False):
+            exe = paths.FOLDER_APP / "VirmoDock-cli.exe"
+            if not exe.exists():
+                raise RuntimeError("VirmoDock-cli.exe tidak ada di folder aplikasi")
+            kode, out = _jalan([exe, "--help"], 60)
+        else:
+            kode, out = _jalan([sys.executable, "-m", "virmodock.cli", "--help"], 60)
+        if kode != 0 or "dock" not in out:
+            raise RuntimeError(out.strip().splitlines()[-1] if out.strip() else f"kode {kode}")
+        return "VirmoDock-cli: info, uji, reseptor, ligan, kantong, alphafold, dock"
+    cek("Baris perintah (VirmoDock-cli)", cli_uji)
+
     def gpu():
         from . import env
         e = env.deteksi({})

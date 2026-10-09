@@ -1,7 +1,9 @@
 """Ekstrak teks UI (literal & f-string) dari kode untuk kamus terjemahan virmodock/i18n/en.json.
 
   PYTHONIOENCODING=utf-8 PYTHONPATH=. .venv/Scripts/python.exe dev/ekstrak_teks.py
-Keluaran: dev/i18n_teks.json {"literal": [...], "pola": [...]} — hanya teks yang BELUM ada di kamus.
+Keluaran: dev/i18n_teks_baru.json {"literal": [...], "pola": [...]} — hanya teks yang BELUM ada di kamus.
+Terjemahan teks baru ditulis ke dev/i18n_tambahan.json (BUKAN i18n_teks.json: berkas itu dipasangkan per indeks
+dengan i18n_b*/p*.json oleh buat_kamus.py — menimpanya membuat terjemahan salah pasang).
 f-string -> pola dengan {0}, {1}, … untuk bagian dinamis.
 """
 import ast
@@ -12,7 +14,7 @@ from pathlib import Path
 BERKAS = sorted(Path("virmodock/ui").glob("*.py")) + [Path(f"virmodock/core/{n}.py") for n in (
     "statistik", "analisis", "kemiripan", "admet", "protonasi", "periksa_protein", "sifat", "grafik", "grafik_uji",
     "uji", "pustaka", "chembl", "env", "qc", "konsensus", "ujimandiri", "mesin", "prep_reseptor", "prep_ligan",
-    "molekul", "laporan", "ekspor", "p2rank", "pindah", "proyek", "antrean")]
+    "molekul", "laporan", "ekspor", "p2rank", "pindah", "proyek", "antrean", "alphafold")]
 LEWATI_FUNGSI = {"value", "setValue", "contains", "remove", "findData", "get", "setdefault", "pop", "startswith",
                  "endswith", "split", "replace", "join", "strip", "rstrip", "lstrip", "objectName", "setObjectName",
                  "js", "runJavaScript", "setProperty", "property", "getattr", "hasattr", "setStyleSheet", "format",
@@ -93,7 +95,7 @@ def main():
             if kunci_teks(s) and bukan_kode(s) and s not in kamus and len(s) < 900:
                 lit.setdefault(s, f.name)
     keluar = {"literal": sorted(lit, key=lambda x: (lit[x], x)), "pola": sorted(pol, key=lambda x: (pol[x], x))}
-    Path("dev/i18n_teks.json").write_text(json.dumps(keluar, ensure_ascii=False, indent=0), encoding="utf-8")
+    Path("dev/i18n_teks_baru.json").write_text(json.dumps(keluar, ensure_ascii=False, indent=0), encoding="utf-8")
     print(len(keluar["literal"]), "literal,", len(keluar["pola"]), "pola;",
           sum(map(len, keluar["literal"])) + sum(map(len, keluar["pola"])), "karakter")
 

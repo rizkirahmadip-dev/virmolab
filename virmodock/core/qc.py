@@ -154,7 +154,8 @@ _pek_kunci = threading.Lock()
 def _perintah_pekerja(alamat, kunci_hex):
     import sys
     if getattr(sys, "frozen", False):
-        return [sys.executable, "--qc-pekerja", alamat, kunci_hex]
+        from . import paths
+        return [str(paths.EXE_UTAMA), "--qc-pekerja", alamat, kunci_hex]
     return [sys.executable, "-m", "virmodock", "--qc-pekerja", alamat, kunci_hex]
 
 
@@ -251,6 +252,12 @@ def periksa_ligan(proyek, j, l, pose):
         return None
     try:
         mol = pose_mol(proyek.p(l["pdbqt"]).read_text(), pose[0].pdbqt)
+        if pose[0].flex:   # residu fleksibel: protein dengan rantai samping pada posisi pose
+            from . import mesin as M
+            from . import paths
+            f = paths.CACHE / f"qc_flex_{j['id']}_{l['id']}.pdb"
+            f.write_text(M.terapkan_flex(prot.read_text(), pose[0].flex), encoding="utf-8")
+            prot = f
         return periksa_proses(mol, prot)
     except Exception as e:
         return {"v": VERSI, "galat": (str(e).strip().splitlines() or [type(e).__name__])[0][:200]}

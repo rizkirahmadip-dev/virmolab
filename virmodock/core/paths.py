@@ -12,6 +12,8 @@ BEKU = getattr(sys, "frozen", False)
 # akar paket (saat dibekukan PyInstaller: folder _internal / _MEIPASS)
 AKAR = Path(sys._MEIPASS) if BEKU else Path(__file__).resolve().parents[2]
 FOLDER_APP = Path(sys.executable).resolve().parent if BEKU else AKAR
+# exe GUI (proses pekerja PoseBusters/ADMET selalu lewat VirmoDock.exe, juga bila dipanggil dari VirmoDock-cli.exe)
+EXE_UTAMA = FOLDER_APP / "VirmoDock.exe" if BEKU else Path(sys.executable)
 PAKET = AKAR / "virmodock" if (AKAR / "virmodock").exists() else Path(__file__).resolve().parents[1]
 BIN = AKAR / "bin" if (AKAR / "bin").exists() else AKAR / "vendor" / "bin"
 VIEWER = PAKET / "viewer"

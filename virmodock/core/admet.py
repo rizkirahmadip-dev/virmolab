@@ -92,7 +92,8 @@ def jalankan_cli(masuk, keluar):
 # ------------------------------------------------------------------ sisi aplikasi
 def _perintah(masuk, keluar):
     if getattr(sys, "frozen", False):
-        return [sys.executable, "--admet", str(masuk), str(keluar)]
+        from . import paths
+        return [str(paths.EXE_UTAMA), "--admet", str(masuk), str(keluar)]
     return [sys.executable, "-m", "virmodock", "--admet", str(masuk), str(keluar)]
 
 

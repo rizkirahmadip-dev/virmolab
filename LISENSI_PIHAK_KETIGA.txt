@@ -90,4 +90,10 @@ Obat disetujui (virmodock/aset/obat_disetujui.tsv.gz) diturunkan dari ChEMBL (ma
   berlisensi CC BY-SA 3.0.
 ChEMBL (API), COCONUT 2.0 (CC0, diunduh pengguna), ZINC22 (situs) diakses atas tindakan pengguna.
 
+Ditambahkan di VirmoDock 0.9.3 (data, tidak dibundel — diunduh atas tindakan pengguna)
+-----------------------------------------------------------------------------
+AlphaFold DB (EMBL-EBI & Google DeepMind)   CC BY 4.0   https://alphafold.ebi.ac.uk
+  Kutip: Jumper dkk. 2021, Nature 596:583; Varadi dkk. 2024, Nucleic Acids Res 52:D368.
+UniProt (pencarian aksesi)                  CC BY 4.0   https://www.uniprot.org
+
 Catatan: ini ringkasan teknis, bukan nasihat hukum.

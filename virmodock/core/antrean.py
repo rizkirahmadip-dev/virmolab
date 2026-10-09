@@ -27,9 +27,18 @@ def job_baru(proyek, ligan, mesin, perangkat, parameter, kotak, nama=None):
             "perangkat": perangkat, "parameter": dict(parameter), "kotak": dict(kotak), "status": "menunggu",
             "dibuat": datetime.now().isoformat(timespec="seconds"), "mulai": None, "selesai": None, "catatan": [],
             "reseptor": proyek.reseptor.get("pdbqt") if proyek.reseptor else None,
+            **_fleksibel(proyek),
             "ligan": [{"id": l["id"], "nama": l["nama"], "pdbqt": l["pdbqt"], "status": "menunggu", "progres": 0,
                        "keluaran": None, "energi": None, "ki": "", "rmsd_ref": None, "n_pose": 0, "pose": [],
                        "pesan": "", "detik": None} for l in ligan]}
+
+
+def _fleksibel(proyek):
+    """Reseptor dengan residu fleksibel aktif -> job memakai PDBQT kaku + berkas flex."""
+    fx = (proyek.reseptor or {}).get("fleksibel") or {}
+    if not (fx.get("aktif") and fx.get("kaku") and fx.get("flex")):
+        return {}
+    return {"reseptor": fx["kaku"], "flex": fx["flex"], "fleksibel": list(fx.get("residu") or [])}
 
 
 class Pelaksana(QObject):
@@ -236,8 +245,11 @@ class Pelaksana(QObject):
             f = pr.p(l["pdbqt"])
             if f.exists():
                 tipe |= M.tipe_atom(f.read_text())
+        if j.get("flex") and pr.p(j["flex"]).exists():     # peta untuk atom residu fleksibel juga
+            tipe |= M.tipe_atom(pr.p(j["flex"]).read_text())
         kotak = M.Kotak(**j["kotak"])
-        gpf = M.tulis_gpf(rec, tipe, kotak)
+        # komentar hash reseptor: peta lama tidak dipakai ulang bila reseptor berubah (mis. kaku <-> fleksibel)
+        gpf = M.tulis_gpf(rec, tipe, kotak) + f"# reseptor {M.hash_teks(rec)}\n"
         g = pr.p("grid")
         g.mkdir(exist_ok=True)
         if M.grid_siap(g, gpf):
@@ -265,25 +277,42 @@ class Pelaksana(QObject):
             self._ubah(j)
             QTimer.singleShot(0, self._berikut)
             return
+        flex = pr.p(j["flex"]) if j.get("flex") else None
+        if flex is not None and not flex.exists():
+            l["status"], l["pesan"] = "gagal", "berkas residu fleksibel tidak ditemukan; atur ulang Residu fleksibel"
+            self._ubah(j)
+            QTimer.singleShot(0, self._berikut)
+            return
+        if flex is not None and j["mesin"] == "ad4":
+            l["status"] = "dilewati"
+            l["pesan"] = "AutoDock4 di VirmoDock belum mendukung residu fleksibel; pakai AutoDock-GPU atau Vina"
+            self._ubah(j)
+            QTimer.singleShot(0, self._berikut)
+            return
         if j["mesin"] == "adgpu":
             teks = lig.read_text()
             from .prep_ligan import MAKS_ATOM_GPU, MAKS_TORSI_GPU
             import re
             tors = int((re.search(r"TORSDOF\s+(\d+)", teks) or [0, 0])[1]) if "TORSDOF" in teks else 0
             n_atom = sum(1 for b in teks.splitlines() if b.startswith(("ATOM", "HETATM")))
+            if flex is not None:     # batas AD-GPU berlaku untuk ligan + residu fleksibel
+                tf = flex.read_text()
+                tors += sum(1 for b in tf.splitlines() if b.startswith("BRANCH"))
+                n_atom += sum(1 for b in tf.splitlines() if b.startswith(("ATOM", "HETATM")))
             if tors > MAKS_TORSI_GPU or n_atom > MAKS_ATOM_GPU:
                 l["status"] = "dilewati"
-                l["pesan"] = f"melebihi batas AutoDock-GPU ({tors} torsi, {n_atom} atom); jalankan dengan Vina"
+                l["pesan"] = (f"melebihi batas AutoDock-GPU ({tors} torsi, {n_atom} atom"
+                              + (" termasuk residu fleksibel" if flex is not None else "") + "); jalankan dengan Vina")
                 self._ubah(j)
                 QTimer.singleShot(0, self._berikut)
                 return
             basis = folder / l["id"]
-            cmd = M.perintah_adgpu(pr.p("grid", "reseptor.maps.fld"), lig, basis, p)
+            cmd = M.perintah_adgpu(pr.p("grid", "reseptor.maps.fld"), lig, basis, p, flex=flex)
             l["keluaran"] = pr.rel(folder / f"{l['id']}.dlg")
             cwd = str(folder)
         elif j["mesin"] == "vina":
             out = folder / f"{l['id']}_out.pdbqt"
-            cmd = M.perintah_vina(pr.p(j["reseptor"]), lig, out, M.Kotak(**j["kotak"]), p)
+            cmd = M.perintah_vina(pr.p(j["reseptor"]), lig, out, M.Kotak(**j["kotak"]), p, flex=flex)
             l["keluaran"] = pr.rel(out)
             cwd = str(folder)
         else:

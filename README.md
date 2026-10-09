@@ -6,14 +6,16 @@ dan ekspor siap publikasi dalam satu jendela berbahasa Indonesia.
 
 - **Mesin**: AutoDock-GPU (OpenCL, native Windows — NVIDIA/AMD/Intel, tanpa WSL), AutoDock Vina 1.2.7,
   AutoDock 4.2.6. Fallback otomatis ke Vina bila GPU/OpenCL tidak tersedia.
-- **Preparasi**: reseptor (gemmi, Open Babel), ligan (RDKit + Meeko), unduh langsung dari RCSB PDB & PubChem.
+- **Preparasi**: reseptor (gemmi, Meeko, PROPKA/PDB2PQR, residu fleksibel), ligan (RDKit + Meeko), unduh langsung
+  dari RCSB PDB, AlphaFold DB (pLDDT), PubChem, ChEMBL, COCONUT.
 - **Antrean job**: banyak ligan, progres & ETA, jeda/lanjut, dilanjutkan setelah aplikasi ditutup.
 - **Analisis**: ikatan H, hidrofobik, π–π, π–kation, jembatan garam, halogen, logam; tampilan 3D (3Dmol.js)
   dan diagram 2D; validasi redocking (RMSD); bandingkan 2–4 ligan; peta interaksi.
 - **Ekspor**: gambar 3D/2D ber-DPI (PNG/TIFF/SVG/PDF), kompleks PDB, SDF, CSV, XLSX, laporan PDF.
 - **Distribusi**: installer per-pengguna tanpa admin, versi portable, pindah laptop (`.vmdbackup`).
+- **Baris perintah**: `VirmoDock-cli.exe` untuk docking batch dan skrip (lihat di bawah).
 
-Status: **0.9.1 pra-rilis** (lihat CHANGELOG.md) — menunggu uji relawan di GPU AMD/Intel dan komputer tanpa GPU.
+Status: **0.9.3 pra-rilis** (lihat CHANGELOG.md) — menunggu uji relawan di GPU AMD/Intel dan komputer tanpa GPU.
 
 ## Unduh
 
@@ -21,6 +23,22 @@ Installer dan versi portable tersedia di halaman *Releases*. Cek integritas deng
 Setelah dipasang, jalankan **Tools › Uji mandiri komponen** untuk memastikan semua mesin berfungsi.
 
 Panduan lengkap: folder [`docs/`](docs/) (juga Help › Panduan, F1) dan tutorial PDF di menu Help.
+
+## Baris perintah
+
+`VirmoDock-cli.exe` ada di folder instalasi (dari kode sumber: `python -m virmodock.cli`). Contoh:
+
+```bat
+VirmoDock-cli dock -r 1HSG -l kandidat.smi --acuan auto -o hasil_1hsg
+VirmoDock-cli dock -r AF-P00918 -l ligan\ --kantong 1 --mesin vina --exhaustiveness 32 -o hasil_ca2
+VirmoDock-cli reseptor 1HSG -o rec.pdbqt --protonasi propka --flex A:25,B:25
+VirmoDock-cli kantong AF-P00918
+```
+
+`dock` menyiapkan reseptor (berkas PDB/CIF, kode PDB, `AF-<UniProt>`, atau PDBQT siap) dan ligan
+(SDF/MOL2/PDB/SMI/PDBQT, folder, atau SMILES) bila perlu, menentukan grid box (`--pusat`, `--acuan`
+berkas/`auto`, atau `--kantong N` P2Rank), lalu menulis pose, `ringkasan.csv`, `metode.txt`, dan `log.txt`.
+`VirmoDock-cli <perintah> -h` menampilkan semua opsi.
 
 ## Menjalankan dari kode sumber
 

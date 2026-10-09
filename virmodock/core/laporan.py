@@ -107,6 +107,17 @@ def html(proyek, baris, info, interaksi_terbaik=None, ada_gambar3d=False, ada_di
                  ("Ion logam dipertahankan", ", ".join(rec.get("logam") or []) or "–"),
                  ("Residu tidak lengkap dibuang", ", ".join(rec.get("dibuang") or []) or "–")):
         o.append(f"<tr><th>{k}</th><td>{_f(v)}</td></tr>")
+    af = rec.get("alphafold") or {}
+    if af:
+        o.append(f"<tr><th>Model prediksi</th><td>AlphaFold DB {escape(str(af.get('entri')))} v{escape(str(af.get('versi')))}"
+                 f" — UniProt {escape(str(af.get('aksesi')))} ({escape(af.get('nama', ''))}, "
+                 f"{escape(af.get('organisme', ''))}); pLDDT rerata {_f(af.get('plddt_rerata'))}"
+                 + (f"; residu pLDDT &lt; {_n(af['ambang'], 0)} dipangkas: {escape(af.get('dibuang', ''))}"
+                    if af.get("n_dibuang") else "") + "</td></tr>")
+    jobs_flex = sorted({", ".join(j.get("fleksibel") or []) for j in jobs if j.get("fleksibel")})
+    if jobs_flex:
+        o.append(f"<tr><th>Residu fleksibel</th><td>{escape(' | '.join(jobs_flex))} (rantai samping dapat "
+                 "berotasi selama docking; Meeko)</td></tr>")
     o.append("</table>")
     op = rec.get("opsi") or {}
     o.append(f"<p class='mut'>Air {'dihapus' if op.get('hapus_air', True) else 'dipertahankan'}; ligan/aditif "

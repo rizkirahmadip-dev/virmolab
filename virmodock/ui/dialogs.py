@@ -1,8 +1,14 @@
 """Dialog: ambil dari database, wizard pertama kali, pengaturan."""
 from PySide6.QtCore import Qt, QUrl
 from PySide6.QtGui import QDesktopServices
-from PySide6.QtWidgets import (QDialog, QDialogButtonBox, QFileDialog, QFormLayout, QHBoxLayout, QLabel, QLineEdit,
+from PySide6.QtWidgets import (QCheckBox, QComboBox, QDialog, QDialogButtonBox, QDoubleSpinBox, QFileDialog,
+                               QFormLayout, QHBoxLayout, QLabel, QLineEdit, QListWidget, QListWidgetItem,
                                QPlainTextEdit, QPushButton, QTabWidget, QVBoxLayout, QWidget, QWizard, QWizardPage)
+
+ORGANISME = [("Semua organisme", None), ("Homo sapiens (manusia)", 9606), ("Mus musculus (mencit)", 10090),
+             ("Rattus norvegicus (tikus)", 10116), ("SARS-CoV-2", 2697049), ("Escherichia coli K-12", 83333),
+             ("Mycobacterium tuberculosis H37Rv", 83332), ("Plasmodium falciparum 3D7", 36329),
+             ("Staphylococcus aureus NCTC 8325", 93061), ("Candida albicans SC5314", 237561)]
 
 
 class DialogAmbil(QDialog):
@@ -39,6 +45,7 @@ class DialogAmbil(QDialog):
         self.smiles.setPlaceholderText("CC(=O)Oc1ccccc1C(=O)O aspirin")
         v3.addWidget(self.smiles)
         self.tab.addTab(w3, "SMILES")
+        self.tab.addTab(self._tab_alphafold(), "AlphaFold DB")
         self.tab.setCurrentIndex(tab)
         lay.addWidget(self.tab)
         bb = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
@@ -48,6 +55,87 @@ class DialogAmbil(QDialog):
         bb.accepted.connect(self.accept)
         bb.rejected.connect(self.reject)
         lay.addWidget(bb)
+
+    def _tab_alphafold(self):
+        w = QWidget()
+        v = QVBoxLayout(w)
+        v.addWidget(self._ket("Struktur prediksi AlphaFold untuk protein yang belum punya struktur kristal. "
+                              "Ketik kode UniProt (mis. P00918) atau nama protein/gen (mis. ACE2), lalu Cari."))
+        h = QHBoxLayout()
+        self.af_kueri = QLineEdit()
+        self.af_kueri.setPlaceholderText("P00918, ACE2, carbonic anhydrase 2")
+        self.af_org = QComboBox()
+        for t, tx in ORGANISME:
+            self.af_org.addItem(t, tx)
+        self.af_org.setCurrentIndex(1)
+        b = QPushButton("Cari")
+        b.clicked.connect(self._af_cari)
+        h.addWidget(self.af_kueri, 1)
+        h.addWidget(self.af_org)
+        h.addWidget(b)
+        v.addLayout(h)
+        self.af_daftar = QListWidget()
+        self.af_daftar.setMinimumHeight(150)
+        self.af_daftar.itemDoubleClicked.connect(lambda *_: self.accept())
+        v.addWidget(self.af_daftar)
+        self.af_status = self._ket("")
+        v.addWidget(self.af_status)
+        h2 = QHBoxLayout()
+        self.af_pangkas = QCheckBox("Pangkas residu pLDDT <")
+        self.af_pangkas.setChecked(True)
+        self.af_ambang = QDoubleSpinBox()
+        self.af_ambang.setRange(30, 90)
+        self.af_ambang.setValue(50)
+        self.af_ambang.setDecimals(0)
+        self.af_ujung = QComboBox()
+        self.af_ujung.addItem("hanya di ujung N/C", True)
+        self.af_ujung.addItem("di mana saja", False)
+        self.af_pangkas.toggled.connect(self.af_ambang.setEnabled)
+        self.af_pangkas.toggled.connect(self.af_ujung.setEnabled)
+        h2.addWidget(self.af_pangkas)
+        h2.addWidget(self.af_ambang)
+        h2.addWidget(self.af_ujung)
+        h2.addStretch(1)
+        v.addLayout(h2)
+        v.addWidget(self._ket("Ujung N/C yang tak beraturan (pLDDT rendah) bisa menutupi kantong dan mengganggu "
+                              "deteksi kantong. Protein diwarnai menurut pLDDT: biru tua > 90, biru muda 70–90, "
+                              "kuning 50–70, jingga < 50. Lisensi data CC BY 4.0 — kutip Jumper dkk. 2021 dan "
+                              "Varadi dkk. 2024."))
+        return w
+
+    def accept(self):
+        # tab AlphaFold: Enter di kolom cari / Impor tanpa pilihan = jalankan pencarian dulu
+        if self.tab.currentIndex() == 3:
+            from ..core import alphafold
+            it = self.af_daftar.currentItem()
+            if self.af_kueri.hasFocus() or not (it or alphafold.aksesi_sah(self.af_kueri.text())):
+                self._af_cari()
+                return
+        super().accept()
+
+    def _af_cari(self):
+        from ..core import alphafold
+        from . import kerja
+        q = self.af_kueri.text().strip()
+        if not q:
+            return
+        self.af_daftar.clear()
+        self.af_status.setText("Mencari di UniProt…")
+        org = None if alphafold.aksesi_sah(q) else self.af_org.currentData()
+
+        def selesai(hasil):
+            self.af_daftar.clear()
+            for r in hasil:
+                it = QListWidgetItem(f"{r['aksesi']}  ·  {r['nama'] or '–'}" + (f"  ({r['gen']})" if r['gen'] else "")
+                                     + f"  ·  {r['organisme']}" + (f"  ·  {r['panjang']} aa" if r['panjang'] else ""))
+                it.setData(Qt.UserRole, r["aksesi"])
+                self.af_daftar.addItem(it)
+            if hasil:
+                self.af_daftar.setCurrentRow(0)
+            self.af_status.setText(f"{len(hasil)} hasil. Pilih satu lalu Impor (atau klik dua kali)." if hasil else
+                                   "Tidak ditemukan. Coba nama lain, kode UniProt, atau 'Semua organisme'.")
+        kerja.jalankan(lambda lapor: alphafold.cari(q, org), selesai=selesai,
+                       galat=lambda g: self.af_status.setText("Pencarian gagal: " + g.splitlines()[0]))
 
     def _ket(self, t):
         l = QLabel(t)
@@ -59,6 +147,14 @@ class DialogAmbil(QDialog):
         i = self.tab.currentIndex()
         if i == 0:
             return ("rcsb", [self.pdbid.text().strip()]) if self.pdbid.text().strip() else None
+        if i == 3:
+            it = self.af_daftar.currentItem()
+            aksesi = it.data(Qt.UserRole) if it else self.af_kueri.text().strip().upper()
+            from ..core import alphafold
+            if not alphafold.aksesi_sah(aksesi or ""):
+                return None
+            return ("alphafold", [aksesi], {"pangkas_aktif": self.af_pangkas.isChecked(),
+                                            "ambang": self.af_ambang.value(), "hanya_ujung": self.af_ujung.currentData()})
         teks = (self.pubchem if i == 1 else self.smiles).toPlainText()
         baris = [b.strip() for b in teks.splitlines() if b.strip() and not b.startswith("#")]
         return (("pubchem" if i == 1 else "smiles"), baris) if baris else None
