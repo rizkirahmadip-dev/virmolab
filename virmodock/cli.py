@@ -10,11 +10,13 @@ Perintah:
   kantong     deteksi kantong P2Rank
   alphafold   unduh model AlphaFold DB (PDB) dari kode UniProt
   dock        satu perintah: (siapkan reseptor & ligan bila perlu) -> grid box -> docking -> ringkasan.csv
+  mmgbsa      MM/GBSA pose docking (OpenMM; minimisasi, atau --md untuk MD + MM/GBSA rata-rata)
 
 Contoh:
   VirmoDock-cli dock -r 1HSG -l kandidat.smi --acuan auto -o hasil_1hsg
   VirmoDock-cli dock -r reseptor.pdbqt -l ligan/ --pusat 13.07 22.47 5.56 --ukuran 22 22 22 --mesin vina
   VirmoDock-cli reseptor 1HSG -o rec.pdbqt --protonasi propka --flex A:25,B:25 --keluar-flex flex.pdbqt
+  VirmoDock-cli mmgbsa -r hasil_1hsg -o mmgbsa_1hsg --md --ns 2
 """
 import argparse
 import csv
@@ -115,6 +117,8 @@ def _siapkan_reseptor(a, folder=None):
     if folder:
         Path(folder, "reseptor_laporan.txt").write_text(h.laporan, encoding="utf-8")
         Path(folder, "reseptor_bersih.pdb").write_text(h.pdb_bersih, encoding="utf-8")
+        if h.pdb_meeko:      # reseptor ber-H dengan keadaan protonasi docking (dipakai MD/MM-GBSA)
+            Path(folder, "reseptor_meeko.pdb").write_text(h.pdb_meeko, encoding="utf-8")
     _cetak(f"  {h.atom} atom, {h.residu} residu · {h.metode}")
     return rigid, flex, info, objs
 
@@ -474,6 +478,79 @@ def _tulis_metode(out, a, rec, kotak, sumber_kotak, p, mesin, n_lig, flex):
     (out / "metode.txt").write_text("\n".join(teks) + "\n", encoding="utf-8")
 
 
+# ------------------------------------------------------------------ MM/GBSA & MD
+def cmd_mmgbsa(a):
+    from .core import md as MD
+    if not MD.tersedia():
+        _galat("Modul MD (OpenMM/OpenFF) tidak terpasang.")
+    out = Path(a.keluar)
+    if out.exists() and any(out.iterdir()) and not a.timpa:
+        _galat(f"Folder keluaran {out} tidak kosong. Pakai folder lain atau --timpa.")
+    out.mkdir(parents=True, exist_ok=True)
+    r = Path(a.reseptor)
+    if r.is_dir():        # folder hasil `dock`
+        pdb = next((r / f for f in ("reseptor_meeko.pdb", "reseptor_bersih.pdb") if (r / f).exists()), None)
+        pdbqt = r / "reseptor.pdbqt"
+        if pdb is None or not pdbqt.exists():
+            _galat(f"{r} bukan folder hasil `dock` (reseptor_bersih.pdb / reseptor.pdbqt tidak ada).")
+        sdf = [Path(x) for x in a.ligan] if a.ligan else sorted((r / "pose").glob("*_terbaik.sdf"))
+        energi = {}
+        f_csv = r / "ringkasan.csv"
+        if f_csv.exists():
+            for b in csv.DictReader(open(f_csv, encoding="utf-8-sig")):
+                if b.get("dG_kcal_mol"):
+                    energi[Path(b.get("berkas_pose", "")).stem.replace("_out", "")] = float(b["dG_kcal_mol"])
+    else:
+        if not a.ligan:
+            _galat("Berikan pose ligan (-l berkas SDF ber-H, mis. pose/*_terbaik.sdf hasil `dock`).")
+        a.flex = None
+        _rigid, _flex, _info, _objs = _siapkan_reseptor(a, out)
+        pdb = out / ("reseptor_meeko.pdb" if (out / "reseptor_meeko.pdb").exists() else "reseptor_bersih.pdb")
+        pdbqt = out / "reseptor.pdbqt"
+        pdbqt.write_text(_rigid, encoding="utf-8")
+        sdf, energi = [Path(x) for x in a.ligan], {}
+    berkas = []
+    for s in sdf:
+        berkas += sorted(s.glob("*.sdf")) if s.is_dir() else [s]
+    if not berkas:
+        _galat("Tidak ada pose SDF.")
+    ligan = [{"nama": f.stem.replace("_terbaik", ""), "lid": f.stem, "job": "cli", "peringkat": 1,
+              "energi_docking": energi.get(f.stem.replace("_terbaik", "")), "sdf": str(f.resolve())} for f in berkas]
+    opsi = {"pelarut": a.pelarut, "ns": a.ns, "interval_ps": a.interval, "frame_mmgbsa": a.frame,
+            "platform": a.perangkat, "kekang": a.kekang}
+    tugas = {"mode": "md" if a.md else "mmgbsa", "folder": str(out.resolve()), "ligan": ligan, "opsi": opsi,
+             "reseptor": {"pdb": str(Path(pdb).resolve()), "pdbqt": str(Path(pdbqt).resolve())}}
+    f_tugas = out / "tugas.json"
+    f_tugas.write_text(json.dumps(tugas, ensure_ascii=False, indent=1), encoding="utf-8")
+    _cetak(f"{'MD ' + a.pelarut + f' {a.ns} ns + ' if a.md else ''}MM/GBSA untuk {len(ligan)} pose…")
+    kode = MD.jalankan_tugas(f_tugas)
+    h = json.loads((out / "hasil.json").read_text(encoding="utf-8"))
+    baris = []
+    for x in h["ligan"]:
+        mn, m = x.get("mmgbsa_min") or {}, x.get("mmgbsa") or {}
+        tr = x.get("trajektori") or {}
+        rm = tr.get("rmsd_ligan") or []
+        baris.append({"ligan": x["nama"], "status": "selesai" if x.get("selesai") else "gagal",
+                      "dG_docking": x.get("energi_docking") if x.get("energi_docking") is not None else "",
+                      "mmgbsa_minimisasi": f"{mn['dG']:.2f}" if mn else "",
+                      "mmgbsa_md": f"{m['dG']:.2f}" if m else "", "sd_md": f"{m['sd']:.2f}" if m else "",
+                      "vdw": f"{(m or mn).get('vdw', 0):.2f}" if (m or mn) else "",
+                      "elek": f"{(m or mn).get('elek', 0):.2f}" if (m or mn) else "",
+                      "gb": f"{(m or mn).get('gb', 0):.2f}" if (m or mn) else "",
+                      "sa": f"{(m or mn).get('sa', 0):.2f}" if (m or mn) else "",
+                      "rmsd_ligan_rerata": f"{sum(rm) / len(rm):.2f}" if rm else "", "pesan": x.get("galat", "")})
+    with open(out / "mmgbsa.csv", "w", newline="", encoding="utf-8-sig") as fh:
+        w = csv.DictWriter(fh, fieldnames=list(baris[0]))
+        w.writeheader()
+        w.writerows(baris)
+    for b in baris:
+        _cetak(f"  {b['ligan']}: docking {b['dG_docking']} · MM/GBSA min {b['mmgbsa_minimisasi']}"
+               + (f" · MD {b['mmgbsa_md']} ± {b['sd_md']}" if b["mmgbsa_md"] else "")
+               + (f" · GAGAL {b['pesan']}" if b["pesan"] else ""))
+    _cetak(f"Hasil: {out / 'mmgbsa.csv'} (rincian & trajektori di subfolder; hasil.json)")
+    return 0 if kode == 0 else KODE_GAGAL
+
+
 # ------------------------------------------------------------------ info / uji
 def cmd_info(a):
     from . import __version__
@@ -561,6 +638,23 @@ def parser():
     s.add_argument("-o", "--keluar", help="berkas PDB keluaran")
     s.add_argument("--ambang", type=float, default=50.0, help="pangkas ujung N/C pLDDT < ambang (0 = tidak)")
     s.set_defaults(fn=cmd_alphafold)
+
+    s = sub.add_parser("mmgbsa", help="MM/GBSA (minimisasi) atau MD + MM/GBSA pose docking (OpenMM)")
+    s.add_argument("-r", "--reseptor", required=True,
+                   help="folder hasil `dock`, atau berkas PDB/CIF / kode PDB / AF-<UniProt> (disiapkan otomatis)")
+    s.add_argument("-l", "--ligan", nargs="*", help="pose SDF ber-H atau folder (bawaan: pose/*_terbaik.sdf folder dock)")
+    s.add_argument("-o", "--keluar", required=True, help="folder hasil")
+    s.add_argument("--timpa", action="store_true", help="izinkan folder keluaran yang tidak kosong")
+    s.add_argument("--md", action="store_true", help="jalankan MD lalu MM/GBSA rata-rata (bawaan: minimisasi saja)")
+    s.add_argument("--pelarut", choices=("implisit", "eksplisit"), default="implisit",
+                   help="implisit = OBC2 (cepat); eksplisit = air TIP3P + PME (butuh GPU)")
+    s.add_argument("--ns", type=float, default=1.0, help="lama MD produksi (ns)")
+    s.add_argument("--interval", type=float, default=10.0, help="simpan frame tiap … ps")
+    s.add_argument("--frame", type=int, default=25, help="jumlah frame MM/GBSA")
+    s.add_argument("--perangkat", choices=("auto", "CUDA", "OpenCL", "CPU"), default="auto")
+    s.add_argument("--kekang", type=float, default=5.0, help="kekang atom berat protein saat minimisasi (kkal/mol/Å²)")
+    _opsi_reseptor_arg(s, wajib=False)
+    s.set_defaults(fn=cmd_mmgbsa)
 
     s = sub.add_parser("dock", help="docking satu perintah -> ringkasan.csv")
     s.add_argument("-r", "--reseptor", required=True,

@@ -6,7 +6,8 @@ from datetime import datetime
 KOLOM_HASIL = [("peringkat", "Peringkat"), ("ligan", "Ligan"), ("energi", "ΔG (kcal/mol)"), ("ki", "Ki perkiraan"),
                ("le", "LE (kcal/mol/atom berat)"), ("klaster", "Klaster (n)"), ("rmsd_kristal", "RMSD kristal (Å)"),
                ("rmsd", "RMSD ref / l.b. (Å)"), ("ifp_sim", "Kemiripan IFP vs kristal (Tanimoto)"),
-               ("posebusters", "PoseBusters"),
+               ("mmgbsa", "MM/GBSA ΔG (kcal/mol)"), ("mmgbsa_sd", "MM/GBSA SD (kcal/mol)"),
+               ("mmgbsa_metode", "MM/GBSA metode"), ("posebusters", "PoseBusters"),
                ("posebusters_gagal", "PoseBusters: uji gagal"), ("hbond", "Ikatan H"), ("hidrofobik", "Hidrofobik"), ("pi", "π–π"),
                ("pikation", "π–kation"), ("garam", "Jembatan garam"), ("halogen", "Halogen"), ("logam", "Logam"),
                ("n_pose", "Jumlah pose"), ("mesin", "Mesin"), ("job", "Job"), ("detik", "Waktu (s)"),
@@ -34,7 +35,9 @@ def baris_hasil(proyek, jobs=None):
                           "n_pose": l.get("n_pose"), "mesin": M.MESIN.get(j["mesin"], j["mesin"]), "job": j["id"],
                           "detik": l.get("detik"), "smiles": lig.get("smiles", ""), "residu": l.get("residu") or {}, "ifp": l.get("ifp") or [],
                           "pose": l.get("pose") or [], "qc": l.get("qc"), "posebusters": qc.teks_sel(l.get("qc")),
-                          "posebusters_gagal": ", ".join((l.get("qc") or {}).get("gagal") or [])})
+                          "posebusters_gagal": ", ".join((l.get("qc") or {}).get("gagal") or []),
+                          "mmgbsa": (l.get("mmgbsa") or {}).get("dG"), "mmgbsa_sd": (l.get("mmgbsa") or {}).get("sd"),
+                          "mmgbsa_metode": (l.get("mmgbsa") or {}).get("metode", "")})
     # acuan IFP: pose kristal ligan asli (dari job dengan reseptor yang sama bila ada)
     from .analisis import tanimoto
     acuan = {}

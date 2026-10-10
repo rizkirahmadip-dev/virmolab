@@ -6,6 +6,7 @@ Argumen:
   --uji-mandiri HASIL.json  jalankan uji komponen tanpa jendela, tulis hasil, keluar (kode 0 = semua lulus)
   --qc-pekerja ALAMAT KUNCI (internal) proses pekerja PoseBusters, tersambung lewat named pipe
   --admet MASUK KELUAR      (internal) prediksi ADMET-AI di proses terpisah (JSON masuk/keluar)
+  --md TUGAS.json           (internal) MD / MM-GBSA OpenMM di proses terpisah (core/md.py)
 """
 import os
 import sys
@@ -30,6 +31,10 @@ def main():
     if arg[:1] == ["--admet"]:           # proses prediksi ADMET-AI (core/admet.py), tanpa jendela
         from .core import admet
         sys.exit(admet.jalankan_cli(arg[1], arg[2]))
+    if arg[:1] == ["--md"]:              # proses MD / MM/GBSA OpenMM (core/md.py), tanpa jendela
+        siapkan_kimia()
+        from .core import md
+        sys.exit(md.jalankan_tugas(arg[1]))
     siapkan_kimia()
     if "--uji-mandiri" in arg:
         i = arg.index("--uji-mandiri")

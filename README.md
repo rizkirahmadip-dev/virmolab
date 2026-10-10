@@ -13,9 +13,11 @@ dan ekspor siap publikasi dalam satu jendela berbahasa Indonesia.
   dan diagram 2D; validasi redocking (RMSD); bandingkan 2–4 ligan; peta interaksi.
 - **Ekspor**: gambar 3D/2D ber-DPI (PNG/TIFF/SVG/PDF), kompleks PDB, SDF, CSV, XLSX, laporan PDF.
 - **Distribusi**: installer per-pengguna tanpa admin, versi portable, pindah laptop (`.vmdbackup`).
+- **MD & MM/GBSA**: OpenMM (ff14SB + OpenFF Sage/NAGL), pelarut implisit OBC2 atau air eksplisit, dengan
+  saran tingkat sesuai kemampuan laptop, jeda/lanjut, RMSD/RMSF, interaksi persisten.
 - **Baris perintah**: `VirmoDock-cli.exe` untuk docking batch dan skrip (lihat di bawah).
 
-Status: **0.9.3 pra-rilis** (lihat CHANGELOG.md) — menunggu uji relawan di GPU AMD/Intel dan komputer tanpa GPU.
+Status: **0.9.4 pra-rilis** (lihat CHANGELOG.md) — menunggu uji relawan di GPU AMD/Intel dan komputer tanpa GPU.
 
 ## Unduh
 
@@ -33,6 +35,7 @@ VirmoDock-cli dock -r 1HSG -l kandidat.smi --acuan auto -o hasil_1hsg
 VirmoDock-cli dock -r AF-P00918 -l ligan\ --kantong 1 --mesin vina --exhaustiveness 32 -o hasil_ca2
 VirmoDock-cli reseptor 1HSG -o rec.pdbqt --protonasi propka --flex A:25,B:25
 VirmoDock-cli kantong AF-P00918
+VirmoDock-cli mmgbsa -r hasil_1hsg -o mmgbsa_1hsg --md --ns 2
 ```
 
 `dock` menyiapkan reseptor (berkas PDB/CIF, kode PDB, `AF-<UniProt>`, atau PDBQT siap) dan ligan
@@ -61,6 +64,25 @@ Deteksi kantong memakai P2Rank + Java yang **tidak ikut repo** (±262 MB). Pasan
   sehingga ada `vendor/bin/jre/bin/java.exe`.
 
 Uji mandiri (`python -m virmodock --uji-mandiri hasil.json`) memeriksa keduanya.
+
+Modul MD & MM/GBSA memakai OpenMM (PyPI, ada di `requirements.txt`) dan tumpukan OpenFF yang **tidak ada di
+PyPI** untuk Windows. Pasang dari arsip rilis GitHub tanpa dependensi (dependensi PyPI-nya sudah ada di
+`requirements.txt`):
+
+```bat
+set G=https://github.com/openforcefield
+set SETUPTOOLS_SCM_PRETEND_VERSION_FOR_OPENFF_UTILITIES=0.1.18
+set SETUPTOOLS_SCM_PRETEND_VERSION_FOR_OPENFF_UNITS=0.4.0
+set SETUPTOOLS_SCM_PRETEND_VERSION_FOR_OPENFORCEFIELDS=2026.09.0
+set SETUPTOOLS_SCM_PRETEND_VERSION_FOR_OPENFF_INTERCHANGE=0.5.5
+set SETUPTOOLS_SCM_PRETEND_VERSION_FOR_OPENFF_TOOLKIT=0.19.0
+set SETUPTOOLS_SCM_PRETEND_VERSION_FOR_OPENFF_NAGL=0.6.1
+set SETUPTOOLS_SCM_PRETEND_VERSION_FOR_OPENFF_NAGL_MODELS=2026.09.0
+.venv\Scripts\python.exe -m pip install --no-deps "openff-utilities @ %G%/openff-utilities/archive/refs/tags/v0.1.18.tar.gz" "openff-units @ %G%/openff-units/archive/refs/tags/0.4.0.tar.gz" "openforcefields @ %G%/openff-forcefields/archive/refs/tags/2026.09.0.tar.gz" "openff-interchange @ %G%/openff-interchange/archive/refs/tags/v0.5.5.tar.gz" "openff-toolkit @ %G%/openff-toolkit/archive/refs/tags/0.19.0.tar.gz" "openff-nagl @ %G%/openff-nagl/archive/refs/tags/v0.6.1.tar.gz" "openff-nagl-models @ %G%/openff-nagl-models/archive/refs/tags/v2026.09.0.tar.gz"
+```
+
+Variabel `SETUPTOOLS_SCM_PRETEND_VERSION_*` perlu karena arsip GitHub tidak membawa riwayat git (tanpanya
+versi terbaca "unavailable"). `openff-amber-ff-ports` tidak diperlukan.
 
 Editor struktur Ketcher juga **tidak ikut repo** (±30 MB): unduh `ketcher-standalone-3.18.0.zip` dari
 https://github.com/epam/ketcher/releases (SHA-256 `484e7f10…a3e7e`) lalu ekstrak ke `vendor/ketcher/` cukup

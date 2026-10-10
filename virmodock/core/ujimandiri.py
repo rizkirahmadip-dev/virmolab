@@ -120,6 +120,36 @@ def uji(lapor=None):
             return f"Meeko {', '.join(ok)} ({R.torsi_flex(flex)} torsi) + Vina --flex: {', '.join(M.residu_flex(pose[0].flex))}"
     cek("Residu fleksibel (Meeko + Vina)", flex_dock)
 
+    def md_uji():
+        """Tripeptida GSG + etanol: OpenMM (platform terbaik) + ff14SB + OpenFF Sage/NAGL -> minimisasi + MM/GBSA."""
+        import math
+        from rdkit import Chem
+        from rdkit.Chem import AllChem
+        from . import md as MD
+        from . import prep_reseptor as R
+        m = Chem.AddHs(Chem.MolFromSequence("GSG"), addCoords=True)
+        AllChem.EmbedMolecule(m, randomSeed=7)
+        AllChem.MMFFOptimizeMolecule(m)
+        h = R.siapkan(Chem.MolToPDBBlock(Chem.RemoveHs(m)), R.OpsiReseptor(protonasi="templat"))
+        lig = Chem.AddHs(Chem.MolFromSmiles("CCO"))
+        AllChem.EmbedMolecule(lig, randomSeed=1)
+        c = m.GetConformer().GetPositions().mean(0)
+        conf = lig.GetConformer()
+        for i in range(lig.GetNumAtoms()):
+            p = conf.GetAtomPosition(i)
+            conf.SetAtomPosition(i, (p.x + c[0] + 4.5, p.y + c[1], p.z + c[2]))
+        hasil, (ff, mdl, info, _pos) = MD.mmgbsa_pose(h.pdb_meeko, h.pdbqt, lig)
+        if not math.isfinite(hasil["dG"]):
+            raise RuntimeError(f"ΔG tidak valid: {hasil['dG']}")
+        # air eksplisit: kotak TIP3P + ion + sistem PME (data tip3p.pdb/xml harus ikut terbundel)
+        _s, m_air, _n = MD.siapkan_md(ff, mdl, info, MD.OpsiMD(pelarut="eksplisit", padding_nm=0.6))
+        n_air = m_air.topology.getNumAtoms() - mdl.topology.getNumAtoms()
+        if n_air < 150:
+            raise RuntimeError(f"solvasi eksplisit gagal ({n_air} atom air)")
+        return (f"OpenMM {MD._versi().get('OpenMM', '')} ({hasil['platform']}), Sage 2.3 + NAGL, OBC2: "
+                f"ΔG {hasil['dG']:.1f} kkal/mol, {hasil['detik']:.0f} s; TIP3P/PME +{n_air} atom air")
+    cek("MD & MM/GBSA (OpenMM + OpenFF)", md_uji)
+
     def cli_uji():
         import sys
         if getattr(sys, "frozen", False):
@@ -131,7 +161,7 @@ def uji(lapor=None):
             kode, out = _jalan([sys.executable, "-m", "virmodock.cli", "--help"], 60)
         if kode != 0 or "dock" not in out:
             raise RuntimeError(out.strip().splitlines()[-1] if out.strip() else f"kode {kode}")
-        return "VirmoDock-cli: info, uji, reseptor, ligan, kantong, alphafold, dock"
+        return "VirmoDock-cli: info, uji, reseptor, ligan, kantong, alphafold, dock, mmgbsa"
     cek("Baris perintah (VirmoDock-cli)", cli_uji)
 
     def gpu():

@@ -14,7 +14,7 @@ from pathlib import Path
 BERKAS = sorted(Path("virmodock/ui").glob("*.py")) + [Path(f"virmodock/core/{n}.py") for n in (
     "statistik", "analisis", "kemiripan", "admet", "protonasi", "periksa_protein", "sifat", "grafik", "grafik_uji",
     "uji", "pustaka", "chembl", "env", "qc", "konsensus", "ujimandiri", "mesin", "prep_reseptor", "prep_ligan",
-    "molekul", "laporan", "ekspor", "p2rank", "pindah", "proyek", "antrean", "alphafold")]
+    "molekul", "laporan", "ekspor", "p2rank", "pindah", "proyek", "antrean", "alphafold", "md")]
 LEWATI_FUNGSI = {"value", "setValue", "contains", "remove", "findData", "get", "setdefault", "pop", "startswith",
                  "endswith", "split", "replace", "join", "strip", "rstrip", "lstrip", "objectName", "setObjectName",
                  "js", "runJavaScript", "setProperty", "property", "getattr", "hasattr", "setStyleSheet", "format",

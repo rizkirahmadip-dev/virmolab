@@ -9,12 +9,13 @@ from ..core import qc
 from . import theme
 
 KOLOM = ["#", "Ligan", "ΔG (kcal/mol)", "Ki perkiraan", "LE", "Klaster", "RMSD kristal (Å)", "RMSD ref (Å)",
-         "PoseBusters", "H", "HF", "π", "Lain", "Mesin", "Job", "IFP vs kristal"]
-NUM = {0, 2, 4, 5, 6, 7, 9, 10, 11, 12, 15}
+         "PoseBusters", "H", "HF", "π", "Lain", "Mesin", "Job", "IFP vs kristal", "MM/GBSA (kcal/mol)"]
+NUM = {0, 2, 4, 5, 6, 7, 9, 10, 11, 12, 15, 16}
 K_IFP = 15
+K_MMGBSA = 16
 K_QC = 8
 # kolom tampil bawaan (sisanya lewat klik kanan pada judul kolom)
-TAMPIL_BAWAAN = {0, 1, 2, 4, 6, K_QC, 9, K_IFP}
+TAMPIL_BAWAAN = {0, 1, 2, 4, 6, K_QC, 9, K_IFP, K_MMGBSA}
 
 
 class ItemAngka(QTreeWidgetItem):
@@ -108,7 +109,12 @@ class PanelHasil(QWidget):
 
     def _kolom_tampil(self):
         from ..core import paths
-        v = paths.settings().value("kolom_hasil")
+        st = paths.settings()
+        v = st.value("kolom_hasil")
+        if v and not st.value("kolom_hasil_mmgbsa"):     # kolom baru 0.9.4: tampilkan sekali di pengaturan lama
+            st.setValue("kolom_hasil", sorted({int(x) for x in v} | {K_MMGBSA}))
+            st.setValue("kolom_hasil_mmgbsa", 1)
+            v = st.value("kolom_hasil")
         try:
             return {int(x) for x in v} if v else set(TAMPIL_BAWAAN)
         except (TypeError, ValueError):
@@ -187,6 +193,11 @@ class PanelHasil(QWidget):
             it.setText(13, b["mesin"])
             it.setText(14, b["job"])
             self._sel(it, K_IFP, b.get("ifp_sim"))
+            self._sel(it, K_MMGBSA, b.get("mmgbsa"))
+            if b.get("mmgbsa") is not None:
+                it.setToolTip(K_MMGBSA, f"{b.get('mmgbsa_metode') or 'MM/GBSA'}"
+                              + (f" · SD {b['mmgbsa_sd']:.2f}" if b.get("mmgbsa_sd") else "")
+                              + " — peringkat relatif; entropi tidak dihitung")
             it.setToolTip(K_IFP, "Kemiripan Tanimoto sidik jari interaksi (residu × jenis, tanpa vdW) pose terbaik "
                                  "terhadap pose kristal ligan asli; 1 = pola interaksi sama persis")
             for p in b["pose"]:

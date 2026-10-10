@@ -184,6 +184,53 @@ def sebar(x, y, nama=None, label_x="", label_y="", judul="", regresi=None, gelap
     return k.selesai()
 
 
+PALET_GARIS = ["#2b6fd6", "#cf3f3f", "#2f9e6b", "#c98a12", "#7a4cc2", "#0f8a9a", "#b8467f", "#5b6b82"]
+
+
+def garis(seri, label_x="", label_y="", judul="", gelap=False, transparan=False, lebar=760, tinggi=480,
+          catatan="", y_nol=False, acuan=None, x_nol=True):
+    """seri: [(nama, xs, ys)] -> grafik garis (mis. RMSD/MM-GBSA terhadap waktu, RMSF per residu).
+    acuan: [(nilai_y, label)] garis putus-putus horizontal."""
+    seri = [(n, list(x), list(y)) for n, x, y in seri if len(x) and len(x) == len(y)]
+    if not seri:
+        k = Kanvas(lebar, tinggi, gelap, transparan, judul)
+        k.teks(lebar / 2, tinggi / 2, "Tidak ada data", 12, "middle", warna_=k.w["tinta2"])
+        return k.selesai()
+    xs = [v for _, x, _ in seri for v in x] + ([0.0] if x_nol and min(v for _, x, _ in seri for v in x) >= 0 else [])
+    ys = [v for _, _, y in seri for v in y] + ([0.0] if y_nol else []) + [a for a, _ in (acuan or [])]
+    tepi = 0.04 * ((max(ys) - min(ys)) or 1.0)          # ruang tepi hanya di sumbu y (sumbu x pas data)
+    ys = ys + [max(ys) + tepi] + ([] if y_nol and min(ys) >= 0 else [min(ys) - tepi])
+    legenda = len(seri) > 1
+    k = Kanvas(lebar, tinggi, gelap, transparan, judul, kanan=24, atas=(44 if judul else 20) + (18 if legenda else 0))
+    k.sumbu(xs, ys, label_x, label_y)
+    k.out.append(f'<defs><clipPath id="areaG"><rect x="{k.kiri}" y="{k.atas}" width="{k.pw}" height="{k.ph}"/>'
+                 f'</clipPath></defs>')
+    for a, t in acuan or []:
+        k.out.append(f'<line x1="{k.kiri}" y1="{k.Y(a):.2f}" x2="{k.kiri + k.pw}" y2="{k.Y(a):.2f}" stroke="{MERAH}" '
+                     f'stroke-width="1.2" stroke-dasharray="5,3"/>')
+        k.teks(k.kiri + k.pw - 4, k.Y(a) - 5, t, 10, "end", warna_=MERAH)
+    for i, (nama, x, y) in enumerate(seri):
+        w = PALET_GARIS[i % len(PALET_GARIS)]
+        d = "M" + " L".join(f"{k.X(a):.2f},{k.Y(b):.2f}" for a, b in zip(x, y))
+        k.out.append(f'<path d="{d}" fill="none" stroke="{w}" stroke-width="1.6" stroke-linejoin="round" '
+                     f'clip-path="url(#areaG)"><title>{escape(nama)}</title></path>')
+        if len(x) <= 60:
+            for a, b in zip(x, y):
+                k.out.append(f'<circle cx="{k.X(a):.2f}" cy="{k.Y(b):.2f}" r="2.2" fill="{w}"><title>{escape(nama)}: '
+                             f'{fmt(a)}; {fmt(b)}</title></circle>')
+    if legenda:
+        x0 = k.kiri
+        for i, (nama, _x, _y) in enumerate(seri):
+            w = PALET_GARIS[i % len(PALET_GARIS)]
+            y0 = k.atas - 12
+            k.out.append(f'<line x1="{x0}" y1="{y0}" x2="{x0 + 18}" y2="{y0}" stroke="{w}" stroke-width="2.2"/>')
+            k.teks(x0 + 23, y0 + 4, nama, 10.5)
+            x0 += 34 + 6.2 * len(nama)
+    if catatan:
+        k.catatan(catatan)
+    return k.selesai()
+
+
 def batang(nama, nilai, label_x="", judul="", gelap=False, transparan=False, lebar=760, tinggi=None, catatan=""):
     """Batang horizontal (mis. ΔG teratas). Nilai negatif digambar ke kiri dari 0."""
     n = len(nilai)

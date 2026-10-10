@@ -96,4 +96,28 @@ AlphaFold DB (EMBL-EBI & Google DeepMind)   CC BY 4.0   https://alphafold.ebi.ac
   Kutip: Jumper dkk. 2021, Nature 596:583; Varadi dkk. 2024, Nucleic Acids Res 52:D368.
 UniProt (pencarian aksesi)                  CC BY 4.0   https://www.uniprot.org
 
+Ditambahkan di VirmoDock 0.9.4 (MD & MM/GBSA)
+---------------------------------------------
+OpenMM               8.6.1       MIT (API, platform Reference & CPU) + LGPL-3.0 (platform OpenCL/CUDA)
+                                 licenses/OpenMM_Licenses.txt, licenses/LGPL-3.0.txt. Platform OpenCL adalah
+                                 pustaka dinamis terpisah (OpenMM.libs/lib/plugins/OpenMMOpenCL.dll) yang tidak diubah
+                                 dan dapat diganti pengguna. Kode sumber: https://github.com/openmm/openmm
+  Komponen di dalam OpenMM: SFMT (BSD-3, Saito & Matsumoto), Hilbert Curve (Rice University —
+  "Hilbert Curve implementation copyright 1998, Rice University"), AsmJit (zlib), PDBx/mmCIF reader
+  (CC BY 3.0, J. Westbrook), irrXML (zlib), L-BFGS (MIT), dll. — rincian lengkap di licenses/OpenMM_Licenses.txt.
+PDBFixer             1.12.0      MIT                             https://github.com/openmm/pdbfixer
+openmmforcefields    0.15.1      MIT                             https://github.com/openmm/openmmforcefields
+OpenFF Toolkit       0.19.0      MIT                             https://github.com/openforcefield/openff-toolkit
+OpenFF Interchange   0.5.5       MIT
+OpenFF Units 0.4.0, OpenFF Utilities 0.1.18   MIT
+OpenFF NAGL          0.6.1       MIT                             https://github.com/openforcefield/openff-nagl
+OpenFF NAGL models   2026.09.0   CC BY 4.0 (model openff-gnn-am1bcc-1.0.0)
+OpenFF Force Fields  2026.09.0   CC BY 4.0 (openff-2.3.0.offxml, "Sage")   https://github.com/openforcefield/openff-forcefields
+Parameter Amber ff14SB, ion Li/Merz, air TIP3P: berkas XML bawaan OpenMM (openmm/app/data/amber14).
+lxml 6.1.3 (BSD-3), pint 0.25.3 (BSD-3), pydantic 2.13 + pydantic-core (MIT), python-constraint 1.4.0 (BSD-2),
+cachetools (MIT), xmltodict (MIT), click (BSD-3), platformdirs (MIT), flexcache/flexparser (BSD-3),
+annotated-types (MIT), typing-inspection (MIT), legacy-cgi (PSF-2.0)
+Catatan pemasangan: paket OpenFF tidak tersedia di PyPI untuk Windows/Python 3.14; dipasang dari arsip rilis
+GitHub (lihat README). openff-amber-ff-ports tidak dibundel (tidak dipakai saat berjalan).
+
 Catatan: ini ringkasan teknis, bukan nasihat hukum.

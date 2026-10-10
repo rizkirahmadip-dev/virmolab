@@ -213,6 +213,19 @@ def html(proyek, baris, info, interaksi_terbaik=None, ada_gambar3d=False, ada_di
                          "</td></tr>")
             o.append("</table>")
 
+    # ---- MM/GBSA & MD
+    mm = [b for b in baris if b.get("mmgbsa") is not None]
+    if mm:
+        o.append("<p><b>Penyempurnaan pasca-docking (MM/GBSA)</b></p>")
+        o.append("<table class='t'><tr><th>Ligan</th><th>ΔG docking (kcal/mol)</th><th>ΔG MM/GBSA (kcal/mol)</th>"
+                 "<th>SD</th><th>Metode</th></tr>")
+        for b in sorted(mm, key=lambda b: b["mmgbsa"])[:20]:
+            o.append(f"<tr><td>{escape(b['ligan'])}</td><td class='n'>{_n(b['energi'])}</td>"
+                     f"<td class='n'>{_n(b['mmgbsa'])}</td><td class='n'>{_f(b.get('mmgbsa_sd'))}</td>"
+                     f"<td>{escape(b.get('mmgbsa_metode') or '')}</td></tr>")
+        o.append("</table><p class='mut'>ΔG MM/GBSA satu-trajektori tanpa entropi konformasi: dipakai untuk "
+                 "peringkat relatif antar-ligan, bukan afinitas absolut.</p>")
+
     # ---- metode
     k = KRITERIA
     o.append("<h2>5. Metode singkat</h2>")
@@ -232,7 +245,13 @@ def html(proyek, baris, info, interaksi_terbaik=None, ada_gambar3d=False, ada_di
                 if sifat_ligan else "")
              + (" Kewajaran fisik pose terbaik tiap ligan (kimia, geometri ikatan, kerataan cincin, energi internal, "
                 "jarak dan tumpang-tindih dengan protein) diperiksa dengan PoseBusters (konfigurasi dock)."
-                if any(b.get("qc") and not b["qc"].get("galat") for b in baris) else "") + "</p>")
+                if any(b.get("qc") and not b["qc"].get("galat") for b in baris) else "")
+             + (" Pose terbaik disempurnakan dengan OpenMM: protein Amber ff14SB, ligan OpenFF Sage 2.3 dengan muatan "
+                "parsial OpenFF NAGL (setara AM1-BCC), ion logam model nonbonded Li/Merz. Kompleks diminimisasi di "
+                "pelarut implisit OBC2 (atom berat protein dikekang 5 kcal/mol/Å²) dan/atau disimulasikan (MD "
+                "Langevin 300 K, langkah 2 fs, ikatan-H dikendala; air eksplisit TIP3P dengan PME dan NaCl 0,15 M bila "
+                "dipilih). ΔG MM/GBSA dihitung dengan pendekatan satu-trajektori (OBC2, igb = 5, radii mbondi2, "
+                "suku permukaan ACE) tanpa entropi konformasi." if mm else "") + "</p>")
     o.append("<h2>6. Perangkat lunak yang dikutip</h2><ol>")
     kunci = [m for m in mesin_dipakai] + ["meeko", "rdkit", "openbabel", "gemmi", "3dmol"]
     if "adgpu" in kunci and "ad4" not in kunci:
@@ -242,6 +261,10 @@ def html(proyek, baris, info, interaksi_terbaik=None, ada_gambar3d=False, ada_di
     if any(b.get("qc") and not b["qc"].get("galat") for b in baris):
         from .qc import SITASI as SITASI_QC
         o.append(f"<li>{escape(SITASI_QC)}</li>")
+    if mm:
+        from .md import SITASI as SITASI_MD
+        for x in SITASI_MD:
+            o.append(f"<li>{escape(x)}</li>")
     if sifat_ligan:
         from .sifat import SITASI as SITASI_SIFAT
         for x in SITASI_SIFAT[:5] + SITASI_SIFAT[7:8]:   # BOILED-Egg, Lipinski, Ghose, Veber, Egan, PAINS

@@ -43,6 +43,35 @@ hidden = collect_submodules("meeko") + collect_submodules("dimorphite_dl") + ["g
 hidden += collect_submodules("pdb2pqr") + collect_submodules("propka") + collect_submodules("admet_ai")
 hidden += collect_submodules("chemprop") + ["rdkit.Chem.Pharm2D.Gobbi_Pharm2D", "rdkit.Chem.Pharm2D.Generate"]
 
+# ---- MD & MM/GBSA (core/md.py): OpenMM + PDBFixer + openmmforcefields + OpenFF (toolkit, Interchange, NAGL)
+import openmm as _omm  # noqa: E402
+from PyInstaller.utils.hooks import copy_metadata  # noqa: E402
+_omm_lib = Path(_omm.__file__).parent.parent / "OpenMM.libs" / "lib"
+# openmm/version.py mencari plugin di openmm/../OpenMM.libs/lib/plugins (relatif) -> pertahankan tata letak itu
+binaries += [(str(f), "OpenMM.libs/lib") for f in _omm_lib.glob("*.dll")]
+binaries += [(str(f), "OpenMM.libs/lib/plugins") for f in (_omm_lib / "plugins").glob("*.dll")]
+datas += collect_data_files("openmm", includes=["app/data/amber14/*", "app/data/amber14-all.xml", "app/data/implicit/*",
+                                                "app/data/pdbNames.xml", "app/data/residues.xml",
+                                                "app/data/hydrogens.xml", "app/data/tip3p.xml",
+                                                "app/data/tip3p.pdb"])   # kotak air Modeller.addSolvent
+datas += collect_data_files("pdbfixer", includes=["templates/*", "soft.xml"])
+datas += collect_data_files("openff.units") + collect_data_files("openff.utilities")
+_off = Path(__import__("openforcefields").__file__).parent / "offxml" / "openff-2.3.0.offxml"
+datas += [(str(_off), "openforcefields/offxml")]     # Sage 2.3.0 (CC BY 4.0); berkas lain tidak dipakai
+_nagl = Path(__import__("openff.nagl_models", fromlist=["x"]).__file__).parent / "models" / "am1bcc"
+datas += [(str(_nagl / "openff-gnn-am1bcc-1.0.0.pt"), "openff/nagl_models/models/am1bcc")]
+for _d in ("openmm", "pdbfixer", "openmmforcefields", "openff-toolkit", "openff-interchange", "openff-units",
+           "openff-utilities", "openff-nagl", "openff-nagl-models", "openforcefields", "pint", "pydantic",
+           "flexcache", "flexparser"):
+    datas += copy_metadata(_d)
+_bukan_uji = lambda n: ".tests" not in n and "._tests" not in n and not n.endswith(".conftest")  # noqa: E731
+hidden += collect_submodules("openmm") + collect_submodules("pdbfixer", filter=lambda n: "uiserver" not in n)
+hidden += collect_submodules("openmmforcefields.generators", filter=_bukan_uji)
+for _p in ("openff.toolkit", "openff.interchange", "openff.units", "openff.utilities", "openff.nagl",
+           "openff.nagl_models"):
+    hidden += collect_submodules(_p, filter=_bukan_uji)
+hidden += ["openforcefields", "lxml.etree", "xmltodict", "cachetools", "constraint"]
+
 # dua titik masuk berbagi satu PYZ/_internal: VirmoDock.exe (jendela) + VirmoDock-cli.exe (konsol, virmodock/cli.py)
 a = Analysis([str(AKAR / "VirmoDock.pyw"), str(AKAR / "VirmoDock_cli.py")], pathex=[str(AKAR)], datas=datas,
              binaries=binaries, hiddenimports=hidden,
@@ -63,6 +92,9 @@ def buang(tujuan):
         return True
     # data DrugBank (CC BY-NC) tidak dipakai (drugbank_path=None); PaDEL (Java) tidak dipakai ADMET-AI
     if d.endswith("admet_ai/resources/data/drugbank_approved.csv") or d.startswith("padelpy/PaDEL"):
+        return True
+    # OpenMM: pustaka impor (.lib) & header C++ tidak diperlukan saat berjalan
+    if d.startswith("OpenMM.libs/") and (d.endswith(".lib") or "/include/" in d):
         return True
     if re.search(r"PySide6/resources/.*\.debug\.(pak|bin)$", d) or "qtwebengine_devtools_resources" in d:
         return True

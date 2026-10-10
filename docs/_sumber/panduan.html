@@ -187,6 +187,22 @@
 <p><b>Salin gambar</b> (<b>Edit › Salin gambar</b>, <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>C</kbd>) menyalin isi tab yang terbuka — viewport 3D, diagram 2D, BOILED-Egg, atau grafik — ke clipboard untuk ditempel ke Word/PowerPoint.</p>
 <p><b>Berkas › Ekspor › Sesi PyMOL / ChimeraX…</b> menulis folder berisi reseptor, pose aktif, serta skrip <code>.pml</code> dan <code>.cxc</code> yang langsung menampilkan residu kontak (berlabel) dan garis interaksi berwarna sama dengan VirmoDock. <b>Alat › Buka di program lain</b> membuka sesi ini di PyMOL/ChimeraX bila ada pose aktif; selain itu mengirim objek yang tampil (juga ke Discovery Studio Visualizer).</p>
 
+<h2 id="md">MD &amp; MM/GBSA</h2>
+<p><b>Analisis › MD &amp; MM/GBSA…</b> menyempurnakan pose docking terbaik dengan OpenMM: protein Amber ff14SB, ligan OpenFF Sage 2.3 (muatan NAGL setara AM1-BCC), pelarut implisit OBC2 atau air eksplisit TIP3P. Centang ligan (bawaan: 5 teratas), pilih tingkat, lalu <b>Jalankan</b>.</p>
+<table>
+<tr><th>Tingkat</th><th>Isi</th><th>Waktu (contoh RTX 3060 / CPU 8 inti, 1 ligan)</th></tr>
+<tr><td>Ringan</td><td>Minimisasi kompleks + MM/GBSA satu titik</td><td>±20 detik / ±40 detik</td></tr>
+<tr><td>Sedang</td><td>MD pelarut implisit 1–2 ns + RMSD/RMSF + MM/GBSA rata-rata</td><td>±15 menit / ±7 jam per 2 ns</td></tr>
+<tr><td>Lengkap</td><td>MD air eksplisit 10–100 ns + MM/GBSA banyak frame</td><td>±2,5 jam per 10 ns / tidak disarankan tanpa GPU</td></tr>
+</table>
+<ul>
+<li>Saat dialog dibuka pertama kali, VirmoDock <b>mengukur kecepatan laptop</b> pada kompleks Anda (±30 detik) lalu menampilkan perkiraan waktu dan status <i>Disarankan</i> (&lt; 2 jam), <i>Bisa (lama)</i> (2–12 jam), atau <i>Tidak disarankan</i> (&gt; 12 jam). Hasil ukur disimpan per perangkat; <b>Ukur kecepatan</b> mengulanginya.</li>
+<li><b>Jeda</b> menyimpan checkpoint; <b>Lanjutkan</b> meneruskannya kapan saja, juga setelah aplikasi dibuka ulang. Menutup VirmoDock saat MD berjalan otomatis menjeda dengan checkpoint. Colok laptop ke listrik untuk MD panjang.</li>
+<li>Hasil tampil di tab Ringkasan (ΔG docking, MM/GBSA setelah minimisasi, rerata MM/GBSA MD ± SD, komponen, RMSD ligan rerata), RMSD, RMSF, MM/GBSA per waktu, dan Interaksi persisten (persentase frame). ΔG MM/GBSA juga masuk ke kolom <b>MM/GBSA</b> tabel Hasil, Statistik, ekspor, dan laporan.</li>
+<li>Berkas di folder proyek <code>md/&lt;id&gt;/</code>: <code>hasil.json</code>, <code>kompleks_minimisasi.pdb</code>, <code>topologi.pdb</code> + <code>trajektori_terlarut.dcd</code> (buka di PyMOL/VMD/ChimeraX).</li>
+<li><b>Tafsiran</b>: MM/GBSA tidak menghitung entropi, jadi angkanya jauh lebih negatif daripada ΔG eksperimen; gunakan untuk <i>membandingkan</i> ligan pada reseptor dan pengaturan yang sama. RMSD ligan rerata &gt; 3 Å menandakan pose tidak stabil. Reseptor dengan ion logam memakai model nonbonded (pendekatan).</li>
+</ul>
+
 <h2 id="cli">Baris perintah (VirmoDock-cli)</h2>
 <p><code>VirmoDock-cli.exe</code> ada di folder instalasi VirmoDock. Buka Command Prompt di folder itu (atau tulis jalur lengkapnya), lalu misalnya:</p>
 <pre>VirmoDock-cli dock -r 1HSG -l kandidat.smi --acuan auto -o hasil_1hsg
@@ -194,7 +210,8 @@ VirmoDock-cli dock -r AF-P00918 -l folder_ligan --kantong 1 --mesin vina -o hasi
 VirmoDock-cli reseptor 1HSG -o rec.pdbqt --flex A:25,B:25
 VirmoDock-cli info</pre>
 <ul>
-<li>Perintah: <code>info</code>, <code>uji</code>, <code>reseptor</code>, <code>ligan</code>, <code>kantong</code> (P2Rank), <code>alphafold</code>, <code>dock</code>. Tambahkan <code>-h</code> untuk semua opsi.</li>
+<li>Perintah: <code>info</code>, <code>uji</code>, <code>reseptor</code>, <code>ligan</code>, <code>kantong</code> (P2Rank), <code>alphafold</code>, <code>dock</code>, <code>mmgbsa</code>. Tambahkan <code>-h</code> untuk semua opsi.</li>
+<li><code>mmgbsa -r hasil_dock -o folder [--md --ns 2 --pelarut implisit|eksplisit]</code>: MM/GBSA pose terbaik dari folder hasil <code>dock</code> (atau <code>-r</code> berkas/kode PDB + <code>-l</code> pose SDF) → <code>mmgbsa.csv</code>.</li>
 <li><code>dock</code> menerima reseptor berupa kode PDB, <code>AF-&lt;UniProt&gt;</code>, berkas PDB/CIF, atau PDBQT siap; ligan berupa berkas, folder, atau teks SMILES. Area docking: <code>--pusat X Y Z</code> (+ <code>--ukuran</code>), <code>--acuan berkas</code> atau <code>--acuan auto</code> (ligan asli), atau <code>--kantong N</code>.</li>
 <li>Hasil: folder pose (DLG/PDBQT + SDF pose terbaik), <code>ringkasan.csv</code> (ΔG, Ki, LE, ikatan H, hidrofobik, residu kontak), <code>metode.txt</code> (parameter + perintah yang bisa diulang persis), <code>log.txt</code>. Kode keluar 0 = minimal satu ligan berhasil.</li>
 </ul>

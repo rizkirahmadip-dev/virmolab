@@ -684,6 +684,9 @@ class JendelaUtama(QMainWindow):
                 A("Kemiripan, ruang kimia, farmakofor…", "similar", self.buka_kemiripan, None,
                   "Tanimoto (ECFP4/FCFP4/MACCS/farmakofor 2D), klaster Butina, peta ruang kimia, cari ligan mirip, "
                   "farmakofor bersama pose teratas"),
+                A("MD & MM/GBSA…", "play", self.buka_md, None,
+                  "Minimisasi + MM/GBSA, atau dinamika molekul (OpenMM) pelarut implisit/eksplisit: RMSD, RMSF, "
+                  "interaksi persisten, ΔG MM/GBSA — VirmoDock menyarankan tingkat sesuai kemampuan laptop"),
                 None,
                 A("Prediksi ADMET (ADMET-AI)…", "lig", self.buka_admet, None,
                   "Absorpsi, distribusi, metabolisme (CYP), ekskresi, toksisitas (hERG, Ames, DILI) — model "
@@ -2474,6 +2477,63 @@ class JendelaUtama(QMainWindow):
                                 "Bahasa antarmuka akan berganti setelah VirmoDock dibuka ulang.\n"
                                 "The interface language will change after VirmoDock is restarted.")
 
+    def buka_md(self):
+        from ..core import md as mdmod
+        if not mdmod.tersedia():
+            self._galat("Modul MD (OpenMM/OpenFF) tidak terpasang. Pasang ulang VirmoDock.")
+            return
+        if not self.proyek or not any(l["status"] == "selesai" for j in self.proyek.job for l in j["ligan"]):
+            self._galat("Belum ada hasil docking. Jalankan docking dulu (langkah 4), lalu buka MD & MM/GBSA.")
+            return
+        d = getattr(self, "_dlg_md", None)
+        if d is None or (d.proyek_awal is not self.proyek and not d.proses_berjalan()):
+            from .dialog_md import DialogMD
+            d = self._dlg_md = DialogMD(self)
+            d.selesai.connect(self.terapkan_md)
+        else:
+            d.muat()
+        d.show()
+        d.raise_()
+        d.activateWindow()
+
+    def terapkan_md(self, h, run):
+        """Tulis ΔG MM/GBSA ke ligan job (kolom Hasil, Statistik, ekspor, laporan)."""
+        pr = self.proyek
+        if not pr:
+            return
+        o = h.get("opsi") or {}
+        for x in h.get("ligan", []):
+            if not x.get("selesai"):
+                continue
+            j = self.pelaksana.cari(x.get("job"))
+            l = next((y for y in (j or {}).get("ligan", []) if y["id"] == x.get("lid")), None)
+            if l is None:
+                continue
+            md_ = x.get("mmgbsa")
+            mn = x.get("mmgbsa_min") or {}
+            if md_:
+                metode = (f"MM/GBSA OBC2, MD {'air eksplisit' if o.get('pelarut') == 'eksplisit' else 'implisit'} "
+                          f"{o.get('ns')} ns, {md_.get('n')} frame")
+                l["mmgbsa"] = {"dG": md_["dG"], "sd": md_.get("sd"), "sem": md_.get("sem"), "min": mn.get("dG"),
+                               "vdw": md_.get("vdw"), "elek": md_.get("elek"), "gb": md_.get("gb"), "sa": md_.get("sa"),
+                               "metode": metode, "md": run.get("id")}
+                tr = x.get("trajektori") or {}
+                if tr.get("rmsd_ligan"):
+                    l["mmgbsa"]["rmsd_ligan"] = sum(tr["rmsd_ligan"]) / len(tr["rmsd_ligan"])
+            elif mn:
+                l["mmgbsa"] = {"dG": mn["dG"], "sd": None, "min": mn["dG"], "vdw": mn.get("vdw"), "elek": mn.get("elek"),
+                               "gb": mn.get("gb"), "sa": mn.get("sa"), "metode": "MM/GBSA OBC2 (minimisasi)",
+                               "md": run.get("id")}
+        pr.md = [r for r in pr.md if r.get("id") != run.get("id")] + [dict(run, status="selesai")]
+        self._muat_hasil()
+        self.minta_simpan()
+        n = sum(1 for x in h.get("ligan", []) if x.get("selesai"))
+        self.pesan.tulis(f"MM/GBSA: {n} ligan diperbarui di tabel Hasil (kolom MM/GBSA). Nilai untuk peringkat relatif; "
+                         "entropi konformasi tidak dihitung.")
+        if any((x.get("logam") or 0) > 0 for x in h.get("ligan", [])):
+            self.pesan.tulis("MM/GBSA: reseptor memuat ion logam (model nonbonded 12-6) — energi interaksi logam–ligan "
+                             "bersifat pendekatan; bandingkan hanya antar-ligan dengan mode ikatan logam yang sama.")
+
     def buka_admet(self):
         if not self._sumber_sifat():
             self._galat("Belum ada ligan. Impor atau siapkan ligan dulu.")
@@ -3647,8 +3707,11 @@ class JendelaUtama(QMainWindow):
         teks = QLabel(f"<b>Versi {VERSI}</b>" + (" (portable)" if paths.PORTABLE else "") +
                       "<br>Aplikasi molecular docking desktop, gratis dan open-source (GPL-3.0-or-later).<br><br>"
                       "Mesin: AutoDock-GPU (OpenCL), AutoDock Vina 1.2.7, AutoDock 4.2.6.<br>"
-                      "Kimia: RDKit, Meeko, Open Babel, gemmi. Viewer: 3Dmol.js. UI: Qt (PySide6).<br><br>"
-                      "© 2026 apt. Rizki Rahmadi Pratama, M. Farm<br><br>"
+                      "Kimia: RDKit, Meeko, Open Babel, gemmi. Viewer: 3Dmol.js. UI: Qt (PySide6).<br>"
+                      "MD &amp; MM/GBSA: OpenMM, OpenFF (Sage, NAGL), Amber ff14SB.<br><br>"
+                      "© 2026 apt. Rizki Rahmadi Pratama, M. Farm<br>"
+                      "<span style='font-size:8pt'>Hilbert Curve implementation copyright 1998, Rice University "
+                      "(bagian dari OpenMM).</span><br><br>"
                       f"<span style='color:{theme.TOKEN[self.mode]['mut']}'>Data aplikasi: {paths.APPDATA}</span>")
         teks.setWordWrap(True)
         teks.setTextInteractionFlags(Qt.TextSelectableByMouse)
@@ -3765,6 +3828,15 @@ class JendelaUtama(QMainWindow):
         self.statusBar().showMessage(g.splitlines()[0][:160] if g else "", 8000)
 
     def closeEvent(self, e):
+        d = getattr(self, "_dlg_md", None)
+        if d is not None and d.proses_berjalan():
+            r = QMessageBox.question(self, "MD sedang berjalan",
+                                     "MD/MM-GBSA masih berjalan. Tutup VirmoDock?\n\nMD akan dijeda dengan checkpoint "
+                                     "dan bisa dilanjutkan dari Analisis › MD & MM/GBSA.")
+            if r != QMessageBox.Yes:
+                e.ignore()
+                return
+            d.hentikan_untuk_keluar()
         if self.pelaksana.sibuk():
             r = QMessageBox.question(self, "Docking sedang berjalan",
                                      "Docking masih berjalan. Tutup VirmoDock?\n\nJob akan dijeda dan bisa dilanjutkan "

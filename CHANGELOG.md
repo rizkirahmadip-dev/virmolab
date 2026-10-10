@@ -2,6 +2,24 @@
 
 Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x adalah pra-rilis.
 
+## [0.9.4] — 9 Oktober 2026
+
+### Baru
+- **MD & MM/GBSA** (Analisis › MD & MM/GBSA…) dengan OpenMM: protein Amber ff14SB, ligan OpenFF Sage 2.3 dengan muatan parsial OpenFF NAGL (setara AM1-BCC), ion logam Li/Merz. Tiga tingkat sesuai rencana A8a:
+  - **Ringan** — minimisasi kompleks + MM/GBSA satu titik (menit, semua laptop);
+  - **Sedang** — MD pelarut implisit OBC2 + RMSD/RMSF + MM/GBSA rata-rata;
+  - **Lengkap** — MD air eksplisit TIP3P/PME + MM/GBSA banyak frame.
+- **Penilaian kemampuan laptop otomatis**: saat dialog pertama dibuka, kecepatan diukur pada kompleks Anda sendiri (implisit & eksplisit, disimpan per perangkat) → perkiraan waktu dan status *Disarankan / Bisa (lama) / Tidak disarankan*; peringatan bila laptop memakai baterai.
+- **Jeda & lanjut**: checkpoint tiap ±5 menit; MD bisa dijeda dan dilanjutkan, juga setelah aplikasi ditutup (menutup VirmoDock saat MD berjalan otomatis menjeda dengan checkpoint).
+- Hasil: ΔG MM/GBSA (vdW, elektrostatik, GB, SA) ± SD, grafik RMSD/RMSF/MM-GBSA per waktu (SVG/PDF/PNG/TIFF), **interaksi persisten** sepanjang trajektori, berkas kompleks terminimisasi (PDB) dan trajektori zat terlarut (DCD) untuk PyMOL/VMD.
+- Kolom **MM/GBSA** di tabel Hasil, variabel MM/GBSA di Statistik, kolom di ekspor CSV/XLSX, serta bagian MM/GBSA, kalimat metode, dan sitasi (OpenMM 8, ff14SB, Sage, OpenFF, OBC, MM/GBSA) di laporan.
+- Pose dari docking **residu fleksibel** dipakai lengkap: rantai samping diposisikan seperti di pose.
+- Baris perintah: `VirmoDock-cli mmgbsa` (minimisasi, atau `--md` dengan `--pelarut implisit|eksplisit`) dari folder hasil `dock` atau pose SDF → `mmgbsa.csv`; `dock` kini juga menyimpan reseptor ber-H dengan keadaan protonasi docking.
+
+### Diubah
+- Uji mandiri kini 25 komponen (+ MD & MM/GBSA OpenMM/OpenFF).
+- Dialog Tentang mencantumkan komponen MD dan pemberitahuan hak cipta Hilbert Curve (Rice University) yang diwajibkan lisensi OpenMM.
+
 ## [0.9.3] — 9 Oktober 2026
 
 ### Baru
