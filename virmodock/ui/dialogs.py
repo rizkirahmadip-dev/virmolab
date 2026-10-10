@@ -1,9 +1,10 @@
 """Dialog: ambil dari database, wizard pertama kali, pengaturan."""
 from PySide6.QtCore import Qt, QUrl
 from PySide6.QtGui import QDesktopServices
-from PySide6.QtWidgets import (QCheckBox, QComboBox, QDialog, QDialogButtonBox, QDoubleSpinBox, QFileDialog,
-                               QFormLayout, QHBoxLayout, QLabel, QLineEdit, QListWidget, QListWidgetItem,
-                               QPlainTextEdit, QPushButton, QTabWidget, QVBoxLayout, QWidget, QWizard, QWizardPage)
+from PySide6.QtWidgets import (QAbstractItemView, QCheckBox, QComboBox, QDialog, QDialogButtonBox, QDoubleSpinBox,
+                               QFileDialog, QFormLayout, QHBoxLayout, QHeaderView, QLabel, QLineEdit, QListWidget,
+                               QListWidgetItem, QPlainTextEdit, QPushButton, QTabWidget, QTreeWidget, QTreeWidgetItem,
+                               QVBoxLayout, QWidget, QWizard, QWizardPage)
 
 ORGANISME = [("Semua organisme", None), ("Homo sapiens (manusia)", 9606), ("Mus musculus (mencit)", 10090),
              ("Rattus norvegicus (tikus)", 10116), ("SARS-CoV-2", 2697049), ("Escherichia coli K-12", 83333),
@@ -18,17 +19,11 @@ class DialogAmbil(QDialog):
         super().__init__(parent)
         self.setWindowTitle("Impor dari database")
         self.setMinimumWidth(460)
+        self.resize(860, 600)
         lay = QVBoxLayout(self)
         self.tab = QTabWidget()
         # RCSB
-        w1 = QWidget()
-        f1 = QFormLayout(w1)
-        self.pdbid = QLineEdit()
-        self.pdbid.setPlaceholderText("mis. 1HSG, 6LU7")
-        self.pdbid.setMaxLength(4)
-        f1.addRow("ID PDB", self.pdbid)
-        f1.addRow(self._ket("Protein, ligan asli, air, dan ion dipisah menjadi objek sendiri."))
-        self.tab.addTab(w1, "RCSB PDB")
+        self.tab.addTab(self._tab_rcsb(), "RCSB PDB")
         # PubChem
         w2 = QWidget()
         v2 = QVBoxLayout(w2)
@@ -55,6 +50,105 @@ class DialogAmbil(QDialog):
         bb.accepted.connect(self.accept)
         bb.rejected.connect(self.reject)
         lay.addWidget(bb)
+
+    def _tab_rcsb(self):
+        w = QWidget()
+        v = QVBoxLayout(w)
+        f1 = QFormLayout()
+        self.pdbid = QLineEdit()
+        self.pdbid.setPlaceholderText("mis. 1HSG, 6LU7")
+        self.pdbid.setMaxLength(4)
+        f1.addRow("ID PDB", self.pdbid)
+        v.addLayout(f1)
+        v.addWidget(self._ket("Belum tahu kodenya? Cari dengan nama protein, gen, ligan, atau penyakit — VirmoDock "
+                              "menyarankan struktur terbaik untuk docking (sinar-X, ada ligan kristal, resolusi terkecil)."))
+        h = QHBoxLayout()
+        self.rc_kueri = QLineEdit()
+        self.rc_kueri.setPlaceholderText("HIV-1 protease, EGFR erlotinib, acetylcholinesterase")
+        self.rc_org = QComboBox()
+        for t, nama in (("Semua organisme", None), ("Homo sapiens (manusia)", "Homo sapiens"),
+                        ("Mus musculus (mencit)", "Mus musculus"), ("Rattus norvegicus (tikus)", "Rattus norvegicus"),
+                        ("SARS-CoV-2", "Severe acute respiratory syndrome coronavirus 2"),
+                        ("HIV-1", "Human immunodeficiency virus 1"), ("Escherichia coli", "Escherichia coli"),
+                        ("Mycobacterium tuberculosis", "Mycobacterium tuberculosis"),
+                        ("Plasmodium falciparum", "Plasmodium falciparum"),
+                        ("Staphylococcus aureus", "Staphylococcus aureus")):
+            self.rc_org.addItem(t, nama)
+        b = QPushButton("Cari")
+        b.clicked.connect(self._rc_cari)
+        h.addWidget(self.rc_kueri, 1)
+        h.addWidget(self.rc_org)
+        h.addWidget(b)
+        v.addLayout(h)
+        h2 = QHBoxLayout()
+        self.rc_ligan = QCheckBox("Hanya yang punya ligan")
+        self.rc_ligan.setChecked(True)
+        self.rc_res = QComboBox()
+        for t, x in (("Resolusi apa saja", None), ("≤ 2,0 Å", 2.0), ("≤ 2,5 Å", 2.5), ("≤ 3,0 Å", 3.0)):
+            self.rc_res.addItem(t, x)
+        self.rc_res.setCurrentIndex(2)
+        self.rc_urut = QComboBox()
+        self.rc_urut.addItem("Urut relevansi", "skor")
+        self.rc_urut.addItem("Urut resolusi", "resolusi")
+        for x in (self.rc_ligan, self.rc_res, self.rc_urut):
+            h2.addWidget(x)
+        h2.addStretch(1)
+        v.addLayout(h2)
+        self.rc_daftar = QTreeWidget()
+        self.rc_daftar.setHeaderLabels(["Kode", "Resolusi (Å)", "Ligan kristal", "Judul", "Organisme"])
+        self.rc_daftar.setRootIsDecorated(False)
+        self.rc_daftar.setMinimumHeight(220)
+        self.rc_daftar.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.rc_daftar.header().setSectionResizeMode(3, QHeaderView.Stretch)
+        self.rc_daftar.currentItemChanged.connect(
+            lambda it, *_: it is not None and self.pdbid.setText(it.data(0, Qt.UserRole) or ""))
+        self.rc_daftar.itemDoubleClicked.connect(lambda *_: self.accept())
+        v.addWidget(self.rc_daftar, 1)
+        self.rc_status = self._ket("Protein, ligan asli, air, dan ion dipisah menjadi objek sendiri.")
+        v.addWidget(self.rc_status)
+        return w
+
+    def _rc_cari(self):
+        from ..core import rcsb
+        from . import kerja
+        q = self.rc_kueri.text().strip()
+        if not q:
+            return
+        self.rc_daftar.clear()
+        self.rc_status.setText("Mencari di RCSB PDB…")
+        arg = dict(organisme=self.rc_org.currentData(), hanya_ligan=self.rc_ligan.isChecked(),
+                   resolusi_maks=self.rc_res.currentData(), urut=self.rc_urut.currentData())
+
+        def selesai(h):
+            total, entri = h
+            kode_saran, alasan = rcsb.saran(entri)
+            self.rc_daftar.clear()
+            for e in sorted(entri, key=lambda e: e["kode"] != kode_saran):
+                it = QTreeWidgetItem([e["kode"] + ("  ★" if e["kode"] == kode_saran else ""),
+                                      f"{e['resolusi']:.2f}".replace(".", ",") if e["resolusi"] else "–",
+                                      ", ".join(c for c, _n in e["ligan"][:4]) or "–", e["judul"], e["organisme"]])
+                it.setData(0, Qt.UserRole, e["kode"])
+                it.setToolTip(2, "\n".join(f"{c}: {n}" for c, n in e["ligan"]) or "Tidak ada ligan kristal (selain "
+                                                                                   "aditif/ion)")
+                it.setToolTip(3, f"{e['judul']}\n{e['protein']}\n{e['metode']} · rilis {e['tanggal']}")
+                it.setTextAlignment(1, Qt.AlignRight | Qt.AlignVCenter)
+                if e["kode"] == kode_saran:
+                    for c in range(5):
+                        f = it.font(c)
+                        f.setBold(True)
+                        it.setFont(c, f)
+                self.rc_daftar.addTopLevelItem(it)
+            for c in (0, 1, 2):
+                self.rc_daftar.resizeColumnToContents(c)
+            if entri:
+                self.rc_daftar.setCurrentItem(self.rc_daftar.topLevelItem(0))
+                self.rc_status.setText(f"{len(entri)} dari {total} entri. ★ Disarankan: {kode_saran} ({alasan}). "
+                                       "Klik dua kali untuk mengimpor.")
+            else:
+                self.rc_status.setText("Tidak ditemukan. Coba kata kunci lain, longgarkan resolusi, atau matikan "
+                                       "'Hanya yang punya ligan'.")
+        kerja.jalankan(lambda lapor: rcsb.cari(q, **arg), selesai=selesai,
+                       galat=lambda g: self.rc_status.setText("Pencarian gagal: " + g.splitlines()[0]))
 
     def _tab_alphafold(self):
         w = QWidget()
@@ -104,6 +198,10 @@ class DialogAmbil(QDialog):
         return w
 
     def accept(self):
+        # tab RCSB: Enter di kolom cari = cari (bukan impor)
+        if self.tab.currentIndex() == 0 and self.rc_kueri.hasFocus():
+            self._rc_cari()
+            return
         # tab AlphaFold: Enter di kolom cari / Impor tanpa pilihan = jalankan pencarian dulu
         if self.tab.currentIndex() == 3:
             from ..core import alphafold

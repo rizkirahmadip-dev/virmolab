@@ -30,7 +30,20 @@ def job_baru(proyek, ligan, mesin, perangkat, parameter, kotak, nama=None):
             **_fleksibel(proyek),
             "ligan": [{"id": l["id"], "nama": l["nama"], "pdbqt": l["pdbqt"], "status": "menunggu", "progres": 0,
                        "keluaran": None, "energi": None, "ki": "", "rmsd_ref": None, "n_pose": 0, "pose": [],
-                       "pesan": "", "detik": None} for l in ligan]}
+                       "pesan": "", "detik": None, **({"flex": l["flex_kov"], "warhead": l.get("warhead", "")}
+                                                         if l.get("flex_kov") else {})}
+                      for l in ligan]}
+
+
+def jadikan_kovalen(job, kv):
+    """Ubah job biasa menjadi docking kovalen (AD-GPU --flexres per ligan; reseptor tanpa rantai samping sasaran).
+    kv: {residu, resn, label, kaku}. Ligan job harus sudah membawa 'flex' (aduk) dan 'pdbqt' templat aduk."""
+    job.pop("flex", None)
+    job.pop("fleksibel", None)
+    job["reseptor"] = kv["kaku"]
+    job["kovalen"] = {k: kv[k] for k in ("residu", "resn", "label") if k in kv}
+    job["nama"] = f"{M.MESIN[job['mesin']]} · kovalen {kv.get('label', kv.get('residu', ''))} · {len(job['ligan'])} ligan"
+    return job
 
 
 def _fleksibel(proyek):
@@ -277,7 +290,22 @@ class Pelaksana(QObject):
             self._ubah(j)
             QTimer.singleShot(0, self._berikut)
             return
-        flex = pr.p(j["flex"]) if j.get("flex") else None
+        kovalen = bool(j.get("kovalen"))
+        if kovalen:
+            flex = pr.p(l["flex"]) if l.get("flex") else None
+            if j["mesin"] != "adgpu":
+                l["status"] = "dilewati"
+                l["pesan"] = "docking kovalen di VirmoDock hanya didukung AutoDock-GPU"
+                self._ubah(j)
+                QTimer.singleShot(0, self._berikut)
+                return
+        else:
+            flex = pr.p(j["flex"]) if j.get("flex") else None
+        if kovalen and (flex is None or not flex.exists()):
+            l["status"], l["pesan"] = "gagal", "berkas aduk kovalen tidak ditemukan; jalankan ulang docking kovalen"
+            self._ubah(j)
+            QTimer.singleShot(0, self._berikut)
+            return
         if flex is not None and not flex.exists():
             l["status"], l["pesan"] = "gagal", "berkas residu fleksibel tidak ditemukan; atur ulang Residu fleksibel"
             self._ubah(j)
@@ -295,6 +323,8 @@ class Pelaksana(QObject):
             import re
             tors = int((re.search(r"TORSDOF\s+(\d+)", teks) or [0, 0])[1]) if "TORSDOF" in teks else 0
             n_atom = sum(1 for b in teks.splitlines() if b.startswith(("ATOM", "HETATM")))
+            if kovalen:          # ligan tidak dikirim terpisah: aduk seluruhnya ada di berkas flexres
+                tors = n_atom = 0
             if flex is not None:     # batas AD-GPU berlaku untuk ligan + residu fleksibel
                 tf = flex.read_text()
                 tors += sum(1 for b in tf.splitlines() if b.startswith("BRANCH"))
@@ -302,12 +332,13 @@ class Pelaksana(QObject):
             if tors > MAKS_TORSI_GPU or n_atom > MAKS_ATOM_GPU:
                 l["status"] = "dilewati"
                 l["pesan"] = (f"melebihi batas AutoDock-GPU ({tors} torsi, {n_atom} atom"
-                              + (" termasuk residu fleksibel" if flex is not None else "") + "); jalankan dengan Vina")
+                              + (" aduk kovalen); kurangi ikatan rotasi ligan" if kovalen else
+                                 (" termasuk residu fleksibel" if flex is not None else "") + "); jalankan dengan Vina"))
                 self._ubah(j)
                 QTimer.singleShot(0, self._berikut)
                 return
             basis = folder / l["id"]
-            cmd = M.perintah_adgpu(pr.p("grid", "reseptor.maps.fld"), lig, basis, p, flex=flex)
+            cmd = M.perintah_adgpu(pr.p("grid", "reseptor.maps.fld"), None if kovalen else lig, basis, p, flex=flex)
             l["keluaran"] = pr.rel(folder / f"{l['id']}.dlg")
             cwd = str(folder)
         elif j["mesin"] == "vina":
@@ -440,9 +471,16 @@ class Pelaksana(QObject):
                 analisis.ringkas_ligan(self.proyek, l, pose, self._reseptor(j))
             except Exception as e:
                 self.log.emit(f"Analisis {l['nama']} dilewati: {e}")
+            if j.get("kovalen"):     # skor kovalen bukan ΔG ikatan: Ki dan LE tidak bermakna
+                l["ki"], l["le"] = "", None
             self._qc_antre(j, l, pose)
             self.log.emit(f"{l['nama']}: {pose[0].energi:.2f} kcal/mol ({l['detik']:.1f} s)")
             self.liganSelesai.emit(j["id"], l["id"])
+        elif j["mesin"] == "adgpu" and j.get("kovalen") and (M.RE_GALAT_OPENCL.search(self.keluaran)
+                                                             or kode in M.KODE_GALAT_DLL):
+            l["status"] = "gagal"
+            l["pesan"] = "AutoDock-GPU tidak bisa memakai GPU (OpenCL); docking kovalen butuh AutoDock-GPU"
+            self.log.emit(f"{l['nama']} gagal: {l['pesan']}")
         elif j["mesin"] == "adgpu" and (M.RE_GALAT_OPENCL.search(self.keluaran) or kode in M.KODE_GALAT_DLL):
             # GPU/OpenCL tidak bisa dipakai: lanjutkan seluruh job dengan Vina (CPU)
             j["mesin"] = "vina"

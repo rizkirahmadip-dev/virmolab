@@ -163,8 +163,8 @@ def hash_teks(t):
 # --------------------------------------------------------------- perintah
 def perintah_adgpu(fld, lig, basis, p, devnum=None, flex=None):
     devnum = devnum or getattr(p, "devnum", 0) or None
-    cmd = [paths.program("autodock_gpu.exe"), "--ffile", str(fld), "--lfile", str(lig), "--nrun", str(p.nrun),
-           "--resnam", str(basis), "--xmloutput", "0", "--heuristics", "1" if p.heuristik else "0"]
+    cmd = [paths.program("autodock_gpu.exe"), "--ffile", str(fld)] + (["--lfile", str(lig)] if lig else []) + [
+           "--nrun", str(p.nrun), "--resnam", str(basis), "--xmloutput", "0", "--heuristics", "1" if p.heuristik else "0"]
     if not p.heuristik:  # heuristik aktif: jumlah evaluasi ditentukan AD-GPU dari ukuran ligan
         cmd += ["--nev", str(p.nev)]
     if p.seed:
@@ -285,7 +285,14 @@ def baca_dlg(path):
                     di_flex = False
                 elif isi.startswith(("ATOM", "HETATM", "ROOT", "ENDROOT", "BRANCH", "ENDBRANCH", "TORSDOF")):
                     (flex if di_flex else atom).append(isi)
+                elif isi.startswith("REMARK") and di_flex:   # REMARK SMILES aduk kovalen
+                    flex.append(isi)
                 elif isi.startswith("ENDMDL"):
+                    if energi is not None and not atom and flex:   # docking kovalen: ligan = aduk di blok flexres
+                        from .kovalen import ubah_pose
+                        kv = ubah_pose(flex)
+                        if kv:
+                            atom, flex = kv[0].splitlines(), kv[1].splitlines()
                     if energi is not None and atom:
                         pose_run[run or len(pose_run) + 1] = (energi, "\n".join(atom), "\n".join(flex))
                 else:
@@ -355,9 +362,11 @@ def baca_hasil(mesin, path):
 
 def pose_ke_pdb(pdbqt, resn="LIG"):
     """Blok pose PDBQT -> PDB (HETATM, kolom elemen) untuk viewer dan ekspor kompleks."""
+    from .kovalen import atom_residu
+    residu = atom_residu(pdbqt)          # pose kovalen: atom residu tampil lewat objek residu fleksibel
     baris = []
-    for b in pdbqt.splitlines():
-        if not b.startswith(("ATOM", "HETATM")):
+    for i, b in enumerate(x for x in pdbqt.splitlines() if x.startswith(("ATOM", "HETATM"))):
+        if i in residu:
             continue
         tipe = b[77:].split()[0] if len(b) > 77 and b[77:].split() else "C"
         el = ELEMEN.get(tipe.upper(), "C" if re.match(r"^C?G\d$", tipe) else tipe[:2].capitalize())

@@ -3,13 +3,19 @@ import platform
 
 from PySide6.QtCore import QUrl
 from PySide6.QtGui import QDesktopServices, QGuiApplication
-from PySide6.QtWidgets import (QDialog, QHBoxLayout, QLabel, QPlainTextEdit, QPushButton, QTabWidget, QTextBrowser,
-                               QVBoxLayout)
+from PySide6.QtWidgets import (QDialog, QFileDialog, QHBoxLayout, QLabel, QPlainTextEdit, QPushButton, QTabWidget,
+                               QTextBrowser, QVBoxLayout)
 
 from ..core import catat, paths
 from ..core.laporan import SITASI
 from ..core.qc import SITASI as SITASI_QC
 from ..core.sifat import SITASI as SITASI_SIFAT
+
+SITASI_MD = []
+try:      # modul MD membutuhkan numpy saja di tingkat impor; daftar sitasi tetap tersedia walau OpenMM tidak ada
+    from ..core.md import SITASI as SITASI_MD
+except Exception:
+    pass
 
 
 def _ket(t):
@@ -48,13 +54,37 @@ class DialogLapor(QDialog):
                                     b1.setText("Tersalin")))
         b2 = QPushButton("Buka folder log")
         b2.clicked.connect(lambda: QDesktopServices.openUrl(QUrl.fromLocalFile(str(paths.LOG))))
+        b4 = QPushButton("Simpan paket laporan (.zip)…")
+        b4.setToolTip("Teks di atas + seluruh berkas log + hasil uji mandiri terakhir (bila ada) dalam satu zip "
+                      "untuk dilampirkan sendiri ke email/Issues")
+        b4.clicked.connect(self.simpan_zip)
+        self.l_zip = _ket("")
         b3 = QPushButton("Tutup")
         b3.clicked.connect(self.accept)
         h.addWidget(b2)
+        h.addWidget(b4)
         h.addStretch(1)
         h.addWidget(b1)
         h.addWidget(b3)
         lay.addLayout(h)
+        lay.addWidget(self.l_zip)
+
+    def simpan_zip(self):
+        import zipfile
+        from datetime import datetime
+        f, _ = QFileDialog.getSaveFileName(self, "Simpan paket laporan",
+                                           str(paths.folder_kerja_bawaan() / f"laporan_VirmoDock_{datetime.now():%Y%m%d_%H%M}.zip"),
+                                           "Arsip zip (*.zip)")
+        if not f:
+            return
+        with zipfile.ZipFile(f, "w", zipfile.ZIP_DEFLATED) as z:
+            z.writestr("laporan.txt", self.teks.toPlainText())
+            for p in sorted(paths.LOG.glob("*.log*")):
+                z.write(p, f"log/{p.name}")
+            for p in (paths.APPDATA / "uji_mandiri.json",):
+                if p.exists():
+                    z.write(p, p.name)
+        self.l_zip.setText(f"Tersimpan: {f} — periksa isinya, lalu lampirkan sendiri saat melapor.")
 
 
 class DialogLisensi(QDialog):
@@ -72,7 +102,12 @@ class DialogLisensi(QDialog):
             "<p>Kutip juga mesin dan pustaka yang Anda pakai (laporan VirmoDock mencantumkannya otomatis):</p><ol>"
             + "".join(f"<li>{v}</li>" for v in SITASI.values()) + "</ol>"
             "<p>Bila memakai kontrol kualitas pose, sifat ligan, atau BOILED-Egg:</p><ol>"
-            + "".join(f"<li>{v}</li>" for v in [SITASI_QC] + SITASI_SIFAT) + "</ol>")
+            + "".join(f"<li>{v}</li>" for v in [SITASI_QC] + SITASI_SIFAT) + "</ol>"
+            "<p>Bila memakai MD &amp; MM/GBSA (OpenMM, OpenFF):</p><ol>"
+            + "".join(f"<li>{v}</li>" for v in SITASI_MD) + "</ol>"
+            "<p>Bila memakai docking kovalen:</p><ol><li>"
+            "Bianco G, Forli S, Goodsell DS, Olson AJ. Covalent docking using AutoDock: two-point attractor and "
+            "flexible side chain methods. Protein Sci. 2016;25(1):295–301. doi:10.1002/pro.2733</li></ol>")
         tab.addTab(kutip, "Cara mengutip")
         lis = QTextBrowser()
         lis.setOpenExternalLinks(True)

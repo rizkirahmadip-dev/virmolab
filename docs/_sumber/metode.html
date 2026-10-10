@@ -22,6 +22,10 @@
 <tr><td>AutoDock 4.2.6</td><td>LGA, 50 run, populasi 150, 2,5 juta evaluasi, 27 000 generasi, Solis-Wets.</td></tr>
 </table>
 
+<h2>Docking kovalen (metode tethered)</h2>
+<p>Ligan direaksikan secara kimia dengan rantai samping residu sasaran (Cys, Ser, atau Lys) di RDKit sesuai jenis gugus reaktifnya: adisi (akseptor Michael, alkuna teraktivasi, nitril, aldehida — orde ikatan turun satu dan nukleofil terikat pada atom elektrofilik), substitusi (α-haloketon/haloasetamida, sulfonil fluorida — gugus pergi dibuang), atau pembentukan imina (aldehida + Lys → basa Schiff). Aduk residu + ligan dibuat 3D (ETKDGv3, minimisasi MMFF94), lalu sumbu CA–CB-nya disejajarkan ke posisi CA–CB residu pada struktur kristal. Aduk dikonversi dengan Meeko sebagai residu fleksibel berakar di CA (<code>adapt_pdbqt_for_autodock4_flexres</code>) dan di-docking dengan AutoDock-GPU memakai <code>--flexres</code> saja (tanpa ligan terpisah), terhadap reseptor yang rantai samping residu sasarannya sudah dipisahkan.</p>
+<p>Skor yang dilaporkan AutoDock-GPU untuk pose ini adalah energi residu fleksibel (aduk–reseptor + intramolekul aduk) tanpa penalti torsi: <b>bukan ΔG ikatan</b>, sehingga Ki dan efisiensi ligan tidak ditampilkan dan skor hanya dibandingkan antar-ligan kovalen pada residu sasaran yang sama. Kontrol kualitas pose kovalen memakai PoseBusters tanpa uji <i>jarak minimum ke protein</i> (ikatan kovalen memang lebih pendek daripada kontak van der Waals); 21 uji sisanya tetap dijalankan. Validasi internal: 6OIM (KRAS G12C–sotorasib, Cys12), ligan dibangun dari SMILES, pose peringkat 1 RMSD 1,34 Å terhadap ligan kristal.</p>
+
 <h2>Kriteria interaksi</h2>
 <table>
 <tr><th>Jenis</th><th>Kriteria</th></tr>

@@ -81,6 +81,17 @@ class PanelDocking(QWidget):
         hf.addWidget(self.l_flex, 1)
         hf.addWidget(b_flex)
         f0.addRow(self._m("Residu fleksibel"), hf)
+        hk = QHBoxLayout()
+        hk.setSpacing(6)
+        self.l_kov = QLabel("tidak")
+        self.l_kov.setObjectName("mono")
+        self.l_kov.setWordWrap(True)
+        b_kov = QPushButton("Atur…")
+        b_kov.setToolTip("Ikat ligan ber-gugus reaktif ke Cys/Ser/Lys lalu docking sebagai aduk (AutoDock-GPU)")
+        b_kov.clicked.connect(lambda: self.aksiKotak.emit("kovalen"))
+        hk.addWidget(self.l_kov, 1)
+        hk.addWidget(b_kov)
+        f0.addRow(self._m("Docking kovalen"), hk)
         lay.addLayout(f0)
 
         lay.addWidget(judul_seksi("Mesin dan perangkat"))
@@ -435,6 +446,9 @@ class PanelDocking(QWidget):
 
     def set_fleksibel(self, residu):
         self.l_flex.setText(", ".join(residu) if residu else "kaku")
+
+    def set_kovalen(self, label):
+        self.l_kov.setText(f"ya · {label}" if label else "tidak")
 
     def set_ringkasan(self, reseptor, n_lig, n_peringatan=0, area=None):
         self.l_rec.setText(reseptor or "belum disiapkan")

@@ -1,4 +1,4 @@
-<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Metode &amp; kriteria · VirmoDock</title><link rel="stylesheet" href="gaya.css"><link rel="icon" href="gambar/ikon.png"></head><body><header><img src="gambar/logo_putih.svg" alt="VirmoDock" style="height:30px;margin-right:6px"><span style="color:#9fb4d3;font-size:13px;margin-right:10px">0.9.4</span><a href="panduan.html">Panduan pengguna</a><a href="instalasi.html">Instalasi</a><a href="pindah_laptop.html">Pindah laptop</a><a href="gpu.html">Setup GPU</a><a href="troubleshooting.html">Mengatasi masalah</a><a href="metode.html" class="aktif">Metode &amp; kriteria</a></header><main><h1>Metode &amp; kriteria</h1>
+<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Metode &amp; kriteria · VirmoDock</title><link rel="stylesheet" href="gaya.css"><link rel="icon" href="gambar/ikon.png"></head><body><header><img src="gambar/logo_putih.svg" alt="VirmoDock" style="height:30px;margin-right:6px"><span style="color:#9fb4d3;font-size:13px;margin-right:10px">0.9.5</span><a href="panduan.html">Panduan pengguna</a><a href="instalasi.html">Instalasi</a><a href="pindah_laptop.html">Pindah laptop</a><a href="gpu.html">Setup GPU</a><a href="troubleshooting.html">Mengatasi masalah</a><a href="metode.html" class="aktif">Metode &amp; kriteria</a></header><main><h1>Metode &amp; kriteria</h1>
 <p class="lead">Rincian ilmiah yang dipakai VirmoDock, untuk ditulis di bagian Metode naskah.</p>
 
 <h2>Preparasi</h2>
@@ -21,6 +21,10 @@
 <tr><td>AutoDock Vina 1.2.7</td><td>Exhaustiveness 16, 9 pose, rentang energi 3 kcal/mol, seed 42.</td></tr>
 <tr><td>AutoDock 4.2.6</td><td>LGA, 50 run, populasi 150, 2,5 juta evaluasi, 27 000 generasi, Solis-Wets.</td></tr>
 </table>
+
+<h2>Docking kovalen (metode tethered)</h2>
+<p>Ligan direaksikan secara kimia dengan rantai samping residu sasaran (Cys, Ser, atau Lys) di RDKit sesuai jenis gugus reaktifnya: adisi (akseptor Michael, alkuna teraktivasi, nitril, aldehida — orde ikatan turun satu dan nukleofil terikat pada atom elektrofilik), substitusi (α-haloketon/haloasetamida, sulfonil fluorida — gugus pergi dibuang), atau pembentukan imina (aldehida + Lys → basa Schiff). Aduk residu + ligan dibuat 3D (ETKDGv3, minimisasi MMFF94), lalu sumbu CA–CB-nya disejajarkan ke posisi CA–CB residu pada struktur kristal. Aduk dikonversi dengan Meeko sebagai residu fleksibel berakar di CA (<code>adapt_pdbqt_for_autodock4_flexres</code>) dan di-docking dengan AutoDock-GPU memakai <code>--flexres</code> saja (tanpa ligan terpisah), terhadap reseptor yang rantai samping residu sasarannya sudah dipisahkan.</p>
+<p>Skor yang dilaporkan AutoDock-GPU untuk pose ini adalah energi residu fleksibel (aduk–reseptor + intramolekul aduk) tanpa penalti torsi: <b>bukan ΔG ikatan</b>, sehingga Ki dan efisiensi ligan tidak ditampilkan dan skor hanya dibandingkan antar-ligan kovalen pada residu sasaran yang sama. Kontrol kualitas pose kovalen memakai PoseBusters tanpa uji <i>jarak minimum ke protein</i> (ikatan kovalen memang lebih pendek daripada kontak van der Waals); 21 uji sisanya tetap dijalankan. Validasi internal: 6OIM (KRAS G12C–sotorasib, Cys12), ligan dibangun dari SMILES, pose peringkat 1 RMSD 1,34 Å terhadap ligan kristal.</p>
 
 <h2>Kriteria interaksi</h2>
 <table>
@@ -126,4 +130,4 @@
 </ol>
 <p>Laporan PDF VirmoDock mencantumkan sitasi sesuai mesin yang benar-benar dipakai.</p>
 <div class="peringatan">Hasil docking adalah prediksi komputasi, bukan bukti aktivitas biologis; konfirmasi dengan uji eksperimen.</div>
-<footer>VirmoDock 0.9.4 · dokumentasi offline · GPL-3.0-or-later</footer></main></body></html>
+<footer>VirmoDock 0.9.5 · dokumentasi offline · GPL-3.0-or-later</footer></main></body></html>

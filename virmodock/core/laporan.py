@@ -102,7 +102,11 @@ def html(proyek, baris, info, interaksi_terbaik=None, ada_gambar3d=False, ada_di
 
     # ---- reseptor
     o.append("<h2>2. Reseptor</h2><table class='t'>")
-    for k, v in (("Struktur", rec.get("nama")), ("Sumber", rec.get("sumber")), ("Metode preparasi", rec.get("metode")),
+    sumber = rec.get("sumber") or ""
+    if re.match(r"^[A-Za-z]:[\\/]", sumber):      # berkas lokal: cukup namanya (jalur memuat nama pengguna Windows)
+        from pathlib import PureWindowsPath
+        sumber = PureWindowsPath(sumber).name
+    for k, v in (("Struktur", rec.get("nama")), ("Sumber", sumber), ("Metode preparasi", rec.get("metode")),
                  ("Atom PDBQT", rec.get("atom")), ("Residu", rec.get("residu")),
                  ("Ion logam dipertahankan", ", ".join(rec.get("logam") or []) or "–"),
                  ("Residu tidak lengkap dibuang", ", ".join(rec.get("dibuang") or []) or "–")):
@@ -118,6 +122,11 @@ def html(proyek, baris, info, interaksi_terbaik=None, ada_gambar3d=False, ada_di
     if jobs_flex:
         o.append(f"<tr><th>Residu fleksibel</th><td>{escape(' | '.join(jobs_flex))} (rantai samping dapat "
                  "berotasi selama docking; Meeko)</td></tr>")
+    jobs_kov = sorted({(j["kovalen"].get("label") or j["kovalen"].get("residu") or "")
+                       for j in jobs if j.get("kovalen")})
+    if jobs_kov:
+        o.append(f"<tr><th>Docking kovalen</th><td>residu sasaran {escape(' | '.join(jobs_kov))} (metode tethered: "
+                 "ligan diikat ke rantai samping residu dan di-docking sebagai aduk)</td></tr>")
     o.append("</table>")
     op = rec.get("opsi") or {}
     o.append(f"<p class='mut'>Air {'dihapus' if op.get('hapus_air', True) else 'dipertahankan'}; ligan/aditif "
@@ -168,10 +177,15 @@ def html(proyek, baris, info, interaksi_terbaik=None, ada_gambar3d=False, ada_di
     o.append("</table>")
     if len(baris) > 15:
         o.append(f"<p class='mut'>15 dari {len(baris)} hasil ditampilkan; tabel lengkap tersedia di ekspor CSV/XLSX.</p>")
+    if jobs_kov:
+        o.append("<p class='mut'>Docking kovalen: angka pada kolom ΔG adalah skor aduk–reseptor (energi residu "
+                 "fleksibel), bukan ΔG ikatan; Ki dan efisiensi ligan tidak dihitung. Bandingkan hanya antar-ligan "
+                 "kovalen pada residu sasaran yang sama.</p>")
     if baris:
         b = baris[0]
-        o.append(f"<p>Ligan terbaik: <b>{escape(b['ligan'])}</b>, ΔG {_n(b['energi'])} kcal/mol "
-                 f"(Ki perkiraan {_f(b['ki'])}).</p>")
+        o.append(f"<p>Ligan terbaik: <b>{escape(b['ligan'])}</b>, "
+                 + (f"skor kovalen {_n(b['energi'])} kcal/mol.</p>" if jobs_kov else
+                    f"ΔG {_n(b['energi'])} kcal/mol (Ki perkiraan {_f(b['ki'])}).</p>"))
         if ada_gambar3d or ada_diagram:
             o.append("<table><tr>")
             if ada_gambar3d:
@@ -239,6 +253,11 @@ def html(proyek, baris, info, interaksi_terbaik=None, ada_gambar3d=False, ada_di
              f"π–π ≤ {_n(k['pi'], 1)} Å, π–kation ≤ {_n(k['pikation'], 1)} Å, jembatan garam ≤ {_n(k['garam'], 1)} Å, "
              f"ikatan halogen ≤ {_n(k['halogen'], 1)} Å. "
              "RMSD redocking dihitung tanpa penjajaran dan memperhitungkan simetri molekul."
+             + (" Docking kovalen memakai metode tethered (rantai samping fleksibel): ligan direaksikan secara kimia "
+                "dengan rantai samping residu sasaran menjadi satu aduk, aduk disejajarkan pada sumbu CA–CB residu "
+                "dan di-docking sebagai residu fleksibel tunggal (AutoDock-GPU --flexres) terhadap reseptor tanpa "
+                "rantai samping tersebut. Skor yang dilaporkan adalah energi aduk–reseptor, bukan ΔG ikatan, dan "
+                "hanya dibandingkan antar-ligan kovalen pada residu sasaran yang sama." if jobs_kov else "")
              + (" Sifat fisikokimia dan kemiripan obat dihitung dengan RDKit dari struktur netral (WLOGP "
                 "Wildman–Crippen, TPSA Ertl); aturan Lipinski, Veber, Ghose, Egan, Muegge; peringatan substruktur "
                 "PAINS; prediksi absorpsi saluran cerna dan penetrasi sawar darah otak dengan model BOILED-Egg."
@@ -258,6 +277,10 @@ def html(proyek, baris, info, interaksi_terbaik=None, ada_gambar3d=False, ada_di
         kunci.insert(1, "ad4")  # AD-GPU memakai fungsi skor & AutoGrid AutoDock4
     for x in kunci:
         o.append(f"<li>{escape(SITASI[x])}</li>")
+    if jobs_kov:
+        o.append("<li>" + escape("Bianco G, Forli S, Goodsell DS, Olson AJ. Covalent docking using AutoDock: "
+                                 "two-point attractor and flexible side chain methods. Protein Sci. "
+                                 "2016;25(1):295–301. doi:10.1002/pro.2733") + "</li>")
     if any(b.get("qc") and not b["qc"].get("galat") for b in baris):
         from .qc import SITASI as SITASI_QC
         o.append(f"<li>{escape(SITASI_QC)}</li>")

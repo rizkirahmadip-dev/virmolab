@@ -596,7 +596,7 @@ Disepakati pengguna (8 Okt 2026): tidak menambah fitur baru lagi; mulai membangu
 | v1.3 | P2Rank deteksi kantong, Asisten Alur, wizard preparasi protein penuh + optimasi ikatan H, ChEMBL validasi & korelasi — **SELESAI (0.9.0–0.9.2)** |
 | v1.4 | Konsensus skor + ROC/EF/BEDROC, laporan Word & HTML interaktif, komposer figur, animasi |
 | v1.5 | ADMET-AI (paket opsional), Ketcher, kemiripan/farmakofor, pustaka ZINC/obat FDA/COCONUT, bahasa Inggris — **SELESAI 9 Okt 2026 (0.9.2)**; ZINC hanya tautan situs (anti-bot) |
-| v2.0 | MD adaptif + MM/GBSA (OpenMM, A8a), flexres/kovalen, plugin & konsol Python, baris perintah, AlphaFold DB — **flexres, baris perintah (VirmoDock-cli), AlphaFold DB SELESAI 9 Okt 2026 (0.9.3)**; **MD adaptif + MM/GBSA SELESAI 9 Okt 2026 (0.9.4)**; sisa: kovalen, plugin/konsol |
+| v2.0 | MD adaptif + MM/GBSA (OpenMM, A8a), flexres/kovalen, plugin & konsol Python, baris perintah, AlphaFold DB — **flexres, baris perintah (VirmoDock-cli), AlphaFold DB SELESAI 9 Okt 2026 (0.9.3)**; **MD adaptif + MM/GBSA SELESAI 9 Okt 2026 (0.9.4)**; **kovalen, plugin & konsol Python SELESAI 10 Okt 2026 (0.9.5)** — v2.0 lengkap |
 | v2.x | Eksperimental: GNINA (WSL), Boltz-2, edit ligan dalam kantong, asisten LLM lokal |
 
 ## E5. Uji di banyak laptop (sebelum setiap rilis)

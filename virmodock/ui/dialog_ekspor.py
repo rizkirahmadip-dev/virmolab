@@ -32,7 +32,8 @@ class DialogEkspor(QDialog):
         lay = QVBoxLayout(self)
         tengah = QHBoxLayout()
         self.daftar = QListWidget()
-        self.daftar.addItems(["Gambar 3D", "Diagram 2D", "Struktur molekul", "Tabel hasil", "Laporan PDF"])
+        self.daftar.addItems(["Gambar 3D", "Diagram 2D", "Struktur molekul", "Tabel hasil", "Laporan PDF",
+                              "Paket Supplementary"])
         self.daftar.setFixedWidth(170)
         self.stack = QStackedWidget()
         self.daftar.currentRowChanged.connect(self.stack.setCurrentIndex)
@@ -168,6 +169,20 @@ class DialogEkspor(QDialog):
                       "(klik baris tabel), tabel lengkap yang bisa dicari & diurutkan, dan laporan lengkap."))
         self.stack.addWidget(w)
 
+        # ---- paket Supplementary
+        w = QWidget()
+        f = QFormLayout(w)
+        self.p_kompleks = QSpinBox()
+        self.p_kompleks.setRange(0, 500)
+        self.p_kompleks.setValue(20)
+        self.p_kompleks.setSuffix(" ligan teratas")
+        f.addRow("Kompleks PDB", self.p_kompleks)
+        f.addRow(_ket("Satu berkas .zip untuk lampiran jurnal: README otomatis, reseptor (PDBQT, PDB bersih, laporan "
+                      "preparasi, pKa, residu fleksibel), ligan PDBQT, pose terbaik & semua pose (SDF bertag ΔG, Ki, LE, "
+                      "interaksi, MM/GBSA), kompleks PDB, tabel CSV, parameter tiap job (JSON), hasil MD & MM/GBSA, "
+                      "versi perangkat lunak, dan checksum SHA-256."))
+        self.stack.addWidget(w)
+
         bawah = QHBoxLayout()
         bawah.addStretch(1)
         b = QPushButton("Ekspor…")
@@ -228,6 +243,8 @@ class DialogEkspor(QDialog):
         elif i == 3:
             d = {"jenis": "tabel", "fmt": "xlsx" if self.t_fmt.currentIndex() == 0 else "csv",
                  "sep": self.t_sep.currentData(), "koma": self.t_dec.currentData(), "interaksi": self.t_inter.isChecked()}
+        elif i == 5:
+            d = {"jenis": "paket", "n_kompleks": self.p_kompleks.value()}
         else:
             self.st.setValue("format_laporan", self.l_fmt.currentData())
             d = {"jenis": "laporan", "penulis": self.l_penulis.text().strip(), "gambar": self.l_gambar.isChecked(),

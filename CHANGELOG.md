@@ -2,6 +2,28 @@
 
 Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x adalah pra-rilis.
 
+## [0.9.5] — 10 Oktober 2026
+
+### Baru
+- **Docking kovalen** (Siapkan › Docking kovalen…, atau *Atur…* di langkah 4): pilih residu nukleofil (Cys, Ser, Lys) di dalam grid box; ligan yang punya gugus reaktif diikat secara kimia ke rantai sampingnya dan di-docking sebagai satu aduk dengan metode *tethered* (AutoDock-GPU `--flexres`). Gugus reaktif yang dikenali: akseptor Michael (akrilamida/enon/vinil sulfon), alkuna teraktivasi, α-haloketon/haloasetamida, sulfonil fluorida, nitril, aldehida (termasuk basa Schiff untuk Lys). Dialog menampilkan deteksi per ligan sebelum dijalankan; ligan tanpa gugus reaktif yang cocok dilewati. Rantai samping residu sasaran tampil sebagai objek pose tersendiri dan interaksi dihitung pada posisi itu. Validasi: 6OIM (KRAS G12C–sotorasib) RMSD 1,34 Å dari SMILES.
+- Docking kovalen di baris perintah: `VirmoDock-cli dock … --kovalen A:12`.
+- **Pencarian struktur RCSB PDB** di dialog Impor: cari dengan nama protein/gen/ligan, saring organisme, "hanya dengan ligan", dan resolusi; VirmoDock menandai ★ struktur terbaik untuk docking (difraksi sinar-X, ada ligan kristal, resolusi terkecil).
+- **Templat proyek** dan **proyek contoh HIV-1 protease** yang bisa dibuka sepenuhnya offline (1HSG + 9 inhibitor disetujui + aspirin sebagai kontrol).
+- **Urungkan/Ulangi** (Ctrl+Z / Ctrl+Y) untuk grid box dan gaya tampilan.
+- **Palet perintah** (Ctrl+K): cari dan jalankan perintah menu mana pun dengan mengetik.
+- **Mode Pemula / Ahli**: mode Ahli menyembunyikan panel Langkah dan membuka pengaturan lanjutan.
+- **Tur aplikasi** (Bantuan › Tur aplikasi): 9 langkah bagian jendela yang disorot satu per satu.
+- **Paket Supplementary** (.zip) untuk publikasi: pose, tabel, parameter tiap job, berkas reseptor/ligan, README, dan SHA-256 tiap berkas.
+- **Lapor masalah atau kirim saran…**: mengemas berkas log ke satu .zip untuk dilampirkan.
+- **Konsol Python** (Alat › Konsol Python) dan **plugin pengguna** (berkas .py di folder plugin → menu Alat › Plugin); galat plugin ditangkap sehingga tidak menjatuhkan aplikasi.
+
+### Diperbaiki
+- Ekspor dan laporan tidak lagi menuliskan jalur berkas lengkap (yang memuat nama pengguna Windows) ke dalam berkas yang dibagikan — kini hanya nama berkas/folder.
+
+### Diubah
+- Uji mandiri kini 26 komponen (+ docking kovalen: aduk + flexres Meeko).
+- Pose kovalen diperiksa PoseBusters tanpa uji *jarak minimum ke protein* (ikatan kovalen memang lebih pendek daripada kontak van der Waals); 21 uji lainnya tetap dijalankan.
+
 ## [0.9.4] — 9 Oktober 2026
 
 ### Baru

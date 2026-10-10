@@ -91,7 +91,8 @@ class HalamanAwal(QWidget):
         v.addSpacing(16)
         h = QHBoxLayout()
         h.setSpacing(16)
-        for kunci, teks in (("tutorial", "Tutorial docking (PDF)"), ("panduan", "Panduan pengguna (F1)")):
+        for kunci, teks in (("templat", "Mulai dari templat / proyek contoh"), ("tur", "Tur aplikasi"),
+                            ("tutorial", "Tutorial docking (PDF)"), ("panduan", "Panduan pengguna (F1)")):
             b = QPushButton(teks)
             b.setObjectName("tautan")
             b.setCursor(Qt.PointingHandCursor)

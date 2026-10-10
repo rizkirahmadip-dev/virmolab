@@ -16,6 +16,7 @@ Contoh:
   VirmoDock-cli dock -r 1HSG -l kandidat.smi --acuan auto -o hasil_1hsg
   VirmoDock-cli dock -r reseptor.pdbqt -l ligan/ --pusat 13.07 22.47 5.56 --ukuran 22 22 22 --mesin vina
   VirmoDock-cli reseptor 1HSG -o rec.pdbqt --protonasi propka --flex A:25,B:25 --keluar-flex flex.pdbqt
+  VirmoDock-cli dock -r 6OIM -l sotorasib.smi --acuan auto -o hasil_kov --kovalen A:12 --mesin adgpu
   VirmoDock-cli mmgbsa -r hasil_1hsg -o mmgbsa_1hsg --md --ns 2
 """
 import argparse
@@ -97,6 +98,9 @@ def _siapkan_reseptor(a, folder=None):
     if a.reseptor.lower().endswith(".pdbqt") and Path(a.reseptor).exists():
         if getattr(a, "flex", None):
             _galat("--flex butuh reseptor PDB/CIF/kode PDB (bukan PDBQT). Atau berikan --berkas-flex.")
+        if getattr(a, "kovalen", None):
+            _galat("--kovalen butuh reseptor PDB/CIF/kode PDB (bukan PDBQT): koordinat CA/CB residu sasaran "
+                   "diambil dari struktur.")
         teks = Path(a.reseptor).read_text(errors="replace")
         flex = Path(a.berkas_flex).read_text(errors="replace") if getattr(a, "berkas_flex", None) else None
         return teks, flex, {"nama": Path(a.reseptor).stem, "metode": "PDBQT disiapkan pengguna"}, []
@@ -108,7 +112,16 @@ def _siapkan_reseptor(a, folder=None):
     info = {"nama": nama, "metode": h.metode, "atom": h.atom, "residu": h.residu, "logam": h.logam,
             "dibuang": h.dibuang}
     rigid, flex = h.pdbqt, None
+    if getattr(a, "kovalen", None):
+        from .core import kovalen as K
+        kv = K.siapkan_reseptor(h.pdb_meeko, h.pdbqt, a.kovalen.strip())
+        rigid = kv["kaku_teks"]
+        info["kovalen"] = kv
+        _cetak(f"  docking kovalen: residu sasaran {kv['resn']} {a.kovalen.strip()} "
+               "(rantai samping dipisah; aduk dibuat per ligan)")
     if getattr(a, "flex", None):
+        if getattr(a, "kovalen", None):
+            _galat("--kovalen tidak bisa digabung dengan --flex (keduanya memakai jalur residu fleksibel).")
         res = [r.strip() for r in a.flex.split(",") if r.strip()]
         rigid, flex, ok, gagal = prep.buat_fleksibel(h.pdb_meeko, h.pdbqt, res)
         info["fleksibel"] = ok
@@ -340,9 +353,36 @@ def cmd_dock(a):
     ligan = _siapkan_ligan(a.ligan, a, out / "ligan")
     if not ligan:
         _galat("Tidak ada ligan yang siap didocking.")
+    kv = info_rec.get("kovalen")
+    flex_lig = {}          # docking kovalen: berkas flexres aduk per ligan (ligan tidak dikirim terpisah)
+    if kv:
+        from .core import kovalen as K
+        folder_aduk = out / "kovalen"
+        folder_aduk.mkdir(exist_ok=True)
+        rantai, _, resi = kv["residu"].partition(":")
+        siap = []
+        for nama, f in ligan:
+            try:
+                aduk, fx, wh, _n = K.siapkan_ligan(f.read_text(), kv["resn"], rantai, resi, kv["ca"], kv["cb"])
+            except Exception as e:
+                _cetak(f"  {nama}: dilewati — {e}")
+                continue
+            fa, ff = folder_aduk / f"{f.stem}.pdbqt", folder_aduk / f"{f.stem}_flex.pdbqt"
+            fa.write_text(aduk, encoding="utf-8")
+            ff.write_text(fx, encoding="utf-8")
+            flex_lig[fa] = ff
+            siap.append((nama, fa))
+            _cetak(f"  {nama}: {wh}")
+        if not siap:
+            _galat(f"Tidak ada ligan dengan gugus reaktif yang cocok untuk {kv['resn']}.")
+        ligan = siap
     mesin = _mesin_otomatis() if a.mesin == "auto" else a.mesin
+    if kv and mesin not in ("auto", "adgpu"):
+        _galat("Docking kovalen hanya didukung AutoDock-GPU (--mesin adgpu).")
     if not M.tersedia(mesin):
         _galat(f"{M.PROGRAM[mesin]} tidak ditemukan di folder bin.")
+    if kv and mesin != "adgpu":
+        _galat("Docking kovalen membutuhkan AutoDock-GPU (OpenCL); program tidak tersedia.")
     if flex and mesin == "ad4":
         _galat("AutoDock4 belum mendukung residu fleksibel di VirmoDock; pakai --mesin adgpu atau vina.")
     p = M.Parameter(mesin=mesin, nrun=a.run, exhaustiveness=a.exhaustiveness, num_modes=a.pose,
@@ -354,7 +394,7 @@ def cmd_dock(a):
     def siapkan_grid():
         tipe = set()
         for _n, f in ligan:
-            tipe |= M.tipe_atom(f.read_text())
+            tipe |= M.tipe_atom((flex_lig.get(f) or f).read_text())
         if flex:
             tipe |= M.tipe_atom(flex)
         gpf = M.tulis_gpf(rigid, tipe, kotak)
@@ -384,8 +424,11 @@ def cmd_dock(a):
                                               flex=out / "flex.pdbqt" if flex else None), out, log)
             elif mesin_l == "adgpu":
                 keluar = folder_pose / f"{dasar}.dlg"
-                r = _jalankan(M.perintah_adgpu(grid / "reseptor.maps.fld", f, folder_pose / dasar, p,
-                                               flex=out / "flex.pdbqt" if flex else None), folder_pose, log)
+                fx_lig = flex_lig.get(f)      # kovalen: hanya --flexres (aduk), tanpa --lfile
+                r = _jalankan(M.perintah_adgpu(grid / "reseptor.maps.fld", None if fx_lig else f,
+                                               folder_pose / dasar, p,
+                                               flex=fx_lig or (out / "flex.pdbqt" if flex else None)),
+                              folder_pose, log)
             else:
                 shutil.copy2(f, folder_pose / f.name)
                 dpf = folder_pose / f"{dasar}.dpf"
@@ -401,6 +444,9 @@ def cmd_dock(a):
                 hasil_status = "selesai"
                 break
             teks_galat = (r.stdout or "") + (r.stderr or "")
+            if kv and mesin_l == "adgpu" and (M.RE_GALAT_OPENCL.search(teks_galat)
+                                              or r.returncode in M.KODE_GALAT_DLL):
+                _galat("AutoDock-GPU tidak bisa memakai GPU (OpenCL); docking kovalen tidak bisa dialihkan ke Vina.")
             if mesin_l == "adgpu" and (M.RE_GALAT_OPENCL.search(teks_galat) or r.returncode in M.KODE_GALAT_DLL):
                 _cetak("  AutoDock-GPU tidak bisa memakai GPU (OpenCL); beralih ke Vina (CPU) untuk sisa ligan.")
                 mesin = mesin_l = "vina"
@@ -426,7 +472,10 @@ def cmd_dock(a):
                 w.write(mol)
                 w.close()
                 d["atom_berat"] = mol.GetNumHeavyAtoms()
-                d["LE"] = f"{analisis.efisiensi_ligan(terbaik.energi, mol.GetNumHeavyAtoms()):.3f}"
+                if kv:    # skor kovalen bukan ΔG ikatan: Ki dan efisiensi ligan tidak bermakna
+                    d["Ki"] = d["LE"] = ""
+                else:
+                    d["LE"] = f"{analisis.efisiensi_ligan(terbaik.energi, mol.GetNumHeavyAtoms()):.3f}"
                 rec = analisis.gabung_flex(analisis.baca_reseptor(rigid), terbaik.flex)
                 I = analisis.interaksi(rec, mol)
                 n = analisis.hitung(I)
@@ -469,6 +518,10 @@ def _tulis_metode(out, a, rec, kotak, sumber_kotak, p, mesin, n_lig, flex):
         + (f"; {rec.get('atom')} atom, {rec.get('residu')} residu" if rec.get("atom") else "")
         + (f"; ion logam: {', '.join(rec['logam'])}" if rec.get("logam") else ""),
         f"Residu fleksibel: {', '.join(rec.get('fleksibel') or []) or ('dari berkas' if flex else 'tidak (reseptor kaku)')}",
+        ("Docking kovalen: metode tethered ke {resn} {res} — ligan diikat ke rantai samping residu dan di-docking "
+         "sebagai aduk (AutoDock-GPU --flexres); skor = energi aduk-reseptor, bukan dG ikatan"
+         ).format(resn=rec["kovalen"]["resn"], res=rec["kovalen"]["residu"]) if rec.get("kovalen")
+        else "Docking kovalen: tidak",
         f"Ligan: {n_lig} (pH {a.ph_ligan}, protonasi {a.protonasi_ligan}, "
         f"{'tanpa minimisasi' if a.tanpa_minimisasi else 'minimisasi MMFF94'}; PDBQT oleh Meeko)",
         f"Grid box: {sumber_kotak}; pusat ({', '.join(f'{v:.3f}' for v in kotak.pusat)}) Å; ukuran "
@@ -592,6 +645,9 @@ def _opsi_reseptor_arg(p, wajib=True):
     p.add_argument("--pertahankan-air", action="store_true", help="jangan hapus molekul air")
     p.add_argument("--buang-logam", action="store_true", help="hapus ion logam (bawaan dipertahankan)")
     p.add_argument("--flex", help="residu fleksibel, mis. A:25,B:25 (maks. 8; Vina/AD-GPU)")
+    p.add_argument("--kovalen", metavar="RANTAI:NOMOR",
+                   help="docking kovalen ke residu nukleofil (Cys/Ser/Lys), mis. A:12; hanya AutoDock-GPU, "
+                        "tidak bisa digabung dengan --flex")
     p.add_argument("--af-ambang", type=float, default=50.0,
                    help="AlphaFold: pangkas ujung N/C dengan pLDDT < ambang (0 = tidak dipangkas)")
 

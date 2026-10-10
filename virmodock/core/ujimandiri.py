@@ -120,6 +120,28 @@ def uji(lapor=None):
             return f"Meeko {', '.join(ok)} ({R.torsi_flex(flex)} torsi) + Vina --flex: {', '.join(M.residu_flex(pose[0].flex))}"
     cek("Residu fleksibel (Meeko + Vina)", flex_dock)
 
+    def kovalen_aduk():
+        """Akrilamida + Cys: deteksi gugus reaktif, aduk 3D disejajarkan ke CA/CB, PDBQT flexres (Meeko)."""
+        from rdkit import Chem
+        from . import kovalen as K
+        ca, cb = [0.0, 0.0, 0.0], [1.52, 0.0, 0.0]
+        mol = Chem.MolFromSmiles("C=CC(=O)Nc1ccccc1")
+        wh = K.deteksi(mol, "CYS")
+        if not wh:
+            raise RuntimeError("gugus reaktif akrilamida tidak terdeteksi")
+        aduk, n, nama = K.buat_aduk(mol, "CYS", ca, cb)
+        setup = __import__("meeko", fromlist=["MoleculePreparation"]).MoleculePreparation().prepare(
+            aduk, root_atom_index=0, not_terminal_atoms=[0])[0]
+        from meeko import PDBQTWriterLegacy
+        pdbqt, ok, err = PDBQTWriterLegacy.write_string(setup)
+        if not ok:
+            raise RuntimeError(str(err)[:150])
+        flex = PDBQTWriterLegacy.adapt_pdbqt_for_autodock4_flexres(pdbqt, "CYS", "A", "1")
+        if not flex.startswith("BEGIN_RES") or "END_RES" not in flex:
+            raise RuntimeError("blok flexres tidak terbentuk")
+        return f"{nama}: aduk {aduk.GetNumHeavyAtoms()} atom berat ({n} dari residu) → flexres Meeko"
+    cek("Docking kovalen (aduk + Meeko flexres)", kovalen_aduk)
+
     def md_uji():
         """Tripeptida GSG + etanol: OpenMM (platform terbaik) + ff14SB + OpenFF Sage/NAGL -> minimisasi + MM/GBSA."""
         import math

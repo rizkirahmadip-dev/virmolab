@@ -111,7 +111,8 @@ def pose_mol(pdbqt_ligan_masukan, pose_pdbqt):
     mols = RDKitMolCreate.from_pdbqt_mol(pm)
     if not mols or mols[0] is None:
         raise ValueError("Pose tidak bisa diubah menjadi molekul RDKit.")
-    return mols[0]
+    from .kovalen import lepas_residu
+    return lepas_residu(mols[0], pose_pdbqt)    # pose kovalen: ligan tanpa atom residu
 
 
 def mol_dari_objek(o):

@@ -49,6 +49,7 @@ class Proyek:
         self.objek = []               # list dict objek viewer
         self.catatan = ""
         self.validasi = {}            # hasil validasi redocking terakhir
+        self.templat = ""             # kunci templat proyek (core/templat.py), bila dibuat dari templat
         self.md = []                  # riwayat MD / MM-GBSA: {id, mode, tanggal, status, folder, ligan, opsi}
         self.eksperimen = {}          # data aktivitas eksperimen (ChEMBL): target, aktivitas [{chembl, nama, smiles, inchikey, pchembl, …}]
 
@@ -70,7 +71,7 @@ class Proyek:
                 "ligan": self.ligan, "kotak": self.kotak, "parameter": self.parameter, "uji_grafik": self.uji_grafik,
                 "komposer": self.komposer, "job": self.job,
                 "objek": self.objek, "catatan": self.catatan, "validasi": self.validasi,
-                "eksperimen": self.eksperimen, "md": self.md}
+                "eksperimen": self.eksperimen, "md": self.md, "templat": self.templat}
 
     def simpan(self):
         self.siapkan_folder()
@@ -110,6 +111,7 @@ class Proyek:
         pr.validasi = d.get("validasi") or {}
         pr.eksperimen = d.get("eksperimen") or {}
         pr.md = d.get("md") or []
+        pr.templat = d.get("templat") or ""
         # job yang terputus (aplikasi ditutup/crash) bisa dilanjutkan
         for j in pr.job:
             if j.get("status") in ("berjalan", "menunggu"):

@@ -4,7 +4,7 @@ Untuk sesi baru: baca seluruh file ini dulu. Pengguna berbahasa Indonesia; UI da
 (Nama file historis — isinya mencakup semua tahap. Jangan diganti namanya: dirujuk dari `CLAUDE.md`.)
 
 **Status singkat:** Tahap 1–4 (MVP v1.0, Lampiran E3) **selesai** + **v1.1 selesai** (§4e) + UI/UX & menu dirombak (§4f) + Kelompok A, Dimorphite, P2Rank (§4g) + **sisa fitur v1.x selesai** (§4h: Format grafik, patah sumbu, ROC, kontingensi, komposer figur, gaya tersimpan, laporan Word/HTML interaktif, animasi). Versi kode 0.9.0 (pra-rilis).
-Versi kode **0.9.4** (§4l: MD adaptif + MM/GBSA OpenMM/OpenFF — sisa v2.0 tinggal kovalen dan plugin/konsol Python). Build 0.9.4: Setup 454 MB, Portable 654 MB, terpasang 1563 MB; uji mandiri 25/25 di dist, terpasang (pasang/copot bersih), portable; pekerja MD beku (implisit + jeda/lanjut, eksplisit, uji kecepatan) dan CLI beku (eksplisit, CPU) lulus. Regresi 49/49. Belum di-commit.
+Versi kode **0.9.5** (§4m: docking kovalen, plugin & konsol Python, RCSB, templat, UX — rencana v2.0 LENGKAP). Belum ada build 0.9.5; build terakhir 0.9.4 (lihat §4l). Regresi 0.9.5 dijalankan 10 Okt 2026. Belum di-commit.
 Versi kode 0.9.3 (§4k: sebagian v2.0 — AlphaFold DB, residu fleksibel, baris perintah VirmoDock-cli). Build rilis 0.9.3 (noarchive): Setup 436 MB, Portable 629 MB, terpasang 1509 MB; uji mandiri 24/24 di dist, terpasang (pasang/copot diam-diam bersih), dan portable. Sisa v2.0: MD adaptif + MM/GBSA (OpenMM, butuh izin unduh), kovalen, plugin/konsol Python.
 Versi kode 0.9.2 (§4j: v1.2–v1.5 E4 selesai — ProLIF heatmap, ChEMBL, wizard protein + PROPKA/PDB2PQR, ADMET-AI, Ketcher, kemiripan/farmakofor, pustaka ligan, bahasa Inggris). Berikutnya: v2.0 E4 atau §5 (relawan, GitHub, SignPath). Build 0.9.2 dibuat (commit c888926 + perbaikan build): Setup 460 MB, Portable 627 MB, terpasang 1401 MB, uji mandiri 22/22 di dist; uji pasang/copot belum.
 
@@ -215,6 +215,34 @@ Tanpa paket baru (Pillow, SciPy, 3Dmol sudah ada).
 - **Grafik**: gaya `acuan` ('nilai=label; …'), `anotasi` ('|' = baris baru), `pos_anotasi`; `_hiasan()` dipanggil semua grafik. Sumbu kedua & EPS sengaja tidak dibuat (tak relevan / Qt tak menulis EPS).
 - Uji baru: `dev/uji_statistik_lanjut.py` (13 validasi silang), `dev/uji_konsensus.py`.
 - Regresi 40/40. Build 0.9.1 (Setup 320 MB, Portable 436 MB): uji mandiri 17/17 di dist, terpasang, portable; CHANGELOG ikut terbundel; copot bersih.
+
+## 4m. Versi 0.9.5 (10 Okt 2026) — v2.0 lengkap: docking kovalen, plugin & konsol, RCSB, templat, UX
+Tanpa paket baru (RCSB Search/Data API, Meeko & AutoDock-GPU yang sudah ada).
+
+### Docking kovalen (`core/kovalen.py`, `ui/dialog_kovalen.py`)
+- **Metode tethered / flexible side chain** (Bianco dkk. 2016): ligan + rantai samping residu digabung jadi satu aduk, aduk jadi residu fleksibel berakar di CA, AutoDock-GPU dijalankan dengan `--flexres` SAJA (tanpa `--lfile`). `mesin.perintah_adgpu(..., lig=None)` kini membolehkan tanpa ligan.
+- **Eksperimen validasi** `dev/uji/kovalen/eksperimen.py` (6OIM, KRAS G12C–sotorasib Cys12): konformer awal 21 Å dari kristal → pose peringkat 1 RMSD **1,11 Å**. Lewat alur aplikasi penuh (ligan dari SMILES, ETKDG+MMFF): **1,34 Å**.
+- `RESIDU` = {CYS: (CA,CB,SG, "CCS"), SER: (…OG, "CCO"), LYS: (…NZ, "CCCCCN")} — urutan nama atom HARUS sama dengan urutan atom SMILES fragmen; atom 0 = CA (akar, `not_terminal_atoms=[0]`).
+- `WARHEAD` = SMARTS ber-peta atom + jenis reaksi: **adisi** (akseptor Michael, propiolamida, nitril, aldehida → orde ikatan turun satu, nukleofil ke atom 1), **substitusi** (haloasetamida, sulfonil fluorida → gugus pergi dibuang), **imina** (aldehida + Lys → basa Schiff, O dibuang). Kecocokan residu diatur per-warhead (mis. propiolamida hanya Cys).
+- JEBAKAN RDKit: `RWMol.RemoveAtom` menggeser indeks — atom gugus pergi dibuang **setelah** semua ikatan diubah; objek `Bond` ikut tidak sahih setelah penghapusan, jadi daftar ikatan yang stereonya di-reset dikumpulkan lebih dulu. Atom di sekitar pusat reaksi perlu `SetNumExplicitHs(0)` + `SetNoImplicit(False)` + `SetChiralTag(CHI_UNSPECIFIED)`, jika tidak sanitasi gagal/valensi salah.
+- Penyejajaran: `rdMolAlign.AlignMol` aduk → molekul semu 2 atom di koordinat CA/CB kristal (sama seperti `meeko.CovalentBuilder.transform`); dicek ‖CA_aduk − CA_kristal‖ ≤ 0,3 Å.
+- PDBQT: `MoleculePreparation().prepare(aduk, root_atom_index=0, not_terminal_atoms=[0])` → `PDBQTWriterLegacy.write_string` → `adapt_pdbqt_for_autodock4_flexres(pdbqt, resn, rantai, resi)`.
+- **Pose dari DLG**: blok kovalen tidak punya bagian ligan, semuanya di BEGIN_RES…END_RES. `mesin.baca_dlg` memanggil `kovalen.ubah_pose(flex)` yang memecah blok jadi (badan pose ligan dengan baris penanda `REMARK VIRMODOCK KOVALEN n`, blok flexres berisi n atom residu dengan nama atom asli). `pose_ke_pdb` membuang n atom residu pertama; `analisis.pose_mol` memanggil `kovalen.lepas_residu` (cocokkan koordinat, buang atom residu + H-nya, `AddHs(addCoords=True)` pada atom pengikat) sehingga RMSD/interaksi/QC/ekspor memakai ligan saja.
+- **Alur**: `reseptor["kovalen"] = {aktif, residu, resn, label, kaku, ca, cb}` (reseptor kaku dibuat `prep_reseptor.buat_fleksibel` dengan satu residu, bagian flex-nya dibuang). `jalankan_docking` → `_jalankan_kovalen` → `kovalen.siapkan_ligan_job` di thread (aduk per ligan ke `kovalen/<rantai><resi>/`) → `antrean.jadikan_kovalen(job_baru(...))`. Tiap ligan membawa `flex` sendiri (berbeda dengan flexres biasa yang satu berkas per job).
+- Kovalen dan residu fleksibel **saling mematikan**; menyiapkan ulang reseptor mematikan keduanya. Hanya AutoDock-GPU (fallback Vina dimatikan untuk job kovalen). Batas atom/torsi AD-GPU dihitung dari berkas flexres, bukan ligan.
+- Skor = energi residu fleksibel (aduk–reseptor + intra-aduk) tanpa penalti torsi → **bukan ΔG**: `ki` dan `le` dikosongkan, Properti pose menulis "Skor kovalen" + residu + gugus reaktif (bukan ΔG/Ki), laporan menambah baris reseptor + kalimat metode.
+- **PoseBusters**: pose kovalen diperiksa tanpa uji *jarak minimum ke protein* (`qc.tanpa_uji_jarak`, `q["kovalen"]=True`) — ikatan kovalen lebih pendek dari kontak vdW sehingga uji itu selalu gagal; 21 uji sisanya lulus untuk sotorasib/6OIM.
+- **CLI**: `VirmoDock-cli dock ... --kovalen A:12` (hanya AD-GPU, tidak bisa + `--flex`, butuh reseptor PDB/CIF/kode PDB); aduk per ligan di `kovalen/`, `metode.txt` menyebut metode tethered, Ki/LE dikosongkan. Diuji pada 6OIM: RMSD 1,24 Å, aspirin dilewati otomatis.
+- Uji: `dev/uji_kovalen.py` (GUI penuh 6OIM: dialog, reseptor kaku tanpa rantai samping Cys12, job, RMSD kristal, aspirin dilewati, objek rantai samping, interaksi) — 20/20 lulus.
+
+### Sisa 0.9.5 (dikerjakan pada sesi yang sama)
+- `core/rcsb.py` (Search API v2 + Data API GraphQL) + tab RCSB di dialog Impor: saran ★ struktur terbaik (sinar-X, ada ligan kristal bukan aditif/ion, resolusi terkecil). Uji `dev/uji_rcsb.py` (butuh internet): karbonat anhidrase II + asetazolamida → 3HS4.
+- `core/templat.py` + proyek contoh HIV-1 protease offline (1HSG + 9 inhibitor disetujui + aspirin kontrol), `ui/dialog_templat.py`.
+- Urungkan/ulangi grid box & gaya (Ctrl+Z/Y), palet perintah `ui/palet.py` (Ctrl+K, 138 perintah), mode Pemula/Ahli, tur aplikasi `ui/tur.py` (9 langkah).
+- `core/supplementary.py`: paket .zip publikasi (README, pose, tabel, parameter per job, SHA-256) — 27 berkas terverifikasi; paket Lapor masalah (log).
+- `ui/konsol.py` (konsol Python) + `core/plugin.py` (plugin pengguna .py → menu Alat › Plugin, galat ditangkap). Uji `dev/uji_konsol_plugin.py` 9/9, `dev/uji_095_gui.py` 15/15.
+- **Privasi**: ekspor & laporan sempat menulis jalur absolut (memuat nama pengguna Windows) ke berkas yang dibagikan — kini hanya nama berkas/folder.
+- Ditunda: konservasi residu (B4 #10) — NCBI BLAST antre ±8 jam, basis data protein EBI HMMER "paused"; dicatat di `IDE_BARU.md`.
 
 ## 4l. Versi 0.9.4 (9 Okt 2026, permintaan pengguna: MD + MM/GBSA, "sangat teliti")
 Izin unduh pengguna (9 Okt 2026): OpenMM 8.6.1 (MIT + LGPL-3.0 platform OpenCL/CUDA), PDBFixer 1.12.0, openmmforcefields 0.15.1, tumpukan OpenFF dari arsip rilis GitHub (toolkit 0.19.0, interchange 0.5.5, units 0.4.0, utilities 0.1.18, nagl 0.6.1, nagl-models 2026.09.0, openforcefields 2026.09.0 — semua MIT/CC BY 4.0), lxml, pint, pydantic, python-constraint, cachetools, xmltodict, click, platformdirs (+ dependensinya). Daftar paket sebelum: `build/pip_sebelum_md.txt`.

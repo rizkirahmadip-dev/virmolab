@@ -116,6 +116,15 @@ def periksa(mol, path_protein):
     return {"v": VERSI, "lulus": not gagal, "n_uji": len(uji), "gagal": gagal, "uji": uji, "angka": angka}
 
 
+def tanpa_uji_jarak(q):
+    """Buang uji jarak minimum ke protein (docking kovalen: ikatan kovalen memang lebih pendek dari kontak vdW)."""
+    if not q or q.get("galat"):
+        return q
+    uji = [u for u in q["uji"] if u[0] != "minimum_distance_to_protein"]
+    gagal = [n for _, n, _, ok in uji if not ok]
+    return dict(q, uji=uji, gagal=gagal, n_uji=len(uji), lulus=not gagal, kovalen=True)
+
+
 def teks_sel(q):
     """Isi kolom tabel."""
     if not q:
@@ -132,6 +141,8 @@ def tooltip(q):
         return "PoseBusters gagal: " + q["galat"]
     t = [f"PoseBusters: {q['n_uji'] - len(q['gagal'])}/{q['n_uji']} uji lulus"]
     t += ["✗ " + g for g in q["gagal"]]
+    if q.get("kovalen"):
+        t.append("Uji jarak minimum ke protein dilewati (ikatan kovalen lebih pendek dari kontak vdW).")
     for k, v in q.get("angka", {}).items():
         t.append(f"{ANGKA[k]}: {v}")
     return "\n".join(t)
@@ -258,6 +269,7 @@ def periksa_ligan(proyek, j, l, pose):
             f = paths.CACHE / f"qc_flex_{j['id']}_{l['id']}.pdb"
             f.write_text(M.terapkan_flex(prot.read_text(), pose[0].flex), encoding="utf-8")
             prot = f
-        return periksa_proses(mol, prot)
+        h = periksa_proses(mol, prot)
+        return tanpa_uji_jarak(h) if j.get("kovalen") else h
     except Exception as e:
         return {"v": VERSI, "galat": (str(e).strip().splitlines() or [type(e).__name__])[0][:200]}
