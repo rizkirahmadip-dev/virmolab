@@ -4,7 +4,8 @@ Untuk sesi baru: baca seluruh file ini dulu. Pengguna berbahasa Indonesia; UI da
 (Nama file historis — isinya mencakup semua tahap. Jangan diganti namanya: dirujuk dari `CLAUDE.md`.)
 
 **Status singkat:** Tahap 1–4 (MVP v1.0, Lampiran E3) **selesai** + **v1.1 selesai** (§4e) + UI/UX & menu dirombak (§4f) + Kelompok A, Dimorphite, P2Rank (§4g) + **sisa fitur v1.x selesai** (§4h: Format grafik, patah sumbu, ROC, kontingensi, komposer figur, gaya tersimpan, laporan Word/HTML interaktif, animasi). Versi kode 0.9.0 (pra-rilis).
-Versi kode **0.9.5** (§4m: docking kovalen, plugin & konsol Python, RCSB, templat, UX — rencana v2.0 LENGKAP). Belum ada build 0.9.5; build terakhir 0.9.4 (lihat §4l). Regresi 0.9.5 dijalankan 10 Okt 2026. Belum di-commit.
+Versi kode **0.9.6** (§4n: penelitian lanjutan — konservasi offline, energi per residu, umpan, enumerasi, mutasi, naskah). Belum ada build installer sejak 0.9.4 (folder `rilis/` dibersihkan 10 Okt 2026).
+Versi kode **0.9.5** (§4m: docking kovalen, plugin & konsol Python, RCSB, templat, UX — rencana v2.0 LENGKAP). Commit `47ca59c`. Belum di-push (sengaja lokal).
 Versi kode 0.9.3 (§4k: sebagian v2.0 — AlphaFold DB, residu fleksibel, baris perintah VirmoDock-cli). Build rilis 0.9.3 (noarchive): Setup 436 MB, Portable 629 MB, terpasang 1509 MB; uji mandiri 24/24 di dist, terpasang (pasang/copot diam-diam bersih), dan portable. Sisa v2.0: MD adaptif + MM/GBSA (OpenMM, butuh izin unduh), kovalen, plugin/konsol Python.
 Versi kode 0.9.2 (§4j: v1.2–v1.5 E4 selesai — ProLIF heatmap, ChEMBL, wizard protein + PROPKA/PDB2PQR, ADMET-AI, Ketcher, kemiripan/farmakofor, pustaka ligan, bahasa Inggris). Berikutnya: v2.0 E4 atau §5 (relawan, GitHub, SignPath). Build 0.9.2 dibuat (commit c888926 + perbaikan build): Setup 460 MB, Portable 627 MB, terpasang 1401 MB, uji mandiri 22/22 di dist; uji pasang/copot belum.
 
@@ -242,7 +243,24 @@ Tanpa paket baru (RCSB Search/Data API, Meeko & AutoDock-GPU yang sudah ada).
 - `core/supplementary.py`: paket .zip publikasi (README, pose, tabel, parameter per job, SHA-256) — 27 berkas terverifikasi; paket Lapor masalah (log).
 - `ui/konsol.py` (konsol Python) + `core/plugin.py` (plugin pengguna .py → menu Alat › Plugin, galat ditangkap). Uji `dev/uji_konsol_plugin.py` 9/9, `dev/uji_095_gui.py` 15/15.
 - **Privasi**: ekspor & laporan sempat menulis jalur absolut (memuat nama pengguna Windows) ke berkas yang dibagikan — kini hanya nama berkas/folder.
-- Ditunda: konservasi residu (B4 #10) — NCBI BLAST antre ±8 jam, basis data protein EBI HMMER "paused"; dicatat di `IDE_BARU.md`.
+- Konservasi residu dikerjakan di 0.9.6 secara offline (bukan BLAST/HMMER). Lihat §4n.
+
+## 4n. Versi 0.9.6 (10 Okt 2026) — penelitian lanjutan
+Masuk dari Analisis › Penelitian lanjutan. GNINA, Boltz, dan ParmEd ditambahkan setelah izin unduh terpisah.
+- `core/konservasi.py`: Needleman–Wunsch + BLOSUM62, persen identitas per posisi, B-faktor. FASTA manual; UniProt hanya pencarian nama.
+- `core/energi_residu.py`: sumbangan Vina per residu + pemindaian alanin pada fungsi skor (bukan MM/GBSA; MM/GBSA total tetap di `md.py`).
+- `core/senyawa.py`: umpan, regangan MMFF, bentuk 3D, tautomer, stereoisomer, gugus R, bioisoster, tabrakan, sunting SMARTS.
+- `core/air.py` + opsi `OpsiReseptor.air_jembatan` / `kofaktor`: air ≤ 3,5 Å dari protein dan ligan ditulis kembali sebagai OA karena Meeko membuang HOH.
+- `core/syarat.py`, `core/mutasi.py` (alanin lokal; lain via PDBFixer), `core/kampanye.py`, `core/naskah.py`, `core/lanjutan.py` (film frames.npy, XML OpenMM, GNINA/Boltz lewat WSL, topologi GROMACS).
+- Kovalen: warhead isotiosianat dan ester aktif + `catatan_warhead`. ETKDG `useMacrocycleTorsions` bila cincin ≥ 7.
+- Templat `bahan_alam`. Uji `dev/uji_penelitian.py`.
+- Izin unduh 10 Okt 2026 malam: GNINA 1.3.3 (`gnina.cuda12.8.static`, GPL-2.0 karena biner menyertakan OpenBabel; Apache-2.0 hanya bila OpenBabel dihapus dari sumber) dan Boltz 2.2.1 (MIT, kode dan bobot) dipasang di `$HOME/virmodock-alat` pada WSL, bukan di installer. Boltz butuh Python 3.12 (PyPI menolak 3.14) plus PyTorch CUDA 12.6. Skrip `build_tools/pasang_gnina_boltz_wsl.sh`. GNINA memuat `libcudnn.so.9` dari roda `nvidia-cudnn` di lingkungan Boltz (`LD_LIBRARY_PATH`), bukan dari apt. RTX 3060 6 GB mungkin kehabisan memori untuk Boltz; ada tombol CPU. MSA ColabFold hanya bila kotak dicentang (sekuens terkirim). Tanpa kotak, YAML memakai `msa: empty`.
+- Sunting kantong: reaksi SMARTS, lalu `vina --local_only --autobox` pada PDBQT reseptor yang sudah disiapkan (`core/lokal.py`).
+- Asisten: `core/asisten.py`, menu Bantuan. Ollama `127.0.0.1:11434` bila ada model; tidak diunduh.
+- BLAST: `konservasi.kirim_blast` ke `swissprot` lewat URL NCBI. Antrean bisa lama; RID disimpan di dialog. Identitas residu tetap Needleman–Wunsch.
+- Arti angka: `core/arti.py`, petunjuk kolom tab Hasil, paragraf di laporan, dan bagian draf skripsi. Ringkasan langkah menulis "skor kovalen" bila job terbaik bersifat kovalen.
+- Contoh redocking 1HSG/MK1 (11 Okt 2026, Vina, exhaustiveness 16, seed 42, kotak di ligan kristal, ligan dari SMILES terprotonasi lalu MMFF, reseptor PROPKA pH 7,4): ΔG −11,18 kcal/mol, RMSD 1,39 Å terhadap MK1 rantai B, GNINA Affinity −11,56 kcal/mol, CNNscore 0,67, CNNaffinity 8,52 (pK). Lolos ambang 2 Å.
+- ParmEd 4.3.1 (LGPL, menurut `setup.py`) dipasang di `.venv` tanpa ekstensi C `_rdparm` (komputer ini tidak punya MSVC; parser prmtop cepat tidak dipakai). `kompleks.top` adalah topologi vakum; gaya OBC2 tidak bisa disalin ke GROMACS.
 
 ## 4l. Versi 0.9.4 (9 Okt 2026, permintaan pengguna: MD + MM/GBSA, "sangat teliti")
 Izin unduh pengguna (9 Okt 2026): OpenMM 8.6.1 (MIT + LGPL-3.0 platform OpenCL/CUDA), PDBFixer 1.12.0, openmmforcefields 0.15.1, tumpukan OpenFF dari arsip rilis GitHub (toolkit 0.19.0, interchange 0.5.5, units 0.4.0, utilities 0.1.18, nagl 0.6.1, nagl-models 2026.09.0, openforcefields 2026.09.0 — semua MIT/CC BY 4.0), lxml, pint, pydantic, python-constraint, cachetools, xmltodict, click, platformdirs (+ dependensinya). Daftar paket sebelum: `build/pip_sebelum_md.txt`.

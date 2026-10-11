@@ -71,6 +71,10 @@ for _p in ("openff.toolkit", "openff.interchange", "openff.units", "openff.utili
            "openff.nagl_models"):
     hidden += collect_submodules(_p, filter=_bukan_uji)
 hidden += ["openforcefields", "lxml.etree", "xmltodict", "cachetools", "constraint"]
+# ParmEd 4.3.1 (LGPL): topologi GROMACS. Tanpa ekstensi _rdparm.
+datas += collect_data_files("parmed")
+datas += copy_metadata("ParmEd")
+hidden += collect_submodules("parmed", filter=_bukan_uji)
 
 # dua titik masuk berbagi satu PYZ/_internal: VirmoDock.exe (jendela) + VirmoDock-cli.exe (konsol, virmodock/cli.py)
 a = Analysis([str(AKAR / "VirmoDock.pyw"), str(AKAR / "VirmoDock_cli.py")], pathex=[str(AKAR)], datas=datas,

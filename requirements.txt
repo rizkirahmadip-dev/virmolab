@@ -30,5 +30,7 @@ cachetools
 xmltodict
 click
 platformdirs
+# v0.9.6: ParmEd 4.3.1 (LGPL) untuk kompleks.top. Jangan dipasang lewat baris ini:
+# sumbernya butuh kompiler C++ untuk _rdparm. Pakai build_tools/pasang_parmed.py
 # build
 pyinstaller==6.22.3

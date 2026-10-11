@@ -56,6 +56,13 @@ TEMPLAT = [
                  "Siapkan ligan lalu jalankan docking preset Cepat (AD-GPU; ±1–3 detik per ligan dengan GPU).",
                  "Docking ulang 20 teratas dengan preset Teliti; MD & MM/GBSA tingkat Ringan untuk 10 teratas.",
                  "Analisis › Korelasi dengan data eksperimen (ChEMBL) untuk aktivitas yang sudah diketahui."]},
+    {"kunci": "bahan_alam", "judul": "Bahan alam dari satu kelompok", "preset": "Cepat",
+     "ket": "Senyawa bahan alam (COCONUT) disaring lalu didocking ke satu protein, dengan obat standar sebagai pembanding.",
+     "langkah": ["Ambil protein target lalu Siapkan reseptor; atur grid box di ligan asli atau kantong.",
+                 "Siapkan › Pustaka ligan › COCONUT: saring kemiripan atau sifat, impor puluhan senyawa.",
+                 "Tambahkan satu obat standar dari pustaka obat disetujui sebagai pembanding.",
+                 "Siapkan ligan, jalankan docking preset Cepat, lalu ulang 15 teratas dengan preset Teliti.",
+                 "Analisis › Penelitian lanjutan: regangan pose, energi per residu, dan draf skripsi."]},
 ]
 
 

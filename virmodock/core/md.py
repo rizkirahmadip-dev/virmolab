@@ -539,8 +539,10 @@ def analisis_trajektori(modeller, info, frames):
 
 def tulis_pdb(topologi, pos_nm, f):
     from openmm import app, unit
+    if not hasattr(pos_nm, "value_in_unit"):
+        pos_nm = unit.Quantity(np.asarray(pos_nm, dtype=float), unit.nanometer)
     with open(f, "w", encoding="utf-8") as h:
-        app.PDBFile.writeFile(topologi, unit.Quantity(np.asarray(pos_nm), unit.nanometer), h, keepIds=True)
+        app.PDBFile.writeFile(topologi, pos_nm, h, keepIds=True)
 
 
 def tulis_dcd(topologi, frames, f, dt_ps):

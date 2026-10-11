@@ -446,6 +446,26 @@ const VM = {
     this.v.render();
     return true;
   },
+  /* PDB multi-MODEL (trajektori) diputar di viewport. */
+  film(id, teks) {
+    this.filmStop();
+    this.remove(id);
+    const m = this.v.addModelsAsFrames(teks, 'pdb');
+    this.models[id] = {m, surf: [], spec: null};
+    const n = (m.getNumFrames && m.getNumFrames()) || 1;
+    this.v.zoomTo({model: m});
+    let f = 0;
+    this._filmTimer = setInterval(() => {
+      f = (f + 1) % n;
+      this.v.setFrame(f);
+      this.v.render();
+    }, 140);
+    this.v.render();
+    return n;
+  },
+  filmStop() {
+    if (this._filmTimer) { clearInterval(this._filmTimer); this._filmTimer = null; }
+  },
   /* Animasi untuk ekspor GIF/WebP: kanvas diset lebar x tinggi (seperti gambar()), lalu animBingkai(t) dengan
      t = 0..1 memutar/menggoyang pandangan awal atau beralih mulus dari seluruh protein ke pandangan sekarang. */
   animMulai(lebar, tinggi, latar, mode, sudut) {

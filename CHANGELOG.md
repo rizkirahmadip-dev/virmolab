@@ -2,6 +2,24 @@
 
 Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x adalah pra-rilis.
 
+## [0.9.6] — 10 Oktober 2026
+
+### Baru
+- **Penelitian lanjutan** (Analisis › Penelitian lanjutan…): konservasi residu dari FASTA (penjajaran lokal, diwarnai lewat B-faktor), sumbangan Vina per residu dan pemindaian alanin pada fungsi skor, penggabungan job (ensemble, selektivitas, kovalen lawan non-kovalen), umpan berpadanan sifat, regangan MMFF, kemiripan bentuk 3D, tautomer dan stereoisomer, enumerasi gugus R, bioisoster, telaah air penjembatan dan kofaktor, syarat interaksi, mutasi residu, sunting ligan di kantong, film trajektori MD, paket OpenMM untuk server, draf skripsi, BibTeX, dan pemeriksa figur (dpi, huruf, buta warna).
+- Wizard reseptor: opsi mempertahankan air penjembatan dan kofaktor.
+- Gugus reaktif kovalen tambahan: isotiosianat dan ester aktif pada alkena, beserta catatan reaktivitas.
+- Templat **Bahan alam dari satu kelompok**.
+- GNINA 1.3.3 dan Boltz 2.2.1 dijalankan lewat WSL (skor ulang CNN dan prediksi pose). Biner Linux-nya tidak ikut installer Windows. Skor GNINA pada reseptor tanpa hidrogen ditandai agar tidak dikutip. Boltz bisa meminta MSA ke ColabFold bila kotaknya dicentang; tanpa itu prediksinya satu sekuens.
+- Sunting ligan di kantong kini dilanjutkan dengan minimisasi Vina di tempat (`--local_only`) bila reseptor PDBQT sudah ada.
+- Asisten (Bantuan › Asisten…): jawaban dari catatan aplikasi, plus Ollama di komputer sendiri bila sebuah model sudah terpasang. Model tidak diunduh dan tidak dibundel.
+- Konservasi bisa mengisi homolog dari BLAST NCBI Swiss-Prot. Persen identitas tetap dihitung lokal. BLAST mengirim sekuens ke NCBI.
+- Arti angka (ΔG, skor kovalen, Ki, GNINA, CNNscore, CNNaffinity, RMSD redocking, RMSD Boltz, MM/GBSA) tertulis di tab Hasil, laporan, dan draf skripsi. Pada ringkasan langkah, skor terbaik kovalen tidak lagi disebut ΔG.
+- Paket server menulis `kompleks.gro` dan topologi GROMACS vakum `kompleks.top` (ParmEd). Suku pelarut OBC2 tetap hanya di `sistem_obc2.xml`.
+
+### Diubah
+- Koordinat 3D ligan dengan cincin ≥ 7 atom memakai torsi makrosiklus ETKDG. Meeko tetap membuat cincin itu fleksibel kecuali kotak “Makrosiklik kaku”.
+- Uji mandiri kini mencakup satu pemeriksaan alat penelitian.
+
 ## [0.9.5] — 10 Oktober 2026
 
 ### Baru

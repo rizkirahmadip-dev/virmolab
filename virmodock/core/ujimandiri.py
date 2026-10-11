@@ -74,6 +74,18 @@ def uji(lapor=None):
         return "fitur: " + ", ".join(sorted(f))
     cek("Fitur kimia RDKit (interaksi)", fitur)
 
+    def penelitian():
+        from rdkit import Chem
+        from . import senyawa
+        mol = Chem.AddHs(Chem.MolFromSmiles("CC(=O)O"))
+        from rdkit.Chem import AllChem
+        AllChem.EmbedMolecule(mol, AllChem.ETKDGv3())
+        umpan = senyawa.umpan(["CC(=O)Oc1ccccc1C(=O)O"], 5, seed=1)
+        if len(umpan) < 1:
+            raise RuntimeError("umpan kosong")
+        return f"regangan {senyawa.regangan(mol):.1f}; umpan {len(umpan)}; makro {senyawa.ada_makrosiklus(Chem.MolFromSmiles('C1CCCCCC1'))}"
+    cek("Penelitian (umpan, regangan, makrosiklus)", penelitian)
+
     def vina_dock():
         from . import prep_ligan
         h = prep_ligan.siapkan_satu("asetat", "CC(=O)O", "smiles", prep_ligan.OpsiLigan(protonasi=False))

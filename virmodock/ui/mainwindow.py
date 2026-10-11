@@ -366,9 +366,12 @@ class JendelaUtama(QMainWindow):
         else:
             s4 = ("belum", "belum dijalankan")
         if n_hasil:
-            dg = min(l["energi"] for j in jobs for l in j["ligan"] if l["status"] == "selesai")
+            terbaik = min(((j, l) for j in jobs for l in j["ligan"] if l["status"] == "selesai"),
+                          key=lambda jl: jl[1]["energi"])
+            dg = terbaik[1]["energi"]
             s5 = ("selesai", f"{n_hasil} hasil")
-            t5 = ok(f"{n_hasil} hasil docking") + f" · ΔG terbaik {dg:.2f} kcal/mol"
+            nama_skor = "skor kovalen" if terbaik[0].get("kovalen") else "ΔG"
+            t5 = ok(f"{n_hasil} hasil docking") + f" · {nama_skor} terbaik {dg:.2f} kcal/mol"
             if not getattr(pr, "validasi", None):
                 t5 += "<br>" + catat("Belum divalidasi (redocking).")
         else:
@@ -716,6 +719,8 @@ class JendelaUtama(QMainWindow):
                 A("MD & MM/GBSA…", "play", self.buka_md, None,
                   "Minimisasi + MM/GBSA, atau dinamika molekul (OpenMM) pelarut implisit/eksplisit: RMSD, RMSF, "
                   "interaksi persisten, ΔG MM/GBSA — VirmoDock menyarankan tingkat sesuai kemampuan laptop"),
+                A("Penelitian lanjutan…", "chart", self.buka_penelitian, None,
+                  "Konservasi, energi per residu, umpan, enumerasi, mutasi, draf skripsi, film trajektori"),
                 None,
                 A("Prediksi ADMET (ADMET-AI)…", "lig", self.buka_admet, None,
                   "Absorpsi, distribusi, metabolisme (CYP), ekskresi, toksisitas (hERG, Ames, DILI) — model "
@@ -758,7 +763,9 @@ class JendelaUtama(QMainWindow):
 
         # ---------------------------------------------------------------- Bantuan
         m = menu("Ba&ntuan")
-        isi(m, (A("Panduan pengguna", "help", lambda: self.buka_panduan("panduan"), "F1"),
+        isi(m, (A("Asisten…", "help", self.buka_asisten, None,
+                  "Catatan di aplikasi, plus Ollama bila sudah terpasang di komputer ini"),
+                A("Panduan pengguna", "help", lambda: self.buka_panduan("panduan"), "F1"),
                 A("Tutorial docking (PDF)", "report", lambda: self.buka_panduan("Tutorial_Docking_VirmoDock.pdf"),
                   None, "Langkah demi langkah dengan contoh 1HSG/MK1"),
                 A("Tur aplikasi", None, self.tur, None, "Sorot bagian-bagian jendela satu per satu (± 1 menit)"),
@@ -2843,6 +2850,18 @@ class JendelaUtama(QMainWindow):
         QMessageBox.information(self, "Bahasa / Language",
                                 "Bahasa antarmuka akan berganti setelah VirmoDock dibuka ulang.\n"
                                 "The interface language will change after VirmoDock is restarted.")
+
+    def buka_asisten(self):
+        from .dialog_asisten import DialogAsisten
+        d = DialogAsisten(self)
+        d.setAttribute(Qt.WA_DeleteOnClose)
+        d.show()
+
+    def buka_penelitian(self):
+        from .dialog_penelitian import DialogPenelitian
+        d = DialogPenelitian(self)
+        d.setAttribute(Qt.WA_DeleteOnClose)
+        d.show()
 
     def buka_md(self):
         from ..core import md as mdmod

@@ -35,7 +35,27 @@ WARHEAD = [
     ("nitril", "nitril (tioimidat/imidat reversibel)", "[CX2:1]#[NX1:2]", "adisi", ("CYS", "SER")),
     ("aldehida_imina", "aldehida → basa Schiff", "[CX3H1:1](=[OX1:2])[#6]", "imina", ("LYS",)),
     ("aldehida", "aldehida (hemitioasetal/hemiasetal)", "[CX3H1:1](=[OX1:2])[#6]", "adisi", ("CYS", "SER")),
+    ("isotiosianat", "isotiosianat", "[NX2:2]=[CX2:1]=[SX1]", "adisi", ("CYS", "LYS")),
+    ("ester_aktif", "ester aktif pada alkena (vinil ester/akrilat)", "[CX3:1]=[CX3:2]-[#8]-[#6]=O",
+     "adisi", ("CYS",)),
 ]
+
+# catatan untuk dialog, bukan ramalan laju reaksi
+REAKTIVITAS = {
+    "michael": "tinggi pada Cys; sering diperlakukan ireversibel",
+    "propiolamida": "tinggi, khas inhibitor KRAS G12C",
+    "haloasetamida": "tinggi; alfa-halokarbonil reaktif terhadap Cys dan Lys",
+    "sulfonil_fluorida": "sedang–tinggi (SuFEx), lebih memilih Ser/Lys",
+    "nitril": "rendah–sedang, sering reversibel",
+    "aldehida_imina": "reversibel (basa Schiff) pada Lys",
+    "aldehida": "reversibel (hemiacetal) pada Cys/Ser",
+    "isotiosianat": "tinggi terhadap Cys; produk tiourea",
+    "ester_aktif": "sedang; pastikan bukan ester biasa yang ikut tercocok",
+}
+
+
+def catatan_warhead(kunci):
+    return REAKTIVITAS.get(kunci, "")
 
 
 class GalatKovalen(Exception):

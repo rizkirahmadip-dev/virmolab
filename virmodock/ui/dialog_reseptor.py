@@ -94,6 +94,13 @@ class DialogReseptor(QDialog):
         self.c_air.setToolTip("Air kristal biasanya dibuang; pertahankan hanya air penjembatan yang terbukti penting")
         self.c_lig = QCheckBox("Hapus ligan asli, aditif, dan ion non-logam")
         self.c_lig.setChecked(True)
+        self.c_jembatan = QCheckBox("Pertahankan air yang menjembatani protein dan ligan (≤ 3,5 Å)")
+        self.c_jembatan.setToolTip("Hanya air yang dekat ke N/O protein sekaligus ke ligan asli. "
+                                   "Ditulis ke PDBQT sebagai akseptor. Meeko sendiri membuang HOH, "
+                                   "jadi atomnya ditambahkan kembali setelah preparasi.")
+        self.c_kof = QCheckBox("Pertahankan kofaktor (HEM, NAD, dan HET lain selain ligan utama)")
+        self.c_kof.setToolTip("Bukan aditif kristalisasi dan bukan ligan terbesar. "
+                              "Bila Meeko menolak residunya, preparasi beralih ke Open Babel.")
         h = QHBoxLayout()
         self.c_logam = QCheckBox("Pertahankan ion logam (Zn, Mg, Ca, Mn, Fe, Cu, Co, Ni) dalam radius")
         self.c_logam.setChecked(True)
@@ -105,7 +112,7 @@ class DialogReseptor(QDialog):
         h.addWidget(self.c_logam)
         h.addWidget(self.sp_rad)
         h.addStretch(1)
-        for x in (self.c_air, self.c_lig):
+        for x in (self.c_air, self.c_jembatan, self.c_lig, self.c_kof):
             gv.addWidget(x)
         gv.addLayout(h)
         self.l_logam = QLabel()
@@ -290,7 +297,8 @@ class DialogReseptor(QDialog):
                             pertahankan_logam=self.c_logam.isChecked(), radius_logam=self.sp_rad.value(),
                             altloc=self.cmb_alt.currentData(), muatan=self.cmb_q.currentData(),
                             protonasi="propka" if self.r_propka.isChecked() else "templat", ph=self.sp_ph.value(),
-                            optimasi_h=self.c_opt.isChecked())
+                            optimasi_h=self.c_opt.isChecked(), air_jembatan=self.c_jembatan.isChecked(),
+                            kofaktor=self.c_kof.isChecked())
 
     def accept(self):
         if not any(cb.isChecked() for cb in self.cek_rantai.values()):

@@ -1,0 +1,13 @@
+Contoh redocking 1HSG / MK1 — 11 Oktober 2026
+VirmoDock 0.9.6, AutoDock Vina, exhaustiveness 16, 9 pose, seed 42.
+Reseptor: PROPKA/PDB2PQR pH 7,4 lalu Meeko (1849 atom, 198 residu).
+Ligan: SMILES terprotonasi, koordinat dibuat ulang (MMFF), bukan koordinat kristal.
+Kotak: pusat ligan kristal MK1 902 B, ukuran 24,9 × 20,2 × 20,0 Å.
+
+ΔG Vina pose terbaik: −11,18 kcal/mol
+Ki perkiraan: 6,42 nM
+LE: 0,248 kcal/mol per atom berat
+RMSD terhadap kristal (kerangka yang sama): 1,39 Å — lolos (≤ 2 Å)
+GNINA Affinity: −11,56 kcal/mol
+CNNscore: 0,67
+CNNaffinity: 8,52 pK (bukan kcal/mol)

@@ -120,4 +120,20 @@ annotated-types (MIT), typing-inspection (MIT), legacy-cgi (PSF-2.0)
 Catatan pemasangan: paket OpenFF tidak tersedia di PyPI untuk Windows/Python 3.14; dipasang dari arsip rilis
 GitHub (lihat README). openff-amber-ff-ports tidak dibundel (tidak dipakai saat berjalan).
 
+Ditambahkan di VirmoDock 0.9.6 (setelah izin unduh 10 Oktober 2026)
+---------------------------------------------------------------
+ParmEd               4.3.1       LGPL (pemberitahuan di README)  licenses/ParmEd_LICENSE.txt
+  Dipakai untuk menulis kompleks.top. Ekstensi C++ _rdparm tidak dibangun.
+  Sumber: https://github.com/ParmEd/ParmEd
+
+Program luar, tidak dibundel (terpasang di rumah WSL ~/virmodock-alat)
+----------------------------------------------------------------------
+GNINA                1.3.3       GPL-2.0 pada biner (menyertakan OpenBabel).
+                                 Apache-2.0 hanya bila OpenBabel dihapus dari sumber.
+                                 https://github.com/gnina/gnina
+  Biner gnina.cuda12.8.static. Dijalankan sebagai proses terpisah lewat WSL.
+Boltz                2.2.1       MIT (kode dan bobot)            https://github.com/jwohlwend/boltz
+  Lingkungan Python 3.12 terpisah. PyTorch yang menyertainya: BSD-3-Clause.
+  Skrip pemasangan: build_tools/pasang_gnina_boltz_wsl.sh
+
 Catatan: ini ringkasan teknis, bukan nasihat hukum.

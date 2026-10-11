@@ -171,6 +171,11 @@ def _3d(mol, minimisasi, langkah):
     if perlu:
         prm = AllChem.ETKDGv3()
         prm.randomSeed = 42
+        Chem.GetSymmSSSR(mol)
+        cincin = mol.GetRingInfo().AtomRings()
+        if any(len(r) >= 7 for r in cincin):
+            prm.useMacrocycleTorsions = True
+            catatan.append("torsi makrosiklus (cincin ≥ 7)")
         if AllChem.EmbedMolecule(mol, prm) != 0:
             prm.useRandomCoords = True
             if AllChem.EmbedMolecule(mol, prm) != 0:

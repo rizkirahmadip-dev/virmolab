@@ -38,6 +38,8 @@ class OpsiReseptor:
     protonasi: str = "templat"       # templat (keadaan baku Meeko) | propka (PDB2PQR + PROPKA pada pH)
     ph: float = 7.4
     optimasi_h: bool = True          # PDB2PQR: optimasi jaringan ikatan H + flip His/Asn/Gln
+    air_jembatan: bool = False       # bila air dibuang: oksigen yang menjembatani protein dan ligan dipertahankan
+    kofaktor: bool = False           # HET selain ligan utama dan aditif (HEM, NAD, …) ikut struktur
 
 
 @dataclass
@@ -119,13 +121,21 @@ def bersihkan(st, opsi):
             if st[0][i].name not in opsi.rantai:
                 del st[0][i]
     lig_pos = _pusat_ligan(st)
+    jaga_air, jaga_kof = set(), set()
+    if opsi.air_jembatan or opsi.kofaktor:
+        from . import air as airmod
+        telaah = airmod.telaah(st)
+        if opsi.air_jembatan:
+            jaga_air = airmod.kunci_jembatan(telaah)
+        if opsi.kofaktor:
+            jaga_kof = airmod.kunci_kofaktor(telaah)
     logam = []
     for ch in st[0]:
         for i in range(len(ch) - 1, -1, -1):
             r = ch[i]
             nama = r.name.upper()
             if nama in AIR:
-                if opsi.hapus_air:
+                if opsi.hapus_air and (ch.name, str(r.seqid.num)) not in jaga_air:
                     del ch[i]
                 continue
             if r.het_flag != "H":
@@ -141,6 +151,8 @@ def bersihkan(st, opsi):
                 del ch[i]
                 continue
             # residu HET lain: ligan, ion non-logam, aditif kristalisasi
+            if (ch.name, str(r.seqid.num), nama) in jaga_kof:
+                continue
             if opsi.hapus_ligan or len(r) <= 1:
                 del ch[i]
     st.remove_empty_chains()
@@ -291,6 +303,26 @@ def siapkan(teks, opsi=None, fmt="pdb", lapor=None):
     if logam:
         baris = [b for b in baris if not b.startswith(("END", "TER"))] + _baris_logam(logam, hitung_atom(pdbqt) + 1)
         log("Ion logam dipertahankan: " + ", ".join(f"{r} {c}{i}" for r, _, _, _, c, i in logam))
+    if opsi.air_jembatan:
+        mulai = hitung_atom("\n".join(baris)) + 1
+        air_baris = []
+        for ch in bersih[0]:
+            for r in ch:
+                if r.name.upper() not in AIR:
+                    continue
+                for a in r:
+                    if a.element.name != "O":
+                        continue
+                    p = a.pos
+                    air_baris.append(
+                        f"HETATM{mulai % 100000:5d} {'O':<4} HOH {ch.name[:1]}{r.seqid.num % 10000:4d}    "
+                        f"{p.x:8.3f}{p.y:8.3f}{p.z:8.3f}  1.00  0.00    {-0.400:+6.3f} OA")
+                    mulai += 1
+        if air_baris:
+            baris = [b for b in baris if not b.startswith(("END", "TER"))] + air_baris
+            log(f"Air penjembatan dipertahankan: {len(air_baris)} (tipe OA)")
+            peringatan.append(f"{len(air_baris)} air penjembatan ditulis sebagai akseptor OA. "
+                              "Skornya tidak setara dengan air eksplisit.")
     pdbqt = "\n".join(baris) + "\n"
     h = HasilReseptor(pdbqt=pdbqt, pdb_bersih=pdb, metode=metode, atom=hitung_atom(pdbqt), residu=n_res - len(dibuang),
                       dibuang=dibuang, logam=[f"{r} {c}{i}" for r, _, _, _, c, i in logam], peringatan=peringatan,
@@ -305,7 +337,9 @@ def siapkan(teks, opsi=None, fmt="pdb", lapor=None):
         f"Atom PDBQT   : {h.atom} (H polar {jumlah_h})",
         f"Muatan total : {q_total:+.3f}",
         f"Tipe atom    : {' '.join(sorted(tipe_atom(pdbqt)))}",
-        f"Air dihapus  : {'ya' if opsi.hapus_air else 'tidak'}",
+        f"Air dihapus  : {'ya' if opsi.hapus_air else 'tidak'}"
+        + (" (air penjembatan dipertahankan)" if opsi.air_jembatan else ""),
+        f"Kofaktor     : {'dipertahankan' if opsi.kofaktor else 'dibuang bersama ligan'}",
         f"Ligan dihapus: {'ya' if opsi.hapus_ligan else 'tidak'}",
         f"Altloc       : {'A' if opsi.altloc == 'A' else 'okupansi tertinggi'}",
         f"Ion logam    : {', '.join(h.logam) or '-'}",

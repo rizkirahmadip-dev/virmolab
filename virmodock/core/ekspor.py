@@ -34,7 +34,8 @@ def baris_hasil(proyek, jobs=None):
                                                       "logam")},
                           "n_pose": l.get("n_pose"), "mesin": M.MESIN.get(j["mesin"], j["mesin"]), "job": j["id"],
                           "detik": l.get("detik"), "smiles": lig.get("smiles", ""), "residu": l.get("residu") or {}, "ifp": l.get("ifp") or [],
-                          "pose": l.get("pose") or [], "qc": l.get("qc"), "posebusters": qc.teks_sel(l.get("qc")),
+                          "pose": l.get("pose") or [], "qc": l.get("qc"), "kovalen": bool(j.get("kovalen")),
+                          "posebusters": qc.teks_sel(l.get("qc")),
                           "posebusters_gagal": ", ".join((l.get("qc") or {}).get("gagal") or []),
                           "mmgbsa": (l.get("mmgbsa") or {}).get("dG"), "mmgbsa_sd": (l.get("mmgbsa") or {}).get("sd"),
                           "mmgbsa_metode": (l.get("mmgbsa") or {}).get("metode", "")})

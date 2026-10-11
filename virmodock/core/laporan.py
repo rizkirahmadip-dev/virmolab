@@ -177,6 +177,8 @@ def html(proyek, baris, info, interaksi_terbaik=None, ada_gambar3d=False, ada_di
     o.append("</table>")
     if len(baris) > 15:
         o.append(f"<p class='mut'>15 dari {len(baris)} hasil ditampilkan; tabel lengkap tersedia di ekspor CSV/XLSX.</p>")
+    from .arti import html
+    o.append("<p class='mut'><b>Arti angka.</b> " + html() + "</p>")
     if jobs_kov:
         o.append("<p class='mut'>Docking kovalen: angka pada kolom ΔG adalah skor aduk–reseptor (energi residu "
                  "fleksibel), bukan ΔG ikatan; Ki dan efisiensi ligan tidak dihitung. Bandingkan hanya antar-ligan "

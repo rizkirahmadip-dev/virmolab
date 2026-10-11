@@ -5,7 +5,7 @@ from PySide6.QtWidgets import (QHBoxLayout, QHeaderView, QLabel, QLineEdit, QPus
                                QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget)
 
 from ..core.laporan import id_angka
-from ..core import qc
+from ..core import arti, qc
 from . import theme
 
 KOLOM = ["#", "Ligan", "ΔG (kcal/mol)", "Ki perkiraan", "LE", "Klaster", "RMSD kristal (Å)", "RMSD ref (Å)",
@@ -75,6 +75,9 @@ class PanelHasil(QWidget):
         self.pohon = QTreeWidget()
         self.pohon.setColumnCount(len(KOLOM))
         self.pohon.setHeaderLabels(KOLOM)
+        judul = self.pohon.headerItem()
+        for i, tip in arti.PETUNJUK_KOLOM.items():
+            judul.setToolTip(i, tip)
         self.pohon.setSortingEnabled(True)
         self.pohon.setUniformRowHeights(True)
         self.pohon.setIndentation(14)
@@ -170,6 +173,7 @@ class PanelHasil(QWidget):
             self._sel(it, 0, b["peringkat"])
             it.setText(1, b["ligan"])
             self._sel(it, 2, b["energi"])
+            it.setToolTip(2, arti.arti_skor(b.get("kovalen")))
             it.setText(3, id_angka(b["ki"] or ""))
             self._sel(it, 4, b["le"], "{:.3f}")
             self._sel(it, 5, b["klaster"])
@@ -205,6 +209,7 @@ class PanelHasil(QWidget):
                 c.setData(1, Qt.UserRole + 1, (b["job"], b["lid"], p["peringkat"]))
                 c.setText(1, f"Pose {p['peringkat']}")
                 self._sel(c, 2, p["energi"])
+                c.setToolTip(2, arti.arti_skor(b.get("kovalen")))
                 self._sel(c, 5, p.get("klaster") or None)
                 self._sel(c, 6, p.get("rmsd_kristal"))
                 self._sel(c, 7, p["rmsd_ref"] if p.get("rmsd_ref", -1) >= 0 else
