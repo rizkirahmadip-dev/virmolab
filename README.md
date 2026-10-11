@@ -17,7 +17,7 @@ dan ekspor siap publikasi dalam satu jendela berbahasa Indonesia.
   saran tingkat sesuai kemampuan laptop, jeda/lanjut, RMSD/RMSF, interaksi persisten.
 - **Baris perintah**: `VirmoDock-cli.exe` untuk docking batch dan skrip (lihat di bawah).
 
-Status: **0.9.6 pra-rilis** (lihat CHANGELOG.md) — menunggu uji relawan di GPU AMD/Intel dan komputer tanpa GPU. Installer 0.9.6 belum dibuat.
+Status: **0.9.6 pra-rilis** (lihat CHANGELOG.md) — menunggu uji relawan di GPU AMD/Intel dan komputer tanpa GPU. Installer dan zip portable 0.9.6 ada di folder `rilis/` (tidak ikut git).
 
 ## Unduh
 

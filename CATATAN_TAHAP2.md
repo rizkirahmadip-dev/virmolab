@@ -260,6 +260,7 @@ Masuk dari Analisis › Penelitian lanjutan. GNINA, Boltz, dan ParmEd ditambahka
 - BLAST: `konservasi.kirim_blast` ke `swissprot` lewat URL NCBI. Antrean bisa lama; RID disimpan di dialog. Identitas residu tetap Needleman–Wunsch.
 - Arti angka: `core/arti.py`, petunjuk kolom tab Hasil, paragraf di laporan, dan bagian draf skripsi. Ringkasan langkah menulis "skor kovalen" bila job terbaik bersifat kovalen.
 - Contoh redocking 1HSG/MK1 (11 Okt 2026, Vina, exhaustiveness 16, seed 42, kotak di ligan kristal, ligan dari SMILES terprotonasi lalu MMFF, reseptor PROPKA pH 7,4): ΔG −11,18 kcal/mol, RMSD 1,39 Å terhadap MK1 rantai B, GNINA Affinity −11,56 kcal/mol, CNNscore 0,67, CNNaffinity 8,52 (pK). Lolos ambang 2 Å.
+- Installer 0.9.6 (11 Okt 2026): uji mandiri exe beku 27/27, ukuran terpasang 1598 MB. `VirmoDock-Setup-0.9.6.exe` 472,1 MB, SHA-256 `850cc27c6b357b6a72e7393a648e85c62e79f0abfc283cd034006140ffeeb168`. `VirmoDock-Portable-0.9.6.zip` 673,0 MB, SHA-256 `f2350a0d7d433b682fdfe5ff75f313bb35e2047ddc3971fe60369b809f819f92`. Keduanya di `rilis/`, tidak ikut git.
 - ParmEd 4.3.1 (LGPL, menurut `setup.py`) dipasang di `.venv` tanpa ekstensi C `_rdparm` (komputer ini tidak punya MSVC; parser prmtop cepat tidak dipakai). `kompleks.top` adalah topologi vakum; gaya OBC2 tidak bisa disalin ke GROMACS.
 
 ## 4l. Versi 0.9.4 (9 Okt 2026, permintaan pengguna: MD + MM/GBSA, "sangat teliti")
