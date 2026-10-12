@@ -4,8 +4,6 @@ Memeriksa: metode & resolusi, rantai, celah rantai (jarak C-N antar residu berur
 berat hilang, konformasi alternatif, okupansi < 1, residu non-standar, ligan/ion/air, dan B-faktor.
 Hasil = dict ringkasan + daftar temuan (tingkat: 'ok' | 'info' | 'peringatan' | 'masalah').
 """
-import gemmi
-
 from .molekul import ADITIF, AIR
 
 # jumlah atom berat sisi + tulang punggung (tanpa OXT) asam amino baku

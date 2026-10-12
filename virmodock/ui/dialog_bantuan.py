@@ -139,7 +139,7 @@ def catatan_perubahan(sejak=None):
         return ""
     teks = f.read_text(encoding="utf-8")
     bagian = teks.split("\n## ")
-    kepala, versi = bagian[0], ["## " + b for b in bagian[1:]]
+    versi = ["## " + b for b in bagian[1:]]
     if sejak:
         def v(t):
             return tuple(int(x) for x in t.split("[", 1)[1].split("]", 1)[0].split(".") if x.isdigit())

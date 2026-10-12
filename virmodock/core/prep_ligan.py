@@ -95,7 +95,8 @@ def _protonasi(mol, ph):
 
 def dimorphite_tersedia():
     try:
-        import dimorphite_dl  # noqa: F401
+        import dimorphite_dl
+        _ = dimorphite_dl
         return True
     except Exception:
         return False

@@ -9,6 +9,10 @@ from pathlib import Path
 
 from PySide6.QtCore import QSettings, QTimer
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 sys.argv = [sys.argv[0]]
 st = QSettings("VirmoDock", "VirmoDock")
 st.setValue("tema", "terang")

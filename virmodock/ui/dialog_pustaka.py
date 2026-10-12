@@ -5,7 +5,7 @@ from html import escape
 
 from PySide6.QtCore import Qt, QUrl
 from PySide6.QtGui import QDesktopServices
-from PySide6.QtWidgets import (QCheckBox, QComboBox, QDialog, QDoubleSpinBox, QFormLayout, QHBoxLayout, QHeaderView,
+from PySide6.QtWidgets import (QCheckBox, QComboBox, QDialog, QDoubleSpinBox, QHBoxLayout, QHeaderView,
                                QLabel, QLineEdit, QMessageBox, QProgressBar, QPushButton, QSpinBox, QStackedWidget,
                                QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget)
 

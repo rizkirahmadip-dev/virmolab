@@ -2,12 +2,12 @@
 from PySide6.QtCore import QByteArray, QRectF, Qt, Signal
 from PySide6.QtGui import QColor, QPainter
 from PySide6.QtSvg import QSvgRenderer
-from PySide6.QtWidgets import (QCheckBox, QGridLayout, QHBoxLayout, QHeaderView, QLabel, QPushButton, QToolBar,
+from PySide6.QtWidgets import (QCheckBox, QGridLayout, QHeaderView, QLabel, QPushButton, QToolBar,
                                QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget)
 
 from ..core.laporan import id_angka
 from ..core.analisis import KRITERIA, NAMA_JENIS, URUT_JENIS
-from . import icons, theme
+from . import theme
 from .panels import judul_seksi
 
 

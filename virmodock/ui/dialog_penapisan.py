@@ -14,11 +14,10 @@ from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QColor, QGuiApplication
 from PySide6.QtWidgets import (
     QCheckBox, QComboBox, QDialog, QDoubleSpinBox, QFileDialog, QGroupBox,
-    QHBoxLayout, QHeaderView, QLabel, QMessageBox, QPushButton, QSlider,
+    QHBoxLayout, QHeaderView, QLabel, QMessageBox, QPushButton,
     QSplitter, QSpinBox, QTabWidget, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget
 )
 
-from ..core import ekspor as eksmod
 from ..core import grafik, penapisan
 from .panel_interaksi import KanvasSvg
 from ..core.laporan import id_angka

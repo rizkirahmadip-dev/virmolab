@@ -28,7 +28,6 @@ def svg(mol, daftar, lebar=960, tinggi=720, judul="", gelap=False, transparan=Fa
     warna = dict(WARNA, **(warna or {}))
     latar = "#14171c" if gelap else "#ffffff"
     tinta = "#e2e6ed" if gelap else "#1b2430"
-    redup = "#7d8796" if gelap else "#7b8698"
     m = Chem.RemoveAllHs(Chem.Mol(mol), sanitize=False)
     try:
         Chem.SanitizeMol(m)

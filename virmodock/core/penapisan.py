@@ -1,6 +1,5 @@
 """Batch Virtual Screening: filter, peringkat multi-kriteria, auto-flag top hits, dan ringkasan data."""
 from typing import Any, Dict, List, Optional, Tuple
-import math
 from . import ekspor
 from . import mpo
 from . import sifat as sifat_mod
@@ -215,7 +214,6 @@ def flag_top_hits(data: List[Dict[str, Any]], n: int = 20,
     # Cari rentang nilai untuk normalisasi min-max
     dgs = [d["energi"] for d in data if d.get("energi") is not None]
     les = [d["le"] for d in data if d.get("le") is not None]
-    mpos = [d["mpo_skor"] for d in data if d.get("mpo_skor") is not None]
     ints = [d["interaksi_total"] for d in data if d.get("interaksi_total") is not None]
 
     min_dg, max_dg = (min(dgs), max(dgs)) if dgs else (-10.0, -4.0)

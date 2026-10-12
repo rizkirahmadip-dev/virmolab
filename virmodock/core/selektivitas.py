@@ -72,7 +72,6 @@ def matriks_selektivitas(
         return [], [], [], {}
 
     label_target = [t[0] for t in proyek_list]
-    n_target = len(proyek_list)
 
     # Kumpulkan hasil per proyek: map {id_kanon: nilai}
     data_per_target = []

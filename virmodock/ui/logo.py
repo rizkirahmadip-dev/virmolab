@@ -1,5 +1,5 @@
 """Logo VirmoDock (SVG vektor dari branding/) sebagai widget, menyesuaikan tema terang/gelap."""
-from PySide6.QtCore import QRectF, QSize, Qt
+from PySide6.QtCore import QRectF, QSize
 from PySide6.QtSvg import QSvgRenderer
 from PySide6.QtWidgets import QWidget
 

@@ -7,7 +7,7 @@ Dilengkapi visualisasi grafik laba-laba / radar SVG interaktif untuk setiap liga
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor, QGuiApplication
 from PySide6.QtWidgets import (QComboBox, QDialog, QFileDialog, QGroupBox, QHBoxLayout,
-                               QHeaderView, QLabel, QMessageBox, QPushButton, QSplitter,
+                               QHeaderView, QLabel, QPushButton, QSplitter,
                                QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget)
 
 from ..core import ekspor as eksmod

@@ -155,7 +155,6 @@ class DialogKonsensus(QDialog):
             self._susun(pilih, j_pose, perlu)
 
     def _susun(self, pilih, j_pose, perlu):
-        pr = self.jw.proyek
         kolom, nama = {}, {}
         for jenis, k in pilih:
             if jenis == "job":

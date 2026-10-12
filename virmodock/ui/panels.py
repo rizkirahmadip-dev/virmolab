@@ -1,9 +1,9 @@
 """Panel samping: hierarki molekul, properti, tampilan (gaya ala PyMOL), log, antrean."""
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QAction, QColor
-from PySide6.QtWidgets import (QAbstractItemView, QButtonGroup, QColorDialog, QComboBox, QFormLayout, QGridLayout,
+from PySide6.QtGui import QColor
+from PySide6.QtWidgets import (QAbstractItemView, QColorDialog, QComboBox, QFormLayout, QGridLayout,
                                QHBoxLayout, QHeaderView, QLabel, QLineEdit, QMenu, QPlainTextEdit, QPushButton,
-                               QScrollArea, QSizePolicy, QSlider, QTableWidget, QTableWidgetItem, QToolButton, QTreeWidget,
+                               QScrollArea, QSizePolicy, QSlider, QToolButton, QTreeWidget,
                                QTreeWidgetItem, QVBoxLayout, QWidget)
 
 from ..core.laporan import id_angka

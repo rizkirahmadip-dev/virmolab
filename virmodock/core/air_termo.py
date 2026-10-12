@@ -12,8 +12,7 @@ Menganalisis molekul air (HOH / TIP3P) di sekitar sisi aktif reseptor dan pose d
    - Berenergi Tinggi / Tidak Stabil: Terjebak di lingkungan hidrofobik; sangat menguntungkan
      bila digusur oleh gugus hidrofobik ligan untuk meningkatkan afinitas (ΔG gusur < 0).
 """
-from typing import Any, Dict, List, Optional, Tuple
-import math
+from typing import Any, Dict, List, Optional
 import numpy as np
 
 from .ppi import _uraikan_pdb

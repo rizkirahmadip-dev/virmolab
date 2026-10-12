@@ -4,19 +4,17 @@ Memprediksi residu antarmuka pengikatan protein (SASA),
 menilai kontak non-kovalen antar-rantai kompleks (H-Bond, Salt Bridge, ΔSASA),
 dan visualisasi model kompleks di viewer 3D.
 """
-import csv
 from pathlib import Path
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QColor, QGuiApplication
 from PySide6.QtWidgets import (
-    QComboBox, QDialog, QFileDialog, QGroupBox, QHBoxLayout, QHeaderView,
-    QLabel, QLineEdit, QMessageBox, QPushButton, QSplitter, QTabWidget,
+    QDialog, QFileDialog, QGroupBox, QHBoxLayout, QHeaderView,
+    QLabel, QMessageBox, QPushButton, QSplitter, QTabWidget,
     QTableWidget, QTableWidgetItem, QTextEdit, QVBoxLayout, QWidget
 )
 
-from ..core import grafik, ppi
-from .panel_interaksi import KanvasSvg
-from . import kit, theme
+from ..core import ppi
+from . import kit
 
 
 def _sel(t, angka=None, align_right=False):

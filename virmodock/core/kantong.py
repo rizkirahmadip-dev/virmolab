@@ -8,12 +8,11 @@ Titik demikian diklasterkan (konektivitas 26) menjadi kantong, lalu diperingkat 
 Rujukan metode: Hendlich, Rippmann & Barnickel (1997), LIGSITE. Implementasi ini disederhanakan dan tidak
 mengurutkan kantong dengan model druggability terlatih.
 """
-import math
 from typing import Any, Dict, List
 
 import numpy as np
 
-from .ppi import VDW_RADIUS, _uraikan_pdb
+from .ppi import _uraikan_pdb
 
 ARAH = [(1, 0, 0), (0, 1, 0), (0, 0, 1),
         (1, 1, 0), (1, -1, 0), (1, 0, 1), (1, 0, -1), (0, 1, 1), (0, 1, -1),

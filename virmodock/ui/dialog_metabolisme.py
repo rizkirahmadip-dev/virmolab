@@ -1,9 +1,7 @@
-"""Dialog Prediksi Titik Metabolisme Ligan (Site of Metabolism / SoM Finder)."""
-from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
     QComboBox, QTableWidget, QTableWidgetItem, QHeaderView,
-    QGroupBox, QTextEdit, QMessageBox
+    QGroupBox, QMessageBox
 )
 
 from ..core import metabolisme

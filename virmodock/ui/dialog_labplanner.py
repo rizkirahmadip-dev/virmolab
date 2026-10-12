@@ -10,14 +10,14 @@ Menjembatani penambatan molekuler ke protokol uji in vitro di laboratorium basah
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor, QFont, QGuiApplication
 from PySide6.QtWidgets import (QComboBox, QDialog, QDoubleSpinBox, QFileDialog, QGroupBox,
-                               QHBoxLayout, QHeaderView, QLabel, QMessageBox, QPushButton,
+                               QHBoxLayout, QHeaderView, QLabel, QPushButton,
                                QSpinBox, QSplitter, QTabWidget, QTableWidget, QTableWidgetItem,
                                QTextEdit, QVBoxLayout, QWidget)
 
 from ..core import ekspor as eksmod
 from ..core import labplanner
 from ..core.laporan import id_angka
-from . import kit, theme
+from . import kit
 
 
 class DialogLabPlanner(QDialog):
@@ -371,6 +371,8 @@ class DialogLabPlanner(QDialog):
                 it.setBackground(QColor(w_hex))
                 it.setForeground(QColor("#1b2430"))   # latar sumur selalu pastel terang
                 it.setData(Qt.UserRole, data_sumur)
+                if lbl:
+                    it.setToolTip(lbl)
                 self.tabel_pelat.setItem(r_idx, c_idx, it)
 
     def _klik_sumur(self, it):

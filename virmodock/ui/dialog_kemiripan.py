@@ -4,13 +4,12 @@ Tab: Peta ruang kimia (MDS Tanimoto / PCA deskriptor, warna klaster atau ΔG), M
 (acuan = ligan proyek atau SMILES), Klaster Butina, Farmakofor bersama (fitur 3D pose terbaik N ligan teratas).
 """
 import csv
-from html import escape
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor
-from PySide6.QtWidgets import (QCheckBox, QComboBox, QDialog, QDoubleSpinBox, QFileDialog, QHBoxLayout, QLabel,
+from PySide6.QtWidgets import (QCheckBox, QComboBox, QDialog, QDoubleSpinBox, QHBoxLayout, QLabel,
                                QLineEdit, QPushButton, QSpinBox, QTabWidget, QTableWidget, QTableWidgetItem,
-                               QTextBrowser, QVBoxLayout, QWidget)
+                               QVBoxLayout, QWidget)
 
 from ..core import analisis, grafik, kemiripan as K
 from ..core import ekspor as eksmod

@@ -9,7 +9,7 @@ Menjembatani hasil penambatan molekuler (in silico) ke protokol eksperimen in vi
 5. Panduan protokol pemipetan langkah-demi-langkah siap cetak.
 """
 import math
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 R_KAL = 1.987207e-3   # kcal / (mol * K)
 SUHU_K = 298.15       # 25 °C
@@ -89,9 +89,6 @@ def buat_protokol_pipet(stok_mM: float, seri_kons_uM: List[float], volume_sumur_
        ke sumur (0.5% volume) langsung menghasilkan DMSO 0.5%.
     2. Atau pengenceran 2 langkah (stok DMSO -> larutan antara dalam buffer -> sumur uji).
     """
-    stok_uM = stok_mM * 1000.0
-    c_maks = seri_kons_uM[0]
-
     # Faktor konsentrasi di sumur (100% / DMSO%)
     # Contoh jika DMSO maks = 0.5%, maka larutan senyawa ditambahkan sebesar 0.5% volume sumur
     # (misal 0.5 μL per 100 μL sumur, atau larutan antara 10x ditambahkan 10 μL per 100 μL sumur dengan DMSO 5%).
@@ -126,6 +123,7 @@ def buat_protokol_pipet(stok_mM: float, seri_kons_uM: List[float], volume_sumur_
         "stok_mM": stok_mM,
         "volume_sumur_uL": volume_sumur_uL,
         "dmso_maks_persen": dmso_maks_persen,
+        "dmso_di_larutan_kerja": dmso_di_larutan_kerja,
         "butuh_larutan_antara": butuh_larutan_antara,
         "vol_tambah_uL": vol_tambah_sumur_uL,
         "vol_buffer_uL": vol_buffer_sumur_uL,
@@ -232,8 +230,8 @@ def buat_teks_protokol(nama_ligan: str, dg_kkal: float, ki_info: Dict[str, Any],
                        protokol: Dict[str, Any]) -> str:
     """Hasilkan teks draf protokol laboratorium terformat dalam Bahasa Indonesia."""
     lines = []
-    lines.append(f"PROTOKOL PENGUJIAN IN VITRO (WET-LAB PLANNER)")
-    lines.append(f"VirmoDock - Penambatan Molekuler ke Uji Laboratorium")
+    lines.append("PROTOKOL PENGUJIAN IN VITRO (WET-LAB PLANNER)")
+    lines.append("VirmoDock - Penambatan Molekuler ke Uji Laboratorium")
     lines.append("=" * 65)
     lines.append(f"Senyawa Uji     : {nama_ligan}")
     lines.append(f"Skor Docking ΔG : {dg_kkal:.2f} kcal/mol")

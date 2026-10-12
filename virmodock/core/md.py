@@ -14,11 +14,10 @@ Onufriev dkk. 2004 (OBC); Genheden & Ryde 2015 (MM/GBSA).
 import io
 import json
 import math
-import os
 import sys
 import time
 import warnings
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass
 from pathlib import Path
 
 import numpy as np
@@ -77,9 +76,10 @@ def _diam():
 
 def tersedia():
     try:
-        import openmm  # noqa: F401
-        from openff.toolkit import Molecule  # noqa: F401
-        from openmmforcefields.generators import SMIRNOFFTemplateGenerator  # noqa: F401
+        import openmm
+        import openff.toolkit
+        import openmmforcefields.generators
+        _ = (openmm, openff.toolkit, openmmforcefields.generators)
         return True
     except Exception:
         return False

@@ -5,7 +5,7 @@ Merancang senyawa bivalen chimera penarget degradasi protein:
 Menghitung parameter fisiko-kimia bRo5 (Beyond Rule of 5), panjang rentang linker (Å),
 dan kompatibilitas konformasi degradasi.
 """
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict
 from rdkit import Chem
 from rdkit.Chem import Descriptors, Lipinski, rdMolDescriptors
 

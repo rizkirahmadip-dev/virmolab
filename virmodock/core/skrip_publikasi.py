@@ -9,7 +9,7 @@ Menghasilkan skrip visualisasi otomatis dengan standar tata letak jurnal ilmiah 
   - Permukaan kantong transparan (solvent-accessible pocket surface)
   - Pengaturan ray-tracing kamera resolusi tinggi 300 DPI siap cetak
 """
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 from pathlib import Path
 
 

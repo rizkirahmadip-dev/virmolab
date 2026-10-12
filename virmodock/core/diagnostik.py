@@ -8,7 +8,7 @@ Memeriksa secara terpadu kesiapan komputer pengguna:
   - Layanan AI Lokal Ollama
 Memberikan status berkode warna dan panduan solusi instan bila ada komponen yang belum aktif.
 """
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List
 import platform
 import sys
 import shutil

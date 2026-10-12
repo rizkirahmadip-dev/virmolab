@@ -7,7 +7,6 @@ Molecular Complexity and Fragment Contributions", J. Cheminform. 1:8.
 Skor berkisar antara 1 (sangat mudah disintesis) sampai 10 (sangat sulit / mustahil).
 Menggunakan RDKit Contrib SA_Score resmi dan pangkalan data fpscores bawaan.
 """
-import os
 import sys
 from pathlib import Path
 

@@ -1,0 +1,56 @@
+name: VirmoDock CI
+
+on:
+  push:
+    branches: [ main, master, dev* ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  lint:
+    name: Lint & Sintaksis
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repositori
+        uses: actions/checkout@v4
+
+      - name: Pasang Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Pasang perkakas linter
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pyflakes ruff
+
+      - name: Jalankan Pyflakes
+        run: |
+          python -m pyflakes virmodock
+
+      - name: Jalankan Ruff Linter
+        run: |
+          python -m ruff check virmodock
+
+  uji-mandiri:
+    name: Uji Mandiri Komponen
+    runs-on: windows-latest
+    needs: lint
+    steps:
+      - name: Checkout repositori
+        uses: actions/checkout@v4
+
+      - name: Pasang Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Pasang dependensi pengujian dasar
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install PySide6 rdkit numpy pandas
+
+      - name: Jalankan Uji Mandiri CLI & Sintaksis
+        run: |
+          python -m virmodock --uji-mandiri

@@ -1,6 +1,5 @@
 """Dialog: ambil dari database, wizard pertama kali, pengaturan."""
-from PySide6.QtCore import Qt, QUrl
-from PySide6.QtGui import QDesktopServices
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (QAbstractItemView, QCheckBox, QComboBox, QDialog, QDialogButtonBox, QDoubleSpinBox,
                                QFileDialog, QFormLayout, QHBoxLayout, QHeaderView, QLabel, QLineEdit, QListWidget,
                                QListWidgetItem, QPlainTextEdit, QProgressBar, QPushButton, QTabWidget, QTreeWidget, QTreeWidgetItem,

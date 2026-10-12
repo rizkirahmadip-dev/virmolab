@@ -1,8 +1,6 @@
-"""Dialog Prediksi Kinetika Pengikatan & Waktu Tinggal (Residence Time & k_off Estimator)."""
-from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QDoubleSpinBox, QSpinBox, QGroupBox, QComboBox, QTextEdit
+    QDoubleSpinBox, QSpinBox, QGroupBox, QTextEdit
 )
 
 from ..core import kinetika

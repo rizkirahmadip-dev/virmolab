@@ -1,0 +1,54 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "virmodock"
+version = "1.1.1"
+description = "Aplikasi desktop molecular docking untuk penemuan obat dan penelitian kimia komputasi"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+    { name = "apt. Rizki Rahmadi Pratama, M. Farm" }
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Win32 (MS Windows)",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Topic :: Scientific/Engineering :: Chemistry",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "UP",  # pyupgrade
+]
+ignore = [
+    "E501", # line too long (handled gracefully)
+    "E722", # bare except (audited systematically)
+    "F403", # import *
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+"dev/*" = ["F401", "F841"]
+
+[tool.pytest.ini_options]
+testpaths = ["dev"]
+python_files = ["uji_*.py"]
+python_functions = ["uji_*", "test_*"]

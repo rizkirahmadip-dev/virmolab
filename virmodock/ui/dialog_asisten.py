@@ -1,5 +1,3 @@
-"""Jendela Asisten Pintar: Tanya Panduan Docking, dan Interpretasi Hasil AI (Ollama)."""
-from PySide6.QtCore import Qt
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import (
     QComboBox, QDialog, QHBoxLayout, QLabel, QLineEdit, QMessageBox,

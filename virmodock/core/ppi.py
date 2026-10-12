@@ -7,7 +7,7 @@ Menyediakan:
 3. Klastering pose docking model protein-protein berbasis RMSD C-alfa.
 4. Penyiapan berkas untuk docking rigid-body di ClusPro 2.0 (diunggah sendiri oleh pengguna).
 """
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 import math
 import numpy as np
 

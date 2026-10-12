@@ -14,7 +14,6 @@ Struktur:
   SHA256SUMS.txt             checksum semua berkas
 """
 import hashlib
-import io
 import json
 import re
 import zipfile

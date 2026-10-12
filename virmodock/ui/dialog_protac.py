@@ -1,8 +1,7 @@
-"""Dialog Perancang Molekul PROTAC & Targeted Protein Degradation (TPD)."""
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import Signal
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QComboBox, QLineEdit, QGroupBox, QTextEdit, QMessageBox
+    QComboBox, QGroupBox, QTextEdit
 )
 
 from ..core import protac

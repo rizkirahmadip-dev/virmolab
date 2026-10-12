@@ -22,7 +22,6 @@ Contoh:
 import argparse
 import csv
 import json
-import os
 import re
 import shutil
 import subprocess
@@ -335,7 +334,6 @@ def _mesin_otomatis():
 def cmd_dock(a):
     from .core import analisis
     from .core import mesin as M
-    from .core import prep_ligan as pl
     out = Path(a.keluar)
     if out.exists() and any(out.iterdir()) and not a.timpa:
         _galat(f"Folder keluaran {out} tidak kosong. Pakai folder lain atau --timpa.")

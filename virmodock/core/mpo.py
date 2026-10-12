@@ -8,7 +8,7 @@ Mendukung preset:
 2. 'cns': CNS-MPO parsial (4 dari 6 suku Wager et al. 2010; ClogD dan pKa tidak dihitung).
 3. 'kustom': Bobot dan rentang dapat diatur bebas oleh pengguna.
 """
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Optional
 
 
 def _turun(x: float, batas_bawah: float, batas_atas: float) -> float:

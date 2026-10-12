@@ -162,7 +162,6 @@ def _offset(c1, n1, c2):
 # --------------------------------------------------------------- interaksi
 def interaksi(rec, mol, radius=8.0):
     """Daftar interaksi (dict) antara Reseptor dan RDKit Mol (koordinat konformer 0)."""
-    from rdkit import Chem
     if mol is None or mol.GetNumConformers() == 0:
         return []
     L = mol.GetConformer().GetPositions()

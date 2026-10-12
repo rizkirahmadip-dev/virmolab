@@ -4,7 +4,7 @@ Mengidentifikasi atom-atom pada molekul ligan yang paling rentan mengalami
 metabolisme fase I oleh enzim Sitokrom P450 (CYP3A4, CYP2D6, CYP2C9),
 serta memberikan saran strategi modifikasi bioisosterik pelindung metabolisme.
 """
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict
 from rdkit import Chem
 
 # Definisi pola SMARTS reaksi metabolisme CYP450 umum

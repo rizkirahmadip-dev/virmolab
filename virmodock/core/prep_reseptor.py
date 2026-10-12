@@ -9,11 +9,9 @@ Alur:
   4. Ion logam ditambahkan ke PDBQT dengan tipe AD4 dan muatan formal.
 """
 import io
-import math
 import re
 from contextlib import redirect_stderr, redirect_stdout
 from dataclasses import dataclass, field
-from pathlib import Path
 
 import gemmi
 

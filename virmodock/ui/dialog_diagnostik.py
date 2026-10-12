@@ -2,8 +2,8 @@
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor, QGuiApplication
 from PySide6.QtWidgets import (
-    QDialog, QGroupBox, QHBoxLayout, QHeaderView, QLabel, QMessageBox,
-    QPushButton, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget
+    QDialog, QHBoxLayout, QHeaderView, QLabel, QMessageBox,
+    QPushButton, QTableWidget, QTableWidgetItem, QVBoxLayout
 )
 
 from ..core import diagnostik

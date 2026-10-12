@@ -537,7 +537,6 @@ class DialogPenelitian(QDialog):
             return
         self._tulis(f"SMILES {smi}. Tabrakan sebelum minimisasi: {n}. Vina sedang meminimisasi di tempat.")
         from . import kerja
-        from ..core import lokal
         kerja.jalankan(lambda lapor, m=baru, r=rec, s=smi, nt=n: self._skor_suntingan(m, r, s, nt),
                        selesai=self._tulis, galat=self._tulis)
 
@@ -658,7 +657,7 @@ class DialogPenelitian(QDialog):
         except Exception as e:
             self._tulis(str(e))
             return
-        self._tulis("Paket ditulis: sistem_obc2.xml, kompleks.pdb, kompleks.gro, "
+        self._tulis(f"Paket ditulis ke {tujuan}: sistem_obc2.xml, kompleks.pdb, kompleks.gro, "
                     "kompleks.top bila ParmEd berhasil, dan BACA.txt.")
 
     def _figur(self):

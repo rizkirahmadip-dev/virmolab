@@ -12,7 +12,6 @@ Status ligan: menunggu | berjalan | selesai | gagal | dilewati | dibatalkan
 import shutil
 import time
 from datetime import datetime
-from pathlib import Path
 
 from PySide6.QtCore import QObject, QProcess, QTimer, Signal
 

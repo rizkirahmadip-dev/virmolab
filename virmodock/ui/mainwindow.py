@@ -5,11 +5,11 @@ import subprocess
 import time
 from pathlib import Path
 
-from PySide6.QtCore import QByteArray, QEvent, QSettings, QSize, Qt, QTimer, QUrl
+from PySide6.QtCore import QByteArray, QSize, Qt, QTimer, QUrl
 from PySide6.QtGui import QAction, QActionGroup, QDesktopServices, QGuiApplication, QIcon, QKeySequence
-from PySide6.QtWidgets import (QApplication, QButtonGroup, QComboBox, QDockWidget, QFileDialog, QHBoxLayout,
+from PySide6.QtWidgets import (QApplication, QButtonGroup, QDockWidget, QFileDialog, QHBoxLayout,
                                QInputDialog, QLabel, QMainWindow, QPushButton, QSizePolicy, QStackedWidget,
-                               QMenu, QMessageBox, QSystemTrayIcon, QTabWidget, QToolBar, QToolButton, QVBoxLayout,
+                               QMessageBox, QSystemTrayIcon, QTabWidget, QToolBar, QToolButton, QVBoxLayout,
                                QWidget)
 
 from ..core import analisis, diagram2d, laporan

@@ -7,7 +7,7 @@ Modul desain obat berbasis fragmen:
    menggunakan rantai penghubung (linker alkil, eter, amida, dll.).
 3. Evaluasi instan profil sifat fisikokimia, QED, dan kemudahan sintesis (SAScore).
 """
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List
 from rdkit import Chem
 from rdkit.Chem import Descriptors, Crippen, QED, rdMolDescriptors
 from . import sascore

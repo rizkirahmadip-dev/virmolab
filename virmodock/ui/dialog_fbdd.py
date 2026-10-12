@@ -1,11 +1,10 @@
 """Dialog Desain Obat Berbasis Fragmen (Fragment-Based Drug Design / FBDD)."""
 import csv
-import io
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QColor, QGuiApplication
+from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import (
-    QComboBox, QDialog, QFileDialog, QGroupBox, QHBoxLayout, QHeaderView,
-    QLabel, QLineEdit, QMessageBox, QPushButton, QSplitter, QTabWidget,
+    QComboBox, QDialog, QFileDialog, QHBoxLayout, QHeaderView,
+    QLabel, QLineEdit, QMessageBox, QPushButton, QTabWidget,
     QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget
 )
 

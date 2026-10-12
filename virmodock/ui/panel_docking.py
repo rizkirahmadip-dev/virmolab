@@ -1,7 +1,7 @@
 """Parameter docking, dibagi dua halaman panel Langkah: Area docking (grid box) dan Jalankan."""
 import math
 
-from PySide6.QtCore import QSettings, Qt, QTimer, Signal
+from PySide6.QtCore import Qt, QTimer, Signal
 from PySide6.QtWidgets import (QButtonGroup, QCheckBox, QComboBox, QDoubleSpinBox, QFormLayout, QGridLayout,
                                QHBoxLayout, QInputDialog, QLabel, QPushButton, QScrollArea, QSizePolicy, QSpinBox,
                                QStackedWidget, QToolButton, QVBoxLayout, QWidget)

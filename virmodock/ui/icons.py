@@ -1,5 +1,5 @@
 """Ikon garis bergaya Lucide (ISC License), dirender dari SVG dengan warna tema."""
-from PySide6.QtCore import QByteArray, QSize, Qt
+from PySide6.QtCore import QByteArray, Qt
 from PySide6.QtGui import QIcon, QPainter, QPixmap
 from PySide6.QtSvg import QSvgRenderer
 

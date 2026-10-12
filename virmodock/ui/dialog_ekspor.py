@@ -1,5 +1,5 @@
 """Pusat Ekspor: satu dialog untuk gambar 3D, diagram 2D, struktur, tabel, laporan."""
-from PySide6.QtCore import QSettings, Qt, Signal
+from PySide6.QtCore import Signal
 from PySide6.QtWidgets import (QCheckBox, QComboBox, QDialog, QDoubleSpinBox, QFormLayout, QHBoxLayout, QLabel,
                                QLineEdit, QListWidget, QPushButton, QSpinBox, QStackedWidget, QVBoxLayout, QWidget)
 

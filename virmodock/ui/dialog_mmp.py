@@ -8,12 +8,11 @@ import io
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QColor, QGuiApplication
 from PySide6.QtWidgets import (
-    QComboBox, QDialog, QDoubleSpinBox, QFileDialog, QGroupBox, QHBoxLayout,
+    QDialog, QDoubleSpinBox, QFileDialog, QGroupBox, QHBoxLayout,
     QHeaderView, QLabel, QMessageBox, QPushButton, QSplitter, QTableWidget,
     QTableWidgetItem, QVBoxLayout, QWidget
 )
 
-from ..core import ekspor as eksmod
 from ..core import grafik, mmp, penapisan
 from .panel_interaksi import KanvasSvg
 from ..core.laporan import id_angka

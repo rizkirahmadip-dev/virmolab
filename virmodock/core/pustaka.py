@@ -10,7 +10,6 @@ import codecs
 from contextlib import closing
 import csv
 import gzip
-import io
 import sqlite3
 import ssl
 import struct
