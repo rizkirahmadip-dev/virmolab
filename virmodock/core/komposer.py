@@ -1,7 +1,7 @@
 """Komposer figur: gabungkan beberapa panel (grafik SVG, diagram 2D, gambar 3D PNG) menjadi satu gambar
 berlabel A/B/C siap jurnal.
 
-Panel SVG disisipkan sebagai <g transform> (bukan <svg> bersarang — QtSvg tidak mendukungnya); id internal
+Panel SVG disisipkan sebagai <g transform> (bukan <svg> bersarang - QtSvg tidak mendukungnya); id internal
 diberi awalan per panel agar clipPath dkk. tidak bentrok. Panel raster disisipkan sebagai <image> data URI.
 """
 import re

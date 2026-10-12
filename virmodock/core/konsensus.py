@@ -2,8 +2,8 @@
 fungsi skor saja.
 
 Sumber kolom skor:
-  - hasil job berbeda (mis. AutoDock-GPU, AutoDock Vina, AutoDock4) — ΔG terbaik tiap ligan per job;
-  - rescoring pose terbaik tiap ligan dengan fungsi skor Vina dan Vinardo (`vina --score_only --autobox`),
+ - hasil job berbeda (mis. AutoDock-GPU, AutoDock Vina, AutoDock4) - ΔG terbaik tiap ligan per job;
+ - rescoring pose terbaik tiap ligan dengan fungsi skor Vina dan Vinardo (`vina --score_only --autobox`),
     tanpa docking ulang. Hasil rescoring disimpan di data ligan job (`l["rescore"]`) agar tidak dihitung ulang.
 Per kolom: peringkat (1 = ΔG terendah) dan z-score (dibalik: makin besar makin baik). Konsensus = rata-rata
 peringkat (utama) dan rata-rata z. "Konsisten" = masuk persentil teratas di SEMUA kolom. Kesepakatan antar

@@ -152,6 +152,99 @@ def t_baru():
     y = lanjutan._yaml_boltz([("A", "ACDEFGHIK")], "CCO")
     assert "empty" in y
     assert "empty" not in lanjutan._yaml_boltz([("A", "ACDEFGHIK")], "CCO", msa_kosong=False)
+    assert lanjutan._langkah_boltz(False) == ("1", "50")
+    assert lanjutan._langkah_boltz(True) == ("3", "200")
+    angka = lanjutan.angka_gnina("Affinity: -11.562\nCNNscore: 0.666\nCNNaffinity: 8.522\n")
+    assert abs(angka["affinity"] + 11.562) < 1e-6 and abs(angka["cnnscore"] - 0.666) < 1e-6
+    assert "pK" in lanjutan.angka_gnina.__doc__
+    conf = mol.GetConformer()
+    p = conf.GetAtomPosition(0)
+    geser = lokal.geser_atom(Chem.MolToMolBlock(mol), "sdf",
+                             {"x": p.x + 0.8, "y": p.y, "z": p.z, "ox": p.x, "oy": p.y, "oz": p.z}, "")
+    assert geser["fmt"] == "sdf" and geser["energi"] is None and "V2000" in geser["teks"]
+    asal = [conf.GetAtomPosition(i) for i in range(mol.GetNumAtoms())]
+    utuh = lokal.geser_utuh(Chem.MolToMolBlock(mol), "sdf", {"dx": 1.0, "dy": 0.0, "dz": 0.0}, "")
+    baru = Chem.MolFromMolBlock(utuh["teks"], removeHs=False)
+    assert baru is not None and baru.GetNumAtoms() == mol.GetNumAtoms()
+    c2 = baru.GetConformer()
+    for i, p0 in enumerate(asal):
+        q = c2.GetAtomPosition(i)
+        assert abs(q.x - p0.x - 1.0) < 0.02 and abs(q.y - p0.y) < 0.02 and abs(q.z - p0.z) < 0.02
+    pilih = lanjutan.batasi_gnina([{"energi": -1}, {"energi": -9}, {"energi": -3}], n=2)
+    assert [x["energi"] for x in pilih] == [-9, -3]
+    assert len(lanjutan.batasi_gnina([{"energi": -i} for i in range(12)], semua=True)) == 12
+
+    def atom(x, y, z, chain="A", resi=25, name="CA"):
+        return f"ATOM  {1:5d} {name:>4} ASP {chain}{resi:4d}    {x:8.3f}{y:8.3f}{z:8.3f}  1.00 20.00           C"
+
+    rec = atom(0, 0, 0)
+    pose = atom(3, 0, 0, name="C")
+    assert rec[21] == "A" and rec[22:26].strip() == "25"
+    assert abs(syarat.jarak_minimum(rec, "A", 25, pose) - 3.0) < 0.01
+    assert syarat.jarak_minimum(rec, "B", 25, pose) is None
+    rec2 = atom(0, 0, 0, chain="A", resi=25, name="OD1") + "\n" + atom(10, 0, 0, chain="B", resi=25, name="OD2")
+    pose2 = atom(2, 0, 0, name="C12")
+    pas = syarat.pasangan_terdekat(rec2, [("A", "25"), ("B", "25")], pose2)
+    assert pas["rantai"] == "A" and abs(pas["min"] - 2.0) < 0.01 and pas["atom_ligan"] == "C12"
+    assert syarat.daftar_residu({"rantai": "A", "resi": "25"}) == [("A", "25")]
+    assert syarat.daftar_residu({"residu": [{"rantai": "A", "resi": "25"}, {"rantai": "B", "resi": "25"}]}) == [
+        ("A", "25"), ("B", "25")]
+    menang = syarat.pilih_pose_syarat(
+        [{"peringkat": 1, "energi": -11.0, "min": 6.0}, {"peringkat": 2, "energi": -9.0, "min": 2.8}], 3.5)
+    assert menang["peringkat"] == 2
+    tetap = syarat.pilih_pose_syarat(
+        [{"peringkat": 1, "energi": -11.0, "min": 2.0}, {"peringkat": 2, "energi": -9.0, "min": 1.5}], 3.5)
+    assert tetap["peringkat"] == 1
+    gagal_semua = syarat.pilih_pose_syarat(
+        [{"peringkat": 1, "energi": -11.0, "min": 6.0}, {"peringkat": 2, "energi": -9.0, "min": 5.0}], 3.5)
+    assert gagal_semua["peringkat"] == 1
+    from virmodock.core.ekspor import baris_hasil
+
+    class _Proyek:
+        def __init__(self):
+            self.job = [{
+                "id": "j", "mesin": "vina", "reseptor": None,
+                "ligan": [{
+                    "id": "l", "nama": "X", "status": "selesai", "energi": -11.0, "ki": "1 nM",
+                    "pose": [
+                        {"peringkat": 1, "energi": -11.0, "rmsd_ref": -1},
+                        {"peringkat": 2, "energi": -9.0, "rmsd_ref": -1},
+                    ],
+                    "syarat_jarak": {
+                        "min": 2.8, "lolos": True, "ambang": 3.5, "peringkat": 2,
+                        "atom_ligan": "C12", "resn": "ASP", "resi": "25", "rantai": "A", "atom_residu": "OD1",
+                        "pose": [
+                            {"peringkat": 1, "min": 6.0, "lolos": False},
+                            {"peringkat": 2, "min": 2.8, "lolos": True, "atom_ligan": "C12"},
+                        ],
+                    },
+                }],
+            }]
+
+        def cari_ligan(self, _i):
+            return {}
+
+    pr = _Proyek()
+    baris = baris_hasil(pr)
+    assert baris[0]["energi"] == -9.0 and baris[0]["syarat_pose"] == 2
+    assert pr.job[0]["ligan"][0]["energi"] == -11.0
+    assert baris[0]["pose"][0]["syarat_lolos"] is False and baris[0]["pose"][1]["syarat_jarak"] == 2.8
+    from virmodock.core.proyek import Proyek
+    pr = Proyek.__new__(Proyek)
+    pr.nama, pr.dibuat = "uji", "2026-01-01"
+    pr.reseptor = pr.kotak = None
+    pr.ligan, pr.job, pr.objek, pr.md = [], [], [], []
+    pr.parameter = pr.uji_grafik = pr.komposer = pr.eksperimen = {}
+    pr.catatan = pr.templat = ""
+    pr.validasi = {}
+    pr.blast = {"rid": "CNV570T8014", "rantai": "A"}
+    pr.syarat_jarak = {"rantai": "A", "resi": "25", "jarak": 3.5}
+    d = pr.ke_dict()
+    assert d["blast"]["rid"] == "CNV570T8014" and d["syarat_jarak"]["resi"] == "25"
+    assert konservasi.urai_fasta(">tes\nACDE\n") == [("tes", "ACDE")]
+    xml_ebi = ("<x><hit><description>sp|P00000|TES</description><alignments>"
+               "<alignment><matchSeq>AC-DE</matchSeq></alignment></alignments></hit></x>")
+    assert konservasi.urai_ebi(xml_ebi) == [("sp|P00000|TES", "ACDE")]
     import virmodock.ui.dialog_asisten
     import virmodock.ui.dialog_penelitian
 

@@ -1,4 +1,4 @@
-"""Dialog Ekspor video/animasi viewport (putar / goyang / zoom masuk): MP4 H.264 Full HD–4K, GIF, WebP,
+"""Dialog Ekspor video/animasi viewport (putar / goyang / zoom masuk): MP4 H.264 Full HD-4K, GIF, WebP,
 atau folder PNG."""
 from PySide6.QtWidgets import (QComboBox, QDialog, QDialogButtonBox, QDoubleSpinBox, QFormLayout, QLabel, QSpinBox,
                                QVBoxLayout)
@@ -15,7 +15,7 @@ class DialogAnimasi(QDialog):
         self.rasio = rasio            # tinggi / lebar viewport (GIF/WebP/PNG mengikuti viewport)
         self.st = paths.settings()
         lay = QVBoxLayout(self)
-        ket = QLabel("Merekam viewport seperti tampil sekarang (gaya, warna, label ikut) pada resolusi penuh — "
+        ket = QLabel("Merekam viewport seperti tampil sekarang (gaya, warna, label ikut) pada resolusi penuh - "
                      "setiap bingkai dirender ulang, bukan direkam dari layar. Atur pandangan dulu, lalu rekam.")
         ket.setWordWrap(True)
         ket.setObjectName("muted")

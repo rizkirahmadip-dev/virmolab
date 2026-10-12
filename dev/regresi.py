@@ -1,6 +1,8 @@
 """Regresi total: jalankan semua dev/uji_*.py satu per satu, log ke dev/uji/regresi/, ringkasan lulus/gagal.
 
 Gagal bila: kode keluar != 0, ada Traceback / "GAGAL" / "GALAT" / "TIMEOUT" di keluaran, atau melewati batas waktu.
+Isi dev/uji/ tidak ikut Git. Di komputer baru (atau sesudah folder itu dibersihkan) jalankan dev/siapkan_contoh.py
+lebih dulu, kalau tidak puluhan uji berhenti karena berkas contohnya tidak ada.
   PYTHONIOENCODING=utf-8 .venv/Scripts/python.exe dev/regresi.py [nama ...]   (tanpa nama = semua kecuali LEWATI)
 """
 import os
@@ -22,6 +24,9 @@ ABAIKAN = re.compile(r"GL_INVALID|gl_utils|^js:|DevTools|MFT name|handler_name|v
 BURUK = re.compile(r"Traceback|\bGAGAL\b|\bGALAT\b|\bTIMEOUT\b|fatal exception")
 
 nama = sys.argv[1:] or [f.stem for f in sorted((AKAR / "dev").glob("uji_*.py")) if f.stem not in LEWATI]
+if not (AKAR / "dev" / "uji" / "1HSG_rec.pdbqt").exists():
+    print("Catatan: berkas contoh di dev/uji/ belum lengkap — jalankan dev/siapkan_contoh.py dulu "
+          "agar uji tidak gagal karena berkasnya tidak ada.\n", flush=True)
 env = dict(os.environ, PYTHONIOENCODING="utf-8", PYTHONPATH=str(AKAR))
 hasil = []
 for n in nama:

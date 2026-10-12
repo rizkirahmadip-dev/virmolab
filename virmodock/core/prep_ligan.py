@@ -308,5 +308,5 @@ def siapkan_banyak(daftar, opsi=None, lapor=None, pekerja=None):
             if lapor:
                 lapor.progres.emit(k, len(daftar), hasil[i].nama)
                 lapor.log.emit(f"Ligan {hasil[i].nama}: {hasil[i].status}"
-                               + (f" — {hasil[i].alasan}" if hasil[i].alasan else ""))
+                               + (f" - {hasil[i].alasan}" if hasil[i].alasan else ""))
     return hasil

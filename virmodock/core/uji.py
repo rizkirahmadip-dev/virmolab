@@ -1,6 +1,6 @@
 """Uji statistik untuk modul 'Uji & Grafik' (alur ala Prism: data kolom -> analisis -> grafik).
 
-Hanya SciPy + NumPy. Pemilihan uji otomatis berdasarkan asumsi (Shapiro–Wilk, Brown–Forsythe), atau manual.
+Hanya SciPy + NumPy. Pemilihan uji otomatis berdasarkan asumsi (Shapiro-Wilk, Brown-Forsythe), atau manual.
 Setiap hasil membawa tabel, paragraf interpretasi, dan paragraf Metode siap tempel (bahasa Indonesia).
 """
 import math
@@ -8,12 +8,12 @@ import math
 import numpy as np
 
 UJI_DUA = {"otomatis": "Otomatis (cek asumsi)", "welch": "t-test Welch", "student": "t-test Student",
-           "mann": "Mann–Whitney", "t_pasang": "t-test berpasangan", "wilcoxon": "Wilcoxon bertanda"}
+           "mann": "Mann-Whitney", "t_pasang": "t-test berpasangan", "wilcoxon": "Wilcoxon bertanda"}
 UJI_BANYAK = {"otomatis": "Otomatis (cek asumsi)", "anova": "ANOVA satu arah + Tukey",
-              "welch_anova": "ANOVA Welch + Games–Howell", "kruskal": "Kruskal–Wallis + Dunn (Holm)",
+              "welch_anova": "ANOVA Welch + Games-Howell", "kruskal": "Kruskal-Wallis + Dunn (Holm)",
               "dunnett": "ANOVA + Dunnett (vs kolom pertama)",
               "rm_anova": "ANOVA pengukuran berulang + t berpasangan", "friedman": "Friedman + Wilcoxon bertanda"}
-KOREKSI = {"holm": "Holm", "bonferroni": "Bonferroni", "sidak": "Šidák", "bh": "Benjamini–Hochberg (FDR)"}
+KOREKSI = {"holm": "Holm", "bonferroni": "Bonferroni", "sidak": "Šidák", "bh": "Benjamini-Hochberg (FDR)"}
 ALFA = 0.05
 
 
@@ -27,14 +27,14 @@ def bintang(p, eksak=False):
 
 def f_angka(v, d=3):
     if v is None or (isinstance(v, float) and v != v):
-        return "–"
+        return "-"
     t = f"{v:.{d}f}"
     return ("−" + t[1:] if t.startswith("-") else t).replace(".", ",")
 
 
 def f_p(p):
     if p is None or p != p:
-        return "–"
+        return "-"
     return "< 0,0001" if p < 1e-4 else f_angka(p, 4)
 
 
@@ -67,7 +67,7 @@ def deskriptif(v):
 
 
 def normalitas(v):
-    """Shapiro–Wilk (n 3–5000). Kembalikan (W, p) atau (None, None)."""
+    """Shapiro-Wilk (n 3-5000). Kembalikan (W, p) atau (None, None)."""
     from scipy import stats
     if len(v) < 3 or len(set(v)) < 2:
         return None, None
@@ -85,7 +85,7 @@ def _cohen(a, b):
 
 
 def koreksi_p(p, metode="holm"):
-    """p disesuaikan untuk perbandingan ganda: holm | bonferroni | sidak | bh (Benjamini–Hochberg, FDR)."""
+    """p disesuaikan untuk perbandingan ganda: holm | bonferroni | sidak | bh (Benjamini-Hochberg, FDR)."""
     p = np.asarray(p, float)
     m = len(p)
     if m == 0:
@@ -106,7 +106,7 @@ def koreksi_p(p, metode="holm"):
 
 
 def _holm(p):
-    """Koreksi Holm–Bonferroni."""
+    """Koreksi Holm-Bonferroni."""
     p = np.asarray(p, float)
     urut = np.argsort(p)
     m = len(p)
@@ -193,7 +193,7 @@ def grubbs(v):
 
 
 def _anova_berulang(X, nama, koreksi):
-    """X: n subjek × k kondisi. ANOVA pengukuran berulang satu faktor + epsilon Greenhouse–Geisser; uji lanjut
+    """X: n subjek × k kondisi. ANOVA pengukuran berulang satu faktor + epsilon Greenhouse-Geisser; uji lanjut
     t berpasangan dengan koreksi p."""
     from scipy import stats
     n, k = X.shape
@@ -304,7 +304,7 @@ def analisis(kelompok, nama, uji="otomatis", berpasangan=False, koreksi="holm"):
         r = _anova_berulang(X, nama, koreksi) if uji == "rm_anova" else _friedman(X, koreksi)
         hasil.update(r, nama_uji=UJI_BANYAK[uji])
         if uji == "rm_anova" and r["epsilon"] < 1:
-            hasil["peringatan"].append(f"Koreksi Greenhouse–Geisser diterapkan (ε = {f_angka(r['epsilon'], 3)}); "
+            hasil["peringatan"].append(f"Koreksi Greenhouse-Geisser diterapkan (ε = {f_angka(r['epsilon'], 3)}); "
                                        f"p tanpa koreksi = {f_p(r['p_tanpa_koreksi'])}.")
     else:
         if berpasangan:
@@ -340,7 +340,7 @@ def analisis(kelompok, nama, uji="otomatis", berpasangan=False, koreksi="holm"):
             F, df, p = _welch_anova(kelompok)
             hasil.update(nama_uji=UJI_BANYAK[uji], stat=("F", F), df=df, p=p)
             hasil["posthoc"] = _games_howell(kelompok)
-            hasil["nama_posthoc"] = "Games–Howell"
+            hasil["nama_posthoc"] = "Games-Howell"
         else:
             r = stats.kruskal(*kelompok)
             n = len(semua)
@@ -350,10 +350,10 @@ def analisis(kelompok, nama, uji="otomatis", berpasangan=False, koreksi="holm"):
             hasil["nama_posthoc"] = f"Dunn (koreksi {KOREKSI[koreksi]})"
     hasil["uji"] = uji
     if not normal and uji in ("welch", "student", "t_pasang", "anova", "welch_anova", "dunnett", "rm_anova"):
-        hasil["peringatan"].append("Sebagian data tidak normal (Shapiro–Wilk p < 0,05): pertimbangkan uji "
+        hasil["peringatan"].append("Sebagian data tidak normal (Shapiro-Wilk p < 0,05): pertimbangkan uji "
                                    "nonparametrik.")
     if k > 2 and uji == "anova" and not sama_var:
-        hasil["peringatan"].append("Varians tidak homogen (Brown–Forsythe p < 0,05): pertimbangkan ANOVA Welch.")
+        hasil["peringatan"].append("Varians tidak homogen (Brown-Forsythe p < 0,05): pertimbangkan ANOVA Welch.")
     hasil["interpretasi"], hasil["metode"] = _teks(hasil, nama)
     return hasil
 
@@ -375,7 +375,7 @@ def _teks(h, nama):
         sig = [f"{nama[i]} vs {nama[j]} ({bintang(p)})" for i, j, _d, _c, p in h["posthoc"] if p < ALFA]
         inter += (f" Uji lanjut {h.get('nama_posthoc', '')}: " + (", ".join(sig) if sig else
                                                                   "tidak ada pasangan yang berbeda bermakna") + ".")
-    norm = "Normalitas diuji dengan Shapiro–Wilk dan homogenitas varians dengan uji Brown–Forsythe."
+    norm = "Normalitas diuji dengan Shapiro-Wilk dan homogenitas varians dengan uji Brown-Forsythe."
     if len(nama) == 2:
         met = f"Perbedaan kedua kelompok dianalisis dengan {h['nama_uji']}. {norm}"
     else:
@@ -385,14 +385,14 @@ def _teks(h, nama):
     return inter, met
 
 
-# ------------------------------------------------------------------ dosis–respons
+# ------------------------------------------------------------------ dosis-respons
 def model_4pl(x, bawah, atas, log_ic50, hill):
     with np.errstate(over="ignore"):     # iterasi awal curve_fit bisa melampaui rentang; hasilnya inf -> 0
         return bawah + (atas - bawah) / (1 + np.power(10.0, (log_ic50 - x) * hill))
 
 
-MODEL_DOSIS = {"auto": "Otomatis: 4PL vs 3PL (uji F)", "4pl": "4PL — kemiringan bebas",
-               "3pl": "3PL — Hill = ±1 (kemiringan standar)"}
+MODEL_DOSIS = {"auto": "Otomatis: 4PL vs 3PL (uji F)", "4pl": "4PL - kemiringan bebas",
+               "3pl": "3PL - Hill = ±1 (kemiringan standar)"}
 
 
 def _aicc(ss, n, k):
@@ -404,7 +404,7 @@ def _aicc(ss, n, k):
 
 
 def dosis_respons(konsentrasi, respons, log_x=True, model="4pl"):
-    """Regresi nonlinear dosis–respons. model: '4pl' (kemiringan bebas), '3pl' (Hill = ±1), atau 'auto'
+    """Regresi nonlinear dosis-respons. model: '4pl' (kemiringan bebas), '3pl' (Hill = ±1), atau 'auto'
     (pilih lewat uji F extra sum-of-squares, α 0,05; AICc ikut dilaporkan). konsentrasi > 0 (bila log_x),
     respons per titik (boleh replikat). Kembalikan dict: parameter model terpilih, IC50 ± CI95, R², kurva,
     perbandingan model."""
@@ -416,7 +416,7 @@ def dosis_respons(konsentrasi, respons, log_x=True, model="4pl"):
     if len(set(x)) < 4:
         return {"galat": "Butuh minimal 4 konsentrasi berbeda untuk model 4PL."}
     if float(np.ptp(y)) < 1e-9:
-        return {"galat": "Respons sama di semua konsentrasi: tidak ada kurva dosis–respons yang bisa dihitung."}
+        return {"galat": "Respons sama di semua konsentrasi: tidak ada kurva dosis-respons yang bisa dihitung."}
     lx = np.log10(x) if log_x else x
     tanda = 1.0 if y[np.argmax(lx)] > y[np.argmin(lx)] else -1.0
     p0 = [float(y.min()), float(y.max()), float(np.median(lx)), tanda]
@@ -465,7 +465,7 @@ def dosis_respons(konsentrasi, respons, log_x=True, model="4pl"):
     ci_ok = bool(np.isfinite(se[2]) and abs(lo) < 300 and abs(hi) < 300)
     peringatan = []
     if not lx.min() <= par[2] <= lx.max():
-        peringatan.append("IC₅₀ berada di luar rentang konsentrasi yang diuji (ekstrapolasi): kurang andal — "
+        peringatan.append("IC₅₀ berada di luar rentang konsentrasi yang diuji (ekstrapolasi): kurang andal - "
                           "tambahkan konsentrasi di sekitar IC₅₀.")
     if not ci_ok or (hi - lo) > 2:
         peringatan.append("CI 95% IC₅₀ sangat lebar atau tak terhitung: data belum cukup mendefinisikan kurva "
@@ -538,7 +538,7 @@ def _bootstrap_skrining(sp, sn, alpha, ulang=1000, seed=0):
 
 def roc(negatif, positif, rendah_positif=False):
     """Kurva ROC dua kolom (negatif = kontrol/decoy, positif = kasus/aktif). Ambang: skor ≥ t -> positif
-    (atau ≤ t bila rendah_positif, mis. ΔG docking). AUC = statistik Mann–Whitney; CI 95 % DeLong;
+    (atau ≤ t bila rendah_positif, mis. ΔG docking). AUC = statistik Mann-Whitney; CI 95 % DeLong;
     titik potong Youden; faktor pengayaan (EF) 1/5/10 % untuk penapisan virtual."""
     from scipy import stats
     neg, pos = np.asarray(negatif, float), np.asarray(positif, float)
@@ -579,21 +579,21 @@ def roc(negatif, positif, rendah_positif=False):
              else "tidak membedakan kedua kelompok secara bermakna")
     kualitas = ("sangat baik" if auc >= 0.9 else "baik" if auc >= 0.8 else "cukup" if auc >= 0.7 else
                 "lemah" if auc >= 0.6 else "setara tebakan acak")
-    inter = (f"AUC = {f_angka(auc)}" + (f" (CI 95% {f_angka(ci[0])}–{f_angka(ci[1])})" if ci else "")
+    inter = (f"AUC = {f_angka(auc)}" + (f" (CI 95% {f_angka(ci[0])}-{f_angka(ci[1])})" if ci else "")
              + f", p {'< 0,0001' if p < 1e-4 else '= ' + f_p(p)}: skor {makna} (daya pembeda {kualitas}). "
              f"Titik potong optimal (indeks Youden) {arah} {f_angka(potong, 2)}: sensitivitas "
              f"{f_angka(sens * 100, 1)} %, spesifisitas {f_angka(spes * 100, 1)} %. EF1% = {f_angka(ef[1], 1)}, "
              f"EF5% = {f_angka(ef[5], 1)}; BEDROC (α = 20) = {f_angka(bd, 3)}; logAUC = {f_angka(lauc, 1)} % "
              f"(acak {f_angka(LOGAUC_ACAK, 1)} %).")
     met = ("Kemampuan skor membedakan kelompok positif dan negatif dinilai dengan kurva receiver operating "
-           "characteristic (ROC). Luas di bawah kurva (AUC) dihitung dengan metode nonparametrik (Mann–Whitney) "
+           "characteristic (ROC). Luas di bawah kurva (AUC) dihitung dengan metode nonparametrik (Mann-Whitney) "
            "beserta interval kepercayaan 95 % metode DeLong; titik potong optimal ditentukan dengan indeks Youden. "
            "Pengayaan dini dinilai dengan faktor pengayaan (EF1%, EF5%), BEDROC (α = 20; Truchon & Bayly 2007) dan "
-           "logAUC pada FPR 0,001–1 (Mysinger & Shoichet 2010); interval kepercayaan 95 % EF dan BEDROC dari "
+           "logAUC pada FPR 0,001-1 (Mysinger & Shoichet 2010); interval kepercayaan 95 % EF dan BEDROC dari "
            f"{n_boot} ulangan bootstrap terstratifikasi. Analisis dilakukan dengan VirmoDock (SciPy).")
     peringatan = []
     if auc < 0.5:
-        peringatan.append("AUC < 0,5: skor justru membedakan ke arah sebaliknya — periksa pilihan arah "
+        peringatan.append("AUC < 0,5: skor justru membedakan ke arah sebaliknya - periksa pilihan arah "
                           "(“Skor rendah = positif” untuk ΔG docking) atau letak kolom negatif/positif.")
     if min(n0, n1) < 10:
         peringatan.append("Jumlah data kecil (< 10 per kelompok): interval kepercayaan AUC kurang andal.")
@@ -627,7 +627,7 @@ def kontingensi(obs, baris, kolom):
         a, b, c_, d = o.ravel()
         chi_y, p_y, _, _ = stats.chi2_contingency(o, correction=True)
         _or, p_f = stats.fisher_exact(o)
-        k = 0.5 if 0 in (a, b, c_, d) else 0.0       # koreksi Haldane–Anscombe
+        k = 0.5 if 0 in (a, b, c_, d) else 0.0       # koreksi Haldane-Anscombe
         orr = float(((a + k) * (d + k)) / ((b + k) * (c_ + k)))
         se_or = math.sqrt(sum(1 / (x + k) for x in (a, b, c_, d)))
         r1, r2 = (a + k) / (a + b + 2 * k), (c_ + k) / (c_ + d + 2 * k)
@@ -641,7 +641,7 @@ def kontingensi(obs, baris, kolom):
         if kecil > 0.2 or (harap < 1).any():
             try:
                 h["p_fisher"] = float(stats.fisher_exact(o).pvalue)
-                h["peringatan"].append("> 20 % sel berfrekuensi harapan < 5: χ² kurang andal — dipakai p uji "
+                h["peringatan"].append("> 20 % sel berfrekuensi harapan < 5: χ² kurang andal - dipakai p uji "
                                        "eksak Fisher (r × c).")
                 h.update(nama_uji="Uji eksak Fisher (r × c)", p=h["p_fisher"])
             except Exception:
@@ -653,9 +653,9 @@ def kontingensi(obs, baris, kolom):
              f"{'berbeda bermakna' if p < ALFA else 'tidak berbeda bermakna'} antar kelompok (α = 0,05). "
              f"Cramér V = {f_angka(v, 2)}.")
     if "OR" in h:
-        inter += (f" Rasio odds = {f_angka(h['OR'], 2)} (CI 95% {f_angka(h['OR_ci'][0], 2)}–"
+        inter += (f" Rasio odds = {f_angka(h['OR'], 2)} (CI 95% {f_angka(h['OR_ci'][0], 2)}-"
                   f"{f_angka(h['OR_ci'][1], 2)}); risiko relatif = {f_angka(h['RR'], 2)} (CI 95% "
-                  f"{f_angka(h['RR_ci'][0], 2)}–{f_angka(h['RR_ci'][1], 2)}).")
+                  f"{f_angka(h['RR_ci'][0], 2)}-{f_angka(h['RR_ci'][1], 2)}).")
     met = ("Hubungan antar variabel kategorik dianalisis dengan "
            + ("uji eksak Fisher; rasio odds dan risiko relatif dilaporkan dengan interval kepercayaan 95 % "
               "(metode Woolf/Katz)." if o.shape == (2, 2) else
@@ -749,9 +749,9 @@ def anova_dua_arah(y, fa, fb, koreksi="sidak"):
         bf = stats.levene(*grup, center="median")
         h["varians"] = (float(bf.statistic), float(bf.pvalue))
         if bf.pvalue < ALFA:
-            h["peringatan"].append("Varians antar sel tidak homogen (Brown–Forsythe p < 0,05): tafsirkan hati-hati.")
+            h["peringatan"].append("Varians antar sel tidak homogen (Brown-Forsythe p < 0,05): tafsirkan hati-hati.")
     if h.get("normal_resid") and h["normal_resid"][1] is not None and h["normal_resid"][1] < ALFA:
-        h["peringatan"].append("Residu tidak normal (Shapiro–Wilk p < 0,05): pertimbangkan transformasi data.")
+        h["peringatan"].append("Residu tidak normal (Shapiro-Wilk p < 0,05): pertimbangkan transformasi data.")
     pa, pb_, pab = (x["p"] for x in baris[:3])
 
     def pt(p):
@@ -759,14 +759,14 @@ def anova_dua_arah(y, fa, fb, koreksi="sidak"):
     inter = (f"ANOVA dua arah: faktor A F({baris[0]['df']}; {df_gal}) = {f_angka(baris[0]['F'], 2)}, p {pt(pa)}; "
              f"faktor B F({baris[1]['df']}; {df_gal}) = {f_angka(baris[1]['F'], 2)}, p {pt(pb_)}; interaksi "
              f"F({baris[2]['df']}; {df_gal}) = {f_angka(baris[2]['F'], 2)}, p {pt(pab)}.")
-    inter += (" Interaksi bermakna: pengaruh faktor A berbeda antar level faktor B — tafsirkan perbandingan per "
+    inter += (" Interaksi bermakna: pengaruh faktor A berbeda antar level faktor B - tafsirkan perbandingan per "
               "level B." if pab < ALFA else " Interaksi tidak bermakna: efek utama dapat ditafsirkan langsung.")
     sig = [f"{a1} vs {a2} pada {b} ({bintang(q)})" for b, a1, a2, _d, _c, q in h["posthoc"] if q < ALFA]
     if sig:
         inter += f" Uji lanjut ({KOREKSI[koreksi]}): " + ", ".join(sig) + "."
     met = ("Data dianalisis dengan ANOVA dua arah (faktor A, faktor B, dan interaksinya; jumlah kuadrat tipe III), "
            f"dilanjutkan perbandingan antar level faktor A di setiap level faktor B dengan koreksi {KOREKSI[koreksi]}. "
-           "Normalitas residu diuji dengan Shapiro–Wilk dan homogenitas varians dengan Brown–Forsythe. Nilai p < 0,05 "
+           "Normalitas residu diuji dengan Shapiro-Wilk dan homogenitas varians dengan Brown-Forsythe. Nilai p < 0,05 "
            "dianggap bermakna. Analisis dilakukan dengan VirmoDock (NumPy/SciPy).")
     h["interpretasi"], h["metode"] = inter, met
     return h

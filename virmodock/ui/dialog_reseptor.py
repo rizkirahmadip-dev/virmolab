@@ -45,7 +45,7 @@ class DialogReseptor(QDialog):
         self.stak.addWidget(self._hal_ringkas())
         bawah = QHBoxLayout()
         bawah.addStretch(1)
-        self.b_batal = QPushButton("Batal")
+        self.b_batal = QPushButton("✕ Batal")
         self.b_kembali = QPushButton("‹ Kembali")
         self.b_lanjut = QPushButton("Lanjut ›")
         self.b_lanjut.setObjectName("primary")
@@ -136,7 +136,7 @@ class DialogReseptor(QDialog):
         g = QGroupBox("Keadaan protonasi residu")
         gv = QVBoxLayout(g)
         self.r_baku = QRadioButton("Baku (templat Meeko): Asp/Glu bermuatan −, Lys/Arg +, His netral")
-        self.r_propka = QRadioButton("Berdasarkan pKa (PROPKA 3 + PDB2PQR) — disarankan")
+        self.r_propka = QRadioButton("Berdasarkan pKa (PROPKA 3 + PDB2PQR) - disarankan")
         self.r_propka.setChecked(True)
         self._grup = QButtonGroup(self)
         self._grup.addButton(self.r_baku)
@@ -150,7 +150,7 @@ class DialogReseptor(QDialog):
         self.sp_ph.setSingleStep(0.1)
         self.sp_ph.setDecimals(1)
         self.sp_ph.setValue(7.4)
-        self.sp_ph.setToolTip("pH fisiologis 7,4; lisosom ±4,5–5; lambung ±2")
+        self.sp_ph.setToolTip("pH fisiologis 7,4; lisosom ±4,5-5; lambung ±2")
         hp.addWidget(self.sp_ph)
         hp.addStretch(1)
         gv.addLayout(hp)
@@ -253,7 +253,7 @@ class DialogReseptor(QDialog):
         s = skor(info)
         warna = {"baik": "#2e9e5b", "peringatan": "#c98a12", "masalah": "#cf3f3f"}[s]
         kepala = {"baik": "Struktur layak untuk docking", "peringatan": "Layak dengan catatan",
-                  "masalah": "Ada masalah — periksa sebelum docking"}[s]
+                  "masalah": "Ada masalah - periksa sebelum docking"}[s]
         o_ = [f"<p style='font-size:14px;font-weight:600;color:{warna}'>{kepala}</p>",
               f"<p style='color:#5b6b82'>{escape(info['metode'] or 'Metode tidak tercantum')} · {info['residu']} residu "
               f"· {info['atom']} atom · {len(info['ligan'])} ligan/aditif · {info['air']} air</p><table cellspacing=4>"]
@@ -278,7 +278,7 @@ class DialogReseptor(QDialog):
              ("Konformasi alternatif", "okupansi tertinggi" if op.altloc == "tertinggi" else "altloc A"),
              ("Protonasi", f"PROPKA 3 + PDB2PQR, pH {op.ph:.1f}".replace(".", ",") if op.protonasi == "propka"
               else "baku templat Meeko"),
-             ("Optimasi ikatan H", ("ya" if op.optimasi_h else "tidak") if op.protonasi == "propka" else "—"),
+             ("Optimasi ikatan H", ("ya" if op.optimasi_h else "tidak") if op.protonasi == "propka" else " - "),
              ("Atom hilang", "dilengkapi PDB2PQR" if op.protonasi == "propka" else "residu tak lengkap dibuang"),
              ("Muatan parsial", self.cmb_q.currentText())]
         self.t_ringkas.setHtml("<table cellspacing=6>" + "".join(

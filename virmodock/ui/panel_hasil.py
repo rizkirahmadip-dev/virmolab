@@ -9,13 +9,18 @@ from ..core import arti, qc
 from . import theme
 
 KOLOM = ["#", "Ligan", "ΔG (kcal/mol)", "Ki perkiraan", "LE", "Klaster", "RMSD kristal (Å)", "RMSD ref (Å)",
-         "PoseBusters", "H", "HF", "π", "Lain", "Mesin", "Job", "IFP vs kristal", "MM/GBSA (kcal/mol)"]
-NUM = {0, 2, 4, 5, 6, 7, 9, 10, 11, 12, 15, 16}
+         "PoseBusters", "H", "HF", "π", "Lain", "Mesin", "Job", "IFP vs kristal", "MM/GBSA (kcal/mol)",
+         "GNINA (kcal/mol)", "CNNscore", "CNNaffinity (pK)", "Syarat jarak (Å)"]
+NUM = {0, 2, 4, 5, 6, 7, 9, 10, 11, 12, 15, 16, 17, 18, 19, 20}
 K_IFP = 15
 K_MMGBSA = 16
+K_GNINA = 17
+K_CNN = 18
+K_PK = 19
+K_JARAK = 20
 K_QC = 8
 # kolom tampil bawaan (sisanya lewat klik kanan pada judul kolom)
-TAMPIL_BAWAAN = {0, 1, 2, 4, 6, K_QC, 9, K_IFP, K_MMGBSA}
+TAMPIL_BAWAAN = {0, 1, 2, 4, 6, K_QC, 9, K_IFP, K_MMGBSA, K_GNINA, K_CNN, K_PK, K_JARAK}
 
 
 class ItemAngka(QTreeWidgetItem):
@@ -59,7 +64,7 @@ class PanelHasil(QWidget):
         self.l_n = QLabel("")
         self.l_n.setObjectName("muted")
         self.b_banding = QPushButton("Bandingkan")
-        self.b_banding.setToolTip("Centang 2–4 ligan di kolom pertama")
+        self.b_banding.setToolTip("Centang 2-4 ligan di kolom pertama")
         self.b_banding.clicked.connect(self._banding)
         b_peta = QPushButton("Peta interaksi")
         b_peta.setToolTip("Peta panas residu × ligan untuk semua hasil")
@@ -93,7 +98,7 @@ class PanelHasil(QWidget):
         self.pohon.itemActivated.connect(self._klik)
         self.pohon.itemChanged.connect(lambda *_: self._hitung_centang())
         lay.addWidget(self.pohon, 1)
-        self.l_kosong = QLabel("Belum ada hasil docking.\nIkuti langkah 1–4 di panel kiri, lalu klik "
+        self.l_kosong = QLabel("Belum ada hasil docking.\nIkuti langkah 1-4 di panel kiri, lalu klik "
                                "Jalankan docking. Hasil muncul di sini otomatis.")
         self.l_kosong.setObjectName("muted")
         self.l_kosong.setAlignment(Qt.AlignCenter)
@@ -101,9 +106,13 @@ class PanelHasil(QWidget):
         self._terapkan_kolom()
         cat = QLabel("Hasil docking adalah prediksi komputasi, bukan bukti aktivitas biologis; konfirmasi dengan "
                      "uji eksperimen. Ki dihitung dari ΔG (perkiraan, 298 K). LE = −ΔG / atom berat. "
-                     "H = ikatan hidrogen, HF = hidrofobik, π = π–π, Lain = π–kation, garam, halogen, logam. "
+                     "H = ikatan hidrogen, HF = hidrofobik, π = π-π, Lain = π-kation, garam, halogen, logam. "
                      "Klik kanan judul kolom untuk menampilkan kolom lain. "
                      "PoseBusters = uji kewajaran fisik pose terbaik (arahkan kursor untuk rincian). "
+                     "GNINA (kcal/mol), CNNscore (0-1), dan CNNaffinity (pK) terisi setelah docking "
+                     "bila GNINA ada di WSL, untuk 10 ligan terbaik. Sel kosong bukan nol. "
+                     "Syarat jarak adalah jarak terdekat pose ke residu yang dipilih. "
+                     "Baris memakai pose berenergi terbaik yang lolos; pose lain tetap di bawahnya. "
                      "Klik dua kali baris untuk memuat pose.")
         cat.setObjectName("muted")
         cat.setWordWrap(True)
@@ -117,6 +126,14 @@ class PanelHasil(QWidget):
         if v and not st.value("kolom_hasil_mmgbsa"):     # kolom baru 0.9.4: tampilkan sekali di pengaturan lama
             st.setValue("kolom_hasil", sorted({int(x) for x in v} | {K_MMGBSA}))
             st.setValue("kolom_hasil_mmgbsa", 1)
+            v = st.value("kolom_hasil")
+        if v and not st.value("kolom_hasil_gnina"):
+            st.setValue("kolom_hasil", sorted({int(x) for x in v} | {K_GNINA, K_CNN, K_PK}))
+            st.setValue("kolom_hasil_gnina", 1)
+            v = st.value("kolom_hasil")
+        if v and not st.value("kolom_hasil_jarak"):
+            st.setValue("kolom_hasil", sorted({int(x) for x in v} | {K_JARAK}))
+            st.setValue("kolom_hasil_jarak", 1)
             v = st.value("kolom_hasil")
         try:
             return {int(x) for x in v} if v else set(TAMPIL_BAWAAN)
@@ -198,10 +215,32 @@ class PanelHasil(QWidget):
             it.setText(14, b["job"])
             self._sel(it, K_IFP, b.get("ifp_sim"))
             self._sel(it, K_MMGBSA, b.get("mmgbsa"))
+            self._sel(it, K_GNINA, b.get("gnina"))
+            it.setToolTip(K_GNINA, arti.PETUNJUK_KOLOM[K_GNINA])
+            self._sel(it, K_CNN, b.get("cnnscore"), "{:.3f}")
+            it.setToolTip(K_CNN, arti.PETUNJUK_KOLOM[K_CNN])
+            self._sel(it, K_PK, b.get("cnnaffinity"))
+            it.setToolTip(K_PK, arti.PETUNJUK_KOLOM[K_PK])
+            self._sel(it, K_JARAK, b.get("syarat_jarak"))
+            if b.get("syarat_lolos") is not None:
+                it.setForeground(K_JARAK, QColor(t["ok"] if b["syarat_lolos"] else t["bad"]))
+                ambang = b.get("syarat_ambang")
+                pose_sj = b.get("syarat_pose")
+                it.setToolTip(K_JARAK, arti.PETUNJUK_KOLOM[K_JARAK]
+                              + (f" Ambang {ambang:.1f} Å." if isinstance(ambang, float) else "")
+                              + (f" Pose {pose_sj}." if pose_sj else "")
+                              + (f" {b.get('syarat_atom')}." if b.get("syarat_atom") else ""))
+                if pose_sj and pose_sj != 1 and b.get("syarat_lolos"):
+                    it.setToolTip(2, arti.arti_skor(b.get("kovalen"))
+                                  + " Baris ini pose yang lolos syarat jarak, bukan pose 1. "
+                                    "ΔG tetap skor docking pose itu.")
+                elif pose_sj and not b.get("syarat_lolos"):
+                    it.setToolTip(K_JARAK, it.toolTip(K_JARAK)
+                                  + " Tidak ada pose di bawah ambang. Baris tetap pose terbaik docking.")
             if b.get("mmgbsa") is not None:
                 it.setToolTip(K_MMGBSA, f"{b.get('mmgbsa_metode') or 'MM/GBSA'}"
                               + (f" · SD {b['mmgbsa_sd']:.2f}" if b.get("mmgbsa_sd") else "")
-                              + " — peringkat relatif; entropi tidak dihitung")
+                              + " - peringkat relatif; entropi tidak dihitung")
             it.setToolTip(K_IFP, "Kemiripan Tanimoto sidik jari interaksi (residu × jenis, tanpa vdW) pose terbaik "
                                  "terhadap pose kristal ligan asli; 1 = pola interaksi sama persis")
             for p in b["pose"]:
@@ -214,8 +253,14 @@ class PanelHasil(QWidget):
                 self._sel(c, 6, p.get("rmsd_kristal"))
                 self._sel(c, 7, p["rmsd_ref"] if p.get("rmsd_ref", -1) >= 0 else
                           (p.get("rmsd_lb") if p.get("peringkat", 1) > 1 else None))
+                self._sel(c, K_JARAK, p.get("syarat_jarak"))
                 for k in range(len(KOLOM)):
-                    c.setForeground(k, QColor(t["ink2"]))
+                    if k != K_JARAK:
+                        c.setForeground(k, QColor(t["ink2"]))
+                if p.get("syarat_lolos") is not None:
+                    c.setForeground(K_JARAK, QColor(t["ok"] if p["syarat_lolos"] else t["bad"]))
+                    if p.get("syarat_atom"):
+                        c.setToolTip(K_JARAK, p["syarat_atom"])
         self.pohon.setSortingEnabled(True)
         self.pohon.sortItems(2, Qt.AscendingOrder)
         self.pohon.setVisible(bool(baris))

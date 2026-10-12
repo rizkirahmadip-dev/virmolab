@@ -1,4 +1,4 @@
-"""Dialog MD & MM/GBSA (Analisis › MD & MM/GBSA…) — rencana A8a: aplikasi menilai kemampuan laptop dan menyarankan.
+"""Dialog MD & MM/GBSA (Analisis › MD & MM/GBSA…) - rencana A8a: aplikasi menilai kemampuan laptop dan menyarankan.
 
 Tiga tingkat: Ringan (minimisasi + MM/GBSA), Sedang (MD pelarut implisit OBC2), Lengkap (MD air eksplisit TIP3P).
 Kecepatan diukur otomatis pada kompleks pengguna sendiri (per perangkat & reseptor, disimpan) -> perkiraan waktu dan
@@ -25,7 +25,7 @@ from ..core.laporan import id_angka
 from .panel_interaksi import KanvasSvg
 
 TINGKAT = [("ringan", "Ringan", "Minimisasi kompleks + MM/GBSA satu titik (menit; semua laptop)"),
-           ("sedang", "Sedang", "MD pelarut implisit (OBC2) + RMSD/RMSF + MM/GBSA rata-rata (puluhan menit–jam)"),
+           ("sedang", "Sedang", "MD pelarut implisit (OBC2) + RMSD/RMSF + MM/GBSA rata-rata (puluhan menit-jam)"),
            ("lengkap", "Lengkap", "MD air eksplisit (TIP3P, PME) + MM/GBSA banyak frame (butuh GPU; standar publikasi)")]
 STATUS = {"disarankan": ("Disarankan", "#2f9e6b"), "bisa": ("Bisa (lama)", "#c98a12"),
           "tidak": ("Tidak disarankan", "#cf3f3f"), "": ("", "#7d8796")}
@@ -62,7 +62,7 @@ class DialogMD(QDialog):
         super().__init__(jw)
         self.jw = jw
         self.proyek_awal = jw.proyek
-        self.setWindowTitle("MD & MM/GBSA — OpenMM")
+        self.setWindowTitle("MD & MM/GBSA - OpenMM")
         self.setWindowFlags(self.windowFlags() | Qt.WindowMinMaxButtonsHint)
         self.resize(1180, 820)
         self.proses = None
@@ -153,7 +153,7 @@ class DialogMD(QDialog):
         self.l_kec.setObjectName("muted")
         hk.addWidget(self.l_kec, 1)
         self.b_ukur = QPushButton("Ukur kecepatan")
-        self.b_ukur.setToolTip("Uji 10–30 detik pada kompleks ligan terpilih pertama (implisit & eksplisit)")
+        self.b_ukur.setToolTip("Uji 10-30 detik pada kompleks ligan terpilih pertama (implisit & eksplisit)")
         self.b_ukur.clicked.connect(lambda: self._mulai("uji"))
         hk.addWidget(self.b_ukur)
         vk.addLayout(hk)
@@ -169,7 +169,7 @@ class DialogMD(QDialog):
                                                 "Elek + GB", "RMSD ligan"])
         for c, tip in ((2, "ΔG MM/GBSA setelah minimisasi kompleks (kcal/mol)"),
                        (3, "Rerata ΔG MM/GBSA atas frame MD (kcal/mol)"), (4, "Simpangan baku antar-frame"),
-                       (5, "Komponen van der Waals"), (6, "ΔE elektrostatik + ΔG solvasi polar (GB) — sering saling "
+                       (5, "Komponen van der Waals"), (6, "ΔE elektrostatik + ΔG solvasi polar (GB) - sering saling "
                                                          "mengimbangi"),
                        (7, "Rerata RMSD atom berat ligan selama MD (Å); > 3 Å = pose tidak stabil")):
             self.t_hasil.horizontalHeaderItem(c).setToolTip(tip)
@@ -207,7 +207,7 @@ class DialogMD(QDialog):
         self.b_jalan = QPushButton("Jalankan")
         self.b_jalan.setObjectName("primary")
         self.b_jalan.clicked.connect(lambda: self._mulai(None))
-        self.b_jeda = QPushButton("Jeda")
+        self.b_jeda = QPushButton("⏸ Jeda")
         self.b_jeda.setToolTip("Simpan checkpoint lalu berhenti; bisa dilanjutkan kapan saja")
         self.b_jeda.clicked.connect(self.jeda)
         self.b_lanjut = QPushButton("Lanjutkan")
@@ -216,7 +216,7 @@ class DialogMD(QDialog):
         self.b_grafik.clicked.connect(self._simpan_grafik)
         self.b_folder = QPushButton("Buka folder")
         self.b_folder.clicked.connect(self._buka_folder)
-        b_tutup = QPushButton("Tutup")
+        b_tutup = QPushButton("✕ Tutup")
         b_tutup.clicked.connect(self.close)
         for b in (self.b_jalan, self.b_jeda, self.b_lanjut, self.b_grafik, self.b_folder, b_tutup):
             hb.addWidget(b)
@@ -247,12 +247,12 @@ class DialogMD(QDialog):
         self.tabel.resizeColumnsToContents()
         if self.grp.checkedId() < 0:
             self.grp.button(0).setChecked(True)
-        self.l_baterai.setText("Laptop memakai baterai — colok ke listrik untuk MD (simulasi panjang menguras baterai "
+        self.l_baterai.setText("Laptop memakai baterai - colok ke listrik untuk MD (simulasi panjang menguras baterai "
                                "dan bisa diperlambat mode hemat daya)." if pakai_baterai() else "")
         dijeda = next((r for r in reversed(pr.md) if r.get("status") == "dijeda"), None) if pr else None
         if dijeda and not self.proses:
             self.run = dict(dijeda)
-            self.l_status.setText(f"MD {dijeda['id']} dijeda — klik Lanjutkan untuk meneruskan dari checkpoint.")
+            self.l_status.setText(f"MD {dijeda['id']} dijeda - klik Lanjutkan untuk meneruskan dari checkpoint.")
         terakhir = next((r for r in reversed(pr.md) if r.get("status") == "selesai"), None) if pr else None
         if terakhir and not self.hasil:
             f = pr.p(terakhir["folder"], "hasil.json")
@@ -335,7 +335,7 @@ class DialogMD(QDialog):
             self.l_stat[kunci].setText(f"<span style='color:{w}; font-weight:600'>{t}</span>" if t else "")
             self.l_est[kunci].setText(_jam(est[kunci]) if kunci in est else "belum diukur")
         if k and st.get("lengkap") == "tidak" and self.tingkat() == "lengkap":
-            self.l_status.setText("Tingkat Lengkap diperkirakan > 12 jam di laptop ini — pilih Sedang, kurangi ns/ligan, "
+            self.l_status.setText("Tingkat Lengkap diperkirakan > 12 jam di laptop ini - pilih Sedang, kurangi ns/ligan, "
                                   "atau jalankan di komputer ber-GPU.")
 
     # ------------------------------------------------------------- proses
@@ -482,14 +482,14 @@ class DialogMD(QDialog):
                 paths.settings().setValue("md/kecepatan", json.dumps(semua))
                 self.l_status.setText("Kecepatan laptop terukur.")
             else:
-                self.l_status.setText(f"Uji kecepatan gagal: {L.get('galat') or f'kode {kode}'} — lihat tab Log.")
+                self.l_status.setText(f"Uji kecepatan gagal: {L.get('galat') or f'kode {kode}'} - lihat tab Log.")
             self.run = next((r for r in reversed(pr.md) if r.get("status") in ("dijeda", "selesai")), None)
             self._muat_kecepatan()
             self._tombol()
             return
         if kode == 3 or h.get("dijeda"):
             self.run["status"] = "dijeda"
-            self.l_status.setText("Dijeda — checkpoint tersimpan. Klik Lanjutkan kapan saja (juga setelah aplikasi "
+            self.l_status.setText("Dijeda - checkpoint tersimpan. Klik Lanjutkan kapan saja (juga setelah aplikasi "
                                   "dibuka ulang).")
         elif any(x.get("selesai") for x in h.get("ligan", [])):
             self.run["status"] = "selesai"
@@ -502,7 +502,7 @@ class DialogMD(QDialog):
         else:
             self.run["status"] = "gagal"
             g = next((x.get("galat") for x in h.get("ligan", []) if x.get("galat")), None)
-            self.l_status.setText(f"Gagal: {g or f'proses berakhir dengan kode {kode}'} — lihat tab Log.")
+            self.l_status.setText(f"Gagal: {g or f'proses berakhir dengan kode {kode}'} - lihat tab Log.")
             self.tab.setCurrentWidget(self.log)
         self._simpan_run()
         self.jw.log.tulis(f"MD/MM-GBSA {self.run['id']}: {self.run['status']}")
@@ -571,17 +571,17 @@ class DialogMD(QDialog):
             n = len(tr.get("rmsd_ligan") or [])
             t = [(i + 1) * dt for i in range(n)]
             return grafik.garis([("Ligan (berat)", t, tr.get("rmsd_ligan") or []), ("Protein Cα", t, tr.get("rmsd_ca") or [])],
-                                "Waktu (ns)", "RMSD (Å)", f"RMSD — {x['nama']}", gelap=gelap, y_nol=True,
+                                "Waktu (ns)", "RMSD (Å)", f"RMSD - {x['nama']}", gelap=gelap, y_nol=True,
                                 catatan="Superposisi pada Cα protein frame pertama produksi; RMSD > 3 Å = pose bergeser")
         if kunci == "rmsf":
             v = tr.get("rmsf") or []
             return grafik.garis([("Cα", list(range(1, len(v) + 1)), v)], "Residu (urutan)", "RMSF (Å)",
-                                f"RMSF Cα — {x['nama']}", gelap=gelap, y_nol=True,
+                                f"RMSF Cα - {x['nama']}", gelap=gelap, y_nol=True,
                                 catatan=(f"Residu 1 = {tr['residu'][0]}, terakhir = {tr['residu'][-1]}" if tr.get("residu") else ""))
         e = x.get("mmgbsa_frame") or []
         acuan = [(x["mmgbsa"]["dG"], f"rerata {grafik.fmt(x['mmgbsa']['dG'])}")] if x.get("mmgbsa") else None
         return grafik.garis([("ΔG MM/GBSA", [f["t_ns"] for f in e], [f["dG"] for f in e])], "Waktu (ns)",
-                            "ΔG MM/GBSA (kcal/mol)", f"MM/GBSA per frame — {x['nama']}", gelap=gelap, acuan=acuan,
+                            "ΔG MM/GBSA (kcal/mol)", f"MM/GBSA per frame - {x['nama']}", gelap=gelap, acuan=acuan,
                             catatan="OBC2 (igb 5), satu-trajektori, tanpa entropi")
 
     def _grafik_ligan(self, r):

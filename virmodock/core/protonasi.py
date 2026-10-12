@@ -26,7 +26,7 @@ _tertambal = False
 
 
 def tambal_propka():
-    """PROPKA 3.5.1 memanggil self.__annotations__ — di Python 3.14 (PEP 649) atribut itu tidak lagi
+    """PROPKA 3.5.1 memanggil self.__annotations__ - di Python 3.14 (PEP 649) atribut itu tidak lagi
     tersedia dari instance. Ganti Parameters.parse_line dengan versi yang membaca anotasi kelas."""
     global _tertambal
     if _tertambal:

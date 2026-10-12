@@ -67,10 +67,11 @@ class PanelInteraksi(QWidget):
         self.pohon.header().setSectionResizeMode(2, QHeaderView.ResizeToContents)
         self.pohon.setIndentation(12)
         self.pohon.itemClicked.connect(self._klik)
+        self.pohon.itemDoubleClicked.connect(self._klik)
         lay.addWidget(self.pohon, 1)
         k = KRITERIA
         cat = QLabel(f"Kriteria: ikatan H D···A ≤ {k['hbond_da']} Å, H···A ≤ {k['hbond_ha']} Å, sudut ≥ "
-                     f"{k['hbond_sudut']:.0f}°; hidrofobik ≤ {k['hidrofobik']} Å; π–π ≤ {k['pi']} Å; π–kation ≤ "
+                     f"{k['hbond_sudut']:.0f}°; hidrofobik ≤ {k['hidrofobik']} Å; π-π ≤ {k['pi']} Å; π-kation ≤ "
                      f"{k['pikation']} Å; garam ≤ {k['garam']} Å; halogen ≤ {k['halogen']} Å, ≥ "
                      f"{k['halogen_sudut']:.0f}°; logam ≤ {k['logam']} Å; vdW ≤ {k['vdw']} Å.")
         cat.setObjectName("muted")

@@ -334,7 +334,7 @@ class DialogKemiripan(QDialog):
             t.setItem(r, 0, _sel(str(r + 1), r + 1))
             t.setItem(r, 1, _sel(l["nama"] + ("  (acuan)" if i == ia else "")))
             t.setItem(r, 2, _sel(_f(sk[i], 3), sk[i]))
-            t.setItem(r, 3, _sel(_f(l["dg"], 2) if l["dg"] is not None else "–", l["dg"] or 0))
+            t.setItem(r, 3, _sel(_f(l["dg"], 2) if l["dg"] is not None else "-", l["dg"] or 0))
             t.setItem(r, 4, _sel(str(self.klaster[i]), self.klaster[i]))
         t.resizeColumnsToContents()
         if self.tab.currentIndex() == 0:
@@ -354,7 +354,7 @@ class DialogKemiripan(QDialog):
             t.setItem(r, 0, _sel(str(k), k))
             t.setItem(r, 1, _sel(str(len(ang)), len(ang)))
             t.setItem(r, 2, _sel(self.lig[pusat]["nama"]))
-            t.setItem(r, 3, _sel(f"{_f(terbaik[0], 2)} ({terbaik[1]})" if terbaik else "–"))
+            t.setItem(r, 3, _sel(f"{_f(terbaik[0], 2)} ({terbaik[1]})" if terbaik else "-"))
             t.setItem(r, 4, _sel(", ".join(self.lig[i]["nama"] for i in ang)))
         t.resizeColumnsToContents()
 
@@ -406,7 +406,7 @@ class DialogKemiripan(QDialog):
         t.resizeColumnsToContents()
         for b in (self.b_tampil, self.b_pml):
             b.setEnabled(bool(fs))
-        saran = "" if fs else " — tidak ada fitur yang cukup sering; turunkan 'Minimal' atau naikkan radius."
+        saran = "" if fs else " - tidak ada fitur yang cukup sering; turunkan 'Minimal' atau naikkan radius."
         self.jw.statusBar().showMessage(f"Farmakofor bersama dari {len(nama)} pose: {K.ringkas_fitur(fs)}{saran}", 10000)
         if fs:
             self.tampil_farma()

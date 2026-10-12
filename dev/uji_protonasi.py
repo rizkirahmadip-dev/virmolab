@@ -4,6 +4,9 @@ from virmodock.core import prep_ligan as L, analisis as A, mesin as M, molekul
 lig = [o for o in molekul.baca_teks_struktur(open("dev/uji/1HSG.pdb").read(), "1HSG") if o.jenis == "ligan"][0]
 kr = A.mol_kristal(lig.teks)
 d = pathlib.Path("dev/uji/run")
+if not (d / "reseptor.maps.fld").exists():
+    print("LEWAT: butuh peta grid AutoDock di dev/uji/run/ (jalankan dev/uji_mesin.py dulu)")
+    raise SystemExit(0)
 for nama, op in (("ph74", L.OpsiLigan()), ("netral", L.OpsiLigan(protonasi=False)), ("netral_tanpa_min", L.OpsiLigan(protonasi=False, minimisasi=False))):
     h = L.siapkan_satu("MK1", lig.teks, "pdb", op)
     f = d / f"p_{nama}.pdbqt"; f.write_text(h.pdbqt)

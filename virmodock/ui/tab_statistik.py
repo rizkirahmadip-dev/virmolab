@@ -1,7 +1,7 @@
 """Tab Statistik: histogram, sebar + regresi, batang ΔG teratas, matriks korelasi; ringkasan deskriptif."""
 from html import escape
 
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import QSize, Qt, Signal
 from PySide6.QtGui import QColor
 from PySide6.QtWidgets import (QCheckBox, QComboBox, QLabel, QPushButton, QSpinBox, QSplitter, QTextBrowser,
                                QToolBar, QVBoxLayout, QWidget)
@@ -18,8 +18,17 @@ MATRIKS_BAWAAN = ["energi", "le", "mw", "wlogp", "tpsa", "hbd", "hba", "rotb", "
 SEMUA = "__semua__"
 
 
+class ComboRingkas(QComboBox):
+    """QComboBox dengan minimum size hint fleksibel agar tidak memaksakan lebar berlebih ke layout induk."""
+    def minimumSizeHint(self):
+        return QSize(80, super().minimumSizeHint().height())
+
+
 class TabStatistik(QWidget):
     ekspor = Signal(str)        # salin | svg | png | csv
+
+    def minimumSizeHint(self):
+        return QSize(460, 260)
 
     def __init__(self):
         super().__init__()
@@ -30,13 +39,13 @@ class TabStatistik(QWidget):
         lay.setContentsMargins(0, 0, 0, 0)
         lay.setSpacing(0)
         bar = QToolBar()
-        self.c_job = QComboBox()
-        self.c_job.setMinimumWidth(220)
+        self.c_job = ComboRingkas()
+        self.c_job.setMinimumWidth(100)
         self.c_job.setToolTip("Satu job = satu mesin & parameter. 'Semua job' memakai ΔG terbaik tiap ligan.")
-        self.c_jenis = QComboBox()
+        self.c_jenis = ComboRingkas()
         for k, t in JENIS:
             self.c_jenis.addItem(t, k)
-        self.c_x, self.c_y = QComboBox(), QComboBox()
+        self.c_x, self.c_y = ComboRingkas(), ComboRingkas()
         for k, label, _p, _d in st.VARIABEL:
             self.c_x.addItem(label, k)
             self.c_y.addItem(label, k)
@@ -47,10 +56,10 @@ class TabStatistik(QWidget):
         self.s_n.setRange(0, 200)
         self.s_n.setSpecialValueText("otomatis")
         self.l_n = QLabel(" Kelas ")
-        self.c_metode = QComboBox()
+        self.c_metode = ComboRingkas()
         self.c_metode.addItem("Pearson", "pearson")
         self.c_metode.addItem("Spearman", "spearman")
-        self.c_frek = QComboBox()
+        self.c_frek = ComboRingkas()
         for t, v in (("Semua residu", 0.0), ("Frekuensi ≥ 10 %", 0.1), ("Frekuensi ≥ 25 %", 0.25),
                      ("Frekuensi ≥ 50 %", 0.5)):
             self.c_frek.addItem(t, v)
@@ -77,7 +86,7 @@ class TabStatistik(QWidget):
         bagi.addWidget(self.kanvas)
         self.info = QTextBrowser()
         self.info.setOpenLinks(False)
-        self.info.setMinimumWidth(400)
+        self.info.setMinimumWidth(160)
         bagi.addWidget(self.info)
         bagi.setStretchFactor(0, 3)
         bagi.setStretchFactor(1, 2)
@@ -271,7 +280,7 @@ class TabStatistik(QWidget):
                 sig = "bermakna (p &lt; 0,05)" if k["p"] < 0.05 else "tidak bermakna (p ≥ 0,05)"
                 o.append(f"<p>Korelasi {arah} {st.kekuatan(k['r'])}, {sig}.</p>")
         o.append("<p><b>Statistik deskriptif</b></p><table><tr><th>Variabel</th><th>n</th><th>Rerata ± SD</th>"
-                 "<th>Median</th><th>Min – Maks</th></tr>")
+                 "<th>Median</th><th>Min - Maks</th></tr>")
         F = grafik.fmt
         for k, label, pendek, des in st.VARIABEL:
             s = st.deskriptif(st.kolom(d, k))
@@ -281,7 +290,7 @@ class TabStatistik(QWidget):
             sd = f" ± {F(s['sd'], dd)}" if s["sd"] is not None else ""
             o.append(f"<tr><td nowrap>{escape(pendek)}</td><td class='n'>{s['n']}</td>"
                      f"<td class='n' nowrap>{F(s['rerata'], dd)}{sd}</td><td class='n' nowrap>{F(s['median'], dd)}</td>"
-                     f"<td class='n' nowrap>{F(s['min'], dd)} – {F(s['maks'], dd)}</td></tr>")
+                     f"<td class='n' nowrap>{F(s['min'], dd)} - {F(s['maks'], dd)}</td></tr>")
         o.append("</table>")
         self.info.setHtml("".join(o))
 

@@ -1,4 +1,4 @@
-"""Paket Supplementary (.zip) untuk publikasi — rencana C6.
+"""Paket Supplementary (.zip) untuk publikasi - rencana C6.
 
 Struktur:
   README.txt                 isi tiap folder, cara membuka, versi
@@ -6,7 +6,7 @@ Struktur:
   ligan/                     PDBQT masukan tiap ligan (setelah preparasi)
   pose/terbaik.sdf           pose terbaik semua ligan (tag ΔG, Ki, LE, interaksi, MM/GBSA)
   pose/semua/                semua pose per ligan (SDF bertag)
-  kompleks/                  kompleks reseptor–ligan PDB (n teratas)
+  kompleks/                  kompleks reseptor-ligan PDB (n teratas)
   tabel/hasil.csv            tabel hasil lengkap (pemisah ; dan koma desimal) + hasil_titik.csv (pemisah , titik)
   parameter/                 parameter tiap job (JSON: mesin, grid box, seed, residu fleksibel) + proyek.json ringkas
   mmgbsa/                    hasil MD & MM/GBSA (hasil.json; tanpa trajektori besar)
@@ -46,7 +46,7 @@ def _versi_teks(versi_app, info_mesin=None):
 
 
 def _readme(pr, versi_app, n_ligan, n_kompleks, ada_mm):
-    return f"""Paket Supplementary — {pr.nama}
+    return f"""Paket Supplementary - {pr.nama}
 Dibuat dengan VirmoDock {versi_app} pada {datetime.now():%Y-%m-%d %H:%M}
 
 Isi
@@ -56,8 +56,8 @@ Isi
   pose/terbaik.sdf Pose terbaik setiap ligan; tag SDF memuat ΔG (kcal/mol), Ki perkiraan, LE, jumlah interaksi,
                    ΔG MM/GBSA (bila dihitung).
   pose/semua/      Semua pose per ligan (SDF).
-  kompleks/        Kompleks reseptor–ligan (PDB) untuk {n_kompleks} ligan teratas.
-  tabel/           hasil.csv (pemisah ;, koma desimal — Excel Indonesia) dan hasil_titik.csv (pemisah ,, titik desimal).
+  kompleks/        Kompleks reseptor-ligan (PDB) untuk {n_kompleks} ligan teratas.
+  tabel/           hasil.csv (pemisah ;, koma desimal - Excel Indonesia) dan hasil_titik.csv (pemisah ,, titik desimal).
   parameter/       Parameter tiap job (mesin, grid box, ketelitian, seed, residu fleksibel) dan ringkasan proyek.
 {"  mmgbsa/         Hasil MD & MM/GBSA (hasil.json per proses)." + chr(10) if ada_mm else ""}  versi_perangkat_lunak.txt   Versi VirmoDock, mesin docking, dan pustaka.
   SHA256SUMS.txt   Checksum SHA-256 untuk memeriksa keutuhan berkas.

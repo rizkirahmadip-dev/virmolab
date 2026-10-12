@@ -1,4 +1,4 @@
-"""Diagram interaksi protein–ligan 2D (SVG vektor).
+"""Diagram interaksi protein-ligan 2D (SVG vektor).
 
 Ligan digambar RDKit (koordinat 2D CoordGen); residu diletakkan di sekeliling
 ligan searah atom kontaknya, lalu dirapikan dengan relaksasi sederhana agar
@@ -34,6 +34,18 @@ def svg(mol, daftar, lebar=960, tinggi=720, judul="", gelap=False, transparan=Fa
         Chem.SanitizeMol(m)
     except Exception:
         pass
+    # E/Z & R/S dari geometri pose 3D; ikatan rangkap yang tetap tak tentu (STEREOANY) jangan digambar
+    # sebagai ikatan silang - tampak cacat pada diagram interaksi (mis. hidrazon C=N).
+    if m.GetNumConformers() and m.GetConformer().Is3D():
+        try:
+            Chem.AssignStereochemistryFrom3D(m)
+        except Exception:
+            pass
+    for b in m.GetBonds():
+        if b.GetStereo() == Chem.BondStereo.STEREOANY:
+            b.SetStereo(Chem.BondStereo.STEREONONE)
+        if b.GetBondDir() in (Chem.BondDir.EITHERDOUBLE, Chem.BondDir.UNKNOWN):
+            b.SetBondDir(Chem.BondDir.NONE)
     m.RemoveAllConformers()
     rdDepictor.SetPreferCoordGen(True)
     rdDepictor.Compute2DCoords(m)
@@ -85,6 +97,15 @@ def svg(mol, daftar, lebar=960, tinggi=720, judul="", gelap=False, transparan=Fa
     # titik penghalang: atom + titik tengah ikatan (lingkaran residu tidak boleh menutupi ligan)
     halang = list(pos) + [((pos[b.GetBeginAtomIdx()][0] + pos[b.GetEndAtomIdx()][0]) / 2,
                            (pos[b.GetBeginAtomIdx()][1] + pos[b.GetEndAtomIdx()][1]) / 2) for b in m.GetBonds()]
+    # label atom berhuruf (NH, H2N, OH, Cl) melebar ke samping: lebarnya ikut jadi penghalang
+    for a in m.GetAtoms():
+        if a.GetAtomicNum() == 6 and not a.GetFormalCharge():
+            continue
+        x, y = pos[a.GetIdx()]
+        lebar_lbl = 12 + (18 if a.GetTotalNumHs() else 0) + (12 if a.GetTotalNumHs() > 1 else 0)
+        for f in (1 / 3, 2 / 3, 1.0):
+            halang += [(x - lebar_lbl * f, y), (x + lebar_lbl * f, y)]
+        halang += [(x - lebar_lbl - 8, y), (x + lebar_lbl + 8, y)]
 
     def keluar(ax, ay):
         """Arah normal keluar lokal di titik jangkar (menjauhi kerapatan atom ligan)."""

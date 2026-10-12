@@ -1,0 +1,1 @@
+Dimer 1HSG (rantai A dan B, MSA ColabFold) dengan pengaturan penuh (3 daur ulang, 200 langkah) dihentikan setelah 4 jam karena batas waktu, sebelum ada berkas struktur. Percobaan ringkas (1 daur, 50 langkah) dimulai lalu dilewati atas permintaan. Jangan dikutip sebagai hasil Boltz dimer.

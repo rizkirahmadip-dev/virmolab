@@ -10,7 +10,7 @@ from PySide6.QtWidgets import (QAbstractItemView, QCheckBox, QComboBox, QDialog,
 from ..core import molekul
 from ..core.prep_ligan import OpsiLigan, dimorphite_tersedia, siapkan_banyak
 from . import kerja, theme
-from .dialogs import DialogAmbil
+from .dialogs import DialogAmbil, DialogProgresUnduh
 
 
 class DialogLigan(QDialog):
@@ -108,7 +108,7 @@ class DialogLigan(QDialog):
         self.b_siap = QPushButton("Siapkan")
         self.b_siap.setObjectName("primary")
         self.b_siap.clicked.connect(self.jalankan)
-        self.b_tutup = QPushButton("Tutup")
+        self.b_tutup = QPushButton("✕ Tutup")
         self.b_tutup.clicked.connect(self.close)
         bawah.addWidget(self.b_siap)
         bawah.addWidget(self.b_tutup)
@@ -126,7 +126,7 @@ class DialogLigan(QDialog):
         it.setFlags(it.flags() | Qt.ItemIsUserCheckable)
         it.setCheckState(Qt.Checked)
         self.tabel.setItem(r, 0, it)
-        sumber = "Ligan asli kristal" if o.info.get("ligan_asli") else (Path(o.sumber).name if o.sumber else "–")
+        sumber = "Ligan asli kristal" if o.info.get("ligan_asli") else (Path(o.sumber).name if o.sumber else "-")
         self._set(r, 1, sumber)
         self._set(r, 2, o.info.get("rumus", ""))
         self._set(r, 3, f"{o.info['mw']:.1f}" if o.info.get("mw") else "", kanan=True)
@@ -188,30 +188,52 @@ class DialogLigan(QDialog):
         if not req:
             return
         jenis, isi = req
+        total = len(isi)
+
+        nama_label = "PubChem" if jenis == "pubchem" else "SMILES"
+        dlg_prog = DialogProgresUnduh(f"Mengunduh dari {nama_label}", total, self)
 
         def satu(x):
+            if dlg_prog.dibatalkan:
+                return [], "Dibatalkan"
             try:
                 if jenis == "pubchem":
                     return molekul.unduh_pubchem(x), ""
                 bag = x.split()
                 return molekul.dari_smiles(bag[0], bag[1] if len(bag) > 1 else None), ""
             except Exception as e:
-                return [], f"{x} — {e}"
+                return [], f"{x} - {e}"
 
         def kerjakan(lapor):
             from concurrent.futures import ThreadPoolExecutor
             hasil, gagal = [], []
             with ThreadPoolExecutor(max_workers=6 if jenis == "pubchem" else 2) as ex:  # sopan ke server PubChem
                 for i, (objs, g) in enumerate(ex.map(satu, isi), 1):
+                    if dlg_prog.dibatalkan:
+                        break
                     hasil += objs
                     if g:
                         gagal.append(g)
-                    lapor.log.emit(f"Diambil {i}/{len(isi)}")
+                    lapor.progres.emit(i, total, f"Diambil {i}/{total}")
             if gagal:
                 lapor.log.emit(f"{len(gagal)} gagal: " + "; ".join(gagal)[:300])
             return hasil
-        self.l_stat.setText("Mengunduh…")
-        kerja.jalankan(kerjakan, selesai=self._tambah_banyak, log=self.l_stat.setText)
+
+        def saat_progres(saat_ini, tot, teks):
+            dlg_prog.set_progres(saat_ini, tot, teks)
+
+        def saat_selesai(hasil):
+            dlg_prog.close()
+            self._tambah_banyak(hasil)
+            self.l_stat.setText(f"Selesai mengunduh {len(hasil)} senyawa.")
+
+        def saat_galat(g):
+            dlg_prog.close()
+            self.l_stat.setText(f"Galat: {g}")
+
+        self.l_stat.setText(f"Mengunduh {total} senyawa…")
+        kerja.jalankan(kerjakan, selesai=saat_selesai, galat=saat_galat, log=self.l_stat.setText, progres=saat_progres)
+        dlg_prog.exec()
 
     # ------------------------------------------------------------ proses
     def opsi(self):

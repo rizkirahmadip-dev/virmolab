@@ -8,7 +8,7 @@ Format plugin (satu berkas .py):
         # vd = jendela utama VirmoDock (lihat KONTEKS di konsol: vd.proyek, vd.objek, vd.log.tulis, …)
         return [("Jalankan sesuatu", lambda: fungsi(vd))]   # daftar (label menu, fungsi)
 
-Plugin menjalankan kode Python bebas dengan hak pengguna — pasang hanya plugin dari sumber tepercaya.
+Plugin menjalankan kode Python bebas dengan hak pengguna - pasang hanya plugin dari sumber tepercaya.
 Galat saat memuat atau menjalankan plugin ditangkap dan ditulis ke Log; tidak menghentikan aplikasi.
 """
 import importlib.util

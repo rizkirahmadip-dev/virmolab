@@ -67,7 +67,7 @@ class HalamanAwal(QWidget):
         t = QLabel("Mulai docking")
         t.setObjectName("judulAwal")
         v.addWidget(t)
-        k = QLabel("Muat protein target, tambahkan ligan, lalu ikuti langkah 1–5 di panel kiri. "
+        k = QLabel("Muat protein target, tambahkan ligan, lalu ikuti langkah 1-5 di panel kiri. "
                    "Setiap langkah dijelaskan di panel kanan.")
         k.setObjectName("muted")
         k.setWordWrap(True)
@@ -78,7 +78,7 @@ class HalamanAwal(QWidget):
         self.ubin = {}
         for i, (kunci, ikon, judul, ket) in enumerate((
                 ("rcsb", "import", "Ambil protein dari RCSB", "Ketik kode PDB, mis. 1HSG atau 6LU7"),
-                ("buka", "open", "Buka berkas", "PDB, CIF, PDBQT, SDF, MOL2, SMILES — atau seret ke jendela ini"),
+                ("buka", "open", "Buka berkas", "PDB, CIF, PDBQT, SDF, MOL2, SMILES - atau seret ke jendela ini"),
                 ("proyek", "folder", "Buka proyek", "Lanjutkan pekerjaan tersimpan (.vmd)"),
                 ("terakhir", "rotate", "Proyek terakhir", ""))):
             u = _Ubin(ikon, judul, ket)

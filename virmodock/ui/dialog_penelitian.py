@@ -47,6 +47,26 @@ class DialogPenelitian(QDialog):
             self.tumpuk.addWidget(w)
         self.menu.currentRowChanged.connect(self.tumpuk.setCurrentIndex)
         self.menu.setCurrentRow(0)
+        self._muat_rid()
+
+    def _muat_rid(self):
+        pr = getattr(self.jw, "proyek", None)
+        b = getattr(pr, "blast", None) or {}
+        if b.get("rid"):
+            self._rid_blast = str(b["rid"])
+            if b.get("rantai") and hasattr(self, "e_rantai"):
+                self.e_rantai.setText(str(b["rantai"])[:1])
+            self._tulis(f"Nomor BLAST tersimpan di proyek: {self._rid_blast}. Tombol ambil hasil masih bisa dipakai.")
+
+    def _simpan_rid(self, rid):
+        self._rid_blast = rid
+        pr = getattr(self.jw, "proyek", None)
+        if not pr or not rid:
+            return
+        rantai = self.e_rantai.text().strip()[:1] if hasattr(self, "e_rantai") else "A"
+        pr.blast = {"rid": rid, "rantai": rantai or "A"}
+        if hasattr(self.jw, "minta_simpan"):
+            self.jw.minta_simpan()
 
     def _tulis(self, teks):
         self.keluar.setPlainText(teks)
@@ -106,12 +126,15 @@ class DialogPenelitian(QDialog):
         v.addWidget(self.e_rantai)
         v.addWidget(self.e_fasta, 1)
         v.addWidget(self.e_uniprot)
-        lab = QLabel("BLAST Swiss-Prot mengirim sekuens rantai ke NCBI. Identitas tetap dihitung di komputer ini.")
+        lab = QLabel("BLAST Swiss-Prot mengirim sekuens rantai ke NCBI. Bila NCBI masih antre, "
+                     "VirmoDock mencoba UniProt lalu EBI. Bila keduanya tidak menjawab, homolog diambil "
+                     "dari pencarian sekuens di RCSB PDB. Identitas tetap dihitung di komputer ini.")
         lab.setWordWrap(True)
         v.addWidget(lab)
         self._tombol(v, "Hitung & warnai B-faktor", self._konservasi)
         self._tombol(v, "Ambil FASTA dari UniProt", self._uniprot)
         self._tombol(v, "BLAST Swiss-Prot (NCBI)", self._blast)
+        self._tombol(v, "Cari homolog (UniProt, EBI, atau RCSB)", self._blast_uniprot)
         self._tombol(v, "Ambil hasil BLAST yang tertunda", self._blast_ambil)
         return w
 
@@ -266,6 +289,10 @@ class DialogPenelitian(QDialog):
         v.addWidget(lab)
         self.c_msa = QCheckBox("Minta MSA ke ColabFold (sekuens terkirim; prediksi lebih layak dibanding kristal)")
         v.addWidget(self.c_msa)
+        self.c_penuh = QCheckBox("Pengaturan penuh: 3 daur ulang, 200 langkah, semua rantai protein yang terbuka. "
+                                 "Pada GPU 6 GB ini sering kehabisan memori.")
+        self.c_penuh.setToolTip("Tanpa centang ini, Boltz memakai 1 daur ulang dan 50 langkah supaya muat di GPU 6 GB.")
+        v.addWidget(self.c_penuh)
         self._tombol(v, "Periksa pemasangan", self._luar)
         self._tombol(v, "Skor ulang pose (GNINA)", self._gnina)
         self._tombol(v, "Prediksi Boltz di GPU", lambda _=False: self._boltz(True))
@@ -358,7 +385,7 @@ class DialogPenelitian(QDialog):
               for b in ens[:20]]
         o += ["", "Selektivitas:", kampanye.teks_tabel(tab), "", "Kovalen lawan non-kovalen:"]
         o += [f"  {p['ligan']}: kovalen {p['kovalen']:.2f} ({p['warhead'] or 'aduk'}), "
-              f"non-kovalen {p['nonkovalen']:.2f} — jangan dibaca sebagai selisih ΔG"
+              f"non-kovalen {p['nonkovalen']:.2f} - jangan dibaca sebagai selisih ΔG"
               for p in kov] or ["  Tidak ada ligan yang punya kedua jenis job."]
         self._tulis("\n".join(o))
 
@@ -395,7 +422,7 @@ class DialogPenelitian(QDialog):
         except Exception as ex:
             self._tulis(str(ex))
             return
-        makna = "kecil" if e < 3 else ("sedang" if e < 8 else "besar — pose mungkin meregang")
+        makna = "kecil" if e < 3 else ("sedang" if e < 8 else "besar - pose mungkin meregang")
         self._tulis(f"Regangan MMFF pose aktif: {e:.2f} kkal/mol ({makna}).")
 
     def _bentuk(self):
@@ -542,20 +569,43 @@ class DialogPenelitian(QDialog):
 
         def selesai(hasil):
             if isinstance(hasil, tuple) and hasil and hasil[0] == "tunggu":
-                self._tulis(hasil[1] + "\nTekan Ambil hasil BLAST yang tertunda beberapa menit lagi.")
                 rid = hasil[1].split("RID ", 1)[-1].strip().rstrip(".")
-                self._rid_blast = rid
+                self._simpan_rid(rid)
+                self._tulis(hasil[1] + "\nNCBI masih antre. Sekuens dikirim ke UniProt, lalu EBI, lalu pencarian sekuens RCSB bila perlu.")
+                kerja.jalankan(lambda lapor, s=seq: konservasi.blast_pengganti(s),
+                               selesai=lambda h: self._isi_homolog(h[0], (h[1], h[2])), galat=self._tulis)
                 return
             rid, daftar = hasil
-            self._rid_blast = rid
-            self.e_fasta.setPlainText("".join(f">{j}\n{s}\n" for j, s in daftar))
-            self._tulis(f"BLAST {rid}: {len(daftar)} homolog. Tekan Hitung & warnai B-faktor. "
-                        "Angka ini persen identitas, bukan skor ConSurf.")
+            self._simpan_rid(rid)
+            self._isi_homolog(f"NCBI {rid}", (rid, daftar))
 
         kerja.jalankan(kerja_blast, selesai=selesai, galat=self._tulis)
 
+    def _isi_homolog(self, sumber, hasil):
+        _nomor, daftar = hasil
+        self.e_fasta.setPlainText("".join(f">{j}\n{s}\n" for j, s in daftar))
+        self._tulis(f"BLAST {sumber}: {len(daftar)} homolog. Tekan Hitung & warnai B-faktor. "
+                    "Angka ini persen identitas, bukan skor ConSurf.")
+
+    def _blast_uniprot(self):
+        prot = self._protein()
+        if not prot:
+            self._tulis("Tidak ada protein di proyek.")
+            return
+        rantai = self.e_rantai.text().strip()[:1] or "A"
+        urut = konservasi.sekuens_rantai(prot.teks, rantai)
+        seq = "".join(aa for _, aa, _, _ in urut)
+        if len(seq) < 10:
+            self._tulis("Sekuens rantai terlalu pendek untuk BLAST.")
+            return
+        self._tulis("Sekuens dikirim ke UniProt. Bila layanan itu tidak menjawab, EBI, lalu pencarian sekuens RCSB PDB.")
+        from . import kerja
+        kerja.jalankan(lambda lapor, s=seq: konservasi.blast_pengganti(s),
+                       selesai=lambda h: self._isi_homolog(h[0], (h[1], h[2])), galat=self._tulis)
+
     def _blast_ambil(self):
-        rid = getattr(self, "_rid_blast", "")
+        rid = getattr(self, "_rid_blast", "") or str(
+            ((getattr(getattr(self.jw, "proyek", None), "blast", None) or {}).get("rid") or ""))
         if not rid:
             self._tulis("Belum ada nomor BLAST. Kirim dulu, atau tunggu sampai baris RID muncul.")
             return
@@ -703,11 +753,16 @@ class DialogPenelitian(QDialog):
         if not folder:
             return
         msa = self.c_msa.isChecked()
+        penuh = self.c_penuh.isChecked()
         self._tulis("Boltz sedang berjalan di " + ("GPU" if gpu else "CPU") + ". "
+                    + (f"{len(seq)} rantai. " if seq else "")
+                    + ("Pengaturan penuh: 3 daur ulang, 200 langkah. " if penuh
+                       else "Pengaturan diringkas: 1 daur ulang, 50 langkah. ")
                     + ("Sekuens dikirim ke ColabFold untuk MSA." if msa
                        else "MSA satu sekuens: hasilnya tidak untuk dibanding kristal."))
         from . import kerja
-        kerja.jalankan(lambda lapor: lanjutan.prediksi_boltz(seq, smi, folder, gpu=gpu, msa_server=msa),
+        kerja.jalankan(lambda lapor: lanjutan.prediksi_boltz(
+                           seq, smi, folder, gpu=gpu, msa_server=msa, penuh=penuh),
                        selesai=self._tulis, galat=self._tulis)
 
     def _luar(self):

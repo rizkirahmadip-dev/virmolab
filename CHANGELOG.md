@@ -2,7 +2,80 @@
 
 Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x adalah pra-rilis.
 
-## [0.9.6] — 10 Oktober 2026
+## [1.1.1] - 12 Oktober 2026
+
+### Baru
+- **Peta organ ADMET** (Analisis › Prediksi ADMET › tab **Peta organ**): diagram alur dua dimensi tanpa figur manusia. Baris atas mengikuti perjalanan obat — penyerapan (saluran cerna) → peredaran (jantung) → metabolisme (hati) → pembuangan (ginjal) — dihubungkan panah dengan titik berjalan yang kecepatannya mengikuti waktu paruh prediksi; baris bawah memuat organ dan sistem terdampak (otak, kulit, inti sel, paparan menyeluruh). Tiap kartu berisi ikon organ, nama, skor 0–100, dan bilah skor. Skor organ = rata-rata endpoint ADMET-AI yang relevan, dibatasi oleh endpoint terburuknya supaya satu nilai buruk tidak tersamarkan; klik kartu untuk melihat endpoint penyusunnya satu per satu. Endpoint netral seperti BBB tampil sebagai angka informasi berwarna biru, bukan dinilai baik/buruk, dan organ tanpa model (paru, pankreas, tiroid) disebutkan apa adanya. Dilengkapi peralihan warna halus saat ganti ligan, denyut singkat pada kartu berisiko, animasi yang bisa dimatikan, serta ekspor PNG/SVG (`core/peta_tubuh.py`, `ui/peta_tubuh.py`).
+- Gerak pada peta organ: kartu muncul bertahap dari bawah saat ligan berganti, tiga partikel menyusuri panah perjalanan obat (tersembunyi saat melintasi kartu), kartu berisiko berdenyut dengan halo yang meredup sendiri, kartu terangkat halus saat disorot tetikus, dan riak melebar sekali ketika sebuah kartu dipilih. Satu kotak centang mematikan seluruh gerak sekaligus menghentikan pengatur waktunya, jadi tidak ada beban gambar ulang saat tidak dipakai.
+- Peta organ memuat nama ligan dan kalimat ringkasan di atas gambar, legenda warna (aman / perlu dicermati / berisiko / informasi) di bawahnya — keduanya ikut terekspor — serta keterangan jelas saat ligan belum diprediksi. Kartu bisa dijelajahi dengan panah papan ketik, dan hurufnya mengikuti huruf antarmuka sehingga tetap pas pada penskalaan Windows 125 % dan 150 %.
+- **Ikon organ digambar sendiri** (`ui/bentuk_organ.py`): otak berlekuk, jantung beraorta, hati berlobus, lambung bergelung usus, sepasang ginjal, potongan kulit berlapis, sel berinti, dan kapsul paparan menyeluruh. Dirakit dari bentuk dasar dan tabung garis, jadi tetap tajam dari ikon kecil sampai ekspor 4K dan tidak bergantung pada aset berlisensi pihak lain.
+- Daftar ligan pada dialog ADMET kini melewati aditif kristalografi (DMS, gliserol, sulfat) dan serpihan di bawah 6 atom berat, sama seperti dialog analisis lain.
+
+### Diperbaiki
+- **Dialog alat lanjutan tidak lagi gagal dibuka pada proyek nyata**: Deteksi kantong, Saluran akses ligan, Skrip figur publikasi, Desain berbasis fragmen, dan Periksa kontak atom pose sebelumnya memanggil `proyek.reseptor[0]`, `proyek.grid`, `self._info`, dan nama sinyal yang tidak ada sehingga langsung melempar `KeyError`/`AttributeError` begitu menu diklik. Semua dialog baru kini menerima jendela utama dan mengambil data lewat pembantu bersama `ui/kit.py` (`reseptor_proyek`, `ligan_proyek`, `pose_aktif`, `pusat_kotak`).
+- **Deteksi kantong pengikatan ditulis ulang (LIGSITE)**: versi lama menggabungkan seluruh lekuk permukaan menjadi satu rongga raksasa (± 14.000 Å³ pada 1HSG) sehingga tidak berguna. Metode baru memakai pemindaian 13 sumbu (protein–pelarut–protein) plus saringan lapisan permukaan: pada 1HSG apo kantong teratas berpusat 0,9 Å dari ligan kristal MK1 dengan volume 207 Å³ dan dinding memuat ASP 25 katalitik. Air, ion, dan pelarut kristalisasi diabaikan.
+- **Saluran akses ligan**: perhitungan dipindahkan ke NumPy (0,4 detik untuk 64 sinar), titik awal diambil dari grid box atau pose aktif (dulu pusat massa protein, yang jarang berada di kantong), titik awal digeser otomatis ke ruang kosong, "kurvatur" yang selalu bernilai ± 1,0 pada jalur lurus dihapus, dan garis tengah saluran kini benar-benar tergambar di viewport (`VM.terowongan`).
+- **Perancang PROTAC menghasilkan molekul utuh**: perakitan dulu sering jatuh ke SMILES bertitik (`warhead.linker.E3`), yaitu tiga fragmen terpisah, lalu sifat fisikokimianya dihitung dari fragmen itu. Kini warhead, linker, dan pengikat E3 disambung kovalen lewat titik lekat RDKit dan rakitan yang gagal ditolak dengan pesan jelas.
+- **Periksa kontak atom pose (dulu "Re-scoring Machine Learning")**: perhitungan kontak divektorkan dan hanya memakai atom reseptor di sekitar pose; ukuran baru kerapatan kontak per atom berat dan pangsa kontak polar; klaim "model Random Forest terlatih PDBbind" diganti keterangan jujur bahwa skornya bobot linier sederhana.
+- **CNS-MPO**: preset dulu memakai RotB dan SAScore yang bukan bagian CNS-MPO Pfizer. Kini hanya empat suku Wager et al. 2010 yang bisa dihitung (MW, ClogP≈WLOGP, TPSA, HBD) dengan keterangan bahwa ClogD dan pKa tidak disertakan, sehingga nilainya tidak disamakan dengan CNS-MPO 0–6 asli.
+- **Pengiriman ClusPro palsu dihapus**: fungsi lama menembak URL yang bukan API ClusPro, mengarang nomor job dari panjang teks, dan melaporkan "berhasil dikirim" untuk respons HTTP apa pun — padahal struktur dan alamat surel pengguna sudah terkirim ke luar. Penggantinya hanya menyiapkan dua berkas PDB untuk diunggah sendiri oleh pengguna; VirmoDock tidak mengirim data ke mana pun.
+- **Telaah air sisi aktif**: angka yang dulu disebut "ΔG penggusuran (kkal/mol)" sebenarnya skor heuristik tanpa satuan dan kini dinamai demikian, lengkap dengan catatan bahwa termodinamika air sesungguhnya memerlukan WaterMap/GIST/3D-RISM.
+- **Skrip figur publikasi**: perintah ChimeraX yang tidak sahih (`select #1 & (zone #2 4.5)`, `transparency sel 70`) diperbaiki, urutan `orient`/`zoom` PyMOL dibetulkan, label residu memakai rantai yang benar, dan struktur yang dirujuk ikut disalin ke folder tujuan sehingga skrip bisa langsung dijalankan.
+- **Sifat ligan pada proyek lama**: ligan tanpa berkas SDF sumber (hanya PDBQT) kini dibaca dari `REMARK SMILES`, sehingga tab Sifat, MPO, MMP, penapisan, dan kalkulator lab basah tidak lagi kosong.
+- **Dua nama lokal `kerja` menutupi modul `ui.kerja`** di `mainwindow.py` sehingga geser ligan utuh dan penilaian GNINA otomatis selalu berhenti dengan `AttributeError: 'function' object has no attribute 'jalankan'`. Keduanya diganti nama (`geser`, `nilai_gnina`).
+- **Uji regresi dipulihkan**: berkas contoh `dev/uji/1HSG_rec.pdbqt`, `dev/uji/run/`, `dev/uji/zn/`, dan `dev/uji/kerja_docs/` dibangun ulang sehingga 26 uji yang gagal karena berkas contoh hilang kembali berjalan; `uji_mesin`, `uji_posemol`, `uji_protonasi`, dan `uji_p2rank` kini berhenti dengan pesan "LEWAT" yang jelas bila contohnya memang belum dibuat, bukan `IndexError`.
+- `uji_kantong` diganti dengan uji struktur nyata (1HSG apo versus holo); `uji_gelombang_a_gui` tidak lagi memakai mock jendela (mock-nya lulus walau dialog tidak bisa dibuka dari aplikasi) melainkan harness jendela asli `dev/uji_dialog_lanjut_gui.py`, yang membuka 16 dialog lanjutan pada proyek nyata di tema terang dan gelap; `uji_095_gui` mengikuti jumlah templat yang sebenarnya.
+
+### Diubah
+- **Tata letak kini menyesuaikan ukuran layar.** Semua panel dulu memakai angka piksel mati (dok kiri 230/400 px, dok kanan 330 px dengan minimum 300 px, panel bawah 180 px), sehingga di layar 1366×768 panel memakan hampir separuh lebar jendela sedangkan di layar besar justru kekecilan. Sekarang lebar dan tinggi dok dihitung sebagai bagian dari ruang kerja (kiri ±18%, kanan ±24%, panel bawah ±20%) dengan batas bawah-atas, dan batas minimumnya mengikuti lebar huruf antarmuka sehingga tetap benar pada penskalaan Windows 125% dan 150%. Diuji pada 1366×768, 1600×900, 1920×1080, dan 2560×1440 lewat `dev/uji_tata_letak.py` — area tengah selalu mendapat 47–68% lebar jendela.
+- **Mode ringkas untuk layar pendek** (tinggi < 800 px): panel Langkah dan Objek ditumpuk jadi tab (bukan dibagi dua vertikal), tinggi baris tabel/pohon dan isian tab serta menu dirapatkan. Peralihannya mengikuti ukuran jendela, bukan hanya ukuran saat aplikasi dibuka.
+- **Panel bawah tidak lagi menetap menutupi hasil.** Dulu `_galat()` membuka panel Antrean/Log/Pesan dan tidak ada kode yang menutupnya lagi, jadi panel kosong menyita ruang selamanya. Kini panel terbuka sendiri hanya untuk galat atau saat ada job berjalan, lalu tertutup kembali setelah antrean selesai dan pesan dibaca; panel yang dibuka sendiri oleh pengguna tidak akan ditutup otomatis, dan bila pengguna menutupnya, galat berikutnya cukup muncul sebagai lencana "N pesan baru" berwarna merah di bilah status.
+- **Tata letak tersimpan diperiksa dulu**: ukuran layar ikut disimpan, dan bila sekarang berbeda lebih dari 15% (mis. dulu di monitor eksternal), proporsinya dihitung ulang alih-alih dipakai mentah. `Tampilan › Atur ulang tata letak` kini punya pintasan `Ctrl+Shift+0`.
+- **Menu Analisis dipadatkan**: dulu 40 butir lurus melebihi tinggi layar. Kini empat butir yang paling sering dipakai di tingkat atas (Tabel hasil, Diagram 2D, Sifat ligan, Bandingkan ligan) dan sisanya dikelompokkan ke submenu: Telaah pose dan interaksi, Validasi dan mutu, Struktur reseptor, Sifat ligan dan desain, Penapisan banyak ligan, Simulasi dan penelitian lanjut, serta Statistik dan figur.
+- **Panah penanda hilang di seluruh aplikasi**: QSS lama menata ulang `QComboBox::drop-down` tanpa menyediakan gambar panah, sehingga kotak pilihan (mis. pemilih alur "Docking Molekuler" dan preset MPO) tampak seperti kotak teks biasa. Ikon chevron kini dirender per tema untuk kotak pilihan, tombol naik/turun spin box, penanda submenu, dan cabang pohon objek.
+- **Tanda proses berjalan**: hitungan yang tadinya membekukan jendela tanpa keterangan kini memakai `kit.sibuk` (kursor tunggu + teks status di dialog): pasangan MMP, jurang aktivitas, matriks selektivitas, SASA dan evaluasi antarmuka PPI, penumbuhan/penyambungan fragmen, titik metabolisme, skor MPO, pemuatan dan penyaringan dasbor penapisan, serta pemeriksa kesehatan sistem. Pemindaian kantong tetap berjalan di thread terpisah.
+- **Tampilan dialog baru diseragamkan dengan aplikasi**: warna tetap (biru, ungu, hijau, merah) diganti token tema sehingga mode gelap terbaca, judul jendela mengikuti gaya kalimat Bahasa Indonesia, tabel memakai pengurutan numerik dan format angka Indonesia (koma desimal, minus asli), tanda "&" tidak lagi tampil sebagai garis bawah pada tab, dan denah pelat mikro memakai warna pastel bertulisan gelap.
+- **Catatan batas di tiap alat perkiraan**: kinetika/waktu tinggal, kelayakan kantong, titik metabolisme, skor kontak, dan interpretasi AI kini menyebutkan asumsi dan batas pemakaiannya langsung di dialog, termasuk pengingat agar hasil AI dicocokkan dengan tab Hasil sebelum masuk naskah.
+- Dialog-dialog baru kini dibuka lewat jendela utama dengan satu pola yang sama (`DialogX(self)`), memakai pekerja latar belakang untuk pemindaian berat sehingga antarmuka tidak membeku.
+
+## [1.1.0] - 11 Oktober 2026
+
+### Baru
+- **Deteksi Terowongan & Saluran Akses Ligan (Tunnel & Channel Finder)** (Analisis › Deteksi Terowongan Akses Ligan…): mendeteksi rute koridor akses molekul kecil dari sisi aktif menuju permukaan pelarut luar. Menghitung radius leher tersempit (bottleneck radius dalam Å), panjang total lorong, kurvatur lintasan, mengidentifikasi residu dinding pelindung serta residu pintu gerbang (*gatekeeper residues*), dan menampilkan lintasan centerline terowongan di viewer 3D (`terowongan.py`, `dialog_terowongan.py`).
+- **Prediksi Kinetika Pengikatan & Waktu Tinggal (Residence Time & k_off Estimator)** (Analisis › Prediksi Kinetika & Waktu Tinggal…): estimasi parameter kinetika interaksi obat-reseptor ($k_{\text{off}}$, $k_{\text{on}}$, waktu tinggal $\tau = 1/k_{\text{off}}$, dan waktu paruh kompleks $t_{1/2} = \ln 2 / k_{\text{off}}$) berbasis energi docking $\Delta G$, derajat proteksi ikatan hidrogen terkubur (*shielded H-bonds*), dan kontak hidrofobik terkurung. Dilengkapi klasifikasi kinetik (*Transient*, *Moderate*, *Sustained*, *Ultra-Sustained*) dan wawasan translasi PK/PD (`kinetika.py`, `dialog_kinetika.py`).
+- **Perancang Molekul PROTAC & Modalitas TPD (Targeted Protein Degradation)** (Analisis › Perancang PROTAC & Degradasi Target…): platform perakitan molekul chimera bivalen penarget degradasi protein: Warhead Ligan Target - Linker Modular - E3 Ligase Binder (VHL VH032, Cereblon Pomalidomide, Cereblon Thalidomide). Menyediakan pilihan linker PEG (PEG2, PEG3, PEG4), alkil (C4, C6, C8), dan piperazin semikaku, evaluasi parameter *Beyond Rule of 5* (bRo5: MW, LogP, TPSA, HBD/HBA, rotatable bonds, panjang rentang linker terentang dalam Å), serta tombol impor langsung ke daftar ligan proyek (`protac.py`, `dialog_protac.py`).
+- **Prediksi Titik Metabolisme Ligan (Site of Metabolism / SoM Finder)** (Analisis › Prediksi Titik Metabolisme…): deteksi posisi atom ligan yang paling rentan terhadap metabolisme oksidatif fase I oleh enzim Sitokrom P450 (CYP3A4, CYP2D6, CYP2C9: N-dealkilasi, O-demetilasi, hidroksilasi benzilik/alifatik/aromatik, S-oksidasi). Menghitung skor stabilitas metabolik intrinsik ligan dan menyajikan rekomendasi substitusi bioisosterik pelindung metabolisme (misal fluorinasi metabolik $C-H \to C-F$, deuterasi, penambahan cincin kaku) (`metabolisme.py`, `dialog_metabolisme.py`).
+- **Re-scoring Berbasis Machine Learning Kontak Atom (RF-Score & Footprinting)** (Analisis › Re-scoring Machine Learning…): ekstraksi sidik jari interaksi intermolekuler pasangan kontak atom protein-ligan ($d \le 4.0\text{ \AA}$) dan estimasi afinitas $\text{pK}_d$ serta $\Delta G_{\text{ML}}$ (kcal/mol) menggunakan model regresi machine learning terkalibrasi PDBbind. Dilengkapi detektor *False-Positive* otomatis untuk memvalidasi pose dengan afinitas Vina tinggi namun kontak atomiknya tidak realistis (`rescore_ml.py`, `dialog_rescore_ml.py`).
+
+## [1.0.0] - 11 Oktober 2026
+
+### Baru
+- **Deteksi Kantong Pengikatan Otomatis (Cavity / Binding Site Finder)** (Analisis › Deteksi Kantong Pengikatan…): deteksi rongga aktif dan kantong pengikatan makromolekul secara otomatis berbasis grid geometri dan uji keterbukaan pelarut (burial check). Mendukung struktur apo atau model AlphaFold yang belum memiliki ko-kristal ligan. Menyediakan perankingan volume rongga (Å³), deteksi residu pembatas kantong (lining residues), visualisasi bola dummy di viewer 3D, serta tombol sekali-klik "Jadikan Kotak Docking Proyek Ini" (`kantong.py`, `dialog_kantong.py`).
+- **Desain Berbasis Fragmen (Fragment-Based Drug Design / FBDD)** (Analisis › Desain Berbasis Fragmen…): platform komputasi untuk perancangan ligan rasional. Mendukung mode **Fragment Growing** (menumbuhkan 15 gugus bioisosterik pada atom hidrogen terpilih) dan **Fragment Linking** (menyambungkan dua fragmen aktif dengan 7 varian linker fleksibel/kaku). Menghitung secara seketika sifat fisikokimia, Lipinski Rule of 5, QED, dan SAScore, serta tombol impor langsung ke antrean ligan proyek (`fbdd.py`, `dialog_fbdd.py`).
+- **Analisis Termodinamika Air Sisi Aktif (Active-Site Water Thermodynamics)**: modul evaluasi energetika molekul air kristal pada sisi aktif reseptor. Mengklasifikasikan air menjadi kategori "Stabil/Struktural" (merugikan bila digusur) dan "Frustrasi/Tidak Stabil" (menguntungkan bila digusur, ΔG_displacement < 0 kcal/mol) berbasis derajat penguburan (burial index) dan jejaring donor/akseptor hidrogen (`air_termo.py`).
+- **Generator Skrip Visualisasi Publikasi PyMOL & UCSF ChimeraX** (Alat › Ekspor Skrip Publikasi…): menghasilkan skrip `.pml` dan `.cxc` siap pakai sekali-klik dengan standar estetika jurnal terkemuka (Nature / Journal of Medicinal Chemistry). Mengotomatisasi pewarnaan kontras ligan, kartun protein, stick residu kantong aktif, garis putus-putus ikatan hidrogen, permukaan kantong transparan, dan pengaturan ray-tracing 300 DPI (`skrip_publikasi.py`, `dialog_skrip_publikasi.py`).
+- **Pemeriksa Kesehatan Lingkungan Sistem (System Diagnostics)** (Bantuan › Pemeriksa Kesehatan Sistem…): audit mandiri komprehensif terhadap 8 subsistem kunci (Python runtime, pustaka chemoinformatics RDKit, manipulasi struktur Gemmi & NumPy, mesin docking AutoDock Vina, akselerasi dinamika molekul OpenMM & GPU CUDA/ROCm/OpenCL, subsistem Linux WSL2 untuk GNINA/Boltz, serta peladen AI lokal Ollama). Dilengkapi penanda status visual, kartu rekomendasi aksi, dan tombol salin laporan sistem (`diagnostik.py`, `dialog_diagnostik.py`).
+
+## [0.9.8] - 11 Oktober 2026
+
+### Baru
+- **Dashboard Penapisan Virtual (Batch Virtual Screening)** (Analisis › Dashboard Penapisan Virtual…): antarmuka interaktif untuk menganalisis hasil penapisan skala besar (>100 ligan). Peta panas (heatmap) ligan × parameter, multi-variabel scatter plot (ΔG vs SAScore bergradien warna QED/MPO), histogram distribusi afinitas dengan garis rata-rata & median, filter multi-kriteria dengan slider & checkbox (Lipinski, Veber, PAINS, Brenk, GI), peringkat komposit multi-dimensi, auto-flag "Top Hits", serta ekspor CSV data terfilter (`penapisan.py`, `dialog_penapisan.py`, `grafik.heatmap_svg`, `grafik.scatter_multi_svg`, `grafik.histogram_distribusi_svg`).
+- **Analisis Molecular Matched Pair (MMP)** (Analisis › Analisis Molecular Matched Pair…): deteksi otomatis pasangan molekul yang berbeda hanya satu variasi substituen (RDKit `rdMMPA`), tabel transformasi R-group terhadap perubahan afinitas (ΔΔG), drug-likeness (ΔQED), dan kemudahan sintesis (ΔSAScore), deteksi SAR Activity Cliffs (|ΔΔG| ≥ 1.5 kcal/mol dengan kemiripan struktur tinggi), serta panel rekomendasi substitusi gugus R yang paling konsisten meningkatkan afinitas pada target (`mmp.py`, `dialog_mmp.py`).
+- **Selektivitas Multi-Target & Matriks Ensemble Docking** (Analisis › Selektivitas Multi-Target…): membandingkan afinitas ligan ke beberapa target protein secara simultan. Menghasilkan matriks ligan × target berbasis SMILES kanonik, normalisasi Z-score relatif per target, klasifikasi otomatis profil farmakologis (Selektif Kuat, Semi-selektif, Promiskuitas obat), serta indeks gap selektivitas ΔΔG (`selektivitas.py`, `dialog_selektivitas.py`).
+- **Interpretasi Hasil Docking AI (Ollama Enhanced & Expert Engine)** (Analisis › Interpretasi Hasil Docking (AI)…): generator narasi ilmiah otomatis untuk merangkum hasil simulasi docking dalam Bahasa Indonesia baku. Menyediakan mode Ringkasan Eksekutif dan draf Bab Hasil & Pembahasan karya ilmiah/skripsi yang menganalisis validitas RMSD, urutan afinitas ΔG, konstanta inhibisi Ki, Ligand Efficiency, dan jaringan ikatan hidrogen/hidrofobik. Terintegrasi langsung dengan model AI lokal Ollama (jika terpasang) atau fallback mulus ke Mesin Pakar VirmoDock (`asisten.py`, `dialog_asisten.py`).
+- **Docking Protein–Protein (PPI) & Analisis Antarmuka** (Analisis › Docking Protein–Protein…): modul docking dan telaah interaksi makromolekul protein-protein. Prediksi residu permukaan/antarmuka aktif berbasis Solvent Accessible Surface Area (SASA Shrake-Rupley), evaluasi kompleks antarmuka (kontak atom berat, ikatan hidrogen antar-rantai, jembatan garam, Buried Surface Area / ΔSASA, dan skor komplementaritas), klastering pose rigid-body berdasarkan RMSD C-alfa, integrasi antrean ClusPro 2.0, serta visualisasi kompleks di viewer 3D (`ppi.py`, `dialog_ppi.py`).
+
+## [0.9.7] - 11 Oktober 2026
+
+### Baru
+- **Synthetic Accessibility Score (SAScore)** (Ertl & Schuffenhauer 2009): perhitungan kemudahan sintesis berbasis fragmen dan kompleksitas molekul RDKit. Nilai 1 (sangat mudah) hingga 10 (sangat sulit). Tersedia di tab Sifat Ligan, variabel korelasi tab Statistik, tabel laporan HTML/PDF, dan komponen uji mandiri (`sascore.py`).
+- **Multi-Parameter Optimization (MPO) & Radar Chart** (Analisis › Multi-Parameter Optimization (MPO) & Radar…): integrasi parameter fisikokimia, drug-likeness (QED), SAScore, dan afinitas docking ΔG menjadi satu skor desirability (0–100). Preset bawaan mencakup Oral Drug-like MPO dan CNS-MPO (Pfizer, Wager et al. 2016), dilengkapi grafik laba-laba/radar SVG interaktif per ligan yang dapat disalin dan diekspor (`mpo.py`, `dialog_mpo.py`, `grafik.radar_svg`).
+- **Kalkulator Pengujian Laboratorium Basah (Wet-Lab Planner)** (Analisis › Kalkulator Uji Lab Basah (Wet-Lab Planner)…): menjembatani hasil docking in silico ke eksperimen in vitro basah. Menghitung prediksi Ki dan IC50 (Cheng-Prusoff), seri pengenceran bertingkat (1:3, 1:2, semi-log), kalkulasi volume pemipetan dan batas toleransi pelarut DMSO (≤ 0.5%), denah visual pelat mikro (96-well / 384-well / 48-well / 24-well) dengan triplo/duplo dan sumur kontrol (pelarut, positif, blanko), serta ekspor draf protokol pemipetan dan berkas CSV (`labplanner.py`, `dialog_labplanner.py`).
+
+### Diperbaiki
+- **Diagram interaksi 2D**: ikatan rangkap dengan stereo tak tentu (mis. C=N hidrazon dari SMILES tanpa E/Z) tidak lagi digambar sebagai ikatan silang yang tampak cacat; E/Z dan R/S kini diambil dari geometri pose 3D. Lingkaran residu tidak lagi menutupi label atom berhuruf (H₂N, NH, OH) (`diagram2d.py`).
+
+## [0.9.6] - 10 Oktober 2026
 
 ### Baru
 - **Penelitian lanjutan** (Analisis › Penelitian lanjutan…): konservasi residu dari FASTA (penjajaran lokal, diwarnai lewat B-faktor), sumbangan Vina per residu dan pemindaian alanin pada fungsi skor, penggabungan job (ensemble, selektivitas, kovalen lawan non-kovalen), umpan berpadanan sifat, regangan MMFF, kemiripan bentuk 3D, tautomer dan stereoisomer, enumerasi gugus R, bioisoster, telaah air penjembatan dan kofaktor, syarat interaksi, mutasi residu, sunting ligan di kantong, film trajektori MD, paket OpenMM untuk server, draf skripsi, BibTeX, dan pemeriksa figur (dpi, huruf, buta warna).
@@ -14,13 +87,26 @@ Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x 
 - Asisten (Bantuan › Asisten…): jawaban dari catatan aplikasi, plus Ollama di komputer sendiri bila sebuah model sudah terpasang. Model tidak diunduh dan tidak dibundel.
 - Konservasi bisa mengisi homolog dari BLAST NCBI Swiss-Prot. Persen identitas tetap dihitung lokal. BLAST mengirim sekuens ke NCBI.
 - Arti angka (ΔG, skor kovalen, Ki, GNINA, CNNscore, CNNaffinity, RMSD redocking, RMSD Boltz, MM/GBSA) tertulis di tab Hasil, laporan, dan draf skripsi. Pada ringkasan langkah, skor terbaik kovalen tidak lagi disebut ΔG.
+- Tab Hasil punya kolom GNINA Affinity (kcal/mol), CNNscore (0–1), dan CNNaffinity (pK). Kolom itu terisi sendiri setelah docking bila GNINA ada di WSL. Bila tidak ada, selnya kosong dan docking tetap selesai.
+- Analisis › Seret atom ligan menggeser satu atom di viewer, merapikan ikatan, lalu menilai ulang dengan Vina di tempat bila reseptor PDBQT sudah ada.
+- Boltz punya kotak pengaturan penuh (3 daur ulang, 200 langkah, semua rantai protein yang terbuka). Tanpa centang, pengaturan tetap diringkas untuk GPU 6 GB.
+- Bila BLAST NCBI masih antre, homolog dicari lewat UniProt, lalu EBI, lalu pencarian sekuens RCSB PDB. Sekuens ikut terkirim. Identitas tetap dihitung lokal. Hasil RCSB bukan Swiss-Prot.
+- Proyek contoh HIV-1 protease menyimpan hasil redocking buta MK1 yang sudah diukur: RMSD 1,39 Å, ΔG Vina −11,18 kcal/mol, GNINA Affinity −11,56 kcal/mol. Angka itu bukan docking baru.
+- Jendela membuka dalam keadaan dimaksimalkan di area kerja, tanpa melewati tepi layar.
 - Paket server menulis `kompleks.gro` dan topologi GROMACS vakum `kompleks.top` (ParmEd). Suku pelarut OBC2 tetap hanya di `sistem_obc2.xml`.
+- Analisis › Geser ligan utuh memindahkan seluruh ligan tanpa mengubah bentuknya, lalu menilai ulang dengan Vina di tempat. Seret atom ligan tetap menggeser satu atom.
+- Setelah docking, GNINA mengisi 10 ligan berenergi terbaik. Analisis › GNINA untuk sisa ligan menilai yang lain. Bila GNINA tidak ada, docking tetap selesai.
+- Nomor BLAST NCBI disimpan di proyek. Tombol ambil hasil tetap bisa dipakai setelah jendela penelitian ditutup.
+- Analisis › Syarat jarak menandai pose yang atom beratnya lebih jauh dari residu yang dipilih (misalnya 3,5 Å). Pencarian docking tidak dipaksa mendekat.
+- Ctrl+Z dan Ctrl+Y juga mengembalikan atau mengulangi perubahan koordinat ligan.
+- Syarat jarak diukur pada semua pose. Baris tabel memakai pose berenergi terbaik yang lolos ambang; pose yang gagal tetap terlihat. Dua residu bisa diisi sekaligus: lolos bila salah satu cukup dekat. Garis putus-putus di viewer menunjukkan pasangan atom terdekat.
+- Skor Vina sesudah geser atom atau geser ligan utuh tersimpan sebagai skor lokal di panel Properti. ΔG docking di tabel tidak ditimpa.
 
 ### Diubah
 - Koordinat 3D ligan dengan cincin ≥ 7 atom memakai torsi makrosiklus ETKDG. Meeko tetap membuat cincin itu fleksibel kecuali kotak “Makrosiklik kaku”.
 - Uji mandiri kini mencakup satu pemeriksaan alat penelitian.
 
-## [0.9.5] — 10 Oktober 2026
+## [0.9.5] - 10 Oktober 2026
 
 ### Baru
 - **Docking kovalen** (Siapkan › Docking kovalen…, atau *Atur…* di langkah 4): pilih residu nukleofil (Cys, Ser, Lys) di dalam grid box; ligan yang punya gugus reaktif diikat secara kimia ke rantai sampingnya dan di-docking sebagai satu aduk dengan metode *tethered* (AutoDock-GPU `--flexres`). Gugus reaktif yang dikenali: akseptor Michael (akrilamida/enon/vinil sulfon), alkuna teraktivasi, α-haloketon/haloasetamida, sulfonil fluorida, nitril, aldehida (termasuk basa Schiff untuk Lys). Dialog menampilkan deteksi per ligan sebelum dijalankan; ligan tanpa gugus reaktif yang cocok dilewati. Rantai samping residu sasaran tampil sebagai objek pose tersendiri dan interaksi dihitung pada posisi itu. Validasi: 6OIM (KRAS G12C–sotorasib) RMSD 1,34 Å dari SMILES.
@@ -36,19 +122,19 @@ Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x 
 - **Konsol Python** (Alat › Konsol Python) dan **plugin pengguna** (berkas .py di folder plugin → menu Alat › Plugin); galat plugin ditangkap sehingga tidak menjatuhkan aplikasi.
 
 ### Diperbaiki
-- Ekspor dan laporan tidak lagi menuliskan jalur berkas lengkap (yang memuat nama pengguna Windows) ke dalam berkas yang dibagikan — kini hanya nama berkas/folder.
+- Ekspor dan laporan tidak lagi menuliskan jalur berkas lengkap (yang memuat nama pengguna Windows) ke dalam berkas yang dibagikan - kini hanya nama berkas/folder.
 
 ### Diubah
 - Uji mandiri kini 26 komponen (+ docking kovalen: aduk + flexres Meeko).
 - Pose kovalen diperiksa PoseBusters tanpa uji *jarak minimum ke protein* (ikatan kovalen memang lebih pendek daripada kontak van der Waals); 21 uji lainnya tetap dijalankan.
 
-## [0.9.4] — 9 Oktober 2026
+## [0.9.4] - 9 Oktober 2026
 
 ### Baru
 - **MD & MM/GBSA** (Analisis › MD & MM/GBSA…) dengan OpenMM: protein Amber ff14SB, ligan OpenFF Sage 2.3 dengan muatan parsial OpenFF NAGL (setara AM1-BCC), ion logam Li/Merz. Tiga tingkat sesuai rencana A8a:
-  - **Ringan** — minimisasi kompleks + MM/GBSA satu titik (menit, semua laptop);
-  - **Sedang** — MD pelarut implisit OBC2 + RMSD/RMSF + MM/GBSA rata-rata;
-  - **Lengkap** — MD air eksplisit TIP3P/PME + MM/GBSA banyak frame.
+ - **Ringan** - minimisasi kompleks + MM/GBSA satu titik (menit, semua laptop);
+ - **Sedang** - MD pelarut implisit OBC2 + RMSD/RMSF + MM/GBSA rata-rata;
+ - **Lengkap** - MD air eksplisit TIP3P/PME + MM/GBSA banyak frame.
 - **Penilaian kemampuan laptop otomatis**: saat dialog pertama dibuka, kecepatan diukur pada kompleks Anda sendiri (implisit & eksplisit, disimpan per perangkat) → perkiraan waktu dan status *Disarankan / Bisa (lama) / Tidak disarankan*; peringatan bila laptop memakai baterai.
 - **Jeda & lanjut**: checkpoint tiap ±5 menit; MD bisa dijeda dan dilanjutkan, juga setelah aplikasi ditutup (menutup VirmoDock saat MD berjalan otomatis menjeda dengan checkpoint).
 - Hasil: ΔG MM/GBSA (vdW, elektrostatik, GB, SA) ± SD, grafik RMSD/RMSF/MM-GBSA per waktu (SVG/PDF/PNG/TIFF), **interaksi persisten** sepanjang trajektori, berkas kompleks terminimisasi (PDB) dan trajektori zat terlarut (DCD) untuk PyMOL/VMD.
@@ -60,14 +146,14 @@ Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x 
 - Uji mandiri kini 25 komponen (+ MD & MM/GBSA OpenMM/OpenFF).
 - Dialog Tentang mencantumkan komponen MD dan pemberitahuan hak cipta Hilbert Curve (Rice University) yang diwajibkan lisensi OpenMM.
 
-## [0.9.3] — 9 Oktober 2026
+## [0.9.3] - 9 Oktober 2026
 
 ### Baru
 - **Protein dari AlphaFold DB** (Siapkan › Protein dari AlphaFold DB…, atau tab *AlphaFold DB* di dialog impor): cari kode UniProt atau nama protein/gen (UniProt, saring organisme), unduh model prediksi terbaru. Protein diwarnai menurut **pLDDT** (pita resmi AlphaFold; juga pilihan warna *pLDDT* di panel Tampilan), ringkasan pLDDT di Properti dan Pesan, ujung N/C tak beraturan (pLDDT < 50) dipangkas otomatis (bisa diatur/dimatikan).
 - **Peringatan pLDDT di grid box**: bila residu di area docking model AlphaFold ber-pLDDT rendah, VirmoDock mengingatkan bahwa pose dan ΔG kurang andal.
 - **P2Rank untuk model AlphaFold** memakai konfigurasi resmi `alphafold` (tanpa fitur B-factor, yang di model AlphaFold berisi pLDDT).
-- **Residu fleksibel** (Siapkan › Residu fleksibel…, atau *Atur…* di langkah Jalankan): pilih 1–8 rantai samping kantong (calon diurutkan menurut jarak ke ligan asli) yang boleh berotasi selama docking — AutoDock-GPU (`--flexres`) dan Vina (`--flex`). Rantai samping tiap pose tampil sebagai objek tersendiri, dan analisis interaksi, PoseBusters, serta laporan memakai posisi rantai samping pada pose itu.
-- **Baris perintah `VirmoDock-cli.exe`** (di folder instalasi): `info`, `uji`, `reseptor`, `ligan`, `kantong`, `alphafold`, dan `dock` — satu perintah dari kode PDB/AF-UniProt/berkas sampai `ringkasan.csv` (ΔG, Ki, LE, interaksi, residu kontak) dan `metode.txt` (parameter lengkap + perintah yang bisa diulang) untuk skrip, batch, dan reproduksibilitas.
+- **Residu fleksibel** (Siapkan › Residu fleksibel…, atau *Atur…* di langkah Jalankan): pilih 1–8 rantai samping kantong (calon diurutkan menurut jarak ke ligan asli) yang boleh berotasi selama docking - AutoDock-GPU (`--flexres`) dan Vina (`--flex`). Rantai samping tiap pose tampil sebagai objek tersendiri, dan analisis interaksi, PoseBusters, serta laporan memakai posisi rantai samping pada pose itu.
+- **Baris perintah `VirmoDock-cli.exe`** (di folder instalasi): `info`, `uji`, `reseptor`, `ligan`, `kantong`, `alphafold`, dan `dock` - satu perintah dari kode PDB/AF-UniProt/berkas sampai `ringkasan.csv` (ΔG, Ki, LE, interaksi, residu kontak) dan `metode.txt` (parameter lengkap + perintah yang bisa diulang) untuk skrip, batch, dan reproduksibilitas.
 - Laporan mencantumkan sumber model AlphaFold (entri, versi, pLDDT, residu dipangkas) dan residu fleksibel.
 
 ### Diperbaiki
@@ -76,7 +162,7 @@ Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x 
 ### Diubah
 - Uji mandiri kini 24 komponen (+ residu fleksibel, baris perintah).
 
-## [0.9.2] — 9 Oktober 2026
+## [0.9.2] - 9 Oktober 2026
 
 ### Baru
 - **Wizard preparasi reseptor 4 langkah** (Periksa struktur → Pembersihan → Protonasi & hidrogen → Ringkasan) dengan **pemeriksa kualitas protein**: resolusi, celah rantai, atom berat hilang, konformasi alternatif, residu non-standar, ligan & ion logam.
@@ -85,14 +171,14 @@ Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x 
 - **Kemiripan, ruang kimia, farmakofor** (Analisis): Tanimoto ECFP4/FCFP4/MACCS/pasangan atom/farmakofor 2D, klaster Butina, peta ruang kimia (MDS/PCA), cari ligan mirip (termasuk SMILES acuan), **farmakofor 3D pose aktif** (tombol P) dan **farmakofor bersama** pose teratas (+ skrip PyMOL).
 - **ChEMBL**: cari target dari ID PDB/UniProt/nama, ambil aktivitas (pChEMBL), impor senyawa aktif sebagai ligan, dan **korelasi ΔG docking vs pChEMBL**; pChEMBL tersedia sebagai variabel di tab Statistik.
 - **Pustaka ligan**: 3.205 obat disetujui (offline, dari ChEMBL), ±700 ribu bahan alam **COCONUT 2.0** (unduh sekali, lalu offline; saring kelas, sifat, kemiripan), dan tautan ZINC22.
-- **Gambar ligan dengan Ketcher** (offline) — juga *Edit struktur di Ketcher* dari klik kanan ligan.
+- **Gambar ligan dengan Ketcher** (offline) - juga *Edit struktur di Ketcher* dari klik kanan ligan.
 - **Prediksi ADMET (ADMET-AI)**: 30 sifat absorpsi, distribusi, metabolisme (CYP), ekskresi, toksisitas (hERG, Ames, DILI), berjalan offline di proses terpisah.
 - **Antarmuka bahasa Inggris** (Tampilan › Bahasa / Language; berlaku setelah aplikasi dibuka ulang).
 
 ### Diubah
 - Uji mandiri kini 22 komponen.
 
-## [0.9.1] — 9 Oktober 2026
+## [0.9.1] - 9 Oktober 2026
 
 ### Baru
 - **Konsensus skor** (Analisis › Konsensus skor…): gabungkan beberapa mesin docking dan *rescoring* pose terbaik dengan fungsi skor Vina & Vinardo menjadi satu peringkat. Ligan yang konsisten di atas pada semua fungsi skor ditandai ✓; kesepakatan antar fungsi skor diukur dengan Kendall W.
@@ -110,7 +196,7 @@ Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x 
 - Tab Statistik tidak lagi kosong bila job terbaru hanya berisi sedikit ligan.
 - Nilai p < 0,0001 kini tampil di tabel hasil uji (sebelumnya kosong).
 
-## [0.9.0] — 8 Oktober 2026
+## [0.9.0] - 8 Oktober 2026
 
 ### Baru
 - **Uji & Grafik** ala Prism: panel Format (klik elemen grafik), gaya tersimpan, patah sumbu, skala log, ROC/AUC, tabel kontingensi (Fisher/χ²), IC₅₀ 4PL.

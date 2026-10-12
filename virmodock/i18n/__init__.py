@@ -6,7 +6,7 @@ diimpor) memasang lapisan terjemahan saat runtime:
   2. widget yang dibuat dengan teks di konstruktor diterjemahkan saat event Polish (sekali, sebelum tampil);
   3. kelas item (QTableWidgetItem, QListWidgetItem, QTreeWidgetItem) diganti subkelas yang menerjemahkan teks awal;
   4. data tampilan di modul core (nama jenis interaksi, label variabel, dll.) dan teks grafik SVG diterjemahkan.
-Kamus: i18n/en.json {"teks": {id: en}, "pola": {pola dengan {0}… : en}} — dibuat/dilengkapi lewat
+Kamus: i18n/en.json {"teks": {id: en}, "pola": {pola dengan {0}… : en}} - dibuat/dilengkapi lewat
 dev/ekstrak_teks.py. Teks yang tidak ada di kamus tampil apa adanya (Bahasa Indonesia).
 Ganti bahasa: Tampilan › Bahasa (berlaku setelah aplikasi dibuka ulang).
 """
@@ -167,7 +167,7 @@ def _polish(w):
                 tv = t(v)
                 if tv != v:
                     getattr(w, set_)(tv)
-        # QToolButton milik QAction: JANGAN sentuh defaultAction() di sini — Polish bisa terjadi di dalam
+        # QToolButton milik QAction: JANGAN sentuh defaultAction() di sini - Polish bisa terjadi di dalam
         # QToolBar.addAction sebelum PySide mendaftarkan pembungkus aksi; pembungkus sementara yang dibuat
         # di sini lalu dibuang ikut menghapus QAction C++ ("already deleted"). Aksi diterjemahkan lewat setter.
         if isinstance(w, W.QToolButton):

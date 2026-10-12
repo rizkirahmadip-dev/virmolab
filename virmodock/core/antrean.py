@@ -108,7 +108,7 @@ class Pelaksana(QObject):
             return
         l["qc"] = h
         if h.get("gagal"):
-            self.log.emit(f"PoseBusters {l['nama']}: gagal {len(h['gagal'])} uji — " + ", ".join(h["gagal"]))
+            self.log.emit(f"PoseBusters {l['nama']}: gagal {len(h['gagal'])} uji - " + ", ".join(h["gagal"]))
         self.liganSelesai.emit(jid, lid)
         self.perluSimpan.emit()
 

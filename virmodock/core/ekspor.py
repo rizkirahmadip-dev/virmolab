@@ -7,9 +7,12 @@ KOLOM_HASIL = [("peringkat", "Peringkat"), ("ligan", "Ligan"), ("energi", "ΔG (
                ("le", "LE (kcal/mol/atom berat)"), ("klaster", "Klaster (n)"), ("rmsd_kristal", "RMSD kristal (Å)"),
                ("rmsd", "RMSD ref / l.b. (Å)"), ("ifp_sim", "Kemiripan IFP vs kristal (Tanimoto)"),
                ("mmgbsa", "MM/GBSA ΔG (kcal/mol)"), ("mmgbsa_sd", "MM/GBSA SD (kcal/mol)"),
+               ("gnina", "GNINA Affinity (kcal/mol)"), ("cnnscore", "CNNscore (0-1)"),
+               ("cnnaffinity", "CNNaffinity (pK)"), ("syarat_jarak", "Syarat jarak (Å)"),
+               ("syarat_pose", "Pose syarat"),
                ("mmgbsa_metode", "MM/GBSA metode"), ("posebusters", "PoseBusters"),
-               ("posebusters_gagal", "PoseBusters: uji gagal"), ("hbond", "Ikatan H"), ("hidrofobik", "Hidrofobik"), ("pi", "π–π"),
-               ("pikation", "π–kation"), ("garam", "Jembatan garam"), ("halogen", "Halogen"), ("logam", "Logam"),
+               ("posebusters_gagal", "PoseBusters: uji gagal"), ("hbond", "Ikatan H"), ("hidrofobik", "Hidrofobik"), ("pi", "π-π"),
+               ("pikation", "π-kation"), ("garam", "Jembatan garam"), ("halogen", "Halogen"), ("logam", "Logam"),
                ("n_pose", "Jumlah pose"), ("mesin", "Mesin"), ("job", "Job"), ("detik", "Waktu (s)"),
                ("smiles", "SMILES")]
 
@@ -24,21 +27,53 @@ def baris_hasil(proyek, jobs=None):
             if l["status"] != "selesai":
                 continue
             p0 = l["pose"][0] if l.get("pose") else {}
-            n = l.get("interaksi") or {}
+            sj = l.get("syarat_jarak") if isinstance(l.get("syarat_jarak"), dict) else {}
+            pose_list = list(l.get("pose") or [])
+            peringkat_sj = sj.get("peringkat") or 1
+            pilih = next((p for p in pose_list if p.get("peringkat") == peringkat_sj), p0)
+            ganti = bool(sj.get("pose")) and pilih is not p0 and isinstance(pilih.get("energi"), (int, float))
+            energi = pilih["energi"] if ganti else l["energi"]
+            n = (sj.get("interaksi") if ganti and sj.get("interaksi") else l.get("interaksi")) or {}
             lig = proyek.cari_ligan(l["id"]) or {}
-            baris.append({"ligan": l["nama"], "lid": l["id"], "energi": l["energi"], "ki": l.get("ki", ""),
-                          "le": l.get("le"), "klaster": p0.get("klaster") or None,
-                          "rmsd_kristal": l.get("rmsd_kristal"),
-                          "rmsd": p0.get("rmsd_ref") if p0 and p0.get("rmsd_ref", -1) >= 0 else None,
+            ukur = {p.get("peringkat"): p for p in (sj.get("pose") or [])}
+            pose_tampil = []
+            for p in pose_list:
+                q = dict(p)
+                u = ukur.get(p.get("peringkat"))
+                if u:
+                    q["syarat_jarak"] = u.get("min")
+                    q["syarat_lolos"] = u.get("lolos")
+                    q["syarat_atom"] = " ".join(x for x in (
+                        u.get("atom_ligan"), "-", u.get("resn"), str(u.get("resi") or ""), u.get("rantai"),
+                        u.get("atom_residu")) if x)
+                pose_tampil.append(q)
+            baris.append({"ligan": l["nama"], "lid": l["id"], "energi": energi,
+                          "ki": M.ki_terbaca(energi) if ganti else l.get("ki", ""),
+                          "le": sj.get("le") if ganti and sj.get("le") is not None else l.get("le"),
+                          "klaster": pilih.get("klaster") or None,
+                          "rmsd_kristal": pilih.get("rmsd_kristal") if ganti and "rmsd_kristal" in pilih
+                          else l.get("rmsd_kristal"),
+                          "rmsd": pilih.get("rmsd_ref") if ganti and pilih.get("rmsd_ref", -1) >= 0 else
+                          (p0.get("rmsd_ref") if p0 and p0.get("rmsd_ref", -1) >= 0 else None),
                           **{k: n.get(k, 0) for k in ("hbond", "hidrofobik", "pi", "pikation", "garam", "halogen",
                                                       "logam")},
                           "n_pose": l.get("n_pose"), "mesin": M.MESIN.get(j["mesin"], j["mesin"]), "job": j["id"],
-                          "detik": l.get("detik"), "smiles": lig.get("smiles", ""), "residu": l.get("residu") or {}, "ifp": l.get("ifp") or [],
-                          "pose": l.get("pose") or [], "qc": l.get("qc"), "kovalen": bool(j.get("kovalen")),
+                          "detik": l.get("detik"), "smiles": (proyek.smiles_ligan(lig) if hasattr(proyek, "smiles_ligan") else lig.get("smiles", "")), "residu": l.get("residu") or {}, "ifp": l.get("ifp") or [],
+                          "pose": pose_tampil, "qc": l.get("qc"), "kovalen": bool(j.get("kovalen")),
                           "posebusters": qc.teks_sel(l.get("qc")),
                           "posebusters_gagal": ", ".join((l.get("qc") or {}).get("gagal") or []),
                           "mmgbsa": (l.get("mmgbsa") or {}).get("dG"), "mmgbsa_sd": (l.get("mmgbsa") or {}).get("sd"),
-                          "mmgbsa_metode": (l.get("mmgbsa") or {}).get("metode", "")})
+                          "mmgbsa_metode": (l.get("mmgbsa") or {}).get("metode", ""),
+                          "gnina": (l.get("gnina") or {}).get("affinity"),
+                          "cnnscore": (l.get("gnina") or {}).get("cnnscore"),
+                          "cnnaffinity": (l.get("gnina") or {}).get("cnnaffinity"),
+                          "syarat_jarak": sj.get("min") if sj.get("pose") else None,
+                          "syarat_lolos": sj.get("lolos") if sj.get("pose") else None,
+                          "syarat_ambang": sj.get("ambang") if sj.get("pose") else None,
+                          "syarat_pose": peringkat_sj if sj.get("pose") else None,
+                          "syarat_atom": " ".join(x for x in (
+                              sj.get("atom_ligan"), "-", sj.get("resn"), str(sj.get("resi") or ""),
+                              sj.get("rantai"), sj.get("atom_residu")) if x) if sj.get("pose") else ""})
     # acuan IFP: pose kristal ligan asli (dari job dengan reseptor yang sama bila ada)
     from .analisis import tanimoto
     acuan = {}

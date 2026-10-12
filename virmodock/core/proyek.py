@@ -49,6 +49,8 @@ class Proyek:
         self.objek = []               # list dict objek viewer
         self.catatan = ""
         self.validasi = {}            # hasil validasi redocking terakhir
+        self.blast = {}               # {rid, rantai} nomor BLAST NCBI yang masih bisa diambil
+        self.syarat_jarak = {}        # {rantai, resi, jarak} saringan pose sesudah docking
         self.templat = ""             # kunci templat proyek (core/templat.py), bila dibuat dari templat
         self.md = []                  # riwayat MD / MM-GBSA: {id, mode, tanggal, status, folder, ligan, opsi}
         self.eksperimen = {}          # data aktivitas eksperimen (ChEMBL): target, aktivitas [{chembl, nama, smiles, inchikey, pchembl, …}]
@@ -71,6 +73,7 @@ class Proyek:
                 "ligan": self.ligan, "kotak": self.kotak, "parameter": self.parameter, "uji_grafik": self.uji_grafik,
                 "komposer": self.komposer, "job": self.job,
                 "objek": self.objek, "catatan": self.catatan, "validasi": self.validasi,
+                "blast": self.blast, "syarat_jarak": self.syarat_jarak,
                 "eksperimen": self.eksperimen, "md": self.md, "templat": self.templat}
 
     def simpan(self):
@@ -109,6 +112,8 @@ class Proyek:
         pr.job = d.get("job") or []
         pr.objek = d.get("objek") or []
         pr.validasi = d.get("validasi") or {}
+        pr.blast = d.get("blast") or {}
+        pr.syarat_jarak = d.get("syarat_jarak") or {}
         pr.eksperimen = d.get("eksperimen") or {}
         pr.md = d.get("md") or []
         pr.templat = d.get("templat") or ""
@@ -180,6 +185,38 @@ class Proyek:
 
     def cari_ligan(self, lid):
         return next((l for l in self.ligan if l["id"] == lid), None)
+
+    def smiles_ligan(self, l):
+        """SMILES netral ligan proyek: kunci smiles, cache sifat, SDF sumber, lalu REMARK SMILES PDBQT ('' bila gagal)."""
+        if not l:
+            return ""
+        smi = l.get("smiles") or (l.get("sifat") or {}).get("smiles")
+        if smi:
+            return smi
+        if not hasattr(self, "_smiles"):
+            self._smiles = {}
+        if l.get("id") in self._smiles:
+            return self._smiles[l["id"]]
+        smi = ""
+        try:
+            from rdkit import Chem
+            f = self.p(l["sdf"]) if l.get("sdf") else None
+            if f and f.exists():
+                m = Chem.MolFromMolBlock(f.read_text(encoding="utf-8").split("$$$$")[0])
+                smi = Chem.MolToSmiles(Chem.RemoveHs(m)) if m is not None else ""
+            f = self.p(l["pdbqt"]) if not smi and l.get("pdbqt") else None
+            if f and f.exists():
+                for b in f.read_text(encoding="utf-8", errors="replace").splitlines():
+                    if b.startswith("REMARK SMILES ") and not b.startswith("REMARK SMILES IDX"):
+                        m = Chem.MolFromSmiles(b.split(None, 2)[2].strip())
+                        if m is not None:
+                            from rdkit.Chem.MolStandardize import rdMolStandardize
+                            smi = Chem.MolToSmiles(rdMolStandardize.Uncharger().uncharge(m))
+                        break
+        except Exception:
+            smi = ""
+        self._smiles[l.get("id")] = smi
+        return smi
 
     def id_ligan_baru(self, nama):
         dasar = nama_aman(nama)

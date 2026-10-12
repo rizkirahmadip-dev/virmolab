@@ -1,6 +1,6 @@
 """ChEMBL (EMBL-EBI) lewat REST API publik: cari target, ambil aktivitas (pChEMBL), cocokkan dengan hasil docking.
 
-Data ChEMBL berlisensi CC BY-SA 3.0 — kutip: Zdrazil et al. 2024, Nucleic Acids Res 52:D1180 (ChEMBL 2023).
+Data ChEMBL berlisensi CC BY-SA 3.0 - kutip: Zdrazil et al. 2024, Nucleic Acids Res 52:D1180 (ChEMBL 2023).
 Tidak ada paket tambahan (urllib + RDKit). Semua fungsi jaringan dipanggil dari thread latar (ui.kerja).
 """
 import json
@@ -12,7 +12,7 @@ API = "https://www.ebi.ac.uk/chembl/api/data"
 RCSB = "https://data.rcsb.org/rest/v1/core"
 JENIS_AKTIVITAS = ["IC50", "Ki", "Kd", "EC50"]
 SITASI = ("Zdrazil B, Felix E, Hunter F, et al. The ChEMBL Database in 2023: a drug discovery platform spanning "
-          "multiple bioactivity data types and time periods. Nucleic Acids Res. 2024;52(D1):D1180–D1192. "
+          "multiple bioactivity data types and time periods. Nucleic Acids Res. 2024;52(D1):D1180-D1192. "
           "doi:10.1093/nar/gkad1004")
 
 

@@ -1,4 +1,4 @@
-"""Deteksi kantong pengikatan dengan P2Rank (MIT, Krivák & Hoksza 2018) — proses Java terpisah.
+"""Deteksi kantong pengikatan dengan P2Rank (MIT, Krivák & Hoksza 2018) - proses Java terpisah.
 
 Program: bin/p2rank (p2rank.jar + lib + config + models) dan bin/jre (Eclipse Temurin JRE, GPL-2.0 + CE).
 Keluaran <nama>.pdb_predictions.csv: peringkat, skor, probabilitas, pusat, residu kantong.
@@ -70,7 +70,7 @@ def prediksi(teks_pdb, folder, thread=None, timeout=600, konfigurasi=None):
 
 
 def ukuran_kotak(kantong, xyz_residu, margin=4.0, minimum=16.0, maksimum=30.0):
-    """Ukuran grid box dari sebaran atom residu kantong (+ 4 Å), dibatasi 16–30 Å per sumbu."""
+    """Ukuran grid box dari sebaran atom residu kantong (+ 4 Å), dibatasi 16-30 Å per sumbu."""
     import numpy as np
     if not len(xyz_residu):
         return (22.0, 22.0, 22.0)

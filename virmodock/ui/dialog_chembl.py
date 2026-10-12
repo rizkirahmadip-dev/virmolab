@@ -41,7 +41,7 @@ class DialogChembl(QDialog):
     def __init__(self, jw, tab_awal=0):
         super().__init__(jw)
         self.jw = jw
-        self.setWindowTitle("ChEMBL — data aktivitas eksperimen")
+        self.setWindowTitle("ChEMBL - data aktivitas eksperimen")
         self.setWindowFlags(self.windowFlags() | Qt.WindowMinMaxButtonsHint)
         self.resize(1240, 800)
         self.target = []
@@ -161,7 +161,7 @@ class DialogChembl(QDialog):
         self.l_status = QLabel()
         self.l_status.setObjectName("muted")
         h3.addWidget(self.l_status)
-        for t, fn in (("Simpan grafik…", self.simpan_grafik), ("Ekspor CSV…", self.ekspor_csv), ("Tutup", self.close)):
+        for t, fn in (("Simpan grafik…", self.simpan_grafik), ("Ekspor CSV…", self.ekspor_csv), ("✕ Tutup", self.close)):
             x = QPushButton(t)
             x.clicked.connect(fn)
             h3.addWidget(x)
@@ -213,7 +213,7 @@ class DialogChembl(QDialog):
             for c, v in enumerate((x["chembl"], x["nama"], x["organisme"], x["jenis"], x["uniprot"])):
                 t.setItem(r, c, _sel(v))
             n = x.get("aktivitas")
-            t.setItem(r, 5, _sel("–" if n is None else f"{n:,}".replace(",", "."), n or 0))
+            t.setItem(r, 5, _sel("-" if n is None else f"{n:,}".replace(",", "."), n or 0))
         for c in (0, 2, 3, 4):
             t.resizeColumnToContents(c)
         if self.target:
@@ -273,7 +273,7 @@ class DialogChembl(QDialog):
             t.setItem(r, 3, _sel(_f(s["pchembl"]) + (f" ± {_f(s['sd'])}" if s.get("sd") else ""), s["pchembl"]))
             t.setItem(r, 4, _sel(str(s["n"]), s["n"]))
             t.setItem(r, 5, _sel(s["jenis"]))
-            t.setItem(r, 6, _sel(_f(s["berat"], 1) if s.get("berat") else "–", s.get("berat") or 0))
+            t.setItem(r, 6, _sel(_f(s["berat"], 1) if s.get("berat") else "-", s.get("berat") or 0))
         for c in (0, 2, 3):
             t.resizeColumnToContents(c)
 
@@ -311,7 +311,7 @@ class DialogChembl(QDialog):
         if ob:
             self.jw.tambah_objek(ob, fokus=False)
         self.l_status.setText(f"{len(ob)} ligan diimpor" + (f", {gagal} gagal" if gagal else "")
-                              + " — siapkan di langkah 2 (Siapkan ligan)")
+                              + " - siapkan di langkah 2 (Siapkan ligan)")
         self.jw.log.tulis(f"ChEMBL: {len(ob)} ligan diimpor dari {len(pilih)} senyawa")
 
     # ------------------------------------------------------------------ korelasi

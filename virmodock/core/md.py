@@ -1,13 +1,13 @@
-"""Dinamika molekul (MD) dan MM/GBSA dengan OpenMM — dijalankan di proses terpisah (lihat jalankan_tugas).
+"""Dinamika molekul (MD) dan MM/GBSA dengan OpenMM - dijalankan di proses terpisah (lihat jalankan_tugas).
 
 Medan gaya: protein Amber ff14SB, ion Li/Merz (amber14/tip3p.xml), ligan OpenFF Sage 2.3.0 dengan muatan
 parsial OpenFF NAGL (openff-gnn-am1bcc-1.0.0, setara AM1-BCC; AmberTools tidak tersedia di Windows).
-Pelarut implisit: OBC2 (Onufriev–Bashford–Case, Amber igb=5, radii mbondi2) dengan GBSAOBCForce native
+Pelarut implisit: OBC2 (Onufriev-Bashford-Case, Amber igb=5, radii mbondi2) dengan GBSAOBCForce native
 (jauh lebih cepat di CPU daripada CustomGBForce). Pelarut eksplisit: TIP3P, PME, NaCl 0,15 M.
 
 MM/GBSA satu-trajektori: ΔG = G(kompleks) − G(reseptor) − G(ligan) dari koordinat yang sama;
 komponen ΔE_vdW, ΔE_elek, ΔG_GB (polar), ΔG_SA (nonpolar, ACE). Energi internal saling meniadakan;
-entropi konformasi TIDAK dihitung — nilai dipakai untuk peringkat relatif, bukan ΔG absolut.
+entropi konformasi TIDAK dihitung - nilai dipakai untuk peringkat relatif, bukan ΔG absolut.
 Kutip: Eastman dkk. 2024 (OpenMM 8); Boothroyd dkk. 2023 (OpenFF Sage); Maier dkk. 2015 (ff14SB);
 Onufriev dkk. 2004 (OBC); Genheden & Ryde 2015 (MM/GBSA).
 """
@@ -25,20 +25,20 @@ import numpy as np
 
 SITASI = [
     "Eastman P, Galvelis R, Peláez RP, et al. OpenMM 8: molecular dynamics simulation with machine learning potentials. "
-    "J Phys Chem B. 2024;128(1):109–116. doi:10.1021/acs.jpcb.3c06662",
+    "J Phys Chem B. 2024;128(1):109-116. doi:10.1021/acs.jpcb.3c06662",
     "Maier JA, Martinez C, Kasavajhala K, Wickstrom L, Hauser KE, Simmerling C. ff14SB: improving the accuracy of protein "
-    "side chain and backbone parameters from ff99SB. J Chem Theory Comput. 2015;11(8):3696–3713. "
+    "side chain and backbone parameters from ff99SB. J Chem Theory Comput. 2015;11(8):3696-3713. "
     "doi:10.1021/acs.jctc.5b00255",
     "Boothroyd S, Behara PK, Madin OC, et al. Development and benchmarking of Open Force Field 2.0.0: the Sage small "
-    "molecule force field. J Chem Theory Comput. 2023;19(11):3251–3275. doi:10.1021/acs.jctc.3c00039",
+    "molecule force field. J Chem Theory Comput. 2023;19(11):3251-3275. doi:10.1021/acs.jctc.3c00039",
     "Wang L, Behara PK, Thompson MW, et al. The Open Force Field Initiative: open software and open science for "
-    "molecular modeling. J Phys Chem B. 2024;128(29):7043–7067. doi:10.1021/acs.jpcb.4c01558",
+    "molecular modeling. J Phys Chem B. 2024;128(29):7043-7067. doi:10.1021/acs.jpcb.4c01558",
     "OpenFF NAGL (graph neural network partial charges), model openff-gnn-am1bcc-1.0.0. Open Force Field Initiative. "
     "https://github.com/openforcefield/openff-nagl",
     "Onufriev A, Bashford D, Case DA. Exploring protein native states and large-scale conformational changes with a "
-    "modified generalized Born model. Proteins. 2004;55(2):383–394. doi:10.1002/prot.20033",
+    "modified generalized Born model. Proteins. 2004;55(2):383-394. doi:10.1002/prot.20033",
     "Genheden S, Ryde U. The MM/PBSA and MM/GBSA methods to estimate ligand-binding affinities. Expert Opin Drug Discov. "
-    "2015;10(5):449–461. doi:10.1517/17460441.2015.1032936",
+    "2015;10(5):449-461. doi:10.1517/17460441.2015.1032936",
 ]
 KKAL = 4.184                 # kJ -> kkal
 MODEL_NAGL = "openff-gnn-am1bcc-1.0.0.pt"
@@ -102,7 +102,7 @@ def _jalur_nagl():
 
 
 def platform_terbaik(pilih="auto"):
-    """(nama, Platform, properti) — CUDA → OpenCL → CPU; tiap kandidat diuji dengan konteks kecil."""
+    """(nama, Platform, properti) - CUDA → OpenCL → CPU; tiap kandidat diuji dengan konteks kecil."""
     import openmm as mm
     urut = ["CUDA", "OpenCL", "CPU"] if pilih == "auto" else [pilih, "CPU"]
     galat = []
@@ -284,7 +284,7 @@ def _tanpa_muatan(sistem):
 
 
 class Penilai:
-    """Energi komponen (kkal/mol) untuk satu bagian (kompleks/reseptor/ligan) — konteks dibuat sekali."""
+    """Energi komponen (kkal/mol) untuk satu bagian (kompleks/reseptor/ligan) - konteks dibuat sekali."""
 
     def __init__(self, ff, topologi, platform):
         import openmm as mm
@@ -579,7 +579,7 @@ def uji_kecepatan(ff, modeller, info, opsi, platform=None, detik=8.0):
 
 
 def saran(ns_hari, ns, n_ligan=1):
-    """Status A8a dari perkiraan waktu: Disarankan (< 2 j) / Bisa (lama, 2–12 j) / Tidak disarankan (> 12 j)."""
+    """Status A8a dari perkiraan waktu: Disarankan (< 2 j) / Bisa (lama, 2-12 j) / Tidak disarankan (> 12 j)."""
     jam = ns * n_ligan / max(ns_hari, 1e-9) * 24.0
     status = "disarankan" if jam < 2 else "bisa" if jam <= 12 else "tidak"
     return status, jam
@@ -602,7 +602,7 @@ def _mol_pose(item):
 
 
 def _interaksi_frame(modeller, info, frames, mol, stride=1):
-    """Frekuensi interaksi (residu|jenis) di sepanjang trajektori — kriteria sama dengan analisis docking."""
+    """Frekuensi interaksi (residu|jenis) di sepanjang trajektori - kriteria sama dengan analisis docking."""
     from rdkit import Chem
     from . import analisis
     top = modeller.topology
@@ -707,7 +707,7 @@ def jalankan_tugas(f_tugas):
                     hasil["ligan"].append(d)
                     hasil["dijeda"] = True
                     f_hasil.write_text(json.dumps(hasil, indent=1, ensure_ascii=False), encoding="utf-8")
-                    log("Dijeda — checkpoint tersimpan; jalankan lagi untuk melanjutkan.")
+                    log("Dijeda - checkpoint tersimpan; jalankan lagi untuk melanjutkan.")
                     return 3
                 top_t = _sub_topologi(m, set(range(meta["n_terlarut"])))
                 tulis_pdb(top_t, frames[0] if len(frames) else pos, sub / "topologi.pdb")
@@ -733,7 +733,7 @@ def jalankan_tugas(f_tugas):
             d["folder"] = sub.name
         except Exception as e:
             d["galat"] = (str(e).strip().splitlines() or [type(e).__name__])[0][:300]
-            log(f"{it['nama']}: GAGAL — {d['galat']}")
+            log(f"{it['nama']}: GAGAL - {d['galat']}")
         hasil["ligan"].append(d)
         f_hasil.write_text(json.dumps(hasil, indent=1, ensure_ascii=False), encoding="utf-8")
     hasil["selesai"] = time.strftime("%Y-%m-%d %H:%M:%S")

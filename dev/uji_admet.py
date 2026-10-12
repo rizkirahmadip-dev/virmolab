@@ -11,7 +11,18 @@ from pathlib import Path
 
 from PySide6.QtCore import QSettings, QTimer
 
-SUMBER = Path(str(sorted(Path("dev/uji/kerja_docs").glob("*.vmd"))[-1])).resolve()
+CALON = [c for d in ("dev/uji/kerja_docs", "dev/uji/kerja", "dev/uji/md_gui", "dev/uji/proj")
+         for c in sorted(Path(d).glob("*.vmd"))]
+if not CALON:
+    print("LEWAT: tidak ada proyek .vmd untuk diuji (buat dulu lewat dev/uji_md_gui.py)")
+    raise SystemExit(0)
+def _n_ligan(d):
+    try:
+        import json
+        return len(json.loads((d / "proyek.json").read_text(encoding="utf-8")).get("ligan", []))
+    except Exception:
+        return 0
+SUMBER = max(CALON, key=_n_ligan).resolve()   # proyek dengan ligan terbanyak
 sys.argv = [sys.argv[0]]
 KERJA = Path("dev/uji/admet").resolve()
 shutil.rmtree(KERJA, ignore_errors=True)

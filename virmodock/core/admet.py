@@ -1,4 +1,4 @@
-"""Prediksi ADMET dengan ADMET-AI (Swanson et al. 2024, Bioinformatics 40:btae416; MIT) — model Chemprop-RDKit
+"""Prediksi ADMET dengan ADMET-AI (Swanson et al. 2024, Bioinformatics 40:btae416; MIT) - model Chemprop-RDKit
 yang dilatih pada 41 dataset TDC.
 
 Dijalankan di PROSES TERPISAH (`VirmoDock.exe --admet MASUK.json KELUAR.json` / `python -m virmodock --admet …`):
@@ -15,7 +15,7 @@ from pathlib import Path
 SITASI = ("Swanson K, Walther P, Leitz J, et al. ADMET-AI: a machine learning ADMET platform for evaluation of "
           "large-scale chemical libraries. Bioinformatics. 2024;40(7):btae416. doi:10.1093/bioinformatics/btae416")
 
-# (kolom ADMET-AI, label Indonesia, kelompok, jenis: 'p' = probabilitas 0–1 | satuan teks, arah baik: +1/-1/0)
+# (kolom ADMET-AI, label Indonesia, kelompok, jenis: 'p' = probabilitas 0-1 | satuan teks, arah baik: +1/-1/0)
 SIFAT = [
     ("HIA_Hou", "Absorpsi usus manusia (HIA)", "Absorpsi", "p", +1),
     ("Bioavailability_Ma", "Bioavailabilitas oral ≥ 20 %", "Absorpsi", "p", +1),
@@ -110,7 +110,7 @@ def prediksi(smiles, lapor=None, batas_waktu=900):
     with tempfile.TemporaryDirectory(prefix="vd_admet_") as d:
         masuk, keluar = Path(d) / "masuk.json", Path(d) / "keluar.json"
         masuk.write_text(json.dumps({"smiles": list(smiles)}), encoding="utf-8")
-        log(f"ADMET-AI: memprediksi {len(smiles)} senyawa (memuat model ±10–20 s)…")
+        log(f"ADMET-AI: memprediksi {len(smiles)} senyawa (memuat model ±10-20 s)…")
         flag = 0x08000000 if os.name == "nt" else 0       # CREATE_NO_WINDOW
         env = dict(os.environ, PYTHONIOENCODING="utf-8")
         if not getattr(sys, "frozen", False):      # mode pengembangan: paket virmodock dari akar proyek
@@ -129,7 +129,7 @@ def prediksi(smiles, lapor=None, batas_waktu=900):
 
 def teks_nilai(k, v):
     if v is None:
-        return "–"
+        return "-"
     jenis = next(j for kk, _l, _g, j, _a in SIFAT if kk == k)
     if jenis == "p":
         return f"{v:.2f}".replace(".", ",")

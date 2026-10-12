@@ -17,6 +17,22 @@ OUT = Path("dev/uji/konsensus").resolve()
 shutil.rmtree(OUT, ignore_errors=True)
 OUT.mkdir(parents=True)
 ASAL = sorted(Path("dev/uji/kerja_docs").glob("*.vmd"))[-1]
+def _cukup_ligan(folder, minimal=3):
+    """Jumlah ligan berstatus selesai pada proyek contoh (uji ini perlu beberapa ligan untuk dibandingkan)."""
+    import json
+    try:
+        data = json.loads((folder / "proyek.json").read_text(encoding="utf-8"))
+    except Exception:
+        return 0
+    nama = {l["nama"] for j in data.get("job", []) for l in j.get("ligan", []) if l.get("status") == "selesai"}
+    return len(nama)
+
+
+if _cukup_ligan(ASAL) < 3:
+    print(f"LEWAT: proyek contoh {ASAL.name} hanya punya {_cukup_ligan(ASAL)} ligan selesai; "
+          "uji ini butuh minimal 3. Jalankan docking beberapa ligan lalu salin proyeknya ke dev/uji/kerja_docs/.")
+    raise SystemExit(0)
+
 PROYEK = OUT / ASAL.name
 shutil.copytree(ASAL, PROYEK)
 

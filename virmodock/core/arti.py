@@ -14,7 +14,7 @@ BUTIR = (
      "Dihitung dari ΔG fungsi skor. Kosong pada docking kovalen. Bukan Ki laboratorium."),
     ("GNINA Affinity", "kcal/mol",
      "Skor ulang pada pose yang sudah ada. Bukan pencarian pose baru."),
-    ("CNNscore", "0–1",
+    ("CNNscore", "0-1",
      "Keyakinan model bahwa pose itu mirip pose yang disukai. Bukan energi."),
     ("CNNaffinity", "pK",
      "Perkiraan afinitas model CNN. Bukan kcal/mol."),
@@ -60,4 +60,10 @@ PETUNJUK_KOLOM = {
     4: "Efisiensi ligan: minus ΔG dibagi jumlah atom berat. Kosong pada docking kovalen.",
     6: BUTIR[6][0] + " (" + BUTIR[6][1] + "): " + BUTIR[6][2],
     16: BUTIR[8][0] + " (" + BUTIR[8][1] + "): " + BUTIR[8][2],
+    17: BUTIR[3][0] + " (" + BUTIR[3][1] + "): " + BUTIR[3][2],
+    18: BUTIR[4][0] + " (" + BUTIR[4][1] + "): " + BUTIR[4][2],
+    19: BUTIR[5][0] + " (" + BUTIR[5][1] + "): " + BUTIR[5][2],
+    20: "Jarak terdekat (Å) atom berat pose ke salah satu residu yang disyaratkan. "
+         "Baris ligan memakai pose berenergi terbaik yang lolos. Pose lain tetap di bawahnya. "
+         "Pencarian docking tidak dipaksa mendekat. Sel kosong berarti syarat belum diatur.",
 }

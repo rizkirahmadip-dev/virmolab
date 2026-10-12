@@ -1,7 +1,7 @@
-"""Grafik modul 'Uji & Grafik': grup (batang/titik/kotak) + braket signifikansi, kurva dosis–respons 4PL,
+"""Grafik modul 'Uji & Grafik': grup (batang/titik/kotak) + braket signifikansi, kurva dosis-respons 4PL,
 kurva ROC, dan batang bertumpuk tabel kontingensi.
 
-SVG murni (lihat grafik.py). Palet Okabe–Ito (ramah buta warna) atau abu-abu untuk cetak.
+SVG murni (lihat grafik.py). Palet Okabe-Ito (ramah buta warna) atau abu-abu untuk cetak.
 Tampilan diatur lewat dict `gaya` (panel Format): ukuran, huruf, penanda, warna per grup, rentang & skala
 sumbu Y, patah sumbu. Setiap fungsi bisa mengisi `daerah` = [(kunci, x0, y0, x1, y1)] (koordinat SVG) agar
 elemen grafik bisa diklik untuk diformat.
@@ -17,7 +17,7 @@ PALET = {"okabe": ["#0072B2", "#E69F00", "#009E73", "#CC79A7", "#56B4E9", "#D55E
          "biru": ["#1f4e8c", "#2b6fd6", "#5b9af0", "#9cc2f5", "#173b6c", "#4a7fc0", "#7aa7e0", "#c4d9f7"],
          "abu": ["#222222", "#555555", "#888888", "#aaaaaa", "#333333", "#666666", "#999999", "#bbbbbb"]}
 JENIS_GRAFIK = {"batang": "Batang + titik (rerata ± galat)", "titik": "Titik (rerata ± galat)",
-                "kotak": "Kotak & kumis (Tukey)", "median": "Titik (median ± IQR)", "qq": "Q–Q plot (cek normalitas)"}
+                "kotak": "Kotak & kumis (Tukey)", "median": "Titik (median ± IQR)", "qq": "Q-Q plot (cek normalitas)"}
 GALAT = {"sd": "SD", "sem": "SEM", "ci": "CI 95%"}
 BENTUK = {"lingkaran": "Lingkaran", "kotak": "Kotak", "segitiga": "Segitiga", "berlian": "Belah ketupat"}
 
@@ -468,7 +468,7 @@ def grafik_dosis(h, label_x="Konsentrasi", label_y="Respons (%)", judul="", gela
         c.out.append(f'<path d="M{c.X(xi):.1f} {b} V{s.Y(yi):.1f} H{c.kiri}" fill="none" stroke="{w["tinta2"]}" '
                      f'stroke-dasharray="5 4" stroke-width="1.1"/>')
     ci = h.get("ic50_ci")
-    t = f"IC₅₀ = {fmt(h['ic50'], 3)}" + (f" (CI 95% {fmt(ci[0], 3)}–{fmt(ci[1], 3)})" if ci else "")
+    t = f"IC₅₀ = {fmt(h['ic50'], 3)}" + (f" (CI 95% {fmt(ci[0], 3)}-{fmt(ci[1], 3)})" if ci else "")
     t2 = f"Hill = {fmt(h['hill'], 2)} · R² = {fmt(h['r2'], 3)} · n = {h['n']}"
     naik = h["hill"] > 0
     xt = c.kiri + 12
@@ -484,7 +484,7 @@ KURVA_ROC = {"roc": "Kurva ROC", "semilog": "ROC semilog (logAUC, pengayaan dini
 
 def grafik_roc(h, judul="", gelap=False, transparan=False, gaya=None, daerah=None, mode="roc"):
     """h: hasil uji.roc. mode 'roc': ROC + diagonal acak + AUC (CI 95 %) + titik Youden; 'semilog': sumbu FPR
-    log10 0,1–100 % (menonjolkan pengayaan dini) + logAUC; 'enrich': % positif ditemukan vs % data teratas,
+    log10 0,1-100 % (menonjolkan pengayaan dini) + logAUC; 'enrich': % positif ditemukan vs % data teratas,
     dengan garis ideal & acak, penanda EF1%/EF5% + BEDROC."""
     gaya = gaya_lengkap(gaya)
     f = gaya["font"]
@@ -572,7 +572,7 @@ def grafik_roc(h, judul="", gelap=False, transparan=False, gaya=None, daerah=Non
         c.out.append(penanda(gaya["bentuk"], c.X(yx), c.Y(yy), gaya["ukuran_titik"] * 1.5, warna_, w["latar"], 1, 1.2))
         c.teks(c.X(yx) + 9, c.Y(yy) + 14, f"potong {fmt(h['potong'], 2)}", f - 1, warna_=w["tinta2"])
         ci = h.get("ci")
-        t = f"AUC = {fmt(h['auc'], 3)}" + (f" (CI 95% {fmt(ci[0], 3)}–{fmt(ci[1], 3)})" if ci else "")
+        t = f"AUC = {fmt(h['auc'], 3)}" + (f" (CI 95% {fmt(ci[0], 3)}-{fmt(ci[1], 3)})" if ci else "")
         c.teks(c.X(100) - 8, c.Y(0) - 12 - f * 1.5, t, f, "end", tebal=True)
         c.teks(c.X(100) - 8, c.Y(0) - 12, f"n positif = {h['n1']} · n negatif = {h['n0']}", f - 1, "end",
                warna_=w["tinta2"])
@@ -661,7 +661,7 @@ def _legenda(c, gaya, entri, palet, daerah, x=None, y=None):
 
 
 def grafik_qq(nama, kelompok, judul="", gelap=False, transparan=False, palet="okabe", gaya=None, daerah=None):
-    """Q–Q plot normal: kuantil teoretis (posisi Blom) vs nilai terstandar tiap grup; garis y = x."""
+    """Q-Q plot normal: kuantil teoretis (posisi Blom) vs nilai terstandar tiap grup; garis y = x."""
     from scipy import stats
     gaya = gaya_lengkap(gaya)
     f = gaya["font"]
@@ -681,7 +681,7 @@ def grafik_qq(nama, kelompok, judul="", gelap=False, transparan=False, palet="ok
         teori = stats.norm.ppf((np.arange(1, n + 1) - 0.375) / (n + 0.25))
         titik.append((i, teori, (a - a.mean()) / a.std(ddof=1)))
     if not titik:
-        c.teks(c.kiri, c.atas + 30, "Butuh n ≥ 3 per grup untuk Q–Q plot.", 13)
+        c.teks(c.kiri, c.atas + 30, "Butuh n ≥ 3 per grup untuk Q-Q plot.", 13)
         return c.selesai(), (W, H)
     batas = max(2.5, max(float(np.abs(np.concatenate([t[1], t[2]])).max()) for t in titik) * 1.08)
     c.sumbu([-batas, batas], [-batas, batas], "", "", 0, 0, kisi=gaya["kisi"])

@@ -1,0 +1,14 @@
+RCSB PDB, pencarian sekuens rantai A 1HSG. NCBI Swiss-Prot RID CNV570T8014 dan NCBI PDB RID CP2Y99F9014 masih WAITING. UniProt /blast/run menjawab 404. EBI menolak tanpa surel yang diterima layanan itu. Ini bukan Swiss-Prot dan bukan hasil RID itu.
+12 homolog. Persen identitas dihitung di komputer ini, bukan ConSurf.
+1HVC HIV-1 PROTEASE (203 aa)
+1HXB HIV-1 PROTEASE (99 aa)
+1W5W POL POLYPROTEIN (110 aa)
+2R38 Protease (99 aa)
+1EBY HIV-1 PROTEASE (99 aa)
+1MES HIV-1 PROTEASE (99 aa)
+2O4P protease (99 aa)
+1MET HIV-1 PROTEASE (99 aa)
+5CON HIV-1 protease (99 aa)
+1A9M HIV-1 PROTEASE (99 aa)
+1GNN HIV-1 PROTEASE (99 aa)
+1MEU HIV-1 PROTEASE (99 aa)

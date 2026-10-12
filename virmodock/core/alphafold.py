@@ -1,7 +1,7 @@
 """Struktur prediksi AlphaFold DB (EMBL-EBI & Google DeepMind, CC BY 4.0) lewat kode UniProt.
 
-pLDDT (0–100, keyakinan per residu) disimpan model AlphaFold di kolom B-factor. Pita resmi:
-  > 90 sangat tinggi · 70–90 yakin · 50–70 rendah · < 50 sangat rendah (sering daerah tak beraturan).
+pLDDT (0-100, keyakinan per residu) disimpan model AlphaFold di kolom B-factor. Pita resmi:
+  > 90 sangat tinggi · 70-90 yakin · 50-70 rendah · < 50 sangat rendah (sering daerah tak beraturan).
 Pencarian nama protein/gen memakai UniProt REST (CC BY 4.0).
 Kutip: Jumper dkk. 2021, Nature 596:583; Varadi dkk. 2024, Nucleic Acids Res 52:D368.
 """
@@ -83,7 +83,7 @@ def info(aksesi):
 
 
 def plddt_residu(teks_pdb):
-    """[(rantai, resi, resn, pLDDT)] urut berkas — pLDDT dari B-factor atom CA (atau atom pertama residu)."""
+    """[(rantai, resi, resn, pLDDT)] urut berkas - pLDDT dari B-factor atom CA (atau atom pertama residu)."""
     out, kunci_lalu, ca = [], None, {}
     for b in teks_pdb.splitlines():
         if not b.startswith("ATOM"):
@@ -164,7 +164,7 @@ def pangkas(teks_pdb, buang):
 
 
 def rentang(buang):
-    """{(rantai, resi)} -> 'A1–24, A250–260' untuk laporan."""
+    """{(rantai, resi)} -> 'A1-24, A250-260' untuk laporan."""
     per = {}
     for c, i in sorted(buang):
         per.setdefault(c, []).append(i)
@@ -175,7 +175,7 @@ def rentang(buang):
             if x is not None and x == lalu + 1:
                 lalu = x
                 continue
-            teks.append(f"{c}{awal}" + (f"–{lalu}" if lalu != awal else ""))
+            teks.append(f"{c}{awal}" + (f"-{lalu}" if lalu != awal else ""))
             if x is not None:
                 awal = lalu = x
     return ", ".join(teks)

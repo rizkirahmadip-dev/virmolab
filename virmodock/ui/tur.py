@@ -9,7 +9,7 @@ from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QPushButton, QVBoxLay
 
 
 def langkah_tur(jw):
-    """[(fungsi -> widget sasaran atau None, judul, teks)] — widget dicari saat langkah tampil."""
+    """[(fungsi -> widget sasaran atau None, judul, teks)] - widget dicari saat langkah tampil."""
     def ruang():
         return jw.grp_ruang.buttons()[0].parentWidget() if getattr(jw, "grp_ruang", None) else None
 
@@ -64,10 +64,10 @@ class Tur(QWidget):
         h = QHBoxLayout()
         self.l_hal = QLabel()
         self.l_hal.setObjectName("muted")
-        self.b_kembali = QPushButton("Kembali")
-        self.b_lanjut = QPushButton("Lanjut")
+        self.b_kembali = QPushButton("‹ Kembali")
+        self.b_lanjut = QPushButton("Lanjut ›")
         self.b_lanjut.setObjectName("primary")
-        b_tutup = QPushButton("Selesai")
+        b_tutup = QPushButton("✓ Selesai")
         self.b_kembali.clicked.connect(lambda: self.ke(self.i - 1))
         self.b_lanjut.clicked.connect(lambda: self.ke(self.i + 1))
         b_tutup.clicked.connect(self.tutup)
@@ -131,7 +131,7 @@ class Tur(QWidget):
         if L.isNull():
             x, y = (r.width() - b.width()) // 2, (r.height() - b.height()) // 2
         else:
-            # kanan lubang, lalu kiri, bawah, atas — yang muat lebih dulu
+            # kanan lubang, lalu kiri, bawah, atas - yang muat lebih dulu
             calon = [(L.right() + 16, L.top()), (L.left() - b.width() - 16, L.top()),
                      (L.left(), L.bottom() + 16), (L.left(), L.top() - b.height() - 16)]
             x, y = next(((cx, cy) for cx, cy in calon

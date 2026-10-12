@@ -14,6 +14,7 @@ class Jembatan(QObject):
     dipilihSignal = Signal(dict)
     ukurSignal = Signal(dict)
     kotakSignal = Signal(dict)
+    seretSignal = Signal(dict)
 
     @Slot()
     def siap(self):
@@ -31,6 +32,10 @@ class Jembatan(QObject):
     def kotak(self, s):
         self.kotakSignal.emit(json.loads(s))
 
+    @Slot(str)
+    def seret(self, s):
+        self.seretSignal.emit(json.loads(s))
+
 
 class Halaman(QWebEnginePage):
     pesan = Signal(str)
@@ -43,6 +48,7 @@ class Viewer(QWebEngineView):
     atomDipilih = Signal(dict)
     jarakDiukur = Signal(dict)
     kotakDigeser = Signal(dict)
+    atomDiseret = Signal(dict)
     pesanJs = Signal(str)
 
     def __init__(self, parent=None):
@@ -64,6 +70,7 @@ class Viewer(QWebEngineView):
         self.jembatan.dipilihSignal.connect(self.atomDipilih)
         self.jembatan.ukurSignal.connect(self.jarakDiukur)
         self.jembatan.kotakSignal.connect(self.kotakDigeser)
+        self.jembatan.seretSignal.connect(self.atomDiseret)
         self.setContextMenuPolicy(self.contextMenuPolicy().NoContextMenu)
         self.load(QUrl.fromLocalFile(str(paths.VIEWER / "viewer.html")))
 

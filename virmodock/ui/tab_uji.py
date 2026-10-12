@@ -1,6 +1,6 @@
 """Tab 'Uji & Grafik': lembar data -> uji statistik -> grafik publikasi.
 
-Jenis data: kolom (bandingkan grup), XY dosis–respons (IC₅₀), ROC (skor negatif vs positif), kontingensi
+Jenis data: kolom (bandingkan grup), XY dosis-respons (IC₅₀), ROC (skor negatif vs positif), kontingensi
 (tabel frekuensi). Alur ala Prism (Data → Analisis → Grafik) dengan nama & tampilan sendiri. Data bisa
 ditempel dari Excel (Ctrl+V), diimpor CSV, atau diisi dari hasil docking. Elemen grafik bisa diklik untuk
 diformat di panel Format; tampilan bisa disimpan sebagai 'gaya' dan dipakai ulang. Tersimpan di proyek
@@ -12,7 +12,7 @@ import json
 from html import escape
 
 import numpy as np
-from PySide6.QtCore import QRectF, Qt, Signal
+from PySide6.QtCore import QRectF, QSize, Qt, Signal
 from PySide6.QtGui import QColor, QGuiApplication, QKeySequence, QPainter, QPen, QShortcut
 from PySide6.QtWidgets import (QCheckBox, QColorDialog, QComboBox, QDoubleSpinBox, QFileDialog, QFormLayout,
                                QFrame, QHBoxLayout, QInputDialog, QLabel, QLineEdit, QMenu, QMessageBox,
@@ -41,7 +41,7 @@ CONTOH_DUA = (["Perlakuan", "Hari 7", "Hari 14"],
                [4.1, 4.6, 3.9, 4.4, 4.2, 4.9, 5.3, 5.1, 4.7, 5.0, 5.4, 5.9, 5.6, 5.2, 5.7],
                [4.3, 4.5, 4.0, 4.6, 4.2, 5.6, 6.1, 5.8, 5.5, 6.0, 7.2, 7.6, 6.9, 7.4, 7.1]])
 
-JENIS_DATA = {"kolom": "Kolom (bandingkan grup)", "xy": "XY dosis–respons (IC₅₀)",
+JENIS_DATA = {"kolom": "Kolom (bandingkan grup)", "xy": "XY dosis-respons (IC₅₀)",
               "roc": "ROC (skor negatif vs positif)", "kontingensi": "Kontingensi (tabel frekuensi)",
               "dua_faktor": "Dua faktor (ANOVA dua arah)"}
 KOLOM_AWAL = {"kolom": ["Grup A", "Grup B", "Grup C"],
@@ -132,7 +132,7 @@ class KanvasKlik(KanvasSvg):
             self._sorot = kunci
             self.setCursor(Qt.PointingHandCursor if kunci else Qt.ArrowCursor)
             nama = ELEMEN.get(kunci.split(":")[0], "") if kunci else ""
-            self.setToolTip(f"{nama} — klik untuk memformat" if nama else "Klik latar untuk format grafik umum")
+            self.setToolTip(f"{nama} - klik untuk memformat" if nama else "Klik latar untuk format grafik umum")
             self.update()
 
     def leaveEvent(self, _e):
@@ -233,7 +233,7 @@ class PanelFormat(QFrame):
             b.clicked.connect(fn)
             bar.addWidget(b)
         lay.addLayout(bar)
-        b_reset = QPushButton("Kembalikan tampilan bawaan")
+        b_reset = QPushButton("↺ Kembalikan tampilan bawaan")
         b_reset.clicked.connect(self._atur_ulang)
         lay.addWidget(b_reset)
         lay.addStretch(1)
@@ -311,7 +311,7 @@ class PanelFormat(QFrame):
         f.addRow("Maksimum", self._opsional("y_maks"))
         f.addRow("Jarak tik", self._opsional("y_langkah"))
         f.addRow("", self._cek("Skala logaritmik (log₁₀)", "y_log"))
-        sub = QLabel("<b>Patah sumbu</b> — rentang di antara dua nilai ini dilompati (berguna bila satu grup "
+        sub = QLabel("<b>Patah sumbu</b> - rentang di antara dua nilai ini dilompati (berguna bila satu grup "
                      "jauh lebih besar).")
         sub.setWordWrap(True)
         f.addRow(sub)
@@ -532,9 +532,18 @@ class PanelFormat(QFrame):
         self.isi_preset()
 
 
+class ComboRingkas(QComboBox):
+    """QComboBox dengan minimum size hint fleksibel agar tidak memaksakan lebar berlebih ke layout induk."""
+    def minimumSizeHint(self):
+        return QSize(80, super().minimumSizeHint().height())
+
+
 class TabUji(QWidget):
     ekspor = Signal(str)        # salin | svg | png | komposer
     berubah = Signal()          # data/pengaturan berubah -> simpan proyek
+
+    def minimumSizeHint(self):
+        return QSize(500, 340)
 
     def __init__(self):
         super().__init__()
@@ -548,7 +557,7 @@ class TabUji(QWidget):
         lay.setSpacing(0)
         bar = QHBoxLayout()
         bar.setContentsMargins(8, 6, 8, 6)
-        self.c_data = QComboBox()
+        self.c_data = ComboRingkas()
         for k, t in JENIS_DATA.items():
             self.c_data.addItem(t, k)
         self.c_data.currentIndexChanged.connect(self._ganti_jenis)
@@ -570,48 +579,41 @@ class TabUji(QWidget):
         b_isi.setMenu(self.m_isi)
         bar.addWidget(b_isi)
         bar.addSpacing(14)
-        self.c_uji = QComboBox()
+        self.c_uji = ComboRingkas()
         self.c_pasang = QCheckBox("Berpasangan")
         self.c_pasang.setToolTip("Baris yang sama di semua kolom = subjek/ulangan yang sama (≥ 3 kolom: ANOVA "
                                  "pengukuran berulang / Friedman)")
-        self.c_koreksi = QComboBox()
+        self.c_koreksi = ComboRingkas()
         for k, t in U.KOREKSI.items():
             self.c_koreksi.addItem(f"Koreksi {t}", k)
         self.c_koreksi.setToolTip("Koreksi p untuk perbandingan ganda (Dunn, uji lanjut berpasangan, ANOVA dua arah). "
-                                  "Tukey, Games–Howell, dan Dunnett sudah terkoreksi bawaan.")
-        self.c_arah = QComboBox()
+                                  "Tukey, Games-Howell, dan Dunnett sudah terkoreksi bawaan.")
+        self.c_arah = ComboRingkas()
         self.c_arah.addItem("Skor tinggi = positif", False)
         self.c_arah.addItem("Skor rendah = positif (mis. ΔG)", True)
         self.c_arah.setToolTip("Arah skor: untuk ΔG docking, nilai lebih negatif = lebih mungkin aktif")
-        self.c_kurva = QComboBox()
+        self.c_kurva = ComboRingkas()
         for k, t in G.KURVA_ROC.items():
             self.c_kurva.addItem(t, k)
         self.c_kurva.setToolTip("ROC biasa, ROC semilog (menilai pengayaan dini/logAUC), atau kurva pengayaan")
         for w in (QLabel("Uji "), self.c_uji, self.c_pasang, self.c_koreksi, self.c_arah, self.c_kurva):
             bar.addWidget(w)
         bar.addStretch(1)
-        for k, t, tip in (("salin", "Salin", "Salin grafik ke clipboard"),
-                          ("svg", "SVG/PDF…", "Simpan vektor"), ("png", "PNG/TIFF…", "Simpan gambar ber-DPI"),
-                          ("komposer", "＋ Komposer", "Tambahkan grafik ini sebagai panel di Komposer figur")):
-            b = QPushButton(t)
-            b.setToolTip(tip)
-            b.clicked.connect(lambda _=False, k=k: self.ekspor.emit(k))
-            bar.addWidget(b)
         lay.addLayout(bar)
 
-        self.c_grafik = QComboBox()
+        self.c_grafik = ComboRingkas()
         for k, t in G.JENIS_GRAFIK.items():
             self.c_grafik.addItem(t, k)
-        self.c_galat = QComboBox()
+        self.c_galat = ComboRingkas()
         for k, t in G.GALAT.items():
             self.c_galat.addItem(t, k)
-        self.c_tanda = QComboBox()
+        self.c_tanda = ComboRingkas()
         self.c_tanda.addItem("Tanda * / **", "bintang")
         self.c_tanda.addItem("p eksak", "eksak")
         self.c_tanda.addItem("Tanpa tanda", "")
         self.c_ns = QCheckBox("Tampilkan ns")
-        self.c_palet = QComboBox()
-        self.c_palet.addItem("Okabe–Ito", "okabe")
+        self.c_palet = ComboRingkas()
+        self.c_palet.addItem("Okabe-Ito", "okabe")
         self.c_palet.addItem("Biru", "biru")
         self.c_palet.addItem("Abu-abu (cetak)", "abu")
         self.e_y = QLineEdit()
@@ -627,6 +629,23 @@ class TabUji(QWidget):
         self.l_petunjuk.setObjectName("muted")
         bar2.addSpacing(10)
         bar2.addWidget(self.l_petunjuk, 1)
+
+        b_salin = QPushButton("Salin")
+        b_salin.setToolTip("Salin grafik ke clipboard")
+        b_salin.clicked.connect(lambda: self.ekspor.emit("salin"))
+        bar2.addWidget(b_salin)
+
+        b_ekspor = QToolButton()
+        b_ekspor.setText("Ekspor ▾")
+        b_ekspor.setPopupMode(QToolButton.InstantPopup)
+        m_eks = QMenu(self)
+        m_eks.addAction("Simpan SVG/PDF…", lambda: self.ekspor.emit("svg"))
+        m_eks.addAction("Simpan PNG/TIFF…", lambda: self.ekspor.emit("png"))
+        m_eks.addSeparator()
+        m_eks.addAction("＋ Tambahkan ke Komposer figur", lambda: self.ekspor.emit("komposer"))
+        b_ekspor.setMenu(m_eks)
+        bar2.addWidget(b_ekspor)
+
         self.b_format = QToolButton()
         self.b_format.setText("Format ▸")
         self.b_format.setCheckable(True)
@@ -652,7 +671,7 @@ class TabUji(QWidget):
         self.info = QTextBrowser()
         self.info.setOpenLinks(False)
         bl.addWidget(self.info)
-        b_teks = QPushButton("Salin hasil && paragraf metode")
+        b_teks = QPushButton("Salin hasil && metode")
         b_teks.clicked.connect(self.salin_teks)
         bl.addWidget(b_teks, 0, Qt.AlignRight)
         kanan.addWidget(bawah)
@@ -663,10 +682,10 @@ class TabUji(QWidget):
         gulir.setWidget(self.format)
         gulir.setWidgetResizable(True)
         gulir.setFrameShape(QFrame.NoFrame)
-        gulir.setMinimumWidth(270)
+        gulir.setMinimumWidth(180)
         self.gulir_format = gulir
         bagi.addWidget(gulir)
-        bagi.setSizes([340, 820, 290])
+        bagi.setSizes([340, 820, 240])
         bagi.setCollapsible(2, True)
         lay.addWidget(bagi, 1)
         tampil = paths.settings().value("uji/panel_format", True)
@@ -769,7 +788,7 @@ class TabUji(QWidget):
                             if self.tabel.item(r, i) and self.tabel.item(r, i).text().strip()])
 
     def _kolom_mentah(self, i):
-        """Nilai per baris (None bila kosong/teks) — untuk XY & berpasangan agar baris tetap sejajar."""
+        """Nilai per baris (None bila kosong/teks) - untuk XY & berpasangan agar baris tetap sejajar."""
         out = []
         for r in range(self.tabel.rowCount()):
             it = self.tabel.item(r, i)
@@ -1088,10 +1107,10 @@ class TabUji(QWidget):
             bd = h.get("banding") or {}
             nama_model = ("4 parameter (kemiringan bebas)" if h.get("model") != "3pl"
                           else "3 parameter (Hill = ±1)")
-            o.append(f"<p><b>Regresi nonlinear {nama_model} — log[inhibitor] vs respons</b></p>"
+            o.append(f"<p><b>Regresi nonlinear {nama_model} - log[inhibitor] vs respons</b></p>"
                      "<table>"
                      f"<tr><th>IC₅₀ / EC₅₀</th><td class='n'>{F(h['ic50'], 4)}</td><td>CI 95% "
-                     f"{(F(ci[0], 4) + ' – ' + F(ci[1], 4)) if ci else '–'}</td></tr>"
+                     f"{(F(ci[0], 4) + ' - ' + F(ci[1], 4)) if ci else '-'}</td></tr>"
                      f"<tr><th>log IC₅₀</th><td class='n'>{F(h['log_ic50'], 4)}</td></tr>"
                      f"<tr><th>Hill slope</th><td class='n'>{F(h['hill'], 3)}</td></tr>"
                      f"<tr><th>Bawah / Atas</th><td class='n'>{F(h['bawah'], 2)} / {F(h['atas'], 2)}</td></tr>"
@@ -1109,7 +1128,7 @@ class TabUji(QWidget):
                             is not None else "") + f". Model dipakai: <b>{pilih}</b>.</p>")
             for w in h.get("peringatan") or []:
                 o.append(f"<p class='w'>⚠ {escape(w)}</p>")
-            self._teks = (f"IC50 = {F(h['ic50'], 3)}" + (f" (CI 95% {F(ci[0], 3)}–{F(ci[1], 3)})" if ci else "")
+            self._teks = (f"IC50 = {F(h['ic50'], 3)}" + (f" (CI 95% {F(ci[0], 3)}-{F(ci[1], 3)})" if ci else "")
                           + f"; Hill = {F(h['hill'], 2)}; R² = {F(h['r2'], 3)}.\nNilai IC50 ditentukan dengan "
                           + ("regresi nonlinear model logistik empat parameter (log[inhibitor] vs respons, kemiringan "
                              "bebas)" if h.get("model") != "3pl" else "regresi nonlinear model logistik tiga parameter "
@@ -1125,16 +1144,16 @@ class TabUji(QWidget):
             cs = h["ci_skrining"]
             o.append("<p><b>Kurva ROC</b></p><table>"
                      f"<tr><th>AUC</th><td class='n'>{F(h['auc'], 4)}</td><td>SE {F(h['se'], 4)} · CI 95% "
-                     f"{(F(ci[0], 3) + ' – ' + F(ci[1], 3)) if ci else '–'} (DeLong)</td></tr>"
-                     f"<tr><th>p (AUC = 0,5)</th><td class='n'>{_p_html(h['p'])}</td><td>Mann–Whitney</td></tr>"
+                     f"{(F(ci[0], 3) + ' - ' + F(ci[1], 3)) if ci else '-'} (DeLong)</td></tr>"
+                     f"<tr><th>p (AUC = 0,5)</th><td class='n'>{_p_html(h['p'])}</td><td>Mann-Whitney</td></tr>"
                      f"<tr><th>Titik potong (Youden)</th><td class='n'>{arah} {F(h['potong'], 3)}</td>"
                      f"<td>sensitivitas {F(h['sens'] * 100, 1)} % · spesifisitas {F(h['spes'] * 100, 1)} %</td></tr>"
                      f"<tr><th>EF1%</th><td class='n'>{F(h['ef'][1], 2)}</td><td>CI 95% "
-                     f"{F(cs['ef1'][0], 2)} – {F(cs['ef1'][1], 2)} (bootstrap)</td></tr>"
+                     f"{F(cs['ef1'][0], 2)} - {F(cs['ef1'][1], 2)} (bootstrap)</td></tr>"
                      f"<tr><th>EF5% · EF10%</th><td class='n'>{F(h['ef'][5], 2)}</td><td>CI 95% "
-                     f"{F(cs['ef5'][0], 2)} – {F(cs['ef5'][1], 2)} · EF10% = {F(h['ef'][10], 2)}</td></tr>"
+                     f"{F(cs['ef5'][0], 2)} - {F(cs['ef5'][1], 2)} · EF10% = {F(h['ef'][10], 2)}</td></tr>"
                      f"<tr><th>BEDROC (α = 20)</th><td class='n'>{F(h['bedroc'], 3)}</td><td>CI 95% "
-                     f"{F(cs['bedroc'][0], 3)} – {F(cs['bedroc'][1], 3)} · 1 = semua positif di urutan teratas</td></tr>"
+                     f"{F(cs['bedroc'][0], 3)} - {F(cs['bedroc'][1], 3)} · 1 = semua positif di urutan teratas</td></tr>"
                      f"<tr><th>logAUC</th><td class='n'>{F(h['logauc'], 1)} %</td><td>terkoreksi "
                      f"{F(h['logauc'] - U.LOGAUC_ACAK, 1)} % (acak {F(U.LOGAUC_ACAK, 1)} %)</td></tr>"
                      f"<tr><th>n</th><td class='n'>{h['n1']} / {h['n0']}</td><td>positif / negatif</td></tr></table>"
@@ -1161,7 +1180,7 @@ class TabUji(QWidget):
                      "<th>CI 95%</th><th>p terkoreksi</th><th></th></tr>")
             for b, a1, a2, dif, ci, q in h["posthoc"]:
                 o.append(f"<tr><td>{escape(b)}</td><td nowrap>{escape(a1)} vs {escape(a2)}</td><td class='n'>{F(dif)}</td>"
-                         f"<td class='n' nowrap>{F(ci[0])} – {F(ci[1])}</td><td class='n'>{_p_html(q)}</td>"
+                         f"<td class='n' nowrap>{F(ci[0])} - {F(ci[1])}</td><td class='n'>{_p_html(q)}</td>"
                          f"<td>{U.bintang(q)}</td></tr>")
             o.append(f"</table><p>{escape(h['interpretasi'])}</p><p class='m'><b>Metode:</b> {escape(h['metode'])}</p>")
             for w in h.get("peringatan") or []:
@@ -1190,9 +1209,9 @@ class TabUji(QWidget):
                          "</td></tr>"
                          f"<tr><th>Fisher eksak</th><td class='n'>{_p_html(h['p'])}</td><td>dua sisi</td></tr>"
                          f"<tr><th>Rasio odds</th><td class='n'>{F(h['OR'], 3)}</td><td>CI 95% "
-                         f"{F(h['OR_ci'][0], 3)} – {F(h['OR_ci'][1], 3)}</td></tr>"
+                         f"{F(h['OR_ci'][0], 3)} - {F(h['OR_ci'][1], 3)}</td></tr>"
                          f"<tr><th>Risiko relatif</th><td class='n'>{F(h['RR'], 3)}</td><td>CI 95% "
-                         f"{F(h['RR_ci'][0], 3)} – {F(h['RR_ci'][1], 3)}</td></tr>")
+                         f"{F(h['RR_ci'][0], 3)} - {F(h['RR_ci'][1], 3)}</td></tr>")
             elif "p_fisher" in h:
                 o.append(f"<tr><th>Fisher eksak (r × c)</th><td class='n'>{_p_html(h['p_fisher'])}</td></tr>")
             o.append(f"<tr><th>Cramér V</th><td class='n'>{F(h['cramer'], 3)}</td><td>n = {h['n']}</td></tr></table>"
@@ -1204,27 +1223,27 @@ class TabUji(QWidget):
             return
         nama = h["nama"]
         o.append("<p><b>Statistik deskriptif</b></p><table><tr><th>Grup</th><th>n</th><th>Rerata</th><th>SD</th>"
-                 "<th>SEM</th><th>Median</th><th>Min – Maks</th><th>Shapiro–Wilk p</th><th>D'Agostino p</th></tr>")
+                 "<th>SEM</th><th>Median</th><th>Min - Maks</th><th>Shapiro-Wilk p</th><th>D'Agostino p</th></tr>")
         dag = h.get("dagostino") or [None] * len(nama)
         for n, d, (_w, p), pd in zip(nama, h["deskriptif"], h["normalitas"], dag):
             o.append(f"<tr><td>{escape(n)}</td><td class='n'>{d['n']}</td><td class='n'>{F(d['rerata'])}</td>"
                      f"<td class='n'>{F(d['sd'])}</td><td class='n'>{F(d['sem'])}</td><td class='n'>{F(d['median'])}</td>"
-                     f"<td class='n' nowrap>{F(d['min'])} – {F(d['maks'])}</td><td class='n'>{_p_html(p)}</td>"
+                     f"<td class='n' nowrap>{F(d['min'])} - {F(d['maks'])}</td><td class='n'>{_p_html(p)}</td>"
                      f"<td class='n'>{_p_html(pd) if pd is not None else '<span class=m>n &lt; 8</span>'}</td></tr>")
         o.append("</table>")
         if h.get("varians"):
-            o.append(f"<p class='m'>Brown–Forsythe (homogenitas varians): F = {F(h['varians'][0])}, "
+            o.append(f"<p class='m'>Brown-Forsythe (homogenitas varians): F = {F(h['varians'][0])}, "
                      f"p = {_p_html(h['varians'][1])}</p>")
         if "p" in h:
             o.append(f"<p><b>{escape(h['nama_uji'])}</b></p><p>{escape(h['interpretasi'])}</p>")
             if h.get("ci"):
-                o.append(f"<p class='m'>Selisih = {F(h['selisih'])} (CI 95% {F(h['ci'][0])} – {F(h['ci'][1])})</p>")
+                o.append(f"<p class='m'>Selisih = {F(h['selisih'])} (CI 95% {F(h['ci'][0])} - {F(h['ci'][1])})</p>")
             if h.get("posthoc") and len(nama) > 2:
                 o.append(f"<p><b>{escape(h.get('nama_posthoc', 'Uji lanjut'))}</b></p><table><tr><th>Pasangan</th>"
                          "<th>Selisih</th><th>CI 95%</th><th>p terkoreksi</th><th></th></tr>")
                 for i, j_, dif, ci, p in h["posthoc"]:
                     o.append(f"<tr><td nowrap>{escape(nama[i])} vs {escape(nama[j_])}</td><td class='n'>{F(dif)}</td>"
-                             f"<td class='n' nowrap>{(F(ci[0]) + ' – ' + F(ci[1])) if ci else '–'}</td>"
+                             f"<td class='n' nowrap>{(F(ci[0]) + ' - ' + F(ci[1])) if ci else '-'}</td>"
                              f"<td class='n'>{_p_html(p)}</td><td>{U.bintang(p)}</td></tr>")
                 o.append("</table>")
             o.append(f"<p class='m'><b>Metode:</b> {escape(h['metode'])}</p>")

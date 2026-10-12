@@ -1,6 +1,6 @@
 """Laporan HTML interaktif satu berkas (bisa dibuka offline di peramban mana pun, dikirim lewat email/WA).
 
-Isi: penjelajah 3D (3Dmol.js disisipkan utuh, lisensi BSD-3) — klik baris tabel untuk melihat pose ligan di
+Isi: penjelajah 3D (3Dmol.js disisipkan utuh, lisensi BSD-3) - klik baris tabel untuk melihat pose ligan di
 situs pengikatan beserta residu kontak & daftar interaksi; tabel hasil lengkap yang bisa dicari dan
 diurutkan; laporan lengkap (isi sama dengan laporan PDF) di tab kedua.
 """
@@ -59,7 +59,7 @@ const WARNA = {hbond:'#2b6fd6', hidrofobik:'#7a8a3a', pi:'#2e9e5b', pikation:'#8
 let v = null, recModel = null, poseModel = null, permukaan = null, label = true, putar = false, urut = {k: 'peringkat', naik: true};
 function tab(n){document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('aktif',b.dataset.t===n));
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('aktif',t.id===n)); if(n==='jelajah'&&v) v.resize();}
-function f(x,d){ if(x===null||x===undefined||x==='') return '–'; return typeof x==='number' ? x.toFixed(d).replace('.',',').replace('-','−') : x; }
+function f(x,d){ if(x===null||x===undefined||x==='') return '-'; return typeof x==='number' ? x.toFixed(d).replace('.',',').replace('-','−') : x; }
 function isiTabel(){
   const q = document.getElementById('cari').value.toLowerCase();
   let rows = D.baris.filter(b => !q || (b.ligan+' '+b.mesin).toLowerCase().includes(q));
@@ -72,7 +72,7 @@ function isiTabel(){
     tr.innerHTML = D.kolom.map(([k,_,c])=>{let x=b[k]; let cls=c;
       if(k==='posebusters'&&b.qc!==null) cls += b.qc ? ' ok':' bad';
       const d = k==='le'?3:(k==='energi'||k==='rmsd_kristal')?2:0;
-      return `<td class="${cls}">${typeof x==='number'?f(x,d):(x??'–')}</td>`}).join('');
+      return `<td class="${cls}">${typeof x==='number'?f(x,d):(x??'-')}</td>`}).join('');
     tb.appendChild(tr);
   }
 }
@@ -161,7 +161,7 @@ def buat(judul, html_laporan, baris, pose, reseptor, fmt_reseptor, js3dmol, jeni
 <html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="generator" content="VirmoDock"><title>{escape(judul)}</title>
 <style>{CSS}{gaya_lap}</style>
-<script>/* 3Dmol.js — BSD 3-Clause License, (c) University of Pittsburgh. https://3dmol.org */
+<script>/* 3Dmol.js - BSD 3-Clause License, (c) University of Pittsburgh. https://3dmol.org */
 {js3dmol}</script>
 <script>{js_label}</script></head>
 <body><header><h1>{escape(judul)}</h1><p>{escape(sub)}</p></header>

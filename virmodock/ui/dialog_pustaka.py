@@ -23,7 +23,7 @@ def _sel(t, angka=None):
 
 
 def _f(v, d=2):
-    return id_angka(f"{v:.{d}f}") if isinstance(v, (int, float)) else "–"
+    return id_angka(f"{v:.{d}f}") if isinstance(v, (int, float)) else "-"
 
 
 class DialogPustaka(QDialog):
@@ -39,7 +39,7 @@ class DialogPustaka(QDialog):
         h = QHBoxLayout()
         h.addWidget(QLabel("Sumber"))
         self.c_sumber = QComboBox()
-        self.c_sumber.addItem("Obat disetujui (ChEMBL fase 4) — offline", "obat")
+        self.c_sumber.addItem("Obat disetujui (ChEMBL fase 4) - offline", "obat")
         self.c_sumber.addItem("Bahan alam (COCONUT 2.0)", "coconut")
         self.c_sumber.addItem("ZINC22 (situs web)", "zinc")
         h.addWidget(self.c_sumber)
@@ -56,7 +56,7 @@ class DialogPustaka(QDialog):
         hm = QHBoxLayout()
         self.e_mirip = QLineEdit()
         self.e_mirip.setPlaceholderText("Opsional: SMILES acuan → hasil diurutkan menurut kemiripan (Tanimoto ECFP4)")
-        b_acuan = QPushButton("Pakai ligan aktif")
+        b_acuan = QPushButton("✓ Pakai ligan aktif")
         b_acuan.setToolTip("Isi SMILES acuan dari ligan/pose yang sedang dipilih")
         b_acuan.clicked.connect(self._acuan_aktif)
         hm.addWidget(QLabel("Mirip dengan"))
@@ -89,7 +89,7 @@ class DialogPustaka(QDialog):
         b_imp = QPushButton("Impor dicentang sebagai ligan")
         b_imp.setObjectName("primary")
         b_imp.clicked.connect(self.impor)
-        b_tutup = QPushButton("Tutup")
+        b_tutup = QPushButton("✕ Tutup")
         b_tutup.clicked.connect(self.close)
         for b in (b_semua, b_imp, b_tutup):
             bawah.addWidget(b)
@@ -128,7 +128,7 @@ class DialogPustaka(QDialog):
         hb.addWidget(self.l_coco, 1)
         self.b_unduh = QPushButton("Unduh basis data COCONUT…")
         self.b_unduh.clicked.connect(self.unduh_coconut)
-        self.b_batal = QPushButton("Batalkan unduhan")
+        self.b_batal = QPushButton("✕ Batalkan unduhan")
         self.b_batal.setVisible(False)
         self.b_batal.clicked.connect(lambda: self._batal and self._batal.set())
         hb.addWidget(self.b_unduh)
@@ -158,7 +158,7 @@ class DialogPustaka(QDialog):
         for t, k in (("Urut: kualitas anotasi", "anotasi"), ("Urut: QED", "qed"), ("Urut: NP-likeness", "np"),
                      ("Acak (sampel beragam)", "acak")):
             self.k_urut.addItem(t, k)
-        for x in (self.k_nama, self.k_kelas, QLabel("MW"), self.k_mw0, QLabel("–"), self.k_mw1, self.k_lip, self.k_qed,
+        for x in (self.k_nama, self.k_kelas, QLabel("MW"), self.k_mw0, QLabel("-"), self.k_mw1, self.k_lip, self.k_qed,
                   self.k_urut):
             h.addWidget(x)
         h.setStretch(0, 1)
@@ -214,7 +214,7 @@ class DialogPustaka(QDialog):
     def unduh_coconut(self):
         if QMessageBox.question(self, "Unduh COCONUT",
                                 "Unduh berkas COCONUT 2.0 (±200 MB) dari server Universitas Jena dan simpan indeks "
-                                "(±250 MB) di folder data VirmoDock?\n\nLisensi data: CC0. Proses ±3–10 menit "
+                                "(±250 MB) di folder data VirmoDock?\n\nLisensi data: CC0. Proses ±3-10 menit "
                                 "tergantung koneksi.") != QMessageBox.Yes:
             return
         self._batal = threading.Event()
@@ -310,7 +310,7 @@ class DialogPustaka(QDialog):
             t.setItem(r, 1, _sel(h.get("nama") or h["id"]))
             t.setItem(r, 2, _sel(h["id"]))
             if k == "obat":
-                t.setItem(r, 3, _sel(str(h["tahun"] or "–"), h["tahun"] or 0))
+                t.setItem(r, 3, _sel(str(h["tahun"] or "-"), h["tahun"] or 0))
                 t.setItem(r, 4, _sel(h["atc"]))
                 t.setItem(r, 5, _sel(", ".join(x for x in ("oral", "topikal", "parenteral") if h.get(x))))
             else:
@@ -368,5 +368,5 @@ class DialogPustaka(QDialog):
         if ob:
             self.jw.tambah_objek(ob, fokus=False)
         self.l_status.setText(f"{len(ob)} ligan diimpor" + (f", {gagal} gagal" if gagal else "")
-                              + " — siapkan di langkah 2")
+                              + " - siapkan di langkah 2")
         self.jw.log.tulis(f"Pustaka {self.c_sumber.currentText()}: {len(ob)} ligan diimpor")

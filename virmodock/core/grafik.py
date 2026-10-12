@@ -133,7 +133,7 @@ def histogram(nilai, label_x="", judul="", kelas=None, gelap=False, transparan=F
     for n, a, b in zip(jumlah, tepi[:-1], tepi[1:]):
         if n:
             k.out.append(f'<rect x="{k.X(a) + 0.5:.2f}" y="{k.Y(n):.2f}" width="{max(0.5, k.X(b) - k.X(a) - 1):.2f}" '
-                         f'height="{k.Y(0) - k.Y(n):.2f}" fill="{AKSEN}" fill-opacity="0.85"><title>{fmt(a)} – '
+                         f'height="{k.Y(0) - k.Y(n):.2f}" fill="{AKSEN}" fill-opacity="0.85"><title>{fmt(a)} - '
                          f'{fmt(b)}: {n}</title></rect>')
     if garis_rerata and len(v):
         m = float(v.mean())
@@ -294,7 +294,7 @@ def peta_korelasi(label, matriks, judul="", gelap=False, transparan=False, lebar
             isi = "#999999" if r is None or r != r else _divergen(r)
             k.out.append(f'<rect x="{kiri + j * sel}" y="{atas + i * sel}" width="{sel - 1}" height="{sel - 1}" '
                          f'fill="{isi}"><title>{escape(label[i])} × {escape(label[j])}: '
-                         f'{"–" if r is None or r != r else fmt(r, 2)}</title></rect>')
+                         f'{"-" if r is None or r != r else fmt(r, 2)}</title></rect>')
             if r is not None and r == r:
                 bintang = "*" if p is not None and i != j and p[i][j] is not None and p[i][j] < 0.05 else ""
                 k.teks(kiri + j * sel + sel / 2, atas + i * sel + sel / 2 + 4, fmt(r, 2) + bintang, 9.5, "middle",
@@ -327,7 +327,7 @@ def _skala_biru(f):
 def sebar_kelompok(x, y, nama, kelompok=None, nilai=None, label_x="", label_y="", judul="", gelap=False,
                    transparan=False, lebar=780, tinggi=580, label=False, acuan=None, label_nilai="", catatan="",
                    tanpa_tik=False):
-    """Sebar berwarna: kelompok (int, 0 = lain-lain) -> palet kategori; atau nilai kontinu -> skala biru–kuning.
+    """Sebar berwarna: kelompok (int, 0 = lain-lain) -> palet kategori; atau nilai kontinu -> skala biru-kuning.
 
     acuan: indeks titik yang ditandai (cincin merah). tanpa_tik: sumbu PCA/MDS (angka tik tidak bermakna)."""
     k = Kanvas(lebar, tinggi, gelap, transparan, judul, kanan=120 if (kelompok or nilai) else 24)
@@ -430,7 +430,7 @@ def peta_ifp(nama, ifps, judul="", gelap=False, transparan=False, catatan="", wa
     """Peta sidik jari interaksi ala ProLIF: baris = ligan, kolom = residu × jenis interaksi.
 
     ifps: list himpunan bit 'residu|jenis'. Sel berwarna sesuai jenis bila interaksi ada. Baris terakhir =
-    frekuensi (% ligan). min_frek: kolom dengan frekuensi < nilai ini (0–1) dibuang.
+    frekuensi (% ligan). min_frek: kolom dengan frekuensi < nilai ini (0-1) dibuang.
     """
     warna_jenis = warna_jenis or {}
     nama_jenis = nama_jenis or {}
@@ -502,5 +502,436 @@ def peta_ifp(nama, ifps, judul="", gelap=False, transparan=False, catatan="", wa
 
 def p_teks(p):
     if p is None or p != p:
-        return "–"
+        return "-"
     return "< 0,001" if p < 0.001 else "= " + fmt(p, 3)
+
+
+def radar_svg(label, nilai, maks=100.0, lebar=460, tinggi=440, gelap=False, transparan=False,
+              judul="", warna_poligon=None, subjudul=""):
+    """Grafik laba-laba / radar SVG untuk Multi-Parameter Optimization (MPO)."""
+    n = len(label)
+    if n < 3:
+        raise ValueError("Radar chart membutuhkan minimal 3 variabel")
+
+    w = warna(gelap)
+    out = [f'<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="{lebar}" height="{tinggi}" '
+           f'viewBox="0 0 {lebar} {tinggi}">']
+    if not transparan:
+        out.append(f'<rect x="0" y="0" width="{lebar}" height="{tinggi}" fill="{w["latar"]}"/>')
+
+    atas_offset = 36 if judul else 16
+    if judul:
+        out.append(f'<text x="{lebar / 2:.1f}" y="24" text-anchor="middle" font-family="{FONT}" '
+                   f'font-size="14" font-weight="600" fill="{w["tinta"]}">{escape(judul)}</text>')
+    if subjudul:
+        out.append(f'<text x="{lebar / 2:.1f}" y="42" text-anchor="middle" font-family="{FONT}" '
+                   f'font-size="11" fill="{w["tinta2"]}">{escape(subjudul)}</text>')
+        atas_offset += 16
+
+    cx = lebar / 2.0
+    cy = atas_offset + (tinggi - atas_offset - 20) / 2.0
+    R = max(50.0, min(lebar / 2.0 - 55.0, (tinggi - atas_offset - 40) / 2.0 - 20.0))
+
+    sudut = [-math.pi / 2.0 + 2.0 * math.pi * i / n for i in range(n)]
+
+    # Cincin poligon kisi (20%, 40%, 60%, 80%, 100%)
+    tingkat = [0.2, 0.4, 0.6, 0.8, 1.0]
+    for frac in tingkat:
+        r_grid = R * frac
+        titik_grid = [(cx + r_grid * math.cos(th), cy + r_grid * math.sin(th)) for th in sudut]
+        jalur_grid = "M" + " L".join(f"{x:.1f},{y:.1f}" for x, y in titik_grid) + " Z"
+        out.append(f'<path d="{jalur_grid}" fill="none" stroke="{w["kisi"]}" stroke-width="1"/>')
+        # Angka skala di sumbu atas
+        y_skala = cy - r_grid
+        out.append(f'<text x="{cx + 4:.1f}" y="{y_skala + 3:.1f}" font-family="{FONT}" font-size="8.5" '
+                   f'fill="{w["tinta2"]}">{int(frac * maks)}</text>')
+
+    # Jari-jari sumbu dari pusat ke sudut
+    for th in sudut:
+        x_ujung = cx + R * math.cos(th)
+        y_ujung = cy + R * math.sin(th)
+        out.append(f'<line x1="{cx:.1f}" y1="{cy:.1f}" x2="{x_ujung:.1f}" y2="{y_ujung:.1f}" '
+                   f'stroke="{w["kisi"]}" stroke-width="1.2"/>')
+
+    # Poligon data nilai
+    warna_aksen = warna_poligon or AKSEN
+    titik_data = []
+    for i in range(n):
+        val = max(0.0, min(maks, float(nilai[i]) if i < len(nilai) and nilai[i] is not None else 0.0))
+        r_val = R * (val / maks)
+        titik_data.append((cx + r_val * math.cos(sudut[i]), cy + r_val * math.sin(sudut[i])))
+
+    jalur_data = "M" + " L".join(f"{x:.1f},{y:.1f}" for x, y in titik_data) + " Z"
+    out.append(f'<path d="{jalur_data}" fill="{warna_aksen}" fill-opacity="0.25" '
+               f'stroke="{warna_aksen}" stroke-width="2"/>')
+
+    # Titik simpul data dan judul tooltip
+    for i in range(n):
+        x, y = titik_data[i]
+        val = float(nilai[i]) if i < len(nilai) and nilai[i] is not None else 0.0
+        out.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="4" fill="{warna_aksen}" stroke="{w["latar"]}" '
+                   f'stroke-width="1.5"><title>{escape(label[i])}: {val:.1f} / {maks:.0f}</title></circle>')
+
+    # Label sumbu di ujung luar
+    for i in range(n):
+        th = sudut[i]
+        x_lab = cx + (R + 16.0) * math.cos(th)
+        y_lab = cy + (R + 16.0) * math.sin(th)
+
+        # Penentuan anchor teks berdasarkan posisi relatif sudut
+        cos_val = math.cos(th)
+        if abs(cos_val) < 0.2:
+            anchor = "middle"
+        elif cos_val > 0:
+            anchor = "start"
+        else:
+            anchor = "end"
+
+        val_teks = f"{nilai[i]:.0f}" if i < len(nilai) and nilai[i] is not None else "0"
+        teks_tampil = f"{label[i]} ({val_teks})"
+        out.append(f'<text x="{x_lab:.1f}" y="{y_lab + 4.0:.1f}" text-anchor="{anchor}" font-family="{FONT}" '
+                   f'font-size="10.5" font-weight="500" fill="{w["tinta"]}">{escape(teks_tampil)}</text>')
+
+    out.append("</svg>")
+    return "\n".join(out)
+
+
+def _warna_gradien(t: float, palet: str = "biru_merah") -> str:
+    """Interpolarasi warna gradien t in [0.0, 1.0]."""
+    t = max(0.0, min(1.0, float(t)))
+    if palet == "viridis":
+        # 4-stop viridis approximation
+        stops = [
+            (0.0, (68, 1, 84)),
+            (0.33, (49, 104, 142)),
+            (0.66, (53, 183, 121)),
+            (1.0, (253, 231, 37)),
+        ]
+        for idx in range(len(stops) - 1):
+            t0, c0 = stops[idx]
+            t1, c1 = stops[idx + 1]
+            if t <= t1:
+                f = (t - t0) / (t1 - t0) if t1 > t0 else 0.0
+                r = int(c0[0] + f * (c1[0] - c0[0]))
+                g = int(c0[1] + f * (c1[1] - c0[1]))
+                b = int(c0[2] + f * (c1[2] - c0[2]))
+                return f"#{r:02x}{g:02x}{b:02x}"
+        return "#fde725"
+    else:
+        # Biru (0.0) -> Putih/Abu (0.5) -> Merah (1.0)
+        if t < 0.5:
+            f = t / 0.5
+            r = int(43 + f * (245 - 43))
+            g = int(111 + f * (245 - 111))
+            b = int(214 + f * (245 - 214))
+        else:
+            f = (t - 0.5) / 0.5
+            r = int(245 - f * (245 - 207))
+            g = int(245 - f * (245 - 63))
+            b = int(245 - f * (245 - 63))
+        return f"#{r:02x}{g:02x}{b:02x}"
+
+
+def heatmap_svg(matriks, label_baris, label_kolom, lebar=650, tinggi=420, gelap=False,
+                judul="", palet="biru_merah", nilai_min=None, nilai_maks=None):
+    """Peta panas numerik N baris x M kolom dengan palet warna dan legenda skala."""
+    if not matriks or not label_baris or not label_kolom:
+        k = Kanvas(lebar, tinggi, gelap, judul=judul)
+        k.teks(lebar / 2, tinggi / 2, "Tidak ada data matriks", 12, "middle", warna_=k.w["tinta2"])
+        return k.selesai()
+
+    n_baris = len(label_baris)
+    n_kolom = len(label_kolom)
+
+    # Hitung rentang nilai numerik
+    semua_nilai = []
+    for r in range(n_baris):
+        for c in range(n_kolom):
+            v = matriks[r][c] if r < len(matriks) and c < len(matriks[r]) else None
+            if v is not None and not (isinstance(v, float) and (math.isnan(v) or math.isinf(v))):
+                semua_nilai.append(float(v))
+
+    vmin = min(semua_nilai) if semua_nilai else 0.0
+    vmax = max(semua_nilai) if semua_nilai else 1.0
+    if nilai_min is not None:
+        vmin = float(nilai_min)
+    if nilai_maks is not None:
+        vmax = float(nilai_maks)
+    rentang = (vmax - vmin) if (vmax - vmin) > 1e-9 else 1.0
+
+    kiri = min(180, max(75, max((len(str(s)) for s in label_baris), default=4) * 7 + 10))
+    atas = 50 if judul else 36
+    kanan = 75
+    bawah = 45
+
+    area_w = max(50, lebar - kiri - kanan)
+    area_h = max(50, tinggi - atas - bawah)
+
+    sel_w = area_w / max(1, n_kolom)
+    sel_h = area_h / max(1, n_baris)
+
+    w = warna(gelap)
+    out = [f'<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="{lebar}" height="{tinggi}" '
+           f'viewBox="0 0 {lebar} {tinggi}">']
+    out.append(f'<rect x="0" y="0" width="{lebar}" height="{tinggi}" fill="{w["latar"]}"/>')
+
+    if judul:
+        out.append(f'<text x="{kiri}" y="24" font-family="{FONT}" font-size="13" font-weight="600" '
+                   f'fill="{w["tinta"]}">{escape(judul)}</text>')
+
+    # Header kolom
+    for c, kol in enumerate(label_kolom):
+        cx = kiri + c * sel_w + sel_w / 2.0
+        cy = atas - 8
+        out.append(f'<text x="{cx:.1f}" y="{cy:.1f}" text-anchor="middle" font-family="{FONT}" '
+                   f'font-size="10" font-weight="500" fill="{w["tinta"]}">{escape(str(kol))}</text>')
+
+    # Sel matriks dan label baris
+    for r in range(n_baris):
+        ry = atas + r * sel_h
+        # Label baris
+        baris_teks = str(label_baris[r])
+        if len(baris_teks) > 20:
+            baris_teks = baris_teks[:18] + "…"
+        out.append(f'<text x="{kiri - 8:.1f}" y="{ry + sel_h / 2.0 + 3.5:.1f}" text-anchor="end" '
+                   f'font-family="{FONT}" font-size="10" fill="{w["tinta"]}">{escape(baris_teks)}</text>')
+
+        for c in range(n_kolom):
+            rx = kiri + c * sel_w
+            v = matriks[r][c] if r < len(matriks) and c < len(matriks[r]) else None
+            if v is None or (isinstance(v, float) and (math.isnan(v) or math.isinf(v))):
+                fill_c = "#4a4f58" if gelap else "#e5e7eb"
+                v_teks = " - "
+            else:
+                norm = (float(v) - vmin) / rentang
+                fill_c = _warna_gradien(norm, palet=palet)
+                v_teks = fmt(float(v), 2)
+
+            out.append(f'<rect x="{rx:.1f}" y="{ry:.1f}" width="{sel_w - 1:.1f}" height="{sel_h - 1:.1f}" '
+                       f'fill="{fill_c}"><title>{escape(str(label_baris[r]))} × {escape(str(label_kolom[c]))}: {v_teks}</title></rect>')
+
+            # Teks nilai di dalam sel jika sel cukup besar
+            if sel_w >= 28 and sel_h >= 14:
+                # Kontras font
+                c_font = "#111827" if (v is not None and 0.25 <= (float(v) - vmin) / rentang <= 0.75) else ("#ffffff" if gelap else "#111827")
+                out.append(f'<text x="{rx + sel_w / 2.0:.1f}" y="{ry + sel_h / 2.0 + 3.5:.1f}" text-anchor="middle" '
+                           f'font-family="{FONT}" font-size="9" fill="{c_font}">{escape(v_teks)}</text>')
+
+    # Legenda Colorbar di sebelah kanan
+    leg_x = lebar - kanan + 15
+    leg_h = min(180, area_h)
+    leg_y = atas + (area_h - leg_h) / 2.0
+    n_seg = 30
+    for s in range(n_seg):
+        frac = 1.0 - (s / (n_seg - 1))
+        col = _warna_gradien(frac, palet=palet)
+        sy = leg_y + s * (leg_h / n_seg)
+        out.append(f'<rect x="{leg_x}" y="{sy:.1f}" width="12" height="{leg_h / n_seg + 0.5:.1f}" fill="{col}"/>')
+    out.append(f'<rect x="{leg_x}" y="{leg_y:.1f}" width="12" height="{leg_h:.1f}" fill="none" '
+               f'stroke="{w["garis"]}" stroke-width="0.8"/>')
+    out.append(f'<text x="{leg_x + 16}" y="{leg_y + 8:.1f}" font-family="{FONT}" font-size="9" fill="{w["tinta2"]}">{fmt(vmax, 1)}</text>')
+    out.append(f'<text x="{leg_x + 16}" y="{leg_y + leg_h:.1f}" font-family="{FONT}" font-size="9" fill="{w["tinta2"]}">{fmt(vmin, 1)}</text>')
+
+    out.append("</svg>")
+    return "\n".join(out)
+
+
+def scatter_multi_svg(data, x_kunci, y_kunci, warna_kunci=None, ukuran_kunci=None,
+                      x_label="", y_label="", judul="", lebar=580, tinggi=380,
+                      gelap=False, sorot_flag="flag_top"):
+    """Scatter plot multi-dimensi (X, Y, Warna, Ukuran) dengan sorot auto-flag."""
+    k = Kanvas(lebar, tinggi, gelap, judul=judul, kanan=65 if warna_kunci else 24)
+    titik_valid = []
+    for d in (data or []):
+        vx = d.get(x_kunci)
+        vy = d.get(y_kunci)
+        if vx is not None and vy is not None:
+            try:
+                titik_valid.append((float(vx), float(vy), d))
+            except (ValueError, TypeError):
+                continue
+
+    if not titik_valid:
+        k.teks(lebar / 2, tinggi / 2, "Tidak ada data untuk diplot", 12, "middle", warna_=k.w["tinta2"])
+        return k.selesai()
+
+    xs = [t[0] for t in titik_valid]
+    ys = [t[1] for t in titik_valid]
+    k.sumbu(xs, ys, label_x=x_label or x_kunci, label_y=y_label or y_kunci, pad=0.08)
+
+    # Nilai warna
+    c_vals = []
+    if warna_kunci:
+        for _, _, d in titik_valid:
+            cv = d.get(warna_kunci)
+            if cv is not None:
+                try:
+                    c_vals.append(float(cv))
+                except (ValueError, TypeError):
+                    pass
+    c_min = min(c_vals) if c_vals else 0.0
+    c_max = max(c_vals) if c_vals else 1.0
+    c_range = (c_max - c_min) if (c_max - c_min) > 1e-9 else 1.0
+
+    # Gambar titik
+    for px, py, d in titik_valid:
+        x_pos = k.X(px)
+        y_pos = k.Y(py)
+        is_flag = bool(d.get(sorot_flag)) if sorot_flag else False
+
+        # Warna
+        if warna_kunci and d.get(warna_kunci) is not None:
+            try:
+                c_norm = (float(d[warna_kunci]) - c_min) / c_range
+                fill_color = _warna_gradien(c_norm, palet="viridis")
+            except Exception:
+                fill_color = AKSEN
+        else:
+            fill_color = "#f59e0b" if is_flag else AKSEN
+
+        # Radius
+        r_titik = 4.5
+        if ukuran_kunci and d.get(ukuran_kunci) is not None:
+            try:
+                r_titik = max(3.0, min(10.0, 3.0 + float(d[ukuran_kunci]) * 0.8))
+            except Exception:
+                r_titik = 4.5
+
+        nama = d.get("nama") or d.get("ligan") or "Ligan"
+        tip = f"{escape(str(nama))}: {x_kunci}={fmt(px)}, {y_kunci}={fmt(py)}"
+        if warna_kunci and d.get(warna_kunci) is not None:
+            tip += f", {warna_kunci}={fmt(float(d[warna_kunci]))}"
+        if is_flag:
+            tip += " [★ Top Hit]"
+
+        if is_flag:
+            # Highlight lingkaran luar / ring emas
+            k.out.append(f'<circle cx="{x_pos:.1f}" cy="{y_pos:.1f}" r="{r_titik + 3.0:.1f}" fill="none" '
+                         f'stroke="#eab308" stroke-width="2.2"/>')
+            k.out.append(f'<circle cx="{x_pos:.1f}" cy="{y_pos:.1f}" r="{r_titik:.1f}" fill="{fill_color}" '
+                         f'stroke="#ffffff" stroke-width="1.2"><title>{tip}</title></circle>')
+        else:
+            k.out.append(f'<circle cx="{x_pos:.1f}" cy="{y_pos:.1f}" r="{r_titik:.1f}" fill="{fill_color}" '
+                         f'fill-opacity="0.85" stroke="{k.w["latar"]}" stroke-width="1"><title>{tip}</title></circle>')
+
+    # Legenda warna bila ada warna_kunci
+    if warna_kunci and c_vals:
+        lx = lebar - 45
+        lh = min(160, k.ph)
+        ly = k.atas + (k.ph - lh) / 2.0
+        n_seg = 25
+        for s in range(n_seg):
+            frac = 1.0 - (s / (n_seg - 1))
+            col = _warna_gradien(frac, palet="viridis")
+            sy = ly + s * (lh / n_seg)
+            k.out.append(f'<rect x="{lx}" y="{sy:.1f}" width="10" height="{lh / n_seg + 0.5:.1f}" fill="{col}"/>')
+        k.out.append(f'<rect x="{lx}" y="{ly:.1f}" width="10" height="{lh:.1f}" fill="none" '
+                     f'stroke="{k.w["garis"]}" stroke-width="0.8"/>')
+        k.teks(lx + 13, ly + 6, fmt(c_max, 1), 9, warna_=k.w["tinta2"])
+        k.teks(lx + 13, ly + lh, fmt(c_min, 1), 9, warna_=k.w["tinta2"])
+        k.teks(lx - 2, ly - 6, warna_kunci, 9.5, anchor="start", tebal=True, warna_=k.w["tinta"])
+
+    return k.selesai()
+
+
+def histogram_distribusi_svg(data, kunci=None, bins=15, lebar=520, tinggi=280,
+                             gelap=False, judul="", x_label="", warna_bar=None):
+    """Histogram frekuensi dengan garis vertikal rata-rata dan median."""
+    k = Kanvas(lebar, tinggi, gelap, judul=judul, bawah=55)
+    angka = []
+    for item in (data or []):
+        if kunci and isinstance(item, dict):
+            val = item.get(kunci)
+        else:
+            val = item
+        if val is not None:
+            try:
+                angka.append(float(val))
+            except (ValueError, TypeError):
+                pass
+
+    if not angka:
+        k.teks(lebar / 2, tinggi / 2, "Tidak ada data numerik", 12, "middle", warna_=k.w["tinta2"])
+        return k.selesai()
+
+    n = len(angka)
+    v_min, v_max = min(angka), max(angka)
+    if abs(v_max - v_min) < 1e-9:
+        v_min -= 0.5
+        v_max += 0.5
+
+    lebar_bin = (v_max - v_min) / bins
+    cacah = [0] * bins
+    for v in angka:
+        idx = int((v - v_min) / lebar_bin)
+        if idx >= bins:
+            idx = bins - 1
+        cacah[idx] += 1
+
+    maks_cacah = max(cacah) if cacah else 1
+    k.x0, k.x1 = v_min, v_max
+    k.y0, k.y1 = 0, maks_cacah * 1.15
+
+    # Sumbu
+    tx, _ = tik(v_min, v_max, 6)
+    ty, _ = tik(0, k.y1, 5)
+    k.x0, k.x1 = tx[0], tx[-1]
+    k.y0, k.y1 = ty[0], ty[-1]
+
+    # Kisi & Tik Y
+    for v in ty:
+        k.out.append(f'<line x1="{k.kiri}" y1="{k.Y(v):.1f}" x2="{k.kiri + k.pw}" y2="{k.Y(v):.1f}" '
+                     f'stroke="{k.w["kisi"]}" stroke-width="1"/>')
+        k.teks(k.kiri - 6, k.Y(v) + 3.5, str(int(v)), 10, anchor="end", warna_=k.w["tinta2"])
+
+    # Tik X
+    b_y = k.atas + k.ph
+    for v in tx:
+        k.out.append(f'<line x1="{k.X(v):.1f}" y1="{b_y}" x2="{k.X(v):.1f}" y2="{b_y + 4}" '
+                     f'stroke="{k.w["garis"]}" stroke-width="1"/>')
+        k.teks(k.X(v), b_y + 16, fmt(v, 1), 10, anchor="middle", warna_=k.w["tinta2"])
+
+    if x_label or kunci:
+        k.teks(k.kiri + k.pw / 2.0, b_y + 34, x_label or str(kunci), 11, anchor="middle", tebal=True)
+
+    # Bingkai
+    k.out.append(f'<line x1="{k.kiri}" y1="{b_y}" x2="{k.kiri + k.pw}" y2="{b_y}" '
+                 f'stroke="{k.w["garis"]}" stroke-width="1.2"/>')
+    k.out.append(f'<line x1="{k.kiri}" y1="{k.atas}" x2="{k.kiri}" y2="{b_y}" '
+                 f'stroke="{k.w["garis"]}" stroke-width="1.2"/>')
+
+    # Gambar batang
+    c_fill = warna_bar or AKSEN
+    for i in range(bins):
+        b_lo = v_min + i * lebar_bin
+        b_hi = b_lo + lebar_bin
+        px0 = k.X(b_lo)
+        px1 = k.X(b_hi)
+        bw = max(2.0, px1 - px0 - 1.5)
+        bh = (k.ph * (cacah[i] / k.y1)) if k.y1 > 0 else 0
+        py0 = b_y - bh
+        k.out.append(f'<rect x="{px0:.1f}" y="{py0:.1f}" width="{bw:.1f}" height="{bh:.1f}" '
+                     f'fill="{c_fill}" fill-opacity="0.8" stroke="{c_fill}" stroke-width="1">'
+                     f'<title>[{fmt(b_lo, 2)} - {fmt(b_hi, 2)}]: {cacah[i]} ligan</title></rect>')
+
+    # Garis rata-rata & median
+    rata2 = sum(angka) / n
+    angka_urut = sorted(angka)
+    median = (angka_urut[n // 2] if n % 2 != 0 else (angka_urut[n // 2 - 1] + angka_urut[n // 2]) / 2.0)
+
+    # Garis rata-rata (Merah putus-putus)
+    x_rata = k.X(rata2)
+    k.out.append(f'<line x1="{x_rata:.1f}" y1="{k.atas}" x2="{x_rata:.1f}" y2="{b_y}" '
+                 f'stroke="{MERAH}" stroke-width="1.6" stroke-dasharray="4,3"/>')
+    k.teks(x_rata, k.atas - 4, f"Rata-rata: {fmt(rata2, 2)}", 9.5, anchor="middle", tebal=True, warna_=MERAH)
+
+    # Garis median (Hijau putus-putus)
+    x_med = k.X(median)
+    k.out.append(f'<line x1="{x_med:.1f}" y1="{k.atas + 12}" x2="{x_med:.1f}" y2="{b_y}" '
+                 f'stroke="#10b981" stroke-width="1.6" stroke-dasharray="4,3"/>')
+    k.teks(x_med, b_y - bh - 6 if (b_y - bh - 6) > k.atas + 25 else k.atas + 22,
+           f"Med: {fmt(median, 2)}", 9.5, anchor="middle", warna_="#10b981")
+
+    return k.selesai()
+
+

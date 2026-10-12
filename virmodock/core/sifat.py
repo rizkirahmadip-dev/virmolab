@@ -2,16 +2,16 @@
 
 Semua dihitung dengan RDKit (tanpa paket tambahan). Struktur dinetralkan dulu
 (fragmen terbesar + Uncharger) agar hasil tidak bergantung protonasi pH saat
-preparasi docking — mendekati cara SwissADME membaca SMILES masukan.
+preparasi docking - mendekati cara SwissADME membaca SMILES masukan.
 
-Catatan perbedaan dengan SwissADME: lipofilisitas memakai Wildman–Crippen
+Catatan perbedaan dengan SwissADME: lipofilisitas memakai Wildman-Crippen
 (= WLOGP, sama metode), tetapi aturan Lipinski & Muegge di SwissADME memakai
 MLOGP/XLOGP3; di sini semuanya memakai WLOGP (dicantumkan di KRITERIA).
 """
 import math
 from xml.sax.saxutils import escape
 
-VERSI = 1      # naikkan bila rumus berubah -> cache di proyek dihitung ulang
+VERSI = 2      # naikkan bila rumus berubah -> cache di proyek dihitung ulang
 
 # BOILED-Egg (Daina & Zoete 2016): elips di ruang (TPSA, WLOGP), rotasi dalam satuan data.
 # (pusat TPSA, pusat WLOGP, sumbu penuh TPSA, sumbu penuh WLOGP, sudut derajat)
@@ -27,29 +27,34 @@ KRITERIA = [
                "ikatan rotasi ≤ 15; akseptor H ≤ 10; donor H ≤ 5"),
     ("BOILED-Egg", "titik (TPSA, WLOGP) di dalam elips putih = absorpsi saluran cerna tinggi (GI); "
                    "di dalam kuning telur = menembus sawar darah otak (BBB)"),
-    ("PAINS / Brenk", "substruktur pengganggu uji (PAINS A–C) dan gugus tak diinginkan (Brenk) — "
+    ("PAINS / Brenk", "substruktur pengganggu uji (PAINS A-C) dan gugus tak diinginkan (Brenk) - "
                       "peringatan, bukan larangan"),
-    ("QED", "indeks kemiripan obat 0–1 (makin tinggi makin mirip obat oral)"),
+    ("QED", "indeks kemiripan obat 0-1 (makin tinggi makin mirip obat oral)"),
+    ("SAScore", "Skor kemudahan sintesis 1 (mudah) - 10 (sulit); ≤ 3 mudah, 3-6 sedang, > 6 sulit "
+                "(Ertl & Schuffenhauer 2009)"),
 ]
 
 SITASI = [
     "Daina A, Zoete V. A BOILED-Egg to predict gastrointestinal absorption and brain penetration of small "
-    "molecules. ChemMedChem 2016;11:1117–21.",
-    "Lipinski CA, et al. Adv Drug Deliv Rev 2001;46:3–26.",
-    "Ghose AK, et al. J Comb Chem 1999;1:55–68.",
-    "Veber DF, et al. J Med Chem 2002;45:2615–23.",
-    "Egan WJ, et al. J Med Chem 2000;43:3867–77.",
-    "Muegge I, et al. J Med Chem 2001;44:1841–6.",
-    "Bickerton GR, et al. Quantifying the chemical beauty of drugs. Nat Chem 2012;4:90–8.",
-    "Baell JB, Holloway GA. J Med Chem 2010;53:2719–40 (PAINS).",
-    "Brenk R, et al. ChemMedChem 2008;3:435–44.",
-    "Wildman SA, Crippen GM. J Chem Inf Comput Sci 1999;39:868–73 (WLOGP).",
+    "molecules. ChemMedChem 2016;11:1117-21.",
+    "Lipinski CA, et al. Adv Drug Deliv Rev 2001;46:3-26.",
+    "Ghose AK, et al. J Comb Chem 1999;1:55-68.",
+    "Veber DF, et al. J Med Chem 2002;45:2615-23.",
+    "Egan WJ, et al. J Med Chem 2000;43:3867-77.",
+    "Muegge I, et al. J Med Chem 2001;44:1841-6.",
+    "Bickerton GR, et al. Quantifying the chemical beauty of drugs. Nat Chem 2012;4:90-8.",
+    "Ertl P, Schuffenhauer A. Estimation of synthetic accessibility score of drug-like molecules based on "
+    "molecular complexity and fragment contributions. J Cheminform 2009;1:8.",
+    "Baell JB, Holloway GA. J Med Chem 2010;53:2719-40 (PAINS).",
+    "Brenk R, et al. ChemMedChem 2008;3:435-44.",
+    "Wildman SA, Crippen GM. J Chem Inf Comput Sci 1999;39:868-73 (WLOGP).",
 ]
 
 # kolom tabel/ekspor: (kunci, judul)
 KOLOM = [("nama", "Ligan"), ("rumus", "Rumus"), ("mw", "MW (g/mol)"), ("wlogp", "WLOGP"), ("tpsa", "TPSA (Å²)"),
          ("mr", "MR"), ("hbd", "Donor H"), ("hba", "Akseptor H"), ("rotb", "Ikatan rotasi"),
          ("cincin_ar", "Cincin aromatik"), ("atom_berat", "Atom berat"), ("fsp3", "Fsp3"), ("qed", "QED"),
+         ("sascore", "SA Score"),
          ("lipinski", "Lipinski (pelanggaran)"), ("ghose", "Ghose"), ("veber", "Veber"), ("egan", "Egan"),
          ("muegge", "Muegge"), ("gi", "Absorpsi GI"), ("bbb", "BBB"), ("pains", "PAINS"), ("brenk", "Brenk"),
          ("smiles", "SMILES")]
@@ -121,11 +126,11 @@ def hitung(mol):
 
     lip = [p for p, ok in (("MW > 500", mw <= 500), ("WLOGP > 5", wlogp <= 5),
                            ("donor H > 5", l_hbd <= 5), ("akseptor H > 10", l_hba <= 10)) if not ok]
-    gho = [p for p, ok in (("MW di luar 160–480", 160 <= mw <= 480), ("WLOGP di luar −0,4–5,6", -0.4 <= wlogp <= 5.6),
-                           ("MR di luar 40–130", 40 <= mr <= 130), ("atom di luar 20–70", 20 <= n_atom <= 70)) if not ok]
+    gho = [p for p, ok in (("MW di luar 160-480", 160 <= mw <= 480), ("WLOGP di luar −0,4-5,6", -0.4 <= wlogp <= 5.6),
+                           ("MR di luar 40-130", 40 <= mr <= 130), ("atom di luar 20-70", 20 <= n_atom <= 70)) if not ok]
     veb = [p for p, ok in (("ikatan rotasi > 10", rotb <= 10), ("TPSA > 140", tpsa <= 140)) if not ok]
     ega = [p for p, ok in (("WLOGP > 5,88", wlogp <= 5.88), ("TPSA > 131,6", tpsa <= 131.6)) if not ok]
-    mue = [p for p, ok in (("MW di luar 200–600", 200 <= mw <= 600), ("WLOGP di luar −2–5", -2 <= wlogp <= 5),
+    mue = [p for p, ok in (("MW di luar 200-600", 200 <= mw <= 600), ("WLOGP di luar −2-5", -2 <= wlogp <= 5),
                            ("TPSA > 150", tpsa <= 150), ("cincin > 7", cincin <= 7), ("C ≤ 4", n_c > 4),
                            ("heteroatom ≤ 1", n_hetero > 1), ("ikatan rotasi > 15", rotb <= 15),
                            ("akseptor H > 10", hba <= 10), ("donor H > 5", hbd <= 5)) if not ok]
@@ -133,13 +138,16 @@ def hitung(mol):
         qed = QED.qed(m)
     except Exception:
         qed = None
+    from . import sascore
+    sas = sascore.hitung_sascore(m)
     pains = sorted({e.GetDescription() for e in _filter("PAINS").GetMatches(m)})
     brenk = sorted({e.GetDescription() for e in _filter("BRENK").GetMatches(m)})
     return {"v": VERSI, "smiles": Chem.MolToSmiles(m), "rumus": R.CalcMolFormula(m),
             "mw": round(mw, 2), "wlogp": round(wlogp, 2), "mr": round(mr, 2), "tpsa": round(tpsa, 2),
             "hbd": hbd, "hba": hba, "rotb": rotb, "cincin": cincin, "cincin_ar": R.CalcNumAromaticRings(m),
             "atom_berat": m.GetNumHeavyAtoms(), "fsp3": round(R.CalcFractionCSP3(m), 2),
-            "qed": round(qed, 3) if qed is not None else None, "muatan_asal": Chem.GetFormalCharge(mol),
+            "qed": round(qed, 3) if qed is not None else None, "sascore": sas,
+            "muatan_asal": Chem.GetFormalCharge(mol),
             "lipinski": len(lip), "lipinski_ok": len(lip) <= 1, "lipinski_alasan": lip,
             "ghose_ok": not gho, "ghose_alasan": gho, "veber_ok": not veb, "veber_alasan": veb,
             "egan_ok": not ega, "egan_alasan": ega, "muegge_ok": not mue, "muegge_alasan": mue,
@@ -170,7 +178,9 @@ def sel(s, k):
     if k in ("gi", "bbb"):
         return ("Tinggi" if s["gi"] else "Rendah") if k == "gi" else ("Ya" if s["bbb"] else "Tidak")
     if k in ("pains", "brenk"):
-        return "; ".join(s[k]) if s[k] else "–"
+        return "; ".join(s[k]) if s[k] else "-"
+    if k == "sascore":
+        return f"{s['sascore']:.2f}" if s.get("sascore") is not None else "-"
     return s.get(k)
 
 
@@ -278,7 +288,7 @@ def boiled_egg_svg(titik, lebar=760, tinggi=600, gelap=False, transparan=False, 
     out.append(f'<circle cx="{lx + 6}" cy="{ly - 4}" r="4.5" fill="{titik_warna}" stroke="#ffffff"/>')
     out.append(f'<text x="{lx + 16}" y="{ly}" font-family="{FONT}" font-size="11" fill="{tinta}">Ligan</text>')
     out.append(f'<text x="{kiri}" y="{tinggi - 8}" font-family="{FONT}" font-size="9.5" fill="{tinta2}">'
-               f'Model BOILED-Egg: Daina &amp; Zoete, ChemMedChem 2016. WLOGP = Wildman–Crippen (RDKit).</text>')
+               f'Model BOILED-Egg: Daina &amp; Zoete, ChemMedChem 2016. WLOGP = Wildman-Crippen (RDKit).</text>')
     out.append("</svg>")
     return "\n".join(out)
 

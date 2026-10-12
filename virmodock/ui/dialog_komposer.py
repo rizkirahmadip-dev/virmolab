@@ -137,7 +137,7 @@ class DialogKomposer(QDialog):
             b = QPushButton(t)
             b.clicked.connect(lambda _=False, k=k: self.ekspor.emit(k))
             bawah.addWidget(b)
-        b = QPushButton("Tutup")
+        b = QPushButton("✕ Tutup")
         b.clicked.connect(self.close)
         bawah.addWidget(b)
         lay.addLayout(bawah)

@@ -8,7 +8,29 @@ from pathlib import Path
 
 from PySide6.QtCore import QSettings, QTimer
 
-SUMBER = Path(str(sorted(Path("dev/uji/kerja_docs").glob("*.vmd"))[-1])).resolve()
+CALON = [c for d in ("dev/uji/kerja_docs", "dev/uji/kerja", "dev/uji/md_gui", "dev/uji/proj")
+         for c in sorted(Path(d).glob("*.vmd"))]
+if not CALON:
+    print("LEWAT: belum ada proyek .vmd contoh untuk diuji")
+    raise SystemExit(0)
+def _punya_reseptor(d):
+    """Proyek contoh harus punya entri reseptor DAN berkas objek protein tersimpan (dipulihkan saat dibuka)."""
+    try:
+        import json
+        data = json.loads((d / "proyek.json").read_text(encoding="utf-8"))
+    except Exception:
+        return False
+    if not data.get("reseptor"):
+        return False
+    return any(o.get("jenis") == "protein" and (d / o.get("berkas", "")).exists()
+               for o in data.get("objek", []))
+
+
+CALON = [c for c in CALON if _punya_reseptor(c)]
+if not CALON:
+    print("LEWAT: belum ada proyek .vmd contoh yang punya reseptor")
+    raise SystemExit(0)
+SUMBER = CALON[-1].resolve()
 sys.argv = [sys.argv[0]]
 KERJA = Path("dev/uji/p2rank_gui").resolve()
 shutil.rmtree(KERJA, ignore_errors=True)

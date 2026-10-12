@@ -463,7 +463,10 @@ class PanelDocking(QWidget):
 
     def set_kotak(self, k):
         if not k or not k.get("pusat"):
+            self._pusat_diatur = False
+            self._info_kotak()
             return
+        self._pusat_diatur = True
         self._diam = True
         for s, v in zip(self.sp_pusat, k["pusat"]):
             s.setValue(v)
@@ -474,6 +477,7 @@ class PanelDocking(QWidget):
         self._info_kotak()
 
     def _kotak_ubah(self, *_):
+        self._pusat_diatur = True
         self._info_kotak()
         if not self._diam:
             self._t_kotak.start()
@@ -483,6 +487,10 @@ class PanelDocking(QWidget):
         n = k.npts()
         self.l_npts.setText(f"{n[0]}×{n[1]}×{n[2]} titik")
         pesan = []
+        if not getattr(self, "_pusat_diatur", False):
+            pesan.append("⚠️ Pusat grid box belum ditentukan. Klik salah satu tombol di atas (mis. 'Pusat di ligan asli' atau 'Pusat di residu') untuk menempatkan grid box di binding site.")
+        else:
+            pesan.append(f"✓ Grid box aktif pada pusat ({k.pusat[0]:.1f}, {k.pusat[1]:.1f}, {k.pusat[2]:.1f}) Å")
         if k.terpotong():
             sp = max(u / 126 for u in k.ukuran)
             pesan.append(f"Melebihi 126 titik grid per sumbu: AutoGrid memotong kotak. "
@@ -490,5 +498,7 @@ class PanelDocking(QWidget):
         if any(u > 30 for u in k.ukuran):
             pesan.append("Ukuran > 30 Å: pencarian Vina kurang efisien; tambah exhaustiveness.")
         self.l_kotak.setText("\n".join(pesan))
-        self.l_kotak.setStyleSheet(f"color:{self.warna_warn}" if pesan else "")
+        ada_warn = k.terpotong() or any(u > 30 for u in k.ukuran) or not getattr(self, "_pusat_diatur", False)
+        warna = self.warna_warn if ada_warn else ("#2e7d32" if getattr(self, "mode", "terang") == "terang" else "#4ade80")
+        self.l_kotak.setStyleSheet(f"color:{warna}")
         self.l_kotak.setVisible(bool(pesan))

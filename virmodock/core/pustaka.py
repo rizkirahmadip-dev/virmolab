@@ -30,7 +30,7 @@ ATC = {"A": "Saluran cerna & metabolisme", "B": "Darah", "C": "Kardiovaskular", 
        "L": "Antineoplastik & imunomodulator", "M": "Muskuloskeletal", "N": "Sistem saraf", "P": "Antiparasit",
        "R": "Pernapasan", "S": "Organ sensorik", "V": "Lain-lain"}
 SITASI_COCONUT = ("Chandrasekhar V, Rajan K, Kanakam SRS, et al. COCONUT 2.0: a comprehensive overhaul and curation "
-                  "of the collection of open natural products database. Nucleic Acids Res. 2025;53(D1):D634–D643.")
+                  "of the collection of open natural products database. Nucleic Acids Res. 2025;53(D1):D634-D643.")
 
 
 def _db():

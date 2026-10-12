@@ -52,7 +52,7 @@ ANGKA = {
     "aromatic_ring_maximum_distance_from_plane": "Simpangan maks. cincin aromatik (Å)",
 }
 SITASI = ("Buttenschoen M, Morris GM, Deane CM. PoseBusters: AI-based docking methods fail to generate "
-          "physically valid poses or generalise to novel sequences. Chem Sci. 2024;15:3130–3139. "
+          "physically valid poses or generalise to novel sequences. Chem Sci. 2024;15:3130-3139. "
           "doi:10.1039/D3SC04185A")
 
 _kunci = threading.Lock()

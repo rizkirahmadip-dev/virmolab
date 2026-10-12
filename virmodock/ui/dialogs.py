@@ -3,7 +3,7 @@ from PySide6.QtCore import Qt, QUrl
 from PySide6.QtGui import QDesktopServices
 from PySide6.QtWidgets import (QAbstractItemView, QCheckBox, QComboBox, QDialog, QDialogButtonBox, QDoubleSpinBox,
                                QFileDialog, QFormLayout, QHBoxLayout, QHeaderView, QLabel, QLineEdit, QListWidget,
-                               QListWidgetItem, QPlainTextEdit, QPushButton, QTabWidget, QTreeWidget, QTreeWidgetItem,
+                               QListWidgetItem, QPlainTextEdit, QProgressBar, QPushButton, QTabWidget, QTreeWidget, QTreeWidgetItem,
                                QVBoxLayout, QWidget, QWizard, QWizardPage)
 
 ORGANISME = [("Semua organisme", None), ("Homo sapiens (manusia)", 9606), ("Mus musculus (mencit)", 10090),
@@ -60,7 +60,7 @@ class DialogAmbil(QDialog):
         self.pdbid.setMaxLength(4)
         f1.addRow("ID PDB", self.pdbid)
         v.addLayout(f1)
-        v.addWidget(self._ket("Belum tahu kodenya? Cari dengan nama protein, gen, ligan, atau penyakit — VirmoDock "
+        v.addWidget(self._ket("Belum tahu kodenya? Cari dengan nama protein, gen, ligan, atau penyakit - VirmoDock "
                               "menyarankan struktur terbaik untuk docking (sinar-X, ada ligan kristal, resolusi terkecil)."))
         h = QHBoxLayout()
         self.rc_kueri = QLineEdit()
@@ -125,8 +125,8 @@ class DialogAmbil(QDialog):
             self.rc_daftar.clear()
             for e in sorted(entri, key=lambda e: e["kode"] != kode_saran):
                 it = QTreeWidgetItem([e["kode"] + ("  ★" if e["kode"] == kode_saran else ""),
-                                      f"{e['resolusi']:.2f}".replace(".", ",") if e["resolusi"] else "–",
-                                      ", ".join(c for c, _n in e["ligan"][:4]) or "–", e["judul"], e["organisme"]])
+                                      f"{e['resolusi']:.2f}".replace(".", ",") if e["resolusi"] else "-",
+                                      ", ".join(c for c, _n in e["ligan"][:4]) or "-", e["judul"], e["organisme"]])
                 it.setData(0, Qt.UserRole, e["kode"])
                 it.setToolTip(2, "\n".join(f"{c}: {n}" for c, n in e["ligan"]) or "Tidak ada ligan kristal (selain "
                                                                                    "aditif/ion)")
@@ -192,8 +192,8 @@ class DialogAmbil(QDialog):
         h2.addStretch(1)
         v.addLayout(h2)
         v.addWidget(self._ket("Ujung N/C yang tak beraturan (pLDDT rendah) bisa menutupi kantong dan mengganggu "
-                              "deteksi kantong. Protein diwarnai menurut pLDDT: biru tua > 90, biru muda 70–90, "
-                              "kuning 50–70, jingga < 50. Lisensi data CC BY 4.0 — kutip Jumper dkk. 2021 dan "
+                              "deteksi kantong. Protein diwarnai menurut pLDDT: biru tua > 90, biru muda 70-90, "
+                              "kuning 50-70, jingga < 50. Lisensi data CC BY 4.0 - kutip Jumper dkk. 2021 dan "
                               "Varadi dkk. 2024."))
         return w
 
@@ -224,7 +224,7 @@ class DialogAmbil(QDialog):
         def selesai(hasil):
             self.af_daftar.clear()
             for r in hasil:
-                it = QListWidgetItem(f"{r['aksesi']}  ·  {r['nama'] or '–'}" + (f"  ({r['gen']})" if r['gen'] else "")
+                it = QListWidgetItem(f"{r['aksesi']}  ·  {r['nama'] or '-'}" + (f"  ({r['gen']})" if r['gen'] else "")
                                      + f"  ·  {r['organisme']}" + (f"  ·  {r['panjang']} aa" if r['panjang'] else ""))
                 it.setData(Qt.UserRole, r["aksesi"])
                 self.af_daftar.addItem(it)
@@ -317,7 +317,7 @@ class Wizard(QWizard):
         g = e.gpu_utama
         baris = []
         if g:
-            baris.append(f"<b>GPU</b>: {g.nama} · {g.vram_gb:g} GB · driver {g.driver or '–'} · "
+            baris.append(f"<b>GPU</b>: {g.nama} · {g.vram_gb:g} GB · driver {g.driver or '-'} · "
                          + ("<span style='color:#2e9e5b'>siap untuk AutoDock-GPU (OpenCL)</span>" if g.opencl
                             else "<span style='color:#cf3f3f'>OpenCL tidak tersedia</span>"))
         else:
@@ -349,3 +349,54 @@ class Wizard(QWizard):
         d = QFileDialog.getExistingDirectory(self, "Pilih folder kerja", self.ed_folder.text())
         if d:
             self.ed_folder.setText(d)
+
+
+class DialogProgresUnduh(QDialog):
+    """Dialog progres saat mengunduh molekul atau protein dari basis data online."""
+
+    def __init__(self, judul, total, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle(judul)
+        self.setMinimumWidth(440)
+        self.setWindowModality(Qt.WindowModal)
+        self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
+        self.dibatalkan = False
+
+        lay = QVBoxLayout(self)
+        lay.setSpacing(12)
+        lay.setContentsMargins(20, 18, 20, 18)
+
+        self.lbl_judul = QLabel(f"Mengunduh {total} item…")
+        self.lbl_judul.setStyleSheet("font-weight: 600; font-size: 10.5pt;")
+        lay.addWidget(self.lbl_judul)
+
+        self.prog = QProgressBar()
+        self.prog.setRange(0, total)
+        self.prog.setValue(0)
+        self.prog.setFixedHeight(22)
+        self.prog.setTextVisible(True)
+        self.prog.setStyleSheet("QProgressBar { text-align: center; font-weight: 600; height: 22px; border-radius: 3px; }")
+        lay.addWidget(self.prog)
+
+        self.lbl_item = QLabel("Menghubungi server…")
+        self.lbl_item.setObjectName("muted")
+        lay.addWidget(self.lbl_item)
+
+        lay_b = QHBoxLayout()
+        lay_b.addStretch()
+        self.btn_batal = QPushButton("✕ Batal")
+        self.btn_batal.clicked.connect(self._batal)
+        lay_b.addWidget(self.btn_batal)
+        lay.addLayout(lay_b)
+
+    def set_progres(self, saat_ini, total, teks_item):
+        self.prog.setValue(saat_ini)
+        self.lbl_item.setText(teks_item)
+        self.lbl_judul.setText(f"Mengunduh ({saat_ini}/{total})…")
+
+    def _batal(self):
+        self.dibatalkan = True
+        self.lbl_item.setText("Membatalkan proses…")
+        self.btn_batal.setEnabled(False)
+        self.reject()
+

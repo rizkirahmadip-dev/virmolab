@@ -78,7 +78,7 @@ class DialogPalet(QDialog):
         calon.sort(key=lambda x: (x[0], x[1], x[3]))
         for _p, _s, jalur, teks, a in calon[:80]:
             pint = a.shortcut().toString()
-            it = QListWidgetItem(f"{teks}    —  {jalur}" + (f"    [{pint}]" if pint else ""))
+            it = QListWidgetItem(f"{teks} - {jalur}" + (f"    [{pint}]" if pint else ""))
             it.setData(Qt.UserRole, a)
             it.setToolTip(a.toolTip())
             if not a.isEnabled():

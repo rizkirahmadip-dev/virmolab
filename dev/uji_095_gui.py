@@ -46,7 +46,8 @@ def hook():
         self.show()
         QApplication.processEvents()
         self.grab().save(str(OUT / "dialog_templat.png"))
-        cek(self.daftar.count() == 6, f"templat: {self.daftar.count()} pilihan")
+        from virmodock.core import templat as Tm
+        cek(self.daftar.count() == len(Tm.TEMPLAT), f"templat: {self.daftar.count()} pilihan")
         self.daftar.setCurrentRow(0)
         return 1
     dialog_templat.DialogTemplat.exec = exec_templat

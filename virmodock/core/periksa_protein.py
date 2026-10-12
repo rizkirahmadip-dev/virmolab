@@ -1,6 +1,6 @@
 """Pemeriksa kualitas struktur protein sebelum preparasi (gemmi saja).
 
-Memeriksa: metode & resolusi, rantai, celah rantai (jarak C–N antar residu berurutan > 2 Å), residu dengan atom
+Memeriksa: metode & resolusi, rantai, celah rantai (jarak C-N antar residu berurutan > 2 Å), residu dengan atom
 berat hilang, konformasi alternatif, okupansi < 1, residu non-standar, ligan/ion/air, dan B-faktor.
 Hasil = dict ringkasan + daftar temuan (tingkat: 'ok' | 'info' | 'peringatan' | 'masalah').
 """
@@ -79,7 +79,7 @@ def periksa(teks, fmt="pdb"):
     elif res_info["metode"] and "NMR" in res_info["metode"].upper():
         temuan.append(("info", "Struktur NMR: hanya model pertama yang dipakai"))
     else:
-        temuan.append(("info", "Resolusi tidak tercantum (model prediksi/homologi?) — periksa skor kepercayaan"))
+        temuan.append(("info", "Resolusi tidak tercantum (model prediksi/homologi?) - periksa skor kepercayaan"))
     if celah:
         temuan.append(("peringatan", f"{len(celah)} celah rantai (residu hilang di model): " + "; ".join(celah[:6])
                        + (" …" if len(celah) > 6 else "") + ". Bila dekat kantong, pertimbangkan model lengkap."))
@@ -97,13 +97,13 @@ def periksa(teks, fmt="pdb"):
         temuan.append(("info", f"{len(okup)} residu dengan okupansi < 1"))
     if nonbaku:
         temuan.append(("peringatan", f"Residu non-standar: {', '.join(sorted(nonbaku)[:8])}"
-                       + (" …" if len(nonbaku) > 8 else "") + " — bisa dibuang saat preparasi"))
+                       + (" …" if len(nonbaku) > 8 else "") + " - bisa dibuang saat preparasi"))
     lig = [l for l, k in ligan if k != "aditif"]
     if lig:
         temuan.append(("info", f"Ligan kristal: {', '.join(lig[:6])}" + (" …" if len(lig) > 6 else "")
-                       + " — dipakai untuk pusat grid & validasi redocking"))
+                       + " - dipakai untuk pusat grid & validasi redocking"))
     if logam:
-        temuan.append(("info", f"Ion logam: {', '.join(logam[:8])} — pertahankan bila di situs aktif"))
+        temuan.append(("info", f"Ion logam: {', '.join(logam[:8])} - pertahankan bila di situs aktif"))
     if res_info["b_rerata"] and res_info["b_rerata"] > 80:
         temuan.append(("peringatan", f"B-faktor rerata tinggi ({res_info['b_rerata']:.0f} Å²): struktur fleksibel"))
     if len(res_info["rantai"]) > 1:

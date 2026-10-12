@@ -34,7 +34,7 @@ class Kotak:
     spasi: float = 0.375
 
     def npts(self):
-        """Titik grid per sumbu (genap, 10–126) untuk AutoGrid."""
+        """Titik grid per sumbu (genap, 10-126) untuk AutoGrid."""
         hasil = []
         for u in self.ukuran:
             n = int(math.ceil(float(u) / self.spasi))
@@ -227,7 +227,7 @@ RE_ADGPU_TOTAL = re.compile(r"or (\d+) evaluations")
 
 
 class PembacaProgres:
-    """Ubah keluaran program (stdout baris demi baris) menjadi persen 0–100."""
+    """Ubah keluaran program (stdout baris demi baris) menjadi persen 0-100."""
 
     def __init__(self, mesin, p):
         self.mesin, self.p = mesin, p

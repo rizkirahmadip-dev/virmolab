@@ -9,10 +9,10 @@ from . import theme
 from .panel_interaksi import KanvasSvg
 
 KOLOM = ["#", "Ligan", "ΔG terbaik", "MW", "WLOGP", "TPSA", "Donor H", "Akseptor H", "Rotasi", "QED",
-         "Lipinski", "Ghose", "Veber", "Egan", "Muegge", "GI", "BBB", "PAINS", "Brenk"]
+         "SA Score", "Lipinski", "Ghose", "Veber", "Egan", "Muegge", "GI", "BBB", "PAINS", "Brenk"]
 KUNCI = [None, "nama", "dg", "mw", "wlogp", "tpsa", "hbd", "hba", "rotb", "qed",
-         "lipinski", "ghose", "veber", "egan", "muegge", "gi", "bbb", "pains", "brenk"]
-NUM = {0, 2, 3, 4, 5, 6, 7, 8, 9}
+         "sascore", "lipinski", "ghose", "veber", "egan", "muegge", "gi", "bbb", "pains", "brenk"]
+NUM = {0, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 ATURAN = {"lipinski", "ghose", "veber", "egan", "muegge", "gi", "bbb"}
 
 
@@ -77,8 +77,9 @@ class TabSifat(QWidget):
         h.setSectionResizeMode(1, QHeaderView.Interactive)
         h.setStretchLastSection(False)
         for i, t in enumerate(("Nomor titik di grafik", "", "ΔG pose terbaik dari semua job (kcal/mol)",
-                               "Massa molekul (g/mol)", "Lipofilisitas Wildman–Crippen", "Luas permukaan polar (Å²)",
-                               "", "", "Ikatan rotasi", "Kemiripan obat (0–1)",
+                               "Massa molekul (g/mol)", "Lipofilisitas Wildman-Crippen", "Luas permukaan polar (Å²)",
+                               "", "", "Ikatan rotasi", "Kemiripan obat (0-1)",
+                               "Skor kemudahan sintesis (1 mudah - 10 sulit, Ertl 2009; ≤ 3 hijau, 3-6 kuning, > 6 merah)",
                                "Ya = ≤ 1 pelanggaran (angka = jumlah pelanggaran)", "", "", "", "",
                                "Absorpsi saluran cerna (BOILED-Egg)", "Menembus sawar darah otak (BOILED-Egg)",
                                "Substruktur pengganggu uji", "Gugus kimia tak diinginkan")):
@@ -98,7 +99,7 @@ class TabSifat(QWidget):
         bagi.setStretchFactor(1, 2)
         lay.addWidget(bagi, 1)
         cat = QLabel("Sifat dihitung RDKit dari struktur netral (fragmen terbesar). WLOGP dipakai untuk semua aturan "
-                     "(SwissADME memakai MLOGP untuk Lipinski & XLOGP3 untuk Muegge — nilai bisa sedikit berbeda). "
+                     "(SwissADME memakai MLOGP untuk Lipinski & XLOGP3 untuk Muegge - nilai bisa sedikit berbeda). "
                      "Prediksi in silico; bukan pengganti uji farmakokinetik. Kriteria lengkap: arahkan kursor ke judul "
                      "kolom atau lihat Bantuan › Dokumentasi › Metode dan kriteria.")
         cat.setObjectName("muted")
@@ -139,6 +140,15 @@ class TabSifat(QWidget):
                 it.setText(k, teks)
                 if k in NUM:
                     it.setTextAlignment(k, Qt.AlignRight | Qt.AlignVCenter)
+                if kunci == "sascore" and isinstance(v, (int, float)):
+                    if v <= 3.0:
+                        it.setForeground(k, QColor(t["ok"]))
+                    elif v <= 6.0:
+                        it.setForeground(k, QColor(t["warn"]))
+                    else:
+                        it.setForeground(k, QColor(t["bad"]))
+                    from ..core import sascore
+                    it.setToolTip(k, sascore.keterangan(v))
                 if kunci in ATURAN:
                     baik = s["gi"] if kunci == "gi" else s["bbb"] if kunci == "bbb" else s[f"{kunci}_ok"]
                     if kunci != "bbb":   # BBB bukan "baik/buruk", tergantung target

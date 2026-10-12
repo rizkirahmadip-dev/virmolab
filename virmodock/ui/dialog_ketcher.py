@@ -22,7 +22,7 @@ class DialogKetcher(QDialog):
         self.jw = jw
         self.awal = awal
         self.siap = False
-        self.setWindowTitle("Gambar ligan — Ketcher")
+        self.setWindowTitle("Gambar ligan - Ketcher")
         self.setWindowFlags(self.windowFlags() | Qt.WindowMinMaxButtonsHint)
         self.resize(1180, 780)
         lay = QVBoxLayout(self)
@@ -45,7 +45,7 @@ class DialogKetcher(QDialog):
         self.b_ok = QPushButton("Tambahkan sebagai ligan")
         self.b_ok.setObjectName("primary")
         self.b_ok.clicked.connect(lambda: self._ambil("getMolfile", self._jadi))
-        b_batal = QPushButton("Batal")
+        b_batal = QPushButton("✕ Batal")
         b_batal.clicked.connect(self.reject)
         for b in (self.b_smiles, self.b_ok, b_batal):
             h.addWidget(b)

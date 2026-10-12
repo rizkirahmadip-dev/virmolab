@@ -47,8 +47,25 @@ def pdbqt_pose(mol):
     return teks
 
 
-def minimisasi_lokal(teks_reseptor, teks_ligan, timeout=180):
-    """Jalankan Vina --local_only --autobox. Kembalikan ΔG (kcal/mol)."""
+def _model_pertama(pdbqt):
+    """Blok pose pertama. Vina menulis MODEL; berkas tanpa MODEL dikembalikan apa adanya."""
+    baris, dalam, ada = [], False, False
+    for b in (pdbqt or "").replace("\x00", "").splitlines():
+        if b.startswith("MODEL"):
+            ada, dalam, baris = True, True, []
+            continue
+        if b.startswith("ENDMDL") and dalam:
+            break
+        if not ada or dalam:
+            baris.append(b)
+    return "\n".join(baris)
+
+
+def minimisasi_lokal(teks_reseptor, teks_ligan, timeout=180, kembalikan=False):
+    """Jalankan Vina --local_only --autobox. Kembalikan ΔG (kcal/mol).
+
+    kembalikan=True juga mengembalikan PDBQT pose yang sudah diminimisasi.
+    """
     exe = paths.program("vina.exe")
     if not exe:
         raise FileNotFoundError("vina.exe tidak ditemukan.")
@@ -61,9 +78,103 @@ def minimisasi_lokal(teks_reseptor, teks_ligan, timeout=180):
         p = subprocess.run(
             [exe, "--receptor", str(rec), "--ligand", str(lig), "--local_only", "--autobox", "--out", str(keluar)],
             capture_output=True, timeout=timeout, creationflags=NOWIN)
+        pose = ""
+        if kembalikan and keluar.exists():
+            pose = _model_pertama(keluar.read_text(encoding="utf-8", errors="replace"))
     teks = (p.stdout + p.stderr).decode("utf-8", "replace")
     energi = baca_afinitas(teks)
     if energi is None:
         ekor = teks.strip().splitlines()[-1] if teks.strip() else "Vina tidak memberi skor."
         raise RuntimeError(ekor)
-    return energi
+    return (energi, pose) if kembalikan else energi
+
+
+def geser_atom(teks, fmt, info, teks_reseptor=""):
+    """Geser satu atom berat, rapikan ikatan di sekitarnya, lalu nilai dengan Vina lokal bila reseptor ada.
+
+    info memuat koordinat baru (x, y, z) dan koordinat asal (ox, oy, oz).
+    """
+    from rdkit import Chem
+    from rdkit.Chem import AllChem
+
+    class _O:
+        pass
+
+    o = _O()
+    o.teks, o.fmt = teks, fmt
+    from .analisis import mol_dari_objek, pose_mol
+    mol = mol_dari_objek(o)
+    if mol is None or mol.GetNumConformers() == 0:
+        raise ValueError("Ligan ini tidak punya koordinat yang bisa digeser.")
+    conf = mol.GetConformer()
+    ox, oy, oz = float(info["ox"]), float(info["oy"]), float(info["oz"])
+    terbaik, jarak = None, 0.75
+    for a in mol.GetAtoms():
+        if a.GetAtomicNum() <= 1:
+            continue
+        p = conf.GetAtomPosition(a.GetIdx())
+        d = ((p.x - ox) ** 2 + (p.y - oy) ** 2 + (p.z - oz) ** 2) ** 0.5
+        if d < jarak:
+            jarak, terbaik = d, a.GetIdx()
+    if terbaik is None:
+        raise ValueError("Atom yang digeser tidak cocok dengan ligan di layar.")
+    conf.SetAtomPosition(terbaik, (float(info["x"]), float(info["y"]), float(info["z"])))
+    try:
+        mh = Chem.AddHs(mol, addCoords=True)
+        props = AllChem.MMFFGetMoleculeProperties(mh, mmffVariant="MMFF94")
+        if props:
+            ff = AllChem.MMFFGetMoleculeForceField(mh, props)
+            ff.MMFFAddPositionConstraint(terbaik, 0.25, 200.0)
+            ff.Minimize(maxIts=200)
+            mol = Chem.RemoveHs(mh)
+    except Exception:
+        mol = Chem.RemoveHs(mol) if any(a.GetAtomicNum() == 1 for a in mol.GetAtoms()) else mol
+    energi = None
+    pesan = "Atom digeser. Skor Vina belum dihitung karena reseptor belum disiapkan."
+    if (teks_reseptor or "").strip():
+        try:
+            masukan = pdbqt_pose(mol)
+            energi, pose = minimisasi_lokal(teks_reseptor, masukan, kembalikan=True)
+            mol = pose_mol(masukan, pose)
+            pesan = f"Atom digeser, lalu Vina meminimisasi di tempat: {energi:.2f} kcal/mol. Angka ini bukan ΔG docking."
+        except Exception as e:
+            pesan = f"Atom digeser. Skor Vina lokal tidak jadi: {e}"
+    blok = Chem.MolToMolBlock(mol)
+    if not blok or ("V2000" not in blok and "V3000" not in blok):
+        raise ValueError("Koordinat baru tidak bisa ditulis.")
+    return {"teks": blok, "fmt": "sdf", "energi": energi, "pesan": pesan}
+
+
+def geser_utuh(teks, fmt, info, teks_reseptor=""):
+    """Geser seluruh ligan dengan vektor yang sama, lalu nilai dengan Vina lokal bila reseptor ada."""
+    from rdkit import Chem
+    from rdkit.Geometry import Point3D
+
+    class _O:
+        pass
+
+    o = _O()
+    o.teks, o.fmt = teks, fmt
+    from .analisis import mol_dari_objek, pose_mol
+    mol = mol_dari_objek(o)
+    if mol is None or mol.GetNumConformers() == 0:
+        raise ValueError("Ligan ini tidak punya koordinat yang bisa digeser.")
+    dx, dy, dz = float(info["dx"]), float(info["dy"]), float(info["dz"])
+    conf = mol.GetConformer()
+    for i in range(mol.GetNumAtoms()):
+        p = conf.GetAtomPosition(i)
+        conf.SetAtomPosition(i, Point3D(p.x + dx, p.y + dy, p.z + dz))
+    energi = None
+    pesan = "Ligan digeser utuh. Skor Vina belum dihitung karena reseptor belum disiapkan."
+    if (teks_reseptor or "").strip():
+        try:
+            masukan = pdbqt_pose(mol)
+            energi, pose = minimisasi_lokal(teks_reseptor, masukan, kembalikan=True)
+            mol = pose_mol(masukan, pose)
+            pesan = f"Ligan digeser utuh, lalu Vina meminimisasi di tempat: {energi:.2f} kcal/mol. Angka ini bukan ΔG docking."
+        except Exception as e:
+            pesan = f"Ligan digeser utuh. Skor Vina lokal tidak jadi: {e}"
+    blok = Chem.MolToMolBlock(mol)
+    if not blok or ("V2000" not in blok and "V3000" not in blok):
+        raise ValueError("Koordinat baru tidak bisa ditulis.")
+    return {"teks": blok, "fmt": "sdf", "energi": energi, "pesan": pesan}

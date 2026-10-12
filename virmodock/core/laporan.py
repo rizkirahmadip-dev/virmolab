@@ -8,13 +8,13 @@ from . import mesin as M
 
 SITASI = {
     "adgpu": "Santos-Martins D, Solis-Vasquez L, Tillack AF, Sanner MF, Koch A, Forli S. Accelerating AutoDock4 with "
-             "GPUs and gradient-based local search. J Chem Theory Comput. 2021;17(2):1060–1073. "
+             "GPUs and gradient-based local search. J Chem Theory Comput. 2021;17(2):1060-1073. "
              "doi:10.1021/acs.jctc.0c01006",
     "vina": "Eberhardt J, Santos-Martins D, Tillack AF, Forli S. AutoDock Vina 1.2.0: new docking methods, expanded "
-            "force field, and Python bindings. J Chem Inf Model. 2021;61(8):3891–3898. doi:10.1021/acs.jcim.1c00203; "
-            "Trott O, Olson AJ. AutoDock Vina. J Comput Chem. 2010;31(2):455–461. doi:10.1002/jcc.21334",
+            "force field, and Python bindings. J Chem Inf Model. 2021;61(8):3891-3898. doi:10.1021/acs.jcim.1c00203; "
+            "Trott O, Olson AJ. AutoDock Vina. J Comput Chem. 2010;31(2):455-461. doi:10.1002/jcc.21334",
     "ad4": "Morris GM, Huey R, Lindstrom W, Sanner MF, Belew RK, Goodsell DS, Olson AJ. AutoDock4 and AutoDockTools4. "
-           "J Comput Chem. 2009;30(16):2785–2791. doi:10.1002/jcc.21256",
+           "J Comput Chem. 2009;30(16):2785-2791. doi:10.1002/jcc.21256",
     "meeko": "Meeko: preparation of small molecules and receptors for AutoDock (Forli Lab, Scripps Research). "
              "https://github.com/forlilab/Meeko",
     "rdkit": "RDKit: Open-source cheminformatics. https://www.rdkit.org",
@@ -22,7 +22,7 @@ SITASI = {
                  "toolbox. J Cheminform. 2011;3:33. doi:10.1186/1758-2946-3-33",
     "gemmi": "Wojdyr M. GEMMI: a library for structural biology. J Open Source Softw. 2022;7(73):4200. "
              "doi:10.21105/joss.04200",
-    "3dmol": "Rego N, Koes D. 3Dmol.js: molecular visualization with WebGL. Bioinformatics. 2015;31(8):1322–1324. "
+    "3dmol": "Rego N, Koes D. 3Dmol.js: molecular visualization with WebGL. Bioinformatics. 2015;31(8):1322-1324. "
              "doi:10.1093/bioinformatics/btu829",
 }
 
@@ -43,9 +43,10 @@ td.n { text-align: right; font-family: Consolas, monospace; }
 def id_angka(t):
     """Teks angka -> gaya Indonesia: koma desimal, tanda minus asli (U+2212). Hanya angka di awal teks
     (mis. Ki "221.99 pM") yang diubah; teks lain apa adanya."""
-    m = re.match(r"^(-?)(\d+)\.(\d+)", t)
+    m = re.match(r"^([-+]?)(\d+)\.(\d+)", t)
     if m:
-        t = ("−" if m.group(1) else "") + m.group(2) + "," + m.group(3) + t[m.end():]
+        tanda = "−" if m.group(1) == "-" else m.group(1)
+        t = tanda + m.group(2) + "," + m.group(3) + t[m.end():]
     elif t.startswith("-") and t[1:2].isdigit():
         t = "−" + t[1:]
     return t
@@ -56,12 +57,12 @@ _id = id_angka
 
 def _n(v, d=2):
     """Angka -> teks gaya Indonesia dengan d desimal."""
-    return "–" if v is None or v == "" else _id(f"{float(v):.{d}f}")
+    return "-" if v is None or v == "" else _id(f"{float(v):.{d}f}")
 
 
 def _f(v, fmt="{:.2f}"):
     if v is None or v == "":
-        return "–"
+        return "-"
     return escape(_id(fmt.format(v) if isinstance(v, float) else str(v)))
 
 
@@ -79,7 +80,7 @@ def html(proyek, baris, info, interaksi_terbaik=None, ada_gambar3d=False, ada_di
     jobs = pr.job
     mesin_dipakai = sorted({j["mesin"] for j in jobs if j["status"] in ("selesai", "dijeda", "gagal")})
     o = [f"<html><head><style>{GAYA}</style></head><body>"]
-    o.append(f"<h1>Laporan Docking Molekuler — {escape(pr.nama)}</h1>")
+    o.append(f"<h1>Laporan Docking Molekuler - {escape(pr.nama)}</h1>")
     n = datetime.now()
     bulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober",
              "November", "Desember"][n.month - 1]
@@ -89,7 +90,19 @@ def html(proyek, baris, info, interaksi_terbaik=None, ada_gambar3d=False, ada_di
     # ---- validasi
     val = getattr(pr, "validasi", None) or {}
     o.append("<h2>1. Validasi metode (redocking)</h2>")
-    if val.get("rmsd") is not None:
+    if val.get("rmsd") is not None and val.get("protokol") == "smiles":
+        ok = val["rmsd"] <= 2.0
+        o.append(f"<p>Angka ini hasil redocking buta yang sudah diukur untuk 1HSG dan MK1, "
+                 f"bukan pengukuran ulang saat proyek ini dibuka. Ligan <b>{escape(val.get('ligan', 'MK1'))}</b> "
+                 f"dibangun dari SMILES bermuatan (bukan koordinat kristal), diminimisasi MMFF, reseptor "
+                 f"diprotonasi PROPKA pH 7,4, lalu didocking dengan {escape(val.get('mesin', 'AutoDock Vina'))}, "
+                 f"exhaustiveness 16, 9 pose, seed 42, kotak pada ligan kristal. RMSD atom berat terhadap kristal, "
+                 f"dalam kerangka yang sama dan tanpa superposisi: "
+                 f"<span class='{'ok' if ok else 'bad'}'>{_n(val['rmsd'])} Å</span> "
+                 f"({'valid, ≤ 2,0 Å' if ok else 'tidak valid, > 2,0 Å'}). "
+                 f"ΔG Vina {_f(val.get('energi'))} kcal/mol. GNINA Affinity {_f(val.get('gnina'))} kcal/mol, "
+                 f"CNNscore {_f(val.get('cnnscore'))}, CNNaffinity {_f(val.get('cnnaffinity'))} pK.</p>")
+    elif val.get("rmsd") is not None:
         ok = val["rmsd"] <= 2.0
         o.append(f"<p>Ligan kristal <b>{escape(val.get('ligan', ''))}</b> didocking ulang ke reseptor dengan parameter "
                  f"yang sama ({escape(val.get('mesin', ''))}), dimulai dari konformasi kristal tanpa minimisasi. RMSD pose terbaik terhadap kristal: "
@@ -108,13 +121,13 @@ def html(proyek, baris, info, interaksi_terbaik=None, ada_gambar3d=False, ada_di
         sumber = PureWindowsPath(sumber).name
     for k, v in (("Struktur", rec.get("nama")), ("Sumber", sumber), ("Metode preparasi", rec.get("metode")),
                  ("Atom PDBQT", rec.get("atom")), ("Residu", rec.get("residu")),
-                 ("Ion logam dipertahankan", ", ".join(rec.get("logam") or []) or "–"),
-                 ("Residu tidak lengkap dibuang", ", ".join(rec.get("dibuang") or []) or "–")):
+                 ("Ion logam dipertahankan", ", ".join(rec.get("logam") or []) or "-"),
+                 ("Residu tidak lengkap dibuang", ", ".join(rec.get("dibuang") or []) or "-")):
         o.append(f"<tr><th>{k}</th><td>{_f(v)}</td></tr>")
     af = rec.get("alphafold") or {}
     if af:
         o.append(f"<tr><th>Model prediksi</th><td>AlphaFold DB {escape(str(af.get('entri')))} v{escape(str(af.get('versi')))}"
-                 f" — UniProt {escape(str(af.get('aksesi')))} ({escape(af.get('nama', ''))}, "
+                 f" - UniProt {escape(str(af.get('aksesi')))} ({escape(af.get('nama', ''))}, "
                  f"{escape(af.get('organisme', ''))}); pLDDT rerata {_f(af.get('plddt_rerata'))}"
                  + (f"; residu pLDDT &lt; {_n(af['ambang'], 0)} dipangkas: {escape(af.get('dibuang', ''))}"
                     if af.get("n_dibuang") else "") + "</td></tr>")
@@ -166,21 +179,30 @@ def html(proyek, baris, info, interaksi_terbaik=None, ada_gambar3d=False, ada_di
     o.append("<h2>4. Hasil</h2>")
     o.append("<table class='t'><tr><th>#</th><th>Ligan</th><th>ΔG (kcal/mol)</th><th>Ki perkiraan</th><th>LE</th>"
              "<th>Ikatan H</th><th>Hidrofobik</th><th>π</th><th>RMSD kristal (Å)</th><th>PoseBusters</th>"
-             "<th>Mesin</th></tr>")
+             "<th>Mesin</th><th>GNINA (kcal/mol)</th><th>CNNscore</th><th>CNNaffinity (pK)</th>"
+             "<th>Syarat jarak (Å)</th></tr>")
     for b in baris[:15]:
         o.append(f"<tr><td class='n'>{b['peringkat']}</td><td>{escape(b['ligan'])}</td><td class='n'>{_n(b['energi'])}</td>"
                  f"<td class='n'>{_f(b['ki'])}</td><td class='n'>{_f(b['le'], '{:.3f}')}</td>"
                  f"<td class='n'>{b['hbond']}</td><td class='n'>{b['hidrofobik']}</td>"
                  f"<td class='n'>{b['pi'] + b['pikation']}</td><td class='n'>{_f(b['rmsd_kristal'])}</td>"
-                 f"<td{_kelas_qc(b.get('qc'))}>{escape(b.get('posebusters') or '–')}</td>"
-                 f"<td>{escape(b['mesin'])}</td></tr>")
+                 f"<td{_kelas_qc(b.get('qc'))}>{escape(b.get('posebusters') or '-')}</td>"
+                 f"<td>{escape(b['mesin'])}</td><td class='n'>{_f(b.get('gnina'))}</td>"
+                 f"<td class='n'>{_f(b.get('cnnscore'), '{:.3f}')}</td>"
+                 f"<td class='n'>{_f(b.get('cnnaffinity'))}</td>"
+                 f"<td class='n'>{_f(b.get('syarat_jarak'))}</td></tr>")
     o.append("</table>")
+    o.append("<p class='mut'>Kolom GNINA kosong bila programnya tidak terpasang di WSL, atau bila ligan itu di luar "
+             "10 energi terbaik dan belum diminta lewat Analisis › GNINA untuk sisa ligan. Sel kosong bukan nol. "
+             "CNNaffinity dalam pK, bukan kcal/mol. Syarat jarak diukur sesudah pencarian; tanda - berarti syarat "
+             "belum diatur. Mesin docking tidak memaksa kontak itu. Bila ada pose lain yang lolos, "
+             "baris memakai pose berenergi terbaik yang lolos; ΔG-nya tetap skor docking pose itu.</p>")
     if len(baris) > 15:
         o.append(f"<p class='mut'>15 dari {len(baris)} hasil ditampilkan; tabel lengkap tersedia di ekspor CSV/XLSX.</p>")
     from .arti import html
     o.append("<p class='mut'><b>Arti angka.</b> " + html() + "</p>")
     if jobs_kov:
-        o.append("<p class='mut'>Docking kovalen: angka pada kolom ΔG adalah skor aduk–reseptor (energi residu "
+        o.append("<p class='mut'>Docking kovalen: angka pada kolom ΔG adalah skor aduk-reseptor (energi residu "
                  "fleksibel), bukan ΔG ikatan; Ki dan efisiensi ligan tidak dihitung. Bandingkan hanya antar-ligan "
                  "kovalen pada residu sasaran yang sama.</p>")
     if baris:
@@ -216,16 +238,17 @@ def html(proyek, baris, info, interaksi_terbaik=None, ada_gambar3d=False, ada_di
                 urut.append(b["ligan"])
                 sudah.add(b["ligan"])
         if urut:
-            o.append("<p><b>Sifat ligan (drug-likeness, BOILED-Egg)</b></p>")
+            o.append("<p><b>Sifat ligan (drug-likeness, BOILED-Egg, SAScore)</b></p>")
             o.append("<table class='t'><tr><th>Ligan</th><th>MW</th><th>WLOGP</th><th>TPSA (Å²)</th><th>QED</th>"
-                     "<th>Lipinski</th><th>Veber</th><th>Absorpsi GI</th><th>BBB</th><th>PAINS</th></tr>")
+                     "<th>SAScore</th><th>Lipinski</th><th>Veber</th><th>Absorpsi GI</th><th>BBB</th><th>PAINS</th></tr>")
             for n in urut[:15]:
                 x = sifat_ligan[n]
                 o.append(f"<tr><td>{escape(n)}</td><td class='n'>{_n(x['mw'], 1)}</td><td class='n'>{_n(x['wlogp'])}</td>"
                          f"<td class='n'>{_n(x['tpsa'], 1)}</td><td class='n'>{_f(x.get('qed'), '{:.2f}')}</td>"
+                         f"<td class='n'>{_f(x.get('sascore'), '{:.2f}')}</td>"
                          f"<td>{escape(S.sel(x, 'lipinski'))}</td><td>{escape(S.sel(x, 'veber'))}</td>"
                          f"<td>{escape(S.sel(x, 'gi'))}</td><td>{escape(S.sel(x, 'bbb'))}</td>"
-                         f"<td>{'<span class=warn>' + escape(', '.join(x['pains'])) + '</span>' if x['pains'] else '–'}"
+                         f"<td>{'<span class=warn>' + escape(', '.join(x['pains'])) + '</span>' if x['pains'] else '-'}"
                          "</td></tr>")
             o.append("</table>")
 
@@ -251,17 +274,17 @@ def html(proyek, baris, info, interaksi_terbaik=None, ada_gambar3d=False, ada_di
              + ("Peta grid dibuat dengan AutoGrid4. " if any(m in ("adgpu", "ad4") for m in mesin_dipakai) else "")
              + "Docking dijalankan dengan " + ", ".join(M.MESIN[m] for m in mesin_dipakai) + ". "
              f"Interaksi dianalisis dengan kriteria geometri: ikatan hidrogen D···A ≤ {_n(k['hbond_da'], 1)} Å dan "
-             f"sudut D–H···A ≥ {k['hbond_sudut']:.0f}°, kontak hidrofobik ≤ {_n(k['hidrofobik'], 1)} Å, "
-             f"π–π ≤ {_n(k['pi'], 1)} Å, π–kation ≤ {_n(k['pikation'], 1)} Å, jembatan garam ≤ {_n(k['garam'], 1)} Å, "
+             f"sudut D-H···A ≥ {k['hbond_sudut']:.0f}°, kontak hidrofobik ≤ {_n(k['hidrofobik'], 1)} Å, "
+             f"π-π ≤ {_n(k['pi'], 1)} Å, π-kation ≤ {_n(k['pikation'], 1)} Å, jembatan garam ≤ {_n(k['garam'], 1)} Å, "
              f"ikatan halogen ≤ {_n(k['halogen'], 1)} Å. "
              "RMSD redocking dihitung tanpa penjajaran dan memperhitungkan simetri molekul."
              + (" Docking kovalen memakai metode tethered (rantai samping fleksibel): ligan direaksikan secara kimia "
-                "dengan rantai samping residu sasaran menjadi satu aduk, aduk disejajarkan pada sumbu CA–CB residu "
+                "dengan rantai samping residu sasaran menjadi satu aduk, aduk disejajarkan pada sumbu CA-CB residu "
                 "dan di-docking sebagai residu fleksibel tunggal (AutoDock-GPU --flexres) terhadap reseptor tanpa "
-                "rantai samping tersebut. Skor yang dilaporkan adalah energi aduk–reseptor, bukan ΔG ikatan, dan "
+                "rantai samping tersebut. Skor yang dilaporkan adalah energi aduk-reseptor, bukan ΔG ikatan, dan "
                 "hanya dibandingkan antar-ligan kovalen pada residu sasaran yang sama." if jobs_kov else "")
              + (" Sifat fisikokimia dan kemiripan obat dihitung dengan RDKit dari struktur netral (WLOGP "
-                "Wildman–Crippen, TPSA Ertl); aturan Lipinski, Veber, Ghose, Egan, Muegge; peringatan substruktur "
+                "Wildman-Crippen, TPSA Ertl); aturan Lipinski, Veber, Ghose, Egan, Muegge; peringatan substruktur "
                 "PAINS; prediksi absorpsi saluran cerna dan penetrasi sawar darah otak dengan model BOILED-Egg."
                 if sifat_ligan else "")
              + (" Kewajaran fisik pose terbaik tiap ligan (kimia, geometri ikatan, kerataan cincin, energi internal, "
@@ -282,7 +305,7 @@ def html(proyek, baris, info, interaksi_terbaik=None, ada_gambar3d=False, ada_di
     if jobs_kov:
         o.append("<li>" + escape("Bianco G, Forli S, Goodsell DS, Olson AJ. Covalent docking using AutoDock: "
                                  "two-point attractor and flexible side chain methods. Protein Sci. "
-                                 "2016;25(1):295–301. doi:10.1002/pro.2733") + "</li>")
+                                 "2016;25(1):295-301. doi:10.1002/pro.2733") + "</li>")
     if any(b.get("qc") and not b["qc"].get("galat") for b in baris):
         from .qc import SITASI as SITASI_QC
         o.append(f"<li>{escape(SITASI_QC)}</li>")

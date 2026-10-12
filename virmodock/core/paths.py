@@ -2,7 +2,7 @@
 
 Mode portable: bila ada berkas `portable.flag` di samping VirmoDock.exe (atau di akar
 proyek saat pengembangan), pengaturan, log, dan proyek bawaan disimpan di folder
-aplikasi — tidak menyentuh registry atau %LOCALAPPDATA%.
+aplikasi - tidak menyentuh registry atau %LOCALAPPDATA%.
 """
 import os
 import sys

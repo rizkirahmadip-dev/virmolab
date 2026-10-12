@@ -1,5 +1,5 @@
 """Perekam video MP4 (H.264) dari bingkai QImage, memakai Qt Multimedia (FFmpeg + encoder Media Foundation
-yang sudah ikut PySide6 — tanpa paket tambahan).
+yang sudah ikut PySide6 - tanpa paket tambahan).
 
 Bingkai dialirkan satu per satu (tidak ditampung semua di memori): kirim() mengantre, pompa ke QVideoFrameInput
 saat siap; minta_lagi() memberi tahu pemanggil kapan boleh merender bingkai berikutnya (tekanan balik).

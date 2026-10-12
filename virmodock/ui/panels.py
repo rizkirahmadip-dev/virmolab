@@ -12,7 +12,7 @@ from . import icons
 IKON_JENIS = {"protein": "rec", "ligan": "lig", "air": "water", "ion": "ion", "pose": "lig", "kompleks": "layers",
               "grid": "box"}
 REPS = [("cartoon", "Kartun"), ("ribbon", "Pita"), ("sticks", "Stick"), ("lines", "Garis"),
-        ("ballstick", "Bola–stick"), ("spheres", "Bola"), ("surface", "Permukaan"), ("mesh", "Mesh")]
+        ("ballstick", "Bola-stick"), ("spheres", "Bola"), ("surface", "Permukaan"), ("mesh", "Mesh")]
 WARNA_MODE = [("element", "Elemen (karbon pilihan)"), ("chain", "Per rantai"), ("spectrum", "Pelangi N→C"),
               ("ss", "Struktur sekunder"), ("bfactor", "B-faktor"), ("plddt", "pLDDT (AlphaFold)"), ("hydro", "Hidrofobisitas"),
               ("muatan", "Muatan residu"), ("solid", "Warna tunggal")]
@@ -93,8 +93,12 @@ class PanelHierarki(QWidget):
             self.set_sematkan(o.id, True)
         if induk is not self.pohon:
             induk.setText(1, str(induk.childCount()))
-        if o.info.get("siap_docking"):
-            it.setToolTip(0, "Siap docking (PDBQT)")
+        if getattr(o, "grup", "") == "Ligan siap docking":
+            it.setToolTip(0, "Ligan masukan (pra-docking) di koordinat asal. Pose docking di binding pocket ada di grup 'Hasil'.")
+        elif o.jenis == "pose":
+            it.setToolTip(0, f"Pose docking {o.nama} (ΔG: {o.info.get('energi', 0):.2f} kcal/mol) di binding site")
+        elif o.info.get("siap_docking"):
+            it.setToolTip(0, "Reseptor siap docking (PDBQT)")
         f = it.font(0)
         f.setBold(o.jenis == "protein")
         it.setFont(0, f)
@@ -185,6 +189,17 @@ class PanelHierarki(QWidget):
         elif d and d[0] == "rantai":
             self.aksiKonteks.emit(d[1], "rantai_tampil", (d[2], it.checkState(0) == Qt.Checked))
 
+    def _atur_grup(self, it, on):
+        self._diam = True
+        it.setCheckState(0, Qt.Checked if on else Qt.Unchecked)
+        for i in range(it.childCount()):
+            it.child(i).setCheckState(0, Qt.Checked if on else Qt.Unchecked)
+        self._diam = False
+        for i in range(it.childCount()):
+            cd = it.child(i).data(0, Qt.UserRole)
+            if cd and cd[0] == "obj":
+                self.visibilitasBerubah.emit(cd[1], on)
+
     def _pilih(self):
         its = self.pohon.selectedItems()
         if not its:
@@ -236,6 +251,9 @@ class PanelHierarki(QWidget):
         oid = d[1]
         m = QMenu(self)
         if d[0] == "grup":
+            m.addAction("Tampilkan semua di grup ini", lambda: self._atur_grup(it, True))
+            m.addAction("Sembunyikan semua di grup ini", lambda: self._atur_grup(it, False))
+            m.addSeparator()
             m.addAction(icons.ikon("trash", self.warna_ikon), "Hapus grup dari tampilan",
                         lambda: self.aksiKonteks.emit("", "hapus_grup", oid))
             m.exec(self.pohon.viewport().mapToGlobal(pos))

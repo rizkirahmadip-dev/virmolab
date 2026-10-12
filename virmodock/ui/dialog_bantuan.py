@@ -34,7 +34,7 @@ class DialogLapor(QDialog):
         self.resize(720, 560)
         lay = QVBoxLayout(self)
         lay.addWidget(_ket("Tulis apa yang terjadi atau saran Anda di bagian atas. Info sistem dan log terakhir di "
-                           "bawahnya membantu menemukan penyebab — periksa dan hapus bagian yang tidak ingin dibagikan. "
+                           "bawahnya membantu menemukan penyebab - periksa dan hapus bagian yang tidak ingin dibagikan. "
                            "VirmoDock tidak mengirim apa pun secara otomatis: salin teks ini lalu kirim lewat email "
                            "atau halaman Issues proyek."))
         g = env.gpu_utama if env else None
@@ -51,7 +51,7 @@ class DialogLapor(QDialog):
         b1 = QPushButton("Salin ke clipboard")
         b1.setObjectName("primary")
         b1.clicked.connect(lambda: (QGuiApplication.clipboard().setText(self.teks.toPlainText()),
-                                    b1.setText("Tersalin")))
+                                    b1.setText("✓ Tersalin")))
         b2 = QPushButton("Buka folder log")
         b2.clicked.connect(lambda: QDesktopServices.openUrl(QUrl.fromLocalFile(str(paths.LOG))))
         b4 = QPushButton("Simpan paket laporan (.zip)…")
@@ -59,7 +59,7 @@ class DialogLapor(QDialog):
                       "untuk dilampirkan sendiri ke email/Issues")
         b4.clicked.connect(self.simpan_zip)
         self.l_zip = _ket("")
-        b3 = QPushButton("Tutup")
+        b3 = QPushButton("✕ Tutup")
         b3.clicked.connect(self.accept)
         h.addWidget(b2)
         h.addWidget(b4)
@@ -84,7 +84,7 @@ class DialogLapor(QDialog):
             for p in (paths.APPDATA / "uji_mandiri.json",):
                 if p.exists():
                     z.write(p, p.name)
-        self.l_zip.setText(f"Tersimpan: {f} — periksa isinya, lalu lampirkan sendiri saat melapor.")
+        self.l_zip.setText(f"Tersimpan: {f} - periksa isinya, lalu lampirkan sendiri saat melapor.")
 
 
 class DialogLisensi(QDialog):
@@ -107,7 +107,7 @@ class DialogLisensi(QDialog):
             + "".join(f"<li>{v}</li>" for v in SITASI_MD) + "</ol>"
             "<p>Bila memakai docking kovalen:</p><ol><li>"
             "Bianco G, Forli S, Goodsell DS, Olson AJ. Covalent docking using AutoDock: two-point attractor and "
-            "flexible side chain methods. Protein Sci. 2016;25(1):295–301. doi:10.1002/pro.2733</li></ol>")
+            "flexible side chain methods. Protein Sci. 2016;25(1):295-301. doi:10.1002/pro.2733</li></ol>")
         tab.addTab(kutip, "Cara mengutip")
         lis = QTextBrowser()
         lis.setOpenExternalLinks(True)
@@ -124,7 +124,7 @@ class DialogLisensi(QDialog):
         b.clicked.connect(lambda: QDesktopServices.openUrl(QUrl.fromLocalFile(str(paths.AKAR / "licenses"
                                                                                    if (paths.AKAR / "licenses").exists()
                                                                                    else paths.AKAR))))
-        t = QPushButton("Tutup")
+        t = QPushButton("✕ Tutup")
         t.clicked.connect(self.accept)
         h.addWidget(b)
         h.addStretch(1)
@@ -166,7 +166,7 @@ class DialogApaBaru(QDialog):
         lay.addWidget(tb)
         h = QHBoxLayout()
         h.addWidget(_ket("Panduan lengkap: Bantuan › Panduan pengguna (F1)."), 1)
-        b = QPushButton("Tutup")
+        b = QPushButton("✕ Tutup")
         b.clicked.connect(self.close)
         h.addWidget(b)
         lay.addLayout(h)

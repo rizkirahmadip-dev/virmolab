@@ -54,7 +54,7 @@ class HasilReseptor:
     peringatan: list = field(default_factory=list)
     laporan: str = ""
     protonasi: object = None                        # protonasi.HasilProtonasi bila memakai PROPKA
-    pdb_meeko: str = ""                             # PDB masukan Meeko (setelah protonasi) — dasar residu fleksibel
+    pdb_meeko: str = ""                             # PDB masukan Meeko (setelah protonasi) - dasar residu fleksibel
 
 
 class GalatPrep(Exception):
@@ -384,7 +384,7 @@ def buat_fleksibel(pdb_meeko, pdbqt_lama, residu, opsi=None):
         raise GalatPrep("Pilih minimal satu residu fleksibel.")
     if len(residu) > MAKS_FLEKSIBEL:
         raise GalatPrep(f"Maksimal {MAKS_FLEKSIBEL} residu fleksibel (ruang pencarian membesar cepat; "
-                        "praktik umum 2–6 residu kantong).")
+                        "praktik umum 2-6 residu kantong).")
     rigid, _dibuang, _log, flex, gagal = _meeko(pdb_meeko, opsi, fleksibel=residu)
     if not flex.strip():
         raise GalatPrep("Tidak ada residu yang bisa dibuat fleksibel: " + "; ".join(gagal))

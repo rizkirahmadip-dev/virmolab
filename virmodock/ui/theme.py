@@ -27,8 +27,19 @@ INTERAKSI = {"hbond": "#2e9e5b", "hidrofobik": "#c98a12", "pi": "#7b5cd6", "pika
              "garam": "#cf3f3f", "halogen": "#1aa3a3", "logam": "#7d80b0", "vdw": "#9aa6b8"}
 
 
-def qss(mode):
+def _a(warna, alfa):
+    """#rrggbb + alfa 0-255 -> rgba() (QSS membaca hex 8 digit sebagai #AARRGGBB)."""
+    c = QColor(warna)
+    return f"rgba({c.red()},{c.green()},{c.blue()},{alfa})"
+
+
+def qss(mode, ringkas=False):
+    """QSS tema; `ringkas` merapatkan isian untuk layar pendek (tinggi area kerja < 800 px)."""
     t = TOKEN[mode]
+    pad = "2px 4px" if ringkas else "4px 6px"
+    pad_tab = "5px 10px" if ringkas else "7px 14px"
+    pad_menu = "3px 26px 3px 24px" if ringkas else "5px 28px 5px 26px"
+    tinggi_baris = 19 if ringkas else 22
     return f"""
 * {{ font-family: "Segoe UI Variable Text","Segoe UI",Inter,sans-serif; font-size: 9pt; }}
 QMainWindow, QWidget#central {{ background: {t['chrome']}; }}
@@ -40,7 +51,7 @@ QMenuBar {{ background: qlineargradient(x1:0,y1:0,x2:0,y2:1, stop:0 {t['head1']}
 QMenuBar::item {{ background: transparent; padding: 5px 10px; border-radius: 2px; color: #dbe5f3; }}
 QMenuBar::item:selected {{ background: rgba(255,255,255,0.14); color: #ffffff; }}
 QMenu {{ background: {t['surf']}; border: 1px solid {t['line']}; padding: 4px 0; }}
-QMenu::item {{ padding: 5px 28px 5px 26px; }}
+QMenu::item {{ padding: {pad_menu}; }}
 QMenu::item:selected {{ background: {t['accs']}; color: {t['acct']}; }}
 QMenu::item:disabled {{ color: {t['mut']}; }}
 QMenu::separator {{ height: 1px; background: {t['line2']}; margin: 4px 8px; }}
@@ -67,7 +78,7 @@ QMainWindow::separator:hover {{ background: {t['acc']}; }}
 
 QTabWidget::pane {{ border: 0; border-top: 1px solid {t['line']}; background: {t['surf']}; }}
 QTabBar {{ background: {t['tb2']}; }}
-QTabBar::tab {{ background: {t['tb2']}; color: {t['mut']}; padding: 6px 14px; border: 0;
+QTabBar::tab {{ background: {t['tb2']}; color: {t['mut']}; padding: {pad_tab}; border: 0;
                border-right: 1px solid {t['line2']}; }}
 QTabBar::tab:selected {{ background: {t['surf']}; color: {t['ink']}; border-top: 2px solid {t['acc']}; }}
 QTabBar::tab:hover:!selected {{ color: {t['ink']}; }}
@@ -76,7 +87,8 @@ QTabBar::close-button {{ subcontrol-position: right; }}
 QTreeWidget, QTreeView, QTableWidget, QTableView, QListWidget {{
     background: {t['panel']}; alternate-background-color: {t['panel']}; border: 0; outline: 0;
     selection-background-color: {t['accs']}; selection-color: {t['acct']}; }}
-QTreeView::item, QListWidget::item {{ height: 22px; padding: 0 2px; }}
+QTreeView::item, QListWidget::item {{ height: {tinggi_baris}px; padding: 0 2px; }}
+QTableView::item {{ padding: {pad}; }}
 QTreeView::item:hover, QTableView::item:hover {{ background: {t['hov']}; }}
 QTreeView::item:selected, QTableView::item:selected {{ background: {t['accs']}; color: {t['acct']}; }}
 QTableWidget, QTableView {{ background: {t['surf']}; gridline-color: {t['line2']}; }}
@@ -88,9 +100,25 @@ QLineEdit, QSpinBox, QDoubleSpinBox, QComboBox, QPlainTextEdit, QTextEdit {{
     background: {t['surf']}; border: 1px solid {t['line']}; border-radius: 3px; padding: 3px 6px;
     selection-background-color: {t['acc']}; selection-color: #ffffff; }}
 QLineEdit:focus, QSpinBox:focus, QDoubleSpinBox:focus, QComboBox:focus, QPlainTextEdit:focus {{ border-color: {t['acc']}; }}
-QComboBox::drop-down {{ border: 0; width: 18px; }}
+QComboBox {{ padding-right: 22px; }}
+QComboBox::drop-down {{ border: 0; width: 20px; subcontrol-origin: padding; subcontrol-position: center right; }}
+QComboBox::down-arrow {{ image: url(ICON_CHEVRON); width: 12px; height: 12px; }}
+QComboBox::down-arrow:disabled {{ image: url(ICON_CHEVRON_REDUP); }}
+QComboBox:hover {{ border-color: {t['mut']}; }}
+QComboBox:on {{ border-color: {t['acc']}; }}
+QSpinBox::up-arrow, QDoubleSpinBox::up-arrow {{ image: url(ICON_CHEVRON_ATAS); width: 9px; height: 9px; }}
+QSpinBox::down-arrow, QDoubleSpinBox::down-arrow {{ image: url(ICON_CHEVRON); width: 9px; height: 9px; }}
+QMenu::right-arrow {{ image: url(ICON_CHEVRON_KANAN); width: 12px; height: 12px; }}
+QTreeView::branch:has-children:!has-siblings:closed, QTreeView::branch:closed:has-children:has-siblings {{
+    image: url(ICON_CHEVRON_KANAN); }}
+QTreeView::branch:open:has-children:!has-siblings, QTreeView::branch:open:has-children:has-siblings {{
+    image: url(ICON_CHEVRON); }}
+QToolButton::menu-button {{ border: 0; width: 14px; }}
 QComboBox QAbstractItemView {{ background: {t['surf']}; border: 1px solid {t['line']}; selection-background-color: {t['accs']}; selection-color: {t['acct']}; }}
-QSpinBox::up-button, QSpinBox::down-button, QDoubleSpinBox::up-button, QDoubleSpinBox::down-button {{ width: 0; border: 0; }}
+QSpinBox::up-button, QSpinBox::down-button, QDoubleSpinBox::up-button, QDoubleSpinBox::down-button {{
+    width: 14px; border: 0; background: transparent; }}
+QSpinBox::up-button:hover, QSpinBox::down-button:hover, QDoubleSpinBox::up-button:hover,
+QDoubleSpinBox::down-button:hover {{ background: {t['hov']}; border-radius: 2px; }}
 QPlainTextEdit#log {{ font-family: "Cascadia Mono",Consolas,monospace; font-size: 8.5pt; border: 0; background: {t['surf']}; color: {t['ink2']}; }}
 
 QPushButton {{ background: {t['surf']}; border: 1px solid {t['line']}; border-radius: 3px; padding: 5px 12px; }}
@@ -134,8 +162,27 @@ QPushButton#ruang:checked {{ background: {t['accs']}; border-color: {t['acc']}; 
 QPushButton#ruang:hover:!checked {{ background: {t['hov']}; }}
 QToolButton#antreanRingkas {{ padding: 1px 8px; border-radius: 2px; color: {t['ink2']}; }}
 QToolButton#antreanRingkas:checked {{ background: {t['accs']}; color: {t['acct']}; border-color: transparent; }}
+QToolButton#antreanRingkas[perhatian="true"] {{ color: {t['bad']}; font-weight: 600; }}
 QToolBar#toolbar_view {{ background: {t['surf']}; border-bottom: 1px solid {t['line2']}; padding: 2px 6px; }}
 QLabel#mono {{ font-family: "Cascadia Mono",Consolas,monospace; }}
+QLabel#judulDialog {{ font-size: 12pt; font-weight: 600; color: {t['ink']}; }}
+QLabel#subjudul {{ color: {t['ink2']}; }}
+QFrame#kartu {{ background: {t['surf']}; border: 1px solid {t['line']}; border-radius: 4px; }}
+QFrame#kartu QLabel {{ background: transparent; }}
+QLabel#kartuLabel {{ color: {t['mut']}; font-size: 8pt; font-weight: 600; }}
+QLabel#kartuNilai {{ color: {t['ink']}; font-size: 13pt; font-weight: 600; }}
+QLabel#kartuKet {{ color: {t['ink2']}; }}
+QLabel#lencana {{ border-radius: 3px; padding: 2px 8px; font-weight: 600; }}
+QLabel#lencana[nada="ok"] {{ background: {_a(t['ok'], 34)}; color: {t['ok']}; border: 1px solid {_a(t['ok'], 102)}; }}
+QLabel#lencana[nada="warn"] {{ background: {_a(t['warn'], 34)}; color: {t['warn']}; border: 1px solid {_a(t['warn'], 102)}; }}
+QLabel#lencana[nada="bad"] {{ background: {_a(t['bad'], 34)}; color: {t['bad']}; border: 1px solid {_a(t['bad'], 102)}; }}
+QLabel#lencana[nada="info"] {{ background: {t['accs']}; color: {t['acct']}; border: 1px solid {_a(t['acc'], 85)}; }}
+QLabel#peringatan {{ background: {_a(t['warn'], 26)}; color: {t['ink']}; border: 1px solid {_a(t['warn'], 102)};
+                     border-left: 3px solid {t['warn']}; border-radius: 3px; padding: 6px 10px; }}
+QLabel#info {{ background: {t['accs']}; color: {t['ink']}; border: 1px solid {_a(t['acc'], 68)};
+               border-left: 3px solid {t['acc']}; border-radius: 3px; padding: 6px 10px; }}
+QTextBrowser#mono, QTextEdit#mono, QPlainTextEdit#mono {{ font-family: "Cascadia Mono",Consolas,monospace; }}
+QFrame#kanvas {{ background: #ffffff; border: 1px solid {t['line']}; border-radius: 3px; }}
 
 QSlider::groove:horizontal {{ height: 4px; background: {t['line']}; border-radius: 2px; }}
 QSlider::sub-page:horizontal {{ background: {t['acc']}; border-radius: 2px; }}

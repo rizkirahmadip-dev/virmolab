@@ -67,7 +67,7 @@ class DialogKonsensus(QDialog):
         lay.addWidget(bagi, 1)
         bawah = QHBoxLayout()
         bawah.addStretch(1)
-        for t, fn in (("Salin paragraf metode", self.salin), ("Ekspor CSV…", self.ekspor), ("Tutup", self.close)):
+        for t, fn in (("Salin paragraf metode", self.salin), ("Ekspor CSV…", self.ekspor), ("✕ Tutup", self.close)):
             x = QPushButton(t)
             x.clicked.connect(fn)
             bawah.addWidget(x)
@@ -211,7 +211,7 @@ class DialogKonsensus(QDialog):
                 self.tabel.setItem(r, c, it)
         self.tabel.resizeColumnsToContents()
         w = h.get("W")
-        tafsir = ("sangat kuat" if w and w[0] >= 0.7 else "sedang" if w and w[0] >= 0.5 else "lemah") if w else "–"
+        tafsir = ("sangat kuat" if w and w[0] >= 0.7 else "sedang" if w and w[0] >= 0.5 else "lemah") if w else "-"
         o = [f"<p><b>{h['n_konsisten']} dari {h['n']} ligan konsisten</b> (masuk {h['teratas']:g} % teratas di semua "
              f"{len(kol)} kolom skor; baris disorot).</p>"]
         if w:

@@ -114,6 +114,22 @@
 
 <p>Rujukan metode ROC: DeLong ER, DeLong DM, Clarke-Pearson DL. Comparing the areas under two or more correlated receiver operating characteristic curves: a nonparametric approach. <i>Biometrics.</i> 1988;44(3):837–845. doi:10.2307/2531595 · Youden WJ. Index for rating diagnostic tests. <i>Cancer.</i> 1950;3(1):32–35. doi:10.1002/1097-0142(1950)3:1&lt;32::AID-CNCR2820030106&gt;3.0.CO;2-3 · Truchon JF, Bayly CI. Evaluating virtual screening methods: good and bad metrics for the “early recognition” problem. <i>J Chem Inf Model.</i> 2007;47(2):488–508. doi:10.1021/ci600426e · Mysinger MM, Shoichet BK. Rapid context-dependent ligand desolvation in molecular docking. <i>J Chem Inf Model.</i> 2010;50(9):1561–1573. doi:10.1021/ci100214a</p>
 
+<h2>Alat telaah lanjutan — rumus dan batasnya</h2>
+<p>Bagian ini merinci cara hitung alat di menu <b>Analisis</b> yang berupa perkiraan. Tuliskan batasnya bila angkanya dipakai dalam naskah.</p>
+<table>
+<tr><th>Alat</th><th>Cara hitung</th><th>Batas yang harus disebut</th></tr>
+<tr><td>Deteksi kantong (geometri)</td><td>Kisi 0,8 Å; tiap titik bebas diuji pada 13 sumbu, sumbu yang terhalang di kedua arah = satu kejadian protein–pelarut–protein (LIGSITE). Titik dengan PSP ≥ 10 dan celah 1,4–5 Å dari dinding diklaster (konektivitas 26); volume = jumlah titik × 0,8³ Å³. Kelayakan = 0,45 × suku volume + 0,35 × suku kedalaman + 0,20 × suku jumlah residu.</td><td>Kelayakan bukan skor druggability terlatih. Air, ion, dan pelarut kristalisasi dibuang; ligan ko-kristal tidak — kantong tampak terisi bila ligan masih ada.</td></tr>
+<tr><td>Saluran akses ligan</td><td>64 sinar (sebaran Fibonacci) dari pusat grid box/pose; sepanjang sinar dihitung celah ke permukaan van der Waals. Saluran = sinar yang mencapai celah ≥ 6 Å setelah ≥ 8 Å tanpa celah &lt; 0,2 Å. Jari-jari leher = celah minimum; residu penjaga = residu dalam leher + 1,2 Å.</td><td>Hanya jalur lurus dan satu konformasi. Lorong berkelok tak terdeteksi; gunakan CAVER/MOLE pada trajektori MD untuk kesimpulan definitif.</td></tr>
+<tr><td>Kontak atom pose</td><td>Semua pasangan atom berat protein–ligan ≤ 4 Å dihitung per kombinasi unsur (C, N, O, S, halogen), gaya deskriptor RF-Score. Skor = 4,15 + Σ bobot × √jumlah kontak, lalu ΔG = −1,363 × pK<sub>d</sub>.</td><td>Bobot linier tetap, bukan model Random Forest terlatih PDBbind; bukan pengganti ΔG docking atau MM/GBSA.</td></tr>
+<tr><td>Kinetika &amp; waktu tinggal</td><td>K<sub>d</sub> = exp(ΔG/RT) pada 310 K; log k<sub>on</sub> = 6 − 0,05 × ikatan berputar; k<sub>off</sub> = K<sub>d</sub> k<sub>on</sub> dibagi faktor ikatan hidrogen terlindung dan kontak hidrofobik; τ = 1/k<sub>off</sub>, t<sub>½</sub> = ln2/k<sub>off</sub>.</td><td>Skor docking tidak memodelkan keadaan transisi; τ bisa meleset beberapa orde besaran. Kinetika sesungguhnya diukur dengan SPR/BLI.</td></tr>
+<tr><td>Titik metabolisme CYP450</td><td>Pencocokan pola SMARTS gugus yang lazim dioksidasi fase I (N-dealkilasi, O-demetilasi, hidroksilasi benzilik/alifatik/aromatik, S-oksidasi); skor stabilitas = 100 − Σ bobot gugus × 18.</td><td>Bukan model terlatih pada data metabolit dan tidak memakai struktur isoform CYP; skor bukan klirens intrinsik.</td></tr>
+<tr><td>Air sisi aktif</td><td>Tiap air kristal digolongkan dari jumlah pasangan polar (N/O ≤ 3,2 Å) dan kontak karbon (≤ 3,8 Å).</td><td>Angkanya skor heuristik tanpa satuan, bukan ΔG. Termodinamika air sesungguhnya memerlukan WaterMap, GIST, atau 3D-RISM.</td></tr>
+<tr><td>MPO</td><td>Tiap parameter diubah menjadi nilai kelayakan 0–1 lewat fungsi naik/turun/trapesium, lalu dirata-rata berbobot dan dikali 100.</td><td>Preset CNS hanya memakai 4 dari 6 suku Wager et al. 2010 (ClogD dan pKa tidak dihitung, ClogP didekati WLOGP); tidak sebanding dengan nilai CNS-MPO 0–6 Pfizer.</td></tr>
+<tr><td>Ki / IC<sub>50</sub> untuk rencana lab</td><td>K<sub>i</sub> = exp(ΔG/RT); IC<sub>50</sub> dari Cheng–Prusoff dengan kadar dan K<sub>m</sub>/K<sub>d</sub> substrat yang Anda isi.</td><td>ΔG docking bukan afinitas terukur; hasilnya hanya untuk menentukan rentang dosis awal.</td></tr>
+<tr><td>Antarmuka PPI</td><td>SASA Shrake–Rupley (probe 1,4 Å), kontak atom berat antar-rantai ≤ 4 Å, ikatan hidrogen N/O ≤ 3,5 Å, jembatan garam ≤ 4 Å, ΔSASA = SASA rantai terpisah − SASA kompleks.</td><td>VirmoDock tidak menjalankan docking protein–protein; berkas disiapkan untuk diunggah sendiri ke ClusPro.</td></tr>
+<tr><td>PROTAC</td><td>Warhead, linker, dan pengikat E3 disambung kovalen di RDKit; MW, LogP, TPSA, HBD/HBA, dan ikatan berputar dihitung dari molekul hasil.</td><td>Panjang linker adalah bentangan rantai terentang penuh secara teori, bukan jarak hasil pemodelan; kelayakan bRo5 tidak menjamin permeabilitas atau pembentukan kompleks terner.</td></tr>
+</table>
+
 <h2>Perangkat lunak yang perlu dikutip</h2>
 <ol>
 <li>Santos-Martins D, et al. Accelerating AutoDock4 with GPUs and gradient-based local search. <i>J Chem Theory Comput.</i> 2021;17(2):1060–1073. doi:10.1021/acs.jctc.0c01006</li>
@@ -127,6 +143,14 @@
 <li>Ropp PJ, et al. Dimorphite-DL: an open-source program for enumerating the ionization states of drug-like small molecules. <i>J Cheminform.</i> 2019;11:14. doi:10.1186/s13321-019-0336-9 (bila dipakai)</li>
 <li>Virtanen P, et al. SciPy 1.0. <i>Nat Methods.</i> 2020;17:261–272. doi:10.1038/s41592-019-0686-2 (statistik)</li>
 <li>Rego N, Koes D. 3Dmol.js. <i>Bioinformatics.</i> 2015;31(8):1322–1324. doi:10.1093/bioinformatics/btu829</li>
+<li>Hendlich M, Rippmann F, Barnickel G. LIGSITE: automatic and efficient detection of potential small molecule-binding sites in proteins. <i>J Mol Graph Model.</i> 1997;15(6):359–363. doi:10.1016/S1093-3263(98)00002-3 (deteksi kantong geometri)</li>
+<li>Ballester PJ, Mitchell JBO. A machine learning approach to predicting protein–ligand binding affinity with applications to molecular docking. <i>Bioinformatics.</i> 2010;26(9):1169–1175. doi:10.1093/bioinformatics/btq112 (gagasan deskriptor kontak atom)</li>
+<li>Ertl P, Schuffenhauer A. Estimation of synthetic accessibility score of drug-like molecules based on molecular complexity and fragment contributions. <i>J Cheminform.</i> 2009;1:8. doi:10.1186/1758-2946-1-8 (SAScore)</li>
+<li>Bickerton GR, et al. Quantifying the chemical beauty of drugs. <i>Nat Chem.</i> 2012;4:90–98. doi:10.1038/nchem.1243 (QED)</li>
+<li>Wager TT, et al. Moving beyond rules: the development of a central nervous system multiparameter optimization (CNS MPO) approach. <i>ACS Chem Neurosci.</i> 2010;1(6):435–449. doi:10.1021/cn100008c (preset CNS-MPO parsial)</li>
+<li>Shrake A, Rupley JA. Environment and exposure to solvent of protein atoms. <i>J Mol Biol.</i> 1973;79(2):351–371. doi:10.1016/0022-2836(73)90011-9 (SASA antarmuka PPI)</li>
+<li>Kozakov D, et al. The ClusPro web server for protein–protein docking. <i>Nat Protoc.</i> 2017;12:255–278. doi:10.1038/nprot.2016.169 (bila docking PPI dijalankan di ClusPro)</li>
+<li>Chodera JD, Mobley DL. Entropy-enthalpy compensation: role and ramifications in biomolecular ligand recognition and design. <i>Annu Rev Biophys.</i> 2013;42:121–142. doi:10.1146/annurev-biophys-083012-130318 (tafsiran batas skor empiris)</li>
 </ol>
 <p>Laporan PDF VirmoDock mencantumkan sitasi sesuai mesin yang benar-benar dipakai.</p>
 <div class="peringatan">Hasil docking adalah prediksi komputasi, bukan bukti aktivitas biologis; konfirmasi dengan uji eksperimen.</div>

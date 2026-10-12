@@ -14,8 +14,8 @@ const KD = {ILE: 4.5, VAL: 4.2, LEU: 3.8, PHE: 2.8, CYS: 2.5, MET: 1.9, ALA: 1.8
 const MUATAN = {ASP: -1, GLU: -1, LYS: 1, ARG: 1, HIS: 0.3};
 
 const VM = {
-  v: null, py: null, models: {}, shapes: {box: [], inter: [], ukur: [], sel: [], kontrib: [], kantong: [], farma: []}, labels: {inter: [], ukur: [], res: [], kontrib: [], kantong: [], farma: []},
-  bgc: '#ffffff', mode: 'putar', ukurAtom: [], dark: false,
+  v: null, py: null, models: {}, shapes: {box: [], inter: [], ukur: [], sel: [], kontrib: [], kantong: [], farma: [], syarat: [], terowongan: []}, labels: {inter: [], ukur: [], res: [], kontrib: [], kantong: [], farma: [], syarat: []},
+  bgc: '#ffffff', mode: 'putar', ukurAtom: [], dark: false, idSeret: {}, _tarik: null,
 
   init() {
     this.v = $3Dmol.createViewer(document.getElementById('gl'), {backgroundColor: 'white', antialias: true, cartoonQuality: 10});
@@ -52,6 +52,7 @@ const VM = {
     window.addEventListener('resize', ukur);
     new ResizeObserver(ukur).observe(gl);
     this.pasangKotak();
+    this.pasangSeret();
     setInterval(() => this.gizmo(), 120);
   },
 
@@ -78,7 +79,7 @@ const VM = {
     delete this.models[id];
     this.v.render();
   },
-  clear() { Object.keys(this.models).forEach(id => this.remove(id)); this.clearShapes('box'); this.clearShapes('inter'); this.clearShapes('ukur'); this.clearShapes('sel'); this.clearShapes('farma'); this.v.render(); },
+  clear() { Object.keys(this.models).forEach(id => this.remove(id)); this.clearShapes('box'); this.clearShapes('inter'); this.clearShapes('ukur'); this.clearShapes('sel'); this.clearShapes('farma'); this.clearShapes('syarat'); this.clearShapes('terowongan'); this.v.render(); },
 
   /* --------------------------------------------- warna & representasi */
   warna(c) {
@@ -173,6 +174,15 @@ const VM = {
       this.v.zoomTo(s, ms ?? 400);
     });
   },
+  fokusTitik(pt, ms) {
+    this._bilaSiap(() => {
+      if (pt) {
+        this.v.center(pt);
+        this.v.zoom(1.2, ms ?? 400);
+        this.v.render();
+      }
+    });
+  },
   // hanya objek yang terlihat: objek tersembunyi (mis. ligan SMILES di titik asal) tidak boleh menggeser kamera
   _terlihat() {
     const m = Object.values(this.models).filter(o => !o.spec || o.spec.visible !== false).map(o => o.m);
@@ -224,16 +234,88 @@ const VM = {
     });
   },
   /* geser layar (piksel CSS) -> vektor model, diuji agar kotak mengikuti kursor */
-  offsetModel(dx, dy) {
-    const c = this.kotak.c, p0 = this.v.modelToScreen({x: c[0], y: c[1], z: c[2]});
+  geserDari(asal, dx, dy) {
+    if (!this.v || !asal) return [0, 0, 0];
+    const p0 = this.v.modelToScreen(asal);
     const e = this.v.screenOffsetToModel(1, 0), f = this.v.screenOffsetToModel(0, 1);
-    // ukur skala piksel per satuan vektor basis lalu selesaikan 2x2
-    const px = this.v.modelToScreen({x: c[0] + e.x, y: c[1] + e.y, z: c[2] + e.z});
-    const py = this.v.modelToScreen({x: c[0] + f.x, y: c[1] + f.y, z: c[2] + f.z});
+    if (!p0 || !e || !f) return [0, 0, 0];
+    const px = this.v.modelToScreen({x: asal.x + e.x, y: asal.y + e.y, z: asal.z + e.z});
+    const py = this.v.modelToScreen({x: asal.x + f.x, y: asal.y + f.y, z: asal.z + f.z});
     const a = px.x - p0.x, b = py.x - p0.x, cc = px.y - p0.y, d = py.y - p0.y, det = a * d - b * cc;
     if (Math.abs(det) < 1e-9) return [0, 0, 0];
     const u = (d * dx - b * dy) / det, w = (-cc * dx + a * dy) / det;
     return [u * e.x + w * f.x, u * e.y + w * f.y, u * e.z + w * f.z];
+  },
+  offsetModel(dx, dy) {
+    const c = this.kotak && this.kotak.c;
+    if (!c) return [0, 0, 0];
+    return this.geserDari({x: c[0], y: c[1], z: c[2]}, dx, dy);
+  },
+  pasangSeret() {
+    const gl = document.getElementById('gl');
+    const lokal = (ev) => {
+      const r = gl.getBoundingClientRect();
+      return {x: ev.clientX - r.left, y: ev.clientY - r.top};
+    };
+    const terdekat = (sx, sy) => {
+      let terbaik = null, jarak = 14;
+      Object.keys(this.models).forEach(id => {
+        if (!this.idSeret[id]) return;
+        this.models[id].m.selectedAtoms({}).forEach(atom => {
+          if (!atom || atom.elem === 'H') return;
+          const p = this.v.modelToScreen(atom);
+          if (!p) return;
+          const d = Math.hypot(p.x - sx, p.y - sy);
+          if (d < jarak) { jarak = d; terbaik = {id, atom}; }
+        });
+      });
+      return terbaik;
+    };
+    gl.addEventListener('pointerdown', (ev) => {
+      if ((this.mode !== 'seret' && this.mode !== 'geser') || ev.button !== 0) return;
+      const p = lokal(ev);
+      const t = terdekat(p.x, p.y);
+      if (!t) return;
+      ev.stopPropagation();
+      ev.preventDefault();
+      const utuh = this.mode === 'geser';
+      const asal = utuh ? this.models[t.id].m.selectedAtoms({}).map(atom => (
+        {atom, x: atom.x, y: atom.y, z: atom.z})) : null;
+      this._tarik = {id: t.id, atom: t.atom, ox: t.atom.x, oy: t.atom.y, oz: t.atom.z,
+        elem: t.atom.elem, sx: p.x, sy: p.y, utuh, asal};
+      gl.style.cursor = 'grabbing';
+    }, true);
+    gl.addEventListener('pointermove', (ev) => {
+      if (!this._tarik) return;
+      ev.stopPropagation();
+      ev.preventDefault();
+      const p = lokal(ev);
+      const a = this._tarik;
+      const d = this.geserDari({x: a.ox, y: a.oy, z: a.oz}, p.x - a.sx, p.y - a.sy);
+      if (a.utuh) {
+        a.asal.forEach(s => { s.atom.x = s.x + d[0]; s.atom.y = s.y + d[1]; s.atom.z = s.z + d[2]; });
+      } else {
+        a.atom.x = a.ox + d[0];
+        a.atom.y = a.oy + d[1];
+        a.atom.z = a.oz + d[2];
+      }
+      this.v.render();
+    }, true);
+    const lepas = (ev) => {
+      if (!this._tarik) return;
+      if (ev) { ev.stopPropagation(); ev.preventDefault(); }
+      const a = this._tarik;
+      this._tarik = null;
+      gl.style.cursor = '';
+      const dx = a.atom.x - a.ox, dy = a.atom.y - a.oy, dz = a.atom.z - a.oz;
+      if (Math.hypot(dx, dy, dz) < 0.08 || !this.py) return;
+      const muatan = a.utuh
+        ? {id: a.id, utuh: true, dx, dy, dz}
+        : {id: a.id, elem: a.elem, x: a.atom.x, y: a.atom.y, z: a.atom.z, ox: a.ox, oy: a.oy, oz: a.oz};
+      this.py.seret(JSON.stringify(muatan));
+    };
+    gl.addEventListener('pointerup', lepas, true);
+    gl.addEventListener('pointercancel', lepas, true);
   },
   kirimKotak(segera) {
     clearTimeout(this._kirim);
@@ -278,6 +360,20 @@ const VM = {
       this.labels.kantong.push(this.v.addLabel('#' + k.nomor, {position: this.xyz(k.pusat), fontSize: 12,
         fontColor: '#7a3d00', backgroundColor: '#ffffff', backgroundOpacity: 0.85, borderThickness: 0, inFront: true,
         alignment: 'center'}));
+    });
+    this.v.render();
+  },
+  /* jalur terowongan: bola sepanjang garis tengah (jari-jari ∝ celah bebas, 0,25–1,4 Å; bentuk transparan tidak tergambar);
+     titik tersempit diberi warna tegas. daftar kosong = hapus. */
+  terowongan(daftar) {
+    this.clearShapes('terowongan');
+    (daftar || []).forEach(t => {
+      const r = t.radius || [];
+      const iMin = r.length ? r.indexOf(Math.min.apply(null, r)) : -1;
+      (t.titik || []).forEach((p, i) => {
+        this.shapes.terowongan.push(this.v.addSphere({center: this.xyz(p),
+          radius: Math.max(0.25, Math.min(1.4, 0.6 * (r[i] || 1))), color: i === iMin ? (t.leher || '#c0392b') : t.warna}));
+      });
     });
     this.v.render();
   },
@@ -383,8 +479,13 @@ const VM = {
   },
 
   /* ------------------------------------------------------ interaksi mouse */
-  setMode(m) { this.mode = m; this.ukurAtom = []; },
+  setMode(m) { this.mode = m; this.ukurAtom = []; this._tarik = null; },
+  aturSeret(ids) {
+    this.idSeret = {};
+    (ids || []).forEach(id => { this.idSeret[id] = true; });
+  },
   klik(id, atom) {
+    if (this.mode === 'seret' || this.mode === 'geser') return;
     const info = {id, chain: atom.chain, resi: atom.resi, resn: atom.resn, atom: atom.atom, elem: atom.elem,
       x: atom.x, y: atom.y, z: atom.z, serial: atom.serial, hetflag: atom.hetflag};
     if (this.mode === 'ukur') {
@@ -405,6 +506,24 @@ const VM = {
     this.py && this.py.dipilih(JSON.stringify(info));
   },
   hapusUkur() { this.clearShapes('ukur'); this.ukurAtom = []; this.v.render(); },
+  garisSyarat(info) {
+    this.clearShapes('syarat');
+    if (!info || !info.ligan || !info.protein) { this.v.render(); return; }
+    const a = this.xyz(info.ligan), b = this.xyz(info.protein);
+    const warna = info.lolos ? '#1f8a4c' : '#c62828';
+    this.shapes.syarat.push(this.v.addCylinder({start: a, end: b, radius: 0.05, color: warna,
+      dashed: true, dashLength: 0.18, gapLength: 0.12, fromCap: 1, toCap: 1}));
+    this.shapes.syarat.push(this.v.addSphere({center: a, radius: 0.22, color: warna}));
+    this.shapes.syarat.push(this.v.addSphere({center: b, radius: 0.22, color: warna}));
+    const mid = {x: (a.x + b.x) / 2, y: (a.y + b.y) / 2, z: (a.z + b.z) / 2};
+    const nama = (info.atom_ligan || 'ligan') + ' – ' + [info.resn, info.resi, info.rantai].filter(Boolean).join(' ')
+      + ' ' + (info.atom_residu || '');
+    const angka = (typeof info.min === 'number') ? info.min.toFixed(2).replace('.', ',') + ' Å' : '';
+    this.labels.syarat.push(this.v.addLabel((nama + '  ' + angka).trim(), {position: mid, fontSize: 11,
+      font: 'Segoe UI', fontColor: warna, backgroundColor: this.bgc, backgroundOpacity: 0.92,
+      borderThickness: 0, inFront: true, alignment: 'center'}));
+    this.v.render();
+  },
 
   /* ----------------------------------------------------------- lain */
   tema(dark, bg) {
@@ -423,7 +542,7 @@ const VM = {
   rapikanLabel(render) {
     // render ulang hanya bila ada label yang bergeser: render memicu viewChangeCallback -> tanpa ini loop tiap frame
     const berubah = LabelVM.rapikan(this.v, [].concat(this.labels.inter, this.labels.ukur, this.labels.kantong,
-                                                     this.labels.kontrib));
+                                                     this.labels.kontrib, this.labels.syarat));
     if (berubah && render !== false) this.v.render();
   },
   jadwalRapikan() {

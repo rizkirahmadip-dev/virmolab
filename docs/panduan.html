@@ -1,4 +1,4 @@
-<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Panduan pengguna · VirmoDock</title><link rel="stylesheet" href="gaya.css"><link rel="icon" href="gambar/ikon.png"></head><body><header><img src="gambar/logo_putih.svg" alt="VirmoDock" style="height:30px;margin-right:6px"><span style="color:#9fb4d3;font-size:13px;margin-right:10px">0.9.6</span><a href="panduan.html" class="aktif">Panduan pengguna</a><a href="instalasi.html">Instalasi</a><a href="pindah_laptop.html">Pindah laptop</a><a href="gpu.html">Setup GPU</a><a href="troubleshooting.html">Mengatasi masalah</a><a href="metode.html">Metode &amp; kriteria</a></header><main><h1>Panduan pengguna</h1>
+<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Panduan pengguna · VirmoDock</title><link rel="stylesheet" href="gaya.css"><link rel="icon" href="gambar/ikon.png"></head><body><header><img src="gambar/logo_putih.svg" alt="VirmoDock" style="height:30px;margin-right:6px"><span style="color:#9fb4d3;font-size:13px;margin-right:10px">1.1.1</span><a href="panduan.html" class="aktif">Panduan pengguna</a><a href="instalasi.html">Instalasi</a><a href="pindah_laptop.html">Pindah laptop</a><a href="gpu.html">Setup GPU</a><a href="troubleshooting.html">Mengatasi masalah</a><a href="metode.html">Metode &amp; kriteria</a></header><main><h1>Panduan pengguna</h1>
 <p class="lead">Alur lengkap docking di VirmoDock, dari mengimpor protein sampai laporan (PDF, Word, atau HTML interaktif) — semuanya di dalam satu aplikasi, dipandu lima langkah.</p>
 
 <nav class="isi"><b>Isi:</b>
@@ -7,6 +7,7 @@
 <a href="#hasil">5. Hasil</a> · <a href="#interaksi">Interaksi</a> · <a href="#diagram">Diagram 2D</a> ·
 <a href="#validasi">Validasi</a> · <a href="#qc">PoseBusters</a> · <a href="#banding">Bandingkan</a> ·
 <a href="#sifat">Sifat ligan</a> · <a href="#statistik">Statistik</a> · <a href="#ekspor">Ekspor &amp; laporan</a> ·
+<a href="#md">MD &amp; MM/GBSA</a> · <a href="#desain">Alat desain &amp; telaah lanjutan</a> · <a href="#cli">Baris perintah</a> ·
 <a href="#proyek">Proyek</a> · <a href="#pintasan">Pintasan</a></nav>
 
 <h2 id="tampilan">Tampilan jendela</h2>
@@ -204,6 +205,91 @@
 <li><b>Tafsiran</b>: MM/GBSA tidak menghitung entropi, jadi angkanya jauh lebih negatif daripada ΔG eksperimen; gunakan untuk <i>membandingkan</i> ligan pada reseptor dan pengaturan yang sama. RMSD ligan rerata &gt; 3 Å menandakan pose tidak stabil. Reseptor dengan ion logam memakai model nonbonded (pendekatan).</li>
 </ul>
 
+<h2 id="desain">Alat desain &amp; telaah lanjutan</h2>
+<p>Alat di bawah ada di menu <b>Analisis</b> (kecuali yang disebut lain). Semuanya berjalan offline di komputer Anda. Sebagian adalah <i>perkiraan berbasis aturan</i>: dialognya selalu menyebutkan asumsi dan batas pemakaian di bagian bawah — baca itu sebelum angkanya masuk naskah.</p>
+
+<h3 id="kantong-geo">Deteksi kantong pengikatan (geometri)</h3>
+<p>Pencari rongga bawaan VirmoDock untuk struktur apo atau model AlphaFold yang belum punya ligan ko-kristal. Berbeda dengan <b>Siapkan › Deteksi kantong (P2Rank)</b> yang memakai model pembelajaran mesin dan butuh Java, alat ini murni geometri dan selalu tersedia.</p>
+<ul>
+<li>Struktur dibungkus kisi 0,8 Å. Tiap titik di luar permukaan van der Waals diperiksa pada 13 sumbu; sumbu yang terhalang protein di kedua arah dihitung sebagai satu kejadian protein–pelarut–protein (PSP, cara LIGSITE). Titik dengan PSP ≥ 10 dan berjarak 1,4–5 Å dari dinding dianggap bagian kantong, lalu diklaster.</li>
+<li>Air, ion, dan pelarut kristalisasi (HOH, SO4, GOL, EDO, DMS, …) diabaikan. Ligan ko-kristal <i>tidak</i> diabaikan: bila masih terpasang, kantongnya tampak terisi — buang dulu ligannya (wizard reseptor sudah melakukannya) agar rongga terdeteksi.</li>
+<li>Kolom <b>Kelayakan</b> (0–1) hanya memadukan volume, kedalaman, dan jumlah residu dinding. Itu bukan skor druggability terlatih seperti fpocket atau DoGSiteScorer: pakai untuk mengurutkan calon, bukan untuk dikutip.</li>
+<li><b>Jadikan grid box docking</b> memakai pusat dan ukuran kantong terpilih sebagai kotak pencarian proyek; <b>Tampilkan pusat kantong di viewport</b> menggambar bola bernomor. Daftarnya bisa disalin sebagai parameter konfigurasi Vina atau diekspor CSV.</li>
+<li>Uji acuan: pada 1HSG tanpa MK1, kantong teratas berpusat 0,9 Å dari ligan kristal (volume ±207 Å³) dan dindingnya memuat ASP 25 katalitik.</li>
+</ul>
+
+<h3 id="saluran">Saluran akses ligan</h3>
+<p>Memeriksa jalan masuk molekul kecil dari sisi aktif ke pelarut. Dari titik awal (pusat grid box, atau pusat pose yang sedang dianalisis) dipancarkan 64 sinar; sepanjang tiap sinar dihitung celah bebas ke permukaan van der Waals terdekat.</p>
+<ul>
+<li>Sinar yang mencapai pelarut (celah ≥ 6 Å setelah menempuh ≥ 8 Å) tanpa menabrak protein dilaporkan sebagai saluran, lengkap dengan <b>jari-jari leher</b> (titik tersempit), jari-jari rerata, panjang, <b>residu penjaga</b> di leher, dan residu dinding.</li>
+<li>Patokan kasar: leher ≥ 1,4 Å cukup untuk molekul obat kecil lewat tanpa pembukaan rantai samping; 1,0–1,4 Å sempit; &lt; 1,0 Å praktis tertutup pada struktur itu.</li>
+<li><b>Gambar garis tengah di viewport</b> menampilkan rangkaian bola sepanjang saluran; bola merah menandai titik tersempit.</li>
+<li>Batas: hanya jalur lurus. Lorong berkelok tidak akan muncul dan panjang yang dilaporkan adalah jarak lurus. Untuk analisis saluran definitif — termasuk gerak pintu gerbang sepanjang waktu — pakai CAVER atau MOLE pada trajektori MD.</li>
+</ul>
+
+<h3 id="kontak-pose">Periksa kontak atom pose</h3>
+<p>Menghitung seluruh pasangan atom berat protein–ligan berjarak ≤ 4 Å pada pose yang sedang dianalisis, dikelompokkan per kombinasi unsur (deskriptor bergaya RF-Score). Berguna untuk menyaring pose yang skor dockingnya kuat tetapi sebenarnya hanya menempel di mulut kantong.</p>
+<ul>
+<li><b>Per atom ligan</b> adalah ukuran paling berguna: &lt; 1,5 kontak per atom berat biasanya berarti pose menggantung, bukan terkubur.</li>
+<li><b>Skor kontak</b> memakai bobot linier sederhana, <i>bukan</i> model Random Forest terlatih PDBbind dan bukan pengganti ΔG docking atau MM/GBSA. Selisih beberapa kkal/mol terhadap skor docking itu lazim karena asumsinya berbeda.</li>
+</ul>
+
+<h3 id="kinetika">Kinetika dan waktu tinggal</h3>
+<p>Perkiraan kasar laju disosiasi k<sub>off</sub>, waktu tinggal τ = 1/k<sub>off</sub>, dan waktu paruh kompleks. Nilai ΔG, jumlah ikatan hidrogen, dan kontak hidrofobik terisi otomatis dari pose aktif dan boleh diubah.</p>
+<ul>
+<li>k<sub>on</sub> ditebak dari jumlah ikatan berputar ligan; k<sub>off</sub> diturunkan dari K<sub>d</sub> (ΔG) lalu diperlambat oleh ikatan hidrogen terlindung dan kontak hidrofobik.</li>
+<li>Skor docking tidak memodelkan keadaan transisi, jadi τ dapat meleset beberapa orde besaran. Pakai untuk membandingkan ligan dalam satu seri; jangan dilaporkan sebagai nilai k<sub>off</sub>. Data kinetika sungguhan datang dari SPR atau BLI.</li>
+</ul>
+
+<h3 id="metabolisme">Titik metabolisme CYP450</h3>
+<p>Menandai gugus yang lazim dioksidasi sitokrom P450 fase I (N-dealkilasi, O-demetilasi, hidroksilasi benzilik/alifatik/aromatik, S-oksidasi) beserta saran penggantinya, misalnya −OCH<sub>3</sub> → −OCHF<sub>2</sub>. Deteksi memakai pola SMARTS, bukan model terlatih pada data metabolit atau struktur isoform CYP; skor stabilitas hanyalah hitungan bobot gugus rawan, bukan klirens intrinsik.</p>
+
+<h3 id="fbdd">Desain berbasis fragmen (FBDD)</h3>
+<p>Dua mode: <b>Fragment growing</b> menumbuhkan gugus bioisosterik pada fragmen awal, <b>Fragment linking</b> menyambung dua fragmen dengan beberapa pilihan linker kaku/fleksibel. Untuk setiap turunan langsung dihitung MW, WLOGP, TPSA, QED, SAScore, dan aturan Lipinski. <b>Impor senyawa terpilih</b> menambahkannya sebagai objek ligan di viewer; konformasi 3D-nya hasil penyematan cepat, jadi lanjutkan ke <i>Siapkan ligan</i> sebelum didocking.</p>
+
+<h3 id="protac">Perancang PROTAC</h3>
+<p>Merakit molekul bivalen <b>warhead – linker – pengikat E3 ligase</b> (VHL VH032, pomalidomid, talidomid) dengan pilihan linker PEG, alkil, atau piperazin. Warhead bisa diambil dari ligan proyek. Hasilnya satu molekul tersambung kovalen (bukan campuran fragmen), dinilai dengan kriteria <i>beyond Rule of 5</i>: MW, LogP, TPSA, HBD/HBA, dan ikatan berputar. Panjang linker yang ditampilkan adalah bentangan rantai terentang penuh secara teori, bukan jarak hasil pemodelan 3D.</p>
+
+<h3 id="peta-tubuh">Peta organ ADMET</h3>
+<p>Tab <b>Peta organ</b> di dialog <b>Prediksi ADMET</b> meringkas 30 parameter ADMET-AI menjadi diagram alur dua dimensi. Baris atas mengikuti perjalanan obat: penyerapan (saluran cerna) → peredaran (jantung) → metabolisme (hati) → pembuangan (ginjal). Baris bawah memuat organ dan sistem yang terdampak: otak, kulit, inti sel, dan paparan menyeluruh.</p>
+<ul>
+<li><b>Skor tiap kartu 0–100</b> (makin tinggi makin aman) = rata-rata endpoint yang relevan, lalu dibatasi oleh endpoint terburuknya supaya satu nilai buruk tidak tertutupi rata-rata.</li>
+<li><b>Klik kartu</b> untuk melihat endpoint penyusunnya: nilai asli, bilah skor 0–100, dan endpoint mana yang tidak ikut menilai.</li>
+<li><b>Angka biru</b> (mis. pada otak) berarti informasi, bukan penilaian risiko — menembus sawar darah otak itu baik untuk target saraf dan merugikan untuk target perifer, jadi VirmoDock tidak memutuskannya untuk Anda.</li>
+<li><b>Organ tanpa model</b> (paru, pankreas, tiroid) tidak dibuatkan kartu dan disebutkan di panel rincian — tidak ada angka yang dikarang.</li>
+<li><b>Gerak</b>: kartu muncul bertahap saat ligan berganti, partikel menyusuri panah dengan kecepatan mengikuti waktu paruh prediksi, kartu berisiko berdenyut sebentar, kartu terangkat saat disorot, dan riak melebar sekali ketika kartu dipilih. Kotak centang <i>Animasi perjalanan obat</i> mematikan semuanya sekaligus — berguna di laptop yang memakai baterai atau saat merekam layar.</li>
+<li><b>Ekspor PNG/SVG</b> menghasilkan gambar diam (tanpa animasi) untuk dimasukkan ke naskah, lengkap dengan nama ligan dan legenda warna sehingga gambarnya bisa berdiri sendiri di dalam tulisan.</li>
+<li><b>Papan ketik</b>: setelah salah satu kartu diklik, panah kiri/kanan berpindah kartu dalam satu baris dan panah atas/bawah berpindah baris.</li>
+</ul>
+<p>Semua angkanya prediksi pembelajaran mesin untuk menyaring kandidat, bukan pengganti uji toksisitas. Bila Anda juga memakai layanan lain seperti pkCSM, perlakukan keduanya sebagai dua perkiraan yang berbeda, bukan satu kebenaran.</p>
+
+<h3 id="mpo">Optimasi multi-parameter (MPO) dan radar</h3>
+<p>Menyatukan sifat fisikokimia, QED, SAScore, dan ΔG docking menjadi satu skor kelayakan 0–100 dengan grafik radar yang bisa disalin atau disimpan sebagai SVG. Preset <b>Oral</b> memakai tujuh suku; preset <b>CNS-MPO parsial</b> memakai empat dari enam suku Wager et al. 2010 (MW, ClogP yang didekati WLOGP, TPSA, HBD) — ClogD dan pKa tidak dihitung, jadi angkanya tidak sebanding dengan nilai CNS-MPO 0–6 Pfizer.</p>
+
+<h3 id="penapisan">Dasbor penapisan virtual</h3>
+<p>Untuk proyek dengan banyak ligan: peta panas ligan × parameter, diagram sebar ΔG vs SAScore berwarna MPO, histogram sebaran afinitas, saringan multikriteria (Lipinski, Veber, PAINS, Brenk, absorpsi GI), peringkat komposit, penandaan hit teratas, dan ekspor CSV hasil saringan.</p>
+
+<h3 id="mmp">Pasangan molekul berpadanan (MMP)</h3>
+<p>Mencari pasangan ligan yang hanya berbeda satu gugus R (RDKit <code>rdMMPA</code>), lalu memasangkan perbedaan itu dengan perubahan ΔG, QED, dan SAScore. Pasangan dengan |ΔΔG| besar pada struktur sangat mirip ditandai sebagai <i>jurang aktivitas</i> (activity cliff) — justru di situ skor docking paling sering keliru, jadi perlakukan sebagai petunjuk arah substitusi, bukan kesimpulan.</p>
+
+<h3 id="selektivitas">Selektivitas multi-target</h3>
+<p>Membandingkan ligan yang sama pada beberapa proyek target: matriks ligan × target, normalisasi Z-score per target, celah ΔΔG, dan klasifikasi profil (selektif, semi-selektif, promiskuitas). Perbandingan hanya sahih bila semua target didocking dengan mesin, ukuran kotak, dan protokol persiapan yang sama.</p>
+
+<h3 id="ppi">Antarmuka protein–protein (PPI)</h3>
+<p>Menghitung residu permukaan dengan SASA (Shrake–Rupley), kontak dan ikatan hidrogen antar-rantai, jembatan garam, serta luas permukaan terkubur (ΔSASA) pada kompleks multi-rantai. VirmoDock <b>tidak</b> menjalankan docking protein–protein sendiri: untuk itu alat ini menyiapkan berkas PDB yang Anda unggah sendiri ke ClusPro memakai akun Anda — tidak ada data yang dikirim otomatis.</p>
+
+<h3 id="lab">Rencana uji lab basah</h3>
+<p>Menjembatani hasil in silico ke bangku lab: perkiraan K<sub>i</sub> dan IC<sub>50</sub> (Cheng–Prusoff) dari ΔG, seri pengenceran bertingkat, volume pemipetan, batas DMSO, serta denah pelat 96/384/48/24 sumur lengkap dengan sumur kontrol, protokol teks, dan ekspor CSV. K<sub>i</sub> dari skor docking adalah perkiraan kasar — pakai sebagai titik awal rentang dosis, lalu sesuaikan dengan hasil uji nyata.</p>
+
+<h3 id="interpretasi">Interpretasi hasil docking</h3>
+<p><b>Analisis › Interpretasi hasil docking…</b> menyusun ringkasan atau draf Bab Hasil &amp; Pembahasan dari angka proyek. Bila Ollama berjalan di komputer ini, teks dibuat oleh model bahasa lokal; bila tidak, VirmoDock merangkainya dari templat tetap. Dua-duanya harus diperiksa: cocokkan setiap angka dan nama residu dengan tab Hasil, tulis ulang dengan kalimat Anda sendiri, dan sebutkan pemakaian AI pada bagian metode bila jurnal mewajibkannya.</p>
+
+<h3 id="skrip-figur">Skrip figur publikasi</h3>
+<p><b>Alat › Skrip figur publikasi (PyMOL / ChimeraX)…</b> menulis berkas <code>.pml</code> dan <code>.cxc</code> siap jalan: kartun protein, stik ligan dan residu kantong, garis putus ikatan hidrogen, permukaan kantong transparan, serta render 2400 × 1800 piksel. Salinan reseptor dan pose ikut ditulis ke folder tujuan sehingga jalur di dalam skrip tetap sahih bila foldernya dipindahkan.</p>
+
+<h3 id="diagnostik">Pemeriksa kesehatan sistem</h3>
+<p><b>Bantuan › Pemeriksa kesehatan sistem…</b> memeriksa kesiapan Python, RDKit, NumPy/Gemmi, mesin docking, OpenMM dan GPU, WSL2 (untuk GNINA/Boltz), serta Ollama, lengkap dengan saran tindakan dan tombol salin laporan — lampirkan hasilnya bila melaporkan masalah.</p>
+
 <h2 id="cli">Baris perintah (VirmoDock-cli)</h2>
 <p><code>VirmoDock-cli.exe</code> ada di folder instalasi VirmoDock. Buka Command Prompt di folder itu (atau tulis jalur lengkapnya), lalu misalnya:</p>
 <pre>VirmoDock-cli dock -r 1HSG -l kandidat.smi --acuan auto -o hasil_1hsg
@@ -244,4 +330,4 @@ VirmoDock-cli info</pre>
 <tr><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd></td><td>Komposer figur</td><td></td><td></td></tr>
 </table>
 <div class="peringatan">Hasil docking adalah prediksi komputasi, bukan bukti aktivitas biologis; konfirmasi dengan uji eksperimen. Ki dihitung dari ΔG sebagai perkiraan.</div>
-<footer>VirmoDock 0.9.6 · dokumentasi offline · GPL-3.0-or-later</footer></main></body></html>
+<footer>VirmoDock 1.1.1 · dokumentasi offline · GPL-3.0-or-later</footer></main></body></html>

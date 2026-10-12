@@ -1,12 +1,12 @@
-"""Analisis hasil docking: molekul pose, interaksi protein–ligan, RMSD kristal, efisiensi ligan.
+"""Analisis hasil docking: molekul pose, interaksi protein-ligan, RMSD kristal, efisiensi ligan.
 
-Kriteria interaksi (Å / derajat) — dicantumkan juga di laporan & panduan:
-  Ikatan hidrogen    D···A ≤ 3.5, H···A ≤ 2.8, sudut D–H···A ≥ 110 (tanpa H: hanya D···A)
+Kriteria interaksi (Å / derajat) - dicantumkan juga di laporan & panduan:
+  Ikatan hidrogen    D···A ≤ 3.5, H···A ≤ 2.8, sudut D-H···A ≥ 110 (tanpa H: hanya D···A)
   Hidrofobik         C nonpolar ligan ↔ C nonpolar protein ≤ 4.0 (satu kontak terdekat per residu)
-  π–π                pusat cincin ≤ 5.5; tumpuk: sudut bidang ≤ 30 & offset ≤ 3.0; bentuk T: sudut ≥ 60
-  π–kation           pusat cincin ↔ kation ≤ 6.0 dengan offset lateral ≤ 2.0
+  π-π                pusat cincin ≤ 5.5; tumpuk: sudut bidang ≤ 30 & offset ≤ 3.0; bentuk T: sudut ≥ 60
+  π-kation           pusat cincin ↔ kation ≤ 6.0 dengan offset lateral ≤ 2.0
   Jembatan garam     gugus bermuatan berlawanan ≤ 4.0
-  Ikatan halogen     X···A ≤ 3.5, sudut C–X···A ≥ 140 (X = Cl, Br, I)
+  Ikatan halogen     X···A ≤ 3.5, sudut C-X···A ≥ 140 (X = Cl, Br, I)
   Koordinasi logam   ion ↔ O/N/S ligan ≤ 2.8
   van der Waals      atom berat ≤ 4.2 (residu yang tidak punya interaksi lain; untuk diagram)
 """
@@ -20,7 +20,7 @@ KRITERIA = {"hbond_da": 3.5, "hbond_ha": 2.8, "hbond_sudut": 110.0, "hidrofobik"
             "pi_tumpuk_sudut": 30.0, "pi_offset": 3.0, "pi_t_sudut": 60.0, "pikation": 6.0,
             "pikation_offset": 2.0, "garam": 4.0, "halogen": 3.5, "halogen_sudut": 140.0, "logam": 2.8,
             "vdw": 4.2}
-NAMA_JENIS = {"hbond": "Ikatan hidrogen", "hidrofobik": "Hidrofobik", "pi": "π–π", "pikation": "π–kation",
+NAMA_JENIS = {"hbond": "Ikatan hidrogen", "hidrofobik": "Hidrofobik", "pi": "π-π", "pikation": "π-kation",
               "garam": "Jembatan garam", "halogen": "Ikatan halogen", "logam": "Koordinasi logam",
               "vdw": "van der Waals"}
 URUT_JENIS = ["hbond", "garam", "logam", "halogen", "pikation", "pi", "hidrofobik", "vdw"]
@@ -195,7 +195,7 @@ def interaksi(rec, mol, radius=8.0):
                     hasil.append(j)
         return hasil
 
-    # sambungan antar residu (C–N peptida) tidak dihitung: cukup untuk kepolaran karbon
+    # sambungan antar residu (C-N peptida) tidak dihitung: cukup untuk kepolaran karbon
     D = np.linalg.norm(P[:, None, :] - L[None, :, :], axis=2)
     fit = _fitur(mol)
     hasil = []
@@ -338,7 +338,7 @@ def interaksi(rec, mol, radius=8.0):
                     sudah.add(kk)
                     li = min(g, key=lambda i: D[k, i])
                     tambah("garam", k, li, d)
-    # π–kation: cincin ligan ↔ kation protein; cincin protein ↔ kation ligan
+    # π-kation: cincin ligan ↔ kation protein; cincin protein ↔ kation ligan
     sudah = set()
     for rl, cl, nl in ring_l:
         for k in kation_p:
@@ -417,7 +417,7 @@ def sidik_jari(daftar):
 
 
 def tanimoto(a, b):
-    """Kemiripan Tanimoto dua IFP (0–1); None bila salah satu kosong/tidak ada."""
+    """Kemiripan Tanimoto dua IFP (0-1); None bila salah satu kosong/tidak ada."""
     if not a or not b:
         return None
     a, b = set(a), set(b)

@@ -66,7 +66,7 @@ def main():
     i18n.pasang(app)          # bahasa antarmuka (sebelum modul UI diimpor)
     from .ui.mainwindow import JendelaUtama
     w = JendelaUtama()
-    w.show()
+    w.showMaximized()
     # buka dari Explorer ("Open with" / asosiasi berkas)
     berkas = [a for a in arg if os.path.exists(a)]
     for a in [a for a in berkas if a.lower().endswith(".vmdbackup")]:

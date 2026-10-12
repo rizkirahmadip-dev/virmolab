@@ -8,7 +8,7 @@ import re
 from .arti import paragraf
 from .laporan import SITASI
 
-# Machado dkk. 2009, aproksimasi buta warna merah-hijau (protanopia) pada RGB 0–1.
+# Machado dkk. 2009, aproksimasi buta warna merah-hijau (protanopia) pada RGB 0-1.
 _PROTAN = (
     (0.152286, 1.052583, -0.204868),
     (0.114503, 0.786281, 0.099216),
@@ -83,14 +83,14 @@ def draf_skripsi(info):
     baris = info.get("baris") or []
     tabel = ["| Ligan | Skor (kkal/mol) | Ki perkiraan |", "|---|---:|---|"]
     for nama, energi, ki in baris[:20]:
-        tabel.append(f"| {nama} | {energi} | {ki or '—'} |")
+        tabel.append(f"| {nama} | {energi} | {ki or ' - '} |")
     if not baris:
-        tabel.append("| — | — | belum ada hasil |")
+        tabel.append("| - | - | belum ada hasil |")
     val = info.get("validasi") or "Validasi redocking belum dicatat."
     return "\n".join([
         f"# {info.get('nama') or 'Proyek docking'}",
         "",
-        "## Bab III — Metode (draf)",
+        "## Bab III - Metode (draf)",
         "",
         f"Reseptor yang digunakan adalah {info.get('reseptor') or 'struktur yang disiapkan di VirmoDock'}. "
         f"Docking dijalankan dengan {info.get('mesin') or 'mesin yang dipilih di aplikasi'}"
@@ -101,7 +101,7 @@ def draf_skripsi(info):
         "",
         val,
         "",
-        "## Bab IV — Hasil (draf)",
+        "## Bab IV - Hasil (draf)",
         "",
         "Peringkat berikut diambil dari pose terbaik tiap ligan pada job terakhir yang sudah selesai. "
         "Angka pada docking kovalen adalah skor aduk, bukan ΔG, dan tidak dibandingkan dengan docking biasa.",

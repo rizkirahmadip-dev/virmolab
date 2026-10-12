@@ -1,4 +1,4 @@
-"""Konsol Python di dalam VirmoDock (Alat › Konsol Python) — untuk pengguna mahir dan pembuat plugin.
+"""Konsol Python di dalam VirmoDock (Alat › Konsol Python) - untuk pengguna mahir dan pembuat plugin.
 
 Variabel siap pakai: vd (jendela utama), proyek, objek, np, dan modul inti VirmoDock (molekul, mesin, analisis, ekspor,
 md, prep_ligan, prep_reseptor). Kode berjalan di thread antarmuka: perintah lama membuat jendela tidak merespons

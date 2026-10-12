@@ -12,7 +12,7 @@ from PySide6.QtWidgets import (QAbstractItemView, QDialog, QDialogButtonBox, QDo
 from ..core.laporan import id_angka
 from ..core.prep_reseptor import MAKS_FLEKSIBEL
 
-# perkiraan torsi rantai samping (termasuk CA–CB) per residu, untuk estimasi ruang pencarian
+# perkiraan torsi rantai samping (termasuk CA-CB) per residu, untuk estimasi ruang pencarian
 TORSI = {"SER": 2, "THR": 2, "CYS": 2, "VAL": 1, "ILE": 2, "LEU": 2, "ASP": 2, "ASN": 2, "GLU": 3, "GLN": 3,
          "HIS": 2, "HID": 2, "HIE": 2, "HIP": 2, "PHE": 2, "TYR": 3, "TRP": 2, "MET": 3, "LYS": 4, "ARG": 4,
          "ASH": 2, "GLH": 3, "LYN": 4, "CYX": 2}
@@ -52,7 +52,7 @@ class DialogFleksibel(QDialog):
         self.matikan = False
         v = QVBoxLayout(self)
         ket = QLabel("Rantai samping yang dicentang boleh berotasi selama docking (induced fit terbatas). "
-                     "Pilih 2–6 residu kantong yang paling dekat dengan ligan; makin banyak residu, ruang pencarian "
+                     "Pilih 2-6 residu kantong yang paling dekat dengan ligan; makin banyak residu, ruang pencarian "
                      "membesar cepat dan hasil makin bergantung pada exhaustiveness/jumlah run. "
                      "Didukung AutoDock-GPU dan Vina (bukan AutoDock4).")
         ket.setWordWrap(True)
@@ -81,11 +81,11 @@ class DialogFleksibel(QDialog):
         self.l_info.setWordWrap(True)
         v.addWidget(self.l_info)
         bb = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
-        bb.button(QDialogButtonBox.Ok).setText("Terapkan")
+        bb.button(QDialogButtonBox.Ok).setText("✓ Terapkan")
         bb.button(QDialogButtonBox.Ok).setObjectName("primary")
-        bb.button(QDialogButtonBox.Cancel).setText("Batal")
+        bb.button(QDialogButtonBox.Cancel).setText("✕ Batal")
         if terpilih:
-            b = QPushButton("Kembali ke reseptor kaku")
+            b = QPushButton("↩ Kembali ke reseptor kaku")
             b.clicked.connect(self._matikan)
             bb.addButton(b, QDialogButtonBox.ResetRole)
         bb.accepted.connect(self.accept)

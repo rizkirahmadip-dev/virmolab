@@ -1,6 +1,11 @@
 import subprocess, time, sys
 from pathlib import Path
 from virmodock.core import mesin as M
+import pathlib as _pl
+_butuh = [_pl.Path("dev/uji/1HSG_rec.pdbqt"), _pl.Path("dev/uji/MK1.pdbqt")]
+if not all(f.exists() for f in _butuh):
+    print("LEWAT: butuh reseptor/ligan PDBQT contoh di dev/uji/ (siapkan lewat GUI atau dev/uji_wizard_reseptor.py)")
+    raise SystemExit(0)
 d=Path("dev/uji/run"); d.mkdir(exist_ok=True)
 rec=open("dev/uji/1HSG_rec.pdbqt").read(); lig=open("dev/uji/MK1.pdbqt").read()
 (d/"reseptor.pdbqt").write_text(rec); (d/"MK1.pdbqt").write_text(lig)

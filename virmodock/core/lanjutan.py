@@ -89,14 +89,38 @@ def ringkas_gnina(teks):
     return "\n".join(baris)
 
 
-def skor_gnina(teks_pdb, sdf, folder):
+def batasi_gnina(daftar, n=10, semua=False):
+    """Ligan yang akan dinilai GNINA. Bawaan: n energi terbaik. semua=True mengambil seluruh daftar."""
+    urut = sorted(daftar, key=lambda l: l.get("energi") if isinstance(l.get("energi"), (int, float)) else 1e9)
+    if semua or len(urut) <= n:
+        return urut
+    return urut[:n]
+
+
+def angka_gnina(teks):
+    """Affinity (kcal/mol), CNNscore (0-1), CNNaffinity (pK). None bila barisnya tidak ada."""
+    import re
+    def ambil(pola):
+        m = re.search(pola, teks or "", re.I)
+        return float(m.group(1)) if m else None
+    return {
+        "affinity": ambil(r"affinity:\s*(-?\d+(?:\.\d+)?)"),
+        "cnnscore": ambil(r"cnn\s*score:\s*(-?\d+(?:\.\d+)?)"),
+        "cnnaffinity": ambil(r"cnn\s*affinity:\s*(-?\d+(?:\.\d+)?)"),
+    }
+
+
+def skor_gnina(teks_pdb, sdf, folder, pdbqt=False):
     """Nilai ulang satu pose. sdf adalah teks berkas SDF (sudah berisi koordinat)."""
     st = status_gnina()
     if not st["ada"]:
         raise RuntimeError(st["pesan"])
     folder = Path(folder)
     folder.mkdir(parents=True, exist_ok=True)
-    rec, lig, out = folder / "reseptor_gnina.pdb", folder / "ligan_gnina.sdf", folder / "skor_gnina.sdf"
+    rec = folder / ("reseptor_gnina.pdbqt" if pdbqt else "reseptor_gnina.pdb")
+    lig, out = folder / "ligan_gnina.sdf", folder / "skor_gnina.sdf"
+    teks_pdb = (teks_pdb or "").replace("\x00", "")
+    sdf = (sdf or "").replace("\x00", "")
     rec.write_text(teks_pdb if teks_pdb.endswith("\n") else teks_pdb + "\n", encoding="utf-8")
     lig.write_text(sdf if sdf.endswith("\n") else sdf + "\n", encoding="utf-8")
     # cuDNN 9 ikut roda PyTorch di lingkungan Boltz; biner GNINA tidak membawanya.
@@ -122,6 +146,14 @@ def skor_gnina(teks_pdb, sdf, folder):
     return ringkas + "\n\n" + CATATAN_GNINA + "\nSkor CNN ditulis di skor_gnina.sdf pada folder yang dipilih." + catatan
 
 
+def nilai_gnina_pose(teks_reseptor_pdbqt, teks_ligan_pdbqt, pose_pdbqt, folder):
+    """Tiga angka GNINA untuk satu pose. Gagal bila programnya tidak ada atau tidak menulis afinitas."""
+    from rdkit import Chem
+    from .analisis import pose_mol
+    mol = pose_mol(teks_ligan_pdbqt, (pose_pdbqt or "").replace("\x00", ""))
+    return angka_gnina(skor_gnina(teks_reseptor_pdbqt, Chem.MolToMolBlock(mol), folder, pdbqt=True))
+
+
 def _yaml_boltz(sekuens_rantai, smiles, msa_kosong=True):
     import yaml
     urut = []
@@ -139,7 +171,12 @@ def _yaml_boltz(sekuens_rantai, smiles, msa_kosong=True):
     return yaml.safe_dump({"version": 1, "sequences": urut}, sort_keys=False, allow_unicode=True)
 
 
-def prediksi_boltz(sekuens_rantai, smiles, folder, gpu=True, msa_server=False):
+def _langkah_boltz(penuh):
+    """(daur ulang, langkah difusi). Penuh mengikuti bawaan Boltz; ringkas supaya muat di GPU 6 GB."""
+    return ("3", "200") if penuh else ("1", "50")
+
+
+def prediksi_boltz(sekuens_rantai, smiles, folder, gpu=True, msa_server=False, penuh=False):
     st = status_boltz()
     if not st["ada"]:
         raise RuntimeError(st["pesan"])
@@ -149,16 +186,17 @@ def prediksi_boltz(sekuens_rantai, smiles, folder, gpu=True, msa_server=False):
     yaml_path.write_text(_yaml_boltz(sekuens_rantai, smiles, msa_kosong=not msa_server), encoding="utf-8")
     keluar = folder / "boltz_out"
     aks = "gpu" if gpu else "cpu"
+    daur, langkah = _langkah_boltz(penuh)
     cmd = " ".join([
         f"{ALAT}/boltz/bin/boltz", "predict", shlex.quote(ke_wsl(yaml_path)),
         "--out_dir", shlex.quote(ke_wsl(keluar)),
         "--accelerator", aks,
         "--model", "boltz2",
         "--diffusion_samples", "1",
-        "--recycling_steps", "1",
-        "--sampling_steps", "50",
+        "--recycling_steps", daur,
+        "--sampling_steps", langkah,
         "--diffusion_samples_affinity", "1",
-        "--sampling_steps_affinity", "50",
+        "--sampling_steps_affinity", langkah,
         "--max_parallel_samples", "1",
         "--output_format", "pdb",
         "--num_workers", "0",
@@ -166,7 +204,7 @@ def prediksi_boltz(sekuens_rantai, smiles, folder, gpu=True, msa_server=False):
         "--no_kernels",
         "--override",
     ] + (["--use_msa_server"] if msa_server else []))
-    p = _wsl(cmd, timeout=7200)
+    p = _wsl(cmd, timeout=14400 if penuh else 7200)
     bersih = _tanpa_jalur((p.stdout or "") + "\n" + (p.stderr or ""))
     struktur = list(keluar.rglob("*.pdb")) + list(keluar.rglob("*.cif")) + list(keluar.rglob("*.mmcif"))
     gagal = p.returncode != 0 or not struktur or "Failed to process" in ((p.stdout or "") + (p.stderr or ""))
@@ -175,8 +213,10 @@ def prediksi_boltz(sekuens_rantai, smiles, folder, gpu=True, msa_server=False):
     cara = ("MSA diminta ke peladen ColabFold; sekuens ikut terkirim." if msa_server
             else "MSA satu sekuens, tanpa peladen. Jangan dikutip sebagai struktur pembanding kristal.")
     from .arti import CATATAN_BOLTZ
-    return ("Prediksi Boltz-2 selesai. Pengaturan diringkas supaya muat di GPU 6 GB "
-            "(1 daur ulang, 50 langkah). " + cara + " " + CATATAN_BOLTZ
+    pengaturan = (f"Pengaturan penuh: {daur} daur ulang, {langkah} langkah, "
+                  f"{len(sekuens_rantai)} rantai protein." if penuh else
+                  "Pengaturan diringkas supaya muat di GPU 6 GB (1 daur ulang, 50 langkah).")
+    return ("Prediksi Boltz-2 selesai. " + pengaturan + " " + cara + " " + CATATAN_BOLTZ
             + " Hasil ada di folder boltz_out.\n" + bersih[-600:])
 
 

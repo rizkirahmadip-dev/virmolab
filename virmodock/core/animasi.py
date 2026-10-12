@@ -8,12 +8,12 @@ from pathlib import Path
 
 JENIS = {"sinema": "Presentasi sinematik (zoom → putar → sorot interaksi)", "putar": "Putar 360°",
          "goyang": "Goyang ±30°", "zoom": "Zoom masuk ke situs pengikatan"}
-FORMAT = {"mp4": "Video MP4 H.264 (kualitas terbaik, Full HD–4K)", "gif": "GIF animasi (WhatsApp, web)",
+FORMAT = {"mp4": "Video MP4 H.264 (kualitas terbaik, Full HD-4K)", "gif": "GIF animasi (WhatsApp, web)",
           "webp": "WebP animasi (lebih kecil, warna penuh)", "png": "Folder bingkai PNG (untuk video editor)"}
 
 
 def simpan(bingkai, f, fmt, fps, lapor=None, ukuran=None):
-    """bingkai: list bytes PNG. f: berkas (gif/webp) atau folder (png). ukuran: (lebar, tinggi) akhir —
+    """bingkai: list bytes PNG. f: berkas (gif/webp) atau folder (png). ukuran: (lebar, tinggi) akhir - 
     bingkai yang dirender lebih besar (layar HiDPI) diperkecil LANCZOS = antialias tambahan.
     Kembalikan jalur keluaran."""
     from PIL import Image

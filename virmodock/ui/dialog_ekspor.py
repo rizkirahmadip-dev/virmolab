@@ -119,7 +119,7 @@ class DialogEkspor(QDialog):
         self.s_jenis.addItem("SDF bertag · semua pose ligan aktif", "sdf_pose")
         self.s_jenis.addItem("PDBQT · pose aktif", "pdbqt")
         f.addRow("Isi", self.s_jenis)
-        f.addRow(_ket("SDF berisi tag ΔG, Ki, LE, klaster, RMSD, jumlah interaksi, SMILES — terbaca di DataWarrior, "
+        f.addRow(_ket("SDF berisi tag ΔG, Ki, LE, klaster, RMSD, jumlah interaksi, SMILES - terbaca di DataWarrior, "
                       "KNIME, PyMOL. Kompleks PDB: ligan di rantai L (HETATM + CONECT) dengan REMARK hasil."))
         if not ada_pose:
             f.addRow(_ket("Pose aktif: pilih pose di panel Objek atau klik dua kali baris di tab Hasil."))
@@ -131,7 +131,7 @@ class DialogEkspor(QDialog):
         self.t_fmt = QComboBox()
         self.t_fmt.addItems(["Excel (.xlsx)", "CSV"])
         self.t_sep = QComboBox()
-        self.t_sep.addItem("Titik koma ( ; ) — Excel Indonesia", ";")
+        self.t_sep.addItem("Titik koma ( ; ) - Excel Indonesia", ";")
         self.t_sep.addItem("Koma ( , )", ",")
         self.t_sep.addItem("Tab", "\t")
         self.t_dec = QComboBox()
@@ -165,7 +165,7 @@ class DialogEkspor(QDialog):
         f.addRow(self.l_gambar)
         f.addRow(_ket("Isi: validasi redocking, reseptor & preparasi, parameter dan perangkat, tabel 15 teratas, "
                       "gambar & interaksi ligan terbaik, metode singkat dengan kriteria interaksi, sitasi software. "
-                      "HTML interaktif: satu berkas yang bisa dibuka offline di peramban — pose 3D 30 ligan teratas "
+                      "HTML interaktif: satu berkas yang bisa dibuka offline di peramban - pose 3D 30 ligan teratas "
                       "(klik baris tabel), tabel lengkap yang bisa dicari & diurutkan, dan laporan lengkap."))
         self.stack.addWidget(w)
 
@@ -188,7 +188,7 @@ class DialogEkspor(QDialog):
         b = QPushButton("Ekspor…")
         b.setObjectName("primary")
         b.clicked.connect(self._ekspor)
-        t = QPushButton("Tutup")
+        t = QPushButton("✕ Tutup")
         t.clicked.connect(self.reject)
         bawah.addWidget(b)
         bawah.addWidget(t)
@@ -219,9 +219,9 @@ class DialogEkspor(QDialog):
         w, h = self.ukuran_3d()
         teks = f"{w} × {h} px"
         if max(w, h) > MAKS_PX:
-            teks += f"  — melebihi {MAKS_PX} px, akan dibatasi"
+            teks += f" - melebihi {MAKS_PX} px, akan dibatasi"
         elif max(w, h) > 4096:
-            teks += "  — dirender per ubin (lebih lama)"
+            teks += " - dirender per ubin (lebih lama)"
         self.g_px.setText(teks)
 
     def _ekspor(self):

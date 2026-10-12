@@ -50,11 +50,11 @@ class DialogKovalen(QDialog):
         v.addWidget(self.l_info)
         bb = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         self.b_ok = bb.button(QDialogButtonBox.Ok)
-        self.b_ok.setText("Aktifkan docking kovalen")
+        self.b_ok.setText("✓ Aktifkan docking kovalen")
         self.b_ok.setObjectName("primary")
-        bb.button(QDialogButtonBox.Cancel).setText("Batal")
+        bb.button(QDialogButtonBox.Cancel).setText("✕ Batal")
         if terpilih:
-            b = QPushButton("Matikan (docking biasa)")
+            b = QPushButton("✕ Matikan (docking biasa)")
             b.clicked.connect(self._matikan)
             bb.addButton(b, QDialogButtonBox.ResetRole)
         bb.accepted.connect(self.accept)
@@ -123,12 +123,12 @@ class DialogKovalen(QDialog):
             self.t_lig.insertRow(r)
             self.t_lig.setItem(r, 0, QTableWidgetItem(nama))
             if mol is None:
-                it = QTableWidgetItem("molekul tidak terbaca — akan dilewati")
+                it = QTableWidgetItem("molekul tidak terbaca - akan dilewati")
             elif wh:
                 cocok += 1
                 it = QTableWidgetItem(wh[0][1] + (f" (+{len(wh) - 1} lain; yang pertama dipakai)" if len(wh) > 1 else ""))
             else:
-                it = QTableWidgetItem("tidak ada — akan dilewati")
+                it = QTableWidgetItem("tidak ada - akan dilewati")
             if mol is None or not wh:
                 it.setForeground(Qt.gray)
             self.t_lig.setItem(r, 1, it)

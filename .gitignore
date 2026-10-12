@@ -41,3 +41,4 @@ vendor/adgpu_src/input/
 
 # Dibuat ulang oleh build_tools/rilis.py
 docs/Tutorial_Docking_VirmoDock.pdf
+uji_mandiri.json

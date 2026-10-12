@@ -219,6 +219,14 @@ def uji(lapor=None):
         return f"WLOGP {s['wlogp']}, TPSA {s['tpsa']}, PAINS {kat} pola"
     cek("Sifat ligan (QED, PAINS, BOILED-Egg)", sifat_lig)
 
+    def sas_uji():
+        from . import sascore
+        s_asp = sascore.hitung_sascore("CC(=O)Oc1ccccc1C(=O)O")
+        if s_asp is None or not (1.0 <= s_asp <= 2.5):
+            raise RuntimeError(f"SAScore aspirin tidak wajar: {s_asp}")
+        return f"aspirin {s_asp:.2f} ({sascore.kategori(s_asp)}), RDKit Contrib SA_Score"
+    cek("Kemudahan sintesis (SAScore)", sas_uji)
+
     def stat():
         from . import statistik
         k = statistik.korelasi([1, 2, 3, 4, 5], [2.1, 3.9, 6.2, 8.1, 9.8])
@@ -305,7 +313,7 @@ def uji(lapor=None):
         M = K.matriks([K.sidik_jari(x, "gobbi") for x in m])
         h = Chem.AddHs(m[0])
         AllChem.EmbedMolecule(h, randomSeed=1)
-        return f"Tanimoto aspirin–salisilat {M[0][1]:.2f}; farmakofor: {K.ringkas_fitur(K.fitur(h))}"
+        return f"Tanimoto aspirin-salisilat {M[0][1]:.2f}; farmakofor: {K.ringkas_fitur(K.fitur(h))}"
     cek("Kemiripan & farmakofor (RDKit)", kemiripan_uji)
 
     def pustaka_uji():

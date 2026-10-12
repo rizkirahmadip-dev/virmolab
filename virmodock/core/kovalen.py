@@ -1,12 +1,12 @@
 """Docking kovalen (metode tethered / flexible side chain, Bianco dkk. 2016) untuk AutoDock-GPU.
 
 Ligan direaksikan secara kimia dengan rantai samping residu sasaran (Cys/Ser/Lys) menjadi satu aduk
-"residu + ligan". Aduk dijadikan residu fleksibel (akar = CA, CA–CB disejajarkan dengan struktur kristal),
+"residu + ligan". Aduk dijadikan residu fleksibel (akar = CA, CA-CB disejajarkan dengan struktur kristal),
 reseptor kaku kehilangan rantai samping residu tsb, lalu AutoDock-GPU dijalankan dengan --flexres saja
-(tanpa --lfile). Divalidasi pada 6OIM (KRAS G12C–sotorasib): pose kristal terulang, RMSD 1,11 Å
+(tanpa --lfile). Divalidasi pada 6OIM (KRAS G12C-sotorasib): pose kristal terulang, RMSD 1,11 Å
 (dev/uji/kovalen/eksperimen.py).
 
-Skor yang dilaporkan AutoDock-GPU untuk pose kovalen = energi internal residu fleksibel (aduk–reseptor + intra-aduk)
+Skor yang dilaporkan AutoDock-GPU untuk pose kovalen = energi internal residu fleksibel (aduk-reseptor + intra-aduk)
 tanpa penalti torsi; bukan ΔG ikatan dan tidak sebanding dengan docking non-kovalen.
 """
 import numpy as np
@@ -21,7 +21,7 @@ ALIAS = {"CYX": "CYS", "CYM": "CYS", "LYN": "LYS"}
 PENANDA = "REMARK VIRMODOCK KOVALEN"     # baris penanda pada blok pose: "<PENANDA> <n atom residu>"
 
 # gugus reaktif (warhead), urut prioritas. jenis:
-#   adisi       : orde ikatan a1–a2 turun satu, nukleofil terikat ke a1 (akseptor Michael, nitril, aldehida)
+#   adisi       : orde ikatan a1-a2 turun satu, nukleofil terikat ke a1 (akseptor Michael, nitril, aldehida)
 #   substitusi  : atom a3 (gugus pergi) dibuang, nukleofil terikat ke a1
 #   imina       : a2 (O) dibuang, nukleofil terikat rangkap ke a1 (basa Schiff Lys + aldehida)
 WARHEAD = [
@@ -45,8 +45,8 @@ REAKTIVITAS = {
     "michael": "tinggi pada Cys; sering diperlakukan ireversibel",
     "propiolamida": "tinggi, khas inhibitor KRAS G12C",
     "haloasetamida": "tinggi; alfa-halokarbonil reaktif terhadap Cys dan Lys",
-    "sulfonil_fluorida": "sedang–tinggi (SuFEx), lebih memilih Ser/Lys",
-    "nitril": "rendah–sedang, sering reversibel",
+    "sulfonil_fluorida": "sedang-tinggi (SuFEx), lebih memilih Ser/Lys",
+    "nitril": "rendah-sedang, sering reversibel",
     "aldehida_imina": "reversibel (basa Schiff) pada Lys",
     "aldehida": "reversibel (hemiacetal) pada Cys/Ser",
     "isotiosianat": "tinggi terhadap Cys; produk tiourea",
@@ -192,7 +192,7 @@ def buat_aduk(mol, resn, ca, cb, kunci_warhead=None, seed=42):
         AllChem.MMFFOptimizeMolecule(aduk, maxIters=500)
     except Exception:
         pass
-    # sejajarkan sumbu CA–CB aduk ke CA–CB kristal (ditambah satu titik semu agar transformasi tertentu penuh)
+    # sejajarkan sumbu CA-CB aduk ke CA-CB kristal (ditambah satu titik semu agar transformasi tertentu penuh)
     acuan = Chem.RWMol()
     for _ in range(2):
         acuan.AddAtom(Chem.Atom(6))
@@ -205,7 +205,7 @@ def buat_aduk(mol, resn, ca, cb, kunci_warhead=None, seed=42):
     rdMolAlign.AlignMol(aduk, acuan, atomMap=[(0, 0), (1, 1)])
     pos = aduk.GetConformer().GetPositions()
     if np.linalg.norm(pos[0] - np.asarray(ca)) > 0.3:
-        raise GalatKovalen("penyejajaran CA–CB gagal")
+        raise GalatKovalen("penyejajaran CA-CB gagal")
     return aduk, n, wh[1]
 
 

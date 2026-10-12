@@ -1,4 +1,4 @@
-"""Baris perintah VirmoDock (tanpa jendela) — untuk skrip, batch, dan reproduksibilitas metode.
+"""Baris perintah VirmoDock (tanpa jendela) - untuk skrip, batch, dan reproduksibilitas metode.
 
   VirmoDock-cli.exe <perintah> [opsi]        (dari kode sumber: python -m virmodock.cli <perintah> [opsi])
 
@@ -75,7 +75,7 @@ def _baca_reseptor_masukan(teks_arg, af_ambang=50.0):
     if m:
         from .core import alphafold
         objs, teks, meta = alphafold.unduh(m.group(1), ambang=af_ambang, pangkas_aktif=af_ambang > 0)
-        _cetak(f"AlphaFold {meta['entri']} v{meta['versi']} — {meta['nama']} ({meta['organisme']}), "
+        _cetak(f"AlphaFold {meta['entri']} v{meta['versi']} - {meta['nama']} ({meta['organisme']}), "
                f"pLDDT rerata {meta['plddt_rerata']}" + (f", dipangkas {meta['dibuang']}" if meta["n_dibuang"] else ""))
         prot = next(o for o in objs if o.jenis == "protein")
         return prot.teks, "pdb", f"AF-{meta['aksesi']}", objs
@@ -187,7 +187,7 @@ def _siapkan_ligan(sumber, a, folder):
                             minimisasi=not a.tanpa_minimisasi)
         for h in pl.siapkan_banyak(mentah, opsi):
             if h.status == "gagal":
-                _cetak(f"  gagal: {h.nama} — {h.alasan}")
+                _cetak(f"  gagal: {h.nama} - {h.alasan}")
                 continue
             if h.alasan:
                 _cetak(f"  {h.nama}: {h.alasan}")
@@ -242,9 +242,9 @@ def cmd_alphafold(a):
     keluar = Path(a.keluar or f"AF-{meta['aksesi']}.pdb")
     keluar.write_text(prot.teks if a.ambang > 0 else teks, encoding="utf-8")
     fr = meta["fraksi"]
-    _cetak(f"{meta['entri']} v{meta['versi']} — {meta['nama']} ({meta['organisme']}) → {keluar}")
-    _cetak(f"pLDDT rerata {meta['plddt_rerata']}; >90 {fr.get('sangat tinggi', 0):.0%}, 70–90 {fr.get('yakin', 0):.0%}, "
-           f"50–70 {fr.get('rendah', 0):.0%}, <50 {fr.get('sangat rendah', 0):.0%}"
+    _cetak(f"{meta['entri']} v{meta['versi']} - {meta['nama']} ({meta['organisme']}) → {keluar}")
+    _cetak(f"pLDDT rerata {meta['plddt_rerata']}; >90 {fr.get('sangat tinggi', 0):.0%}, 70-90 {fr.get('yakin', 0):.0%}, "
+           f"50-70 {fr.get('rendah', 0):.0%}, <50 {fr.get('sangat rendah', 0):.0%}"
            + (f"; dipangkas {meta['dibuang']}" if meta["n_dibuang"] else ""))
     return 0
 
@@ -365,7 +365,7 @@ def cmd_dock(a):
             try:
                 aduk, fx, wh, _n = K.siapkan_ligan(f.read_text(), kv["resn"], rantai, resi, kv["ca"], kv["cb"])
             except Exception as e:
-                _cetak(f"  {nama}: dilewati — {e}")
+                _cetak(f"  {nama}: dilewati - {e}")
                 continue
             fa, ff = folder_aduk / f"{f.stem}.pdbqt", folder_aduk / f"{f.stem}_flex.pdbqt"
             fa.write_text(aduk, encoding="utf-8")
@@ -488,7 +488,7 @@ def cmd_dock(a):
                 (folder_pose / f"{dasar}_flex_terbaik.pdb").write_text(M.flex_ke_pdb(terbaik.flex), encoding="utf-8")
             _cetak(f"[{k}/{len(ligan)}] {nama}: {terbaik.energi:.2f} kcal/mol ({d['detik']} s)")
         else:
-            _cetak(f"[{k}/{len(ligan)}] {nama}: GAGAL — {pesan}")
+            _cetak(f"[{k}/{len(ligan)}] {nama}: GAGAL - {pesan}")
         baris.append(d)
     baris.sort(key=lambda x: float(x["dG_kcal_mol"]) if x["dG_kcal_mol"] != "" else 1e9)
     with open(out / "ringkasan.csv", "w", newline="", encoding="utf-8-sig") as fh:
@@ -514,11 +514,11 @@ def _tulis_metode(out, a, rec, kotak, sumber_kotak, p, mesin, n_lig, flex):
         f"VirmoDock {__version__} (baris perintah), {datetime.now():%Y-%m-%d %H:%M}",
         f"Perintah: {_perintah()}",
         "",
-        f"Reseptor: {rec.get('nama')} — {rec.get('metode')}"
+        f"Reseptor: {rec.get('nama')} - {rec.get('metode')}"
         + (f"; {rec.get('atom')} atom, {rec.get('residu')} residu" if rec.get("atom") else "")
         + (f"; ion logam: {', '.join(rec['logam'])}" if rec.get("logam") else ""),
         f"Residu fleksibel: {', '.join(rec.get('fleksibel') or []) or ('dari berkas' if flex else 'tidak (reseptor kaku)')}",
-        ("Docking kovalen: metode tethered ke {resn} {res} — ligan diikat ke rantai samping residu dan di-docking "
+        ("Docking kovalen: metode tethered ke {resn} {res} - ligan diikat ke rantai samping residu dan di-docking "
          "sebagai aduk (AutoDock-GPU --flexres); skor = energi aduk-reseptor, bukan dG ikatan"
          ).format(resn=rec["kovalen"]["resn"], res=rec["kovalen"]["residu"]) if rec.get("kovalen")
         else "Docking kovalen: tidak",
@@ -629,7 +629,7 @@ def cmd_uji(a):
     ok = ujimandiri.tulis(keluar)
     data = json.loads(Path(keluar).read_text(encoding="utf-8"))
     for h in data["hasil"]:
-        _cetak(("  OK    " if h["ok"] else "  GAGAL ") + h["uji"] + " — " + h["detail"].splitlines()[0][:160])
+        _cetak(("  OK    " if h["ok"] else "  GAGAL ") + h["uji"] + " - " + h["detail"].splitlines()[0][:160])
     _cetak(f"{sum(h['ok'] for h in data['hasil'])}/{len(data['hasil'])} lulus · {keluar}")
     return 0 if ok else KODE_GAGAL
 

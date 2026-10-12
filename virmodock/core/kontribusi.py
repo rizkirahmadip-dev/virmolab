@@ -3,7 +3,7 @@
 Vina 1.2 tidak lagi punya `--atom_terms`, jadi suku Vina dihitung ulang di sini dengan NumPy:
 tipe atom XS dari tipe AutoDock (PDBQT) + ikatan dari jarak kovalen, jarak permukaan d = r − R1 − R2,
 lalu gauss1, gauss2, repulsi, hidrofobik, dan ikatan H dengan bobot Vina (Trott & Olson 2010), batas 8 Å.
-Tiap pasangan ligan–reseptor dibebankan penuh ke atom ligan. Jumlah semua atom ≈ "Final Intermolecular
+Tiap pasangan ligan-reseptor dibebankan penuh ke atom ligan. Jumlah semua atom ≈ "Final Intermolecular
 Energy" `vina --score_only` (selisih kecil karena Vina memakai interpolasi grid).
 Nilai negatif = menguntungkan (hijau), positif = merugikan (merah).
 """

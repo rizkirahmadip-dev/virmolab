@@ -15,6 +15,22 @@ st.setValue("tema", "terang")
 st.remove("layout")
 st.remove("sesi_terbuka")
 SUMBER = sorted(Path("dev/uji/kerja_docs").glob("*.vmd"))[-1].resolve()  # proyek docs terbaru
+def _cukup_ligan(folder, minimal=3):
+    """Jumlah ligan berstatus selesai pada proyek contoh (uji ini perlu beberapa ligan untuk dibandingkan)."""
+    import json
+    try:
+        data = json.loads((folder / "proyek.json").read_text(encoding="utf-8"))
+    except Exception:
+        return 0
+    nama = {l["nama"] for j in data.get("job", []) for l in j.get("ligan", []) if l.get("status") == "selesai"}
+    return len(nama)
+
+
+if _cukup_ligan(SUMBER) < 3:
+    print(f"LEWAT: proyek contoh {SUMBER.name} hanya punya {_cukup_ligan(SUMBER)} ligan selesai; "
+          "uji ini butuh minimal 3. Jalankan docking beberapa ligan lalu salin proyeknya ke dev/uji/kerja_docs/.")
+    raise SystemExit(0)
+
 OUT = Path("dev/uji/statistik/gui").resolve()
 OUT.mkdir(parents=True, exist_ok=True)
 PROYEK = OUT / "proyek_uji.vmd"

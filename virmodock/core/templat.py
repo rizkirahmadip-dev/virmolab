@@ -7,6 +7,7 @@ SMILES inhibitor diambil dari pustaka obat disetujui (ChEMBL, dibundel).
 from .paths import PAKET
 
 CONTOH_PDB = PAKET / "aset" / "contoh" / "1HSG.pdb"
+CONTOH_HOMOLOG = PAKET / "aset" / "contoh" / "1HSG_homolog.fasta"
 # nama persis di pustaka obat disetujui (aset/obat_disetujui.tsv.gz)
 INHIBITOR_HIV = ["Saquinavir", "Ritonavir", "Indinavir Anhydrous", "Nelfinavir", "Amprenavir", "Lopinavir",
                  "Atazanavir", "Tipranavir", "Darunavir"]
@@ -15,7 +16,10 @@ KONTROL_NEGATIF = ("Aspirin", "CC(=O)Oc1ccccc1C(=O)O")
 TEMPLAT = [
     {"kunci": "contoh", "judul": "Contoh: HIV-1 protease (offline)", "preset": "Standar",
      "ket": "1HSG + 9 inhibitor protease yang disetujui + aspirin sebagai kontrol negatif. Untuk latihan tanpa internet.",
-     "langkah": ["Protein 1HSG dan 10 ligan sudah dimuat; grid box otomatis di ligan kristal MK1.",
+     "langkah": ["Redocking buta MK1 yang sudah diukur (dari SMILES, Vina exhaustiveness 16, seed 42): "
+                 "RMSD 1,39 Å, ΔG −11,18 kcal/mol, GNINA Affinity −11,56 kcal/mol. "
+                 "Angka ini bukan docking baru di proyek ini.",
+                 "Protein 1HSG dan 10 ligan sudah dimuat; grid box otomatis di ligan kristal MK1.",
                  "Langkah 1: Siapkan reseptor (PROPKA pH 7,4 disarankan).",
                  "Langkah 2: Siapkan ligan (semua 10 ligan).",
                  "Langkah 4: Jalankan docking (AD-GPU bila ada GPU).",
@@ -33,11 +37,11 @@ TEMPLAT = [
      "langkah": ["Ambil protein lalu Siapkan reseptor; atur grid box.",
                  "Ambil ligan: Siapkan › Pustaka ligan (obat disetujui / COCONUT) atau Buka berkas SDF.",
                  "Siapkan ligan (batch) lalu jalankan docking dengan preset Cepat.",
-                 "Urutkan hasil; docking ulang 10–20 teratas dengan preset Teliti atau mesin lain.",
+                 "Urutkan hasil; docking ulang 10-20 teratas dengan preset Teliti atau mesin lain.",
                  "Konsensus skor dan MD & MM/GBSA (tingkat Ringan) untuk teratas; periksa sifat ligan/ADMET."]},
     {"kunci": "redocking", "judul": "Validasi redocking", "preset": "Standar",
      "ket": "Membuktikan protokol docking mampu mengulang pose kristal (RMSD ≤ 2 Å) sebelum dipakai untuk ligan uji.",
-     "langkah": ["Ambil struktur kompleks protein–ligan dari RCSB PDB (pakai saran ★ di pencarian).",
+     "langkah": ["Ambil struktur kompleks protein-ligan dari RCSB PDB (pakai saran ★ di pencarian).",
                  "Siapkan reseptor (ligan asli otomatis dihapus dari reseptor).",
                  "Grid box: Pusat di ligan asli.",
                  "Docking › Validasi redocking: ligan kristal didocking ulang lalu RMSD dihitung.",
@@ -53,7 +57,7 @@ TEMPLAT = [
      "ket": "Mendocking obat yang sudah disetujui ke target baru, lalu memeringkat dan membandingkan dengan data ChEMBL.",
      "langkah": ["Ambil protein target lalu Siapkan reseptor; atur grid box (ligan asli atau Deteksi kantong).",
                  "Siapkan › Pustaka ligan › Obat disetujui: saring (mis. rute oral), centang semua, Impor.",
-                 "Siapkan ligan lalu jalankan docking preset Cepat (AD-GPU; ±1–3 detik per ligan dengan GPU).",
+                 "Siapkan ligan lalu jalankan docking preset Cepat (AD-GPU; ±1-3 detik per ligan dengan GPU).",
                  "Docking ulang 20 teratas dengan preset Teliti; MD & MM/GBSA tingkat Ringan untuk 10 teratas.",
                  "Analisis › Korelasi dengan data eksperimen (ChEMBL) untuk aktivitas yang sudah diketahui."]},
     {"kunci": "bahan_alam", "judul": "Bahan alam dari satu kelompok", "preset": "Cepat",

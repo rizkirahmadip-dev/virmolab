@@ -25,6 +25,7 @@ VARIABEL = [
     ("atom_berat", "Atom berat", "Atom berat", 0),
     ("fsp3", "Fsp3", "Fsp3", 2),
     ("qed", "QED", "QED", 2),
+    ("sascore", "Kemudahan sintesis (SAScore)", "SAScore", 2),
     ("pchembl", "pChEMBL eksperimen (ChEMBL)", "pChEMBL", 2),
     ("mmgbsa", "MM/GBSA ΔG (kcal/mol)", "MM/GBSA", 2),
 ]
@@ -49,7 +50,7 @@ def dataset(baris, sifat_per_lid):
                                                      "logam")),
              "rmsd_kristal": b.get("rmsd_kristal"), "ifp": b.get("ifp") or [], "ifp_sim": b.get("ifp_sim"),
              "mmgbsa": b.get("mmgbsa")}
-        for k in ("mw", "wlogp", "tpsa", "hbd", "hba", "rotb", "atom_berat", "fsp3", "qed", "pchembl"):
+        for k in ("mw", "wlogp", "tpsa", "hbd", "hba", "rotb", "atom_berat", "fsp3", "qed", "sascore", "pchembl"):
             d[k] = s.get(k)
         out.append(d)
     return out
@@ -140,7 +141,7 @@ def matriks(data, kunci, metode="pearson"):
 
 
 def kekuatan(r):
-    """Tafsiran kasar besaran |r| (Evans 1996) — hanya panduan."""
+    """Tafsiran kasar besaran |r| (Evans 1996) - hanya panduan."""
     a = abs(r)
     return ("sangat lemah" if a < 0.2 else "lemah" if a < 0.4 else "sedang" if a < 0.6 else
             "kuat" if a < 0.8 else "sangat kuat")
