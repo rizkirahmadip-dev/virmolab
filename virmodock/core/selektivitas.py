@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from pathlib import Path
 import math
 from rdkit import Chem
-from . import ekspor
+from . import catat, ekspor
 from .proyek import Proyek
 
 
@@ -37,7 +37,8 @@ def muat_proyek_ganda(daftar_jalur: List[Union[str, Path, Proyek]]) -> List[Tupl
         else:
             try:
                 pr = Proyek.buka(item)
-            except Exception:
+            except Exception as err:
+                catat.log.warning(f"Gagal membuka proyek '{item}' untuk analisis selektivitas: {err}")
                 continue
 
         # Tentukan nama target

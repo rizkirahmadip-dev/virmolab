@@ -14,6 +14,8 @@ import math
 import os
 from dataclasses import dataclass, field
 
+from . import catat
+
 import numpy as np
 
 KRITERIA = {"hbond_da": 3.5, "hbond_ha": 2.8, "hbond_sudut": 110.0, "hidrofobik": 4.0, "pi": 5.5,
@@ -479,7 +481,8 @@ def ringkas_ligan(proyek, l, pose, rec):
             break
         try:
             m = pose_mol(teks_in, p.pdbqt)
-        except Exception:
+        except Exception as e:
+            catat.log.warning(f"Gagal memetakan pose_mol: {e}")
             continue
         if i == 0:
             terbaik = m
@@ -502,8 +505,8 @@ def ringkas_ligan(proyek, l, pose, rec):
     if rec is not None and kr is not None:
         try:   # IFP pose kristal = acuan kolom 'IFP vs kristal'
             l["ifp_kristal"] = sidik_jari(interaksi(rec, kr))
-        except Exception:
-            pass
+        except Exception as e:
+            catat.log.debug(f"Gagal menghitung IFP kristal: {e}")
     if l["pose"] and "rmsd_kristal" in l["pose"][0]:
         l["rmsd_kristal"] = l["pose"][0]["rmsd_kristal"]
         l["rmsd_kristal_min"] = min(p.get("rmsd_kristal", 99) for p in l["pose"])

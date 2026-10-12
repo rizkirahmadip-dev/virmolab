@@ -9,6 +9,7 @@ Menggunakan RDKit Contrib SA_Score resmi dan pangkalan data fpscores bawaan.
 """
 import sys
 from pathlib import Path
+from . import catat
 
 _sascorer = None
 _inited = False
@@ -68,7 +69,8 @@ def hitung_sascore(mol):
             if m is None:
                 return None
             mol = m
-        except Exception:
+        except Exception as e:
+            catat.log.debug(f"SAScore: gagal parse SMILES '{mol}': {e}")
             return None
 
     mod = _muat_sascorer()
@@ -81,8 +83,8 @@ def hitung_sascore(mol):
         skor = mod.calculateScore(m)
         if skor is not None and not (isinstance(skor, float) and (skor != skor or skor == float("inf"))):
             return round(float(skor), 2)
-    except Exception:
-        pass
+    except Exception as e:
+        catat.log.debug(f"SAScore kalkulasi gagal: {e}")
     return None
 
 

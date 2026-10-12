@@ -62,7 +62,7 @@ def _uraikan_pdb(pdb_teks: str) -> List[Dict[str, Any]]:
                     "simbol": simbol,
                     "r": VDW_RADIUS.get(simbol, 1.70),
                 })
-            except Exception:
+            except (ValueError, IndexError):
                 continue
     return atom_list
 

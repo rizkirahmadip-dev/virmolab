@@ -10,7 +10,7 @@ Modul desain obat berbasis fragmen:
 from typing import Any, Dict, List
 from rdkit import Chem
 from rdkit.Chem import Descriptors, Crippen, QED, rdMolDescriptors
-from . import sascore
+from . import catat, sascore
 
 
 # Pustaka substituen baku untuk Fragment Growing
@@ -143,7 +143,8 @@ def tumbuhkan_fragmen(
                     counter += 1
                     if len(hasil) >= maks_hasil:
                         return hasil
-            except Exception:
+            except Exception as e:
+                catat.log.debug(f"Gagal menumbuhkan fragmen dengan {label_gugus}: {e}")
                 continue
 
     return hasil
@@ -222,7 +223,8 @@ def sambung_fragmen(
                         counter += 1
                         if len(hasil) >= maks_hasil:
                             return hasil
-                except Exception:
+                except Exception as e:
+                    catat.log.debug(f"Gagal menyambung fragmen dengan linker {label_l}: {e}")
                     continue
 
     return hasil

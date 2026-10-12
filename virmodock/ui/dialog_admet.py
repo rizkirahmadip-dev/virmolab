@@ -13,6 +13,7 @@ from PySide6.QtWidgets import (QCheckBox, QDialog, QHBoxLayout, QHeaderView, QLa
                                QTabWidget, QTableWidget, QTableWidgetItem, QTextBrowser, QVBoxLayout, QWidget)
 
 from ..core import admet as AD
+from ..core import catat
 from ..core import peta_tubuh as PT
 from . import kerja, kit
 from .peta_tubuh import PetaTubuh
@@ -187,7 +188,8 @@ class DialogAdmet(QDialog):
                 if mol.GetNumHeavyAtoms() < 6:      # serpihan kecil: prediksi ADMET tidak bermakna
                     continue
                 smi = Chem.MolToSmiles(mol)
-            except Exception:
+            except Exception as e:
+                catat.log.warning(f"ADMET dilewati untuk '{nama}': {e}")
                 continue
             c = (l or {}).get("admet") or {}
             hasil = c.get("hasil") if c.get("smiles") == smi and c.get("v") == AD.VERSI else None

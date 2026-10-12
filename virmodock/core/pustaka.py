@@ -18,7 +18,7 @@ import time
 import urllib.request
 import zlib
 
-from . import paths
+from . import catat, paths
 
 FILE_OBAT = paths.PAKET / "aset" / "obat_disetujui.tsv.gz"
 URL_COCONUT = "https://coconut.s3.uni-jena.de/prod/downloads/2026-10/coconut_csv_lite-10-2026.zip"
@@ -88,7 +88,8 @@ def coconut_ada():
             n = c.execute("SELECT nilai FROM meta WHERE kunci='jumlah'").fetchone()
             w = c.execute("SELECT nilai FROM meta WHERE kunci='waktu'").fetchone()
         return {"jumlah": int(n[0]), "waktu": w[0], "ukuran": p.stat().st_size}
-    except Exception:
+    except Exception as e:
+        catat.log.debug(f"Gagal membaca status SQLite COCONUT: {e}")
         return None
 
 
@@ -97,7 +98,7 @@ def _konteks_ssl():
     try:
         import certifi
         return ssl.create_default_context(cafile=certifi.where())
-    except Exception:
+    except (ImportError, Exception):
         return ssl.create_default_context()
 
 

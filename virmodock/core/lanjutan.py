@@ -8,6 +8,8 @@ import shutil
 import subprocess
 from pathlib import Path
 
+from . import catat
+
 ALAT = "$HOME/virmodock-alat"
 
 
@@ -302,8 +304,8 @@ def paket_server(folder, teks_reseptor, teks_pdbqt, mol):
         catatan = "Topologi GROMACS tidak lengkap: " + str(e)[:400]
         try:
             tulis_gro(modeller.topology, modeller.positions, folder / "kompleks.gro")
-        except Exception:
-            pass
+        except Exception as egro:
+            catat.log.warning(f"Gagal menulis kompleks.gro: {egro}")
     (folder / "BACA.txt").write_text(
         "Paket ini untuk dijalankan di komputer lain.\n"
         "sistem_obc2.xml  : sistem OpenMM pelarut implisit OBC2 (ff14SB + OpenFF pada ligan).\n"

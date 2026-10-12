@@ -36,7 +36,7 @@ def _uraikan_air(pdb_teks: str) -> List[Dict[str, Any]]:
                         "resi": resi,
                         "pos": np.array([x, y, z], dtype=np.float64),
                     })
-                except Exception:
+                except (ValueError, IndexError):
                     continue
     return air_list
 

@@ -10,7 +10,7 @@ from PySide6.QtWidgets import (QComboBox, QDialog, QFileDialog, QGroupBox, QHBox
                                QHeaderView, QLabel, QPushButton, QSplitter,
                                QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget)
 
-from ..core import ekspor as eksmod
+from ..core import catat, ekspor as eksmod
 from ..core import grafik, mpo, sifat
 from ..core.laporan import id_angka
 from . import kit, theme
@@ -159,7 +159,8 @@ class DialogMPO(QDialog):
             if not isinstance(s, dict) or s.get("v") != sifat.VERSI:
                 try:
                     s = sifat.dari_teks(teks, fmt)
-                except Exception:
+                except Exception as e:
+                    catat.log.warning(f"MPO: gagal membaca sifat ligan '{nama}': {e}")
                     continue
                 if l is not None:
                     l["sifat"] = s

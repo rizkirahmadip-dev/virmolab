@@ -12,7 +12,7 @@ from PySide6.QtWidgets import (QApplication, QButtonGroup, QDockWidget, QFileDia
                                QMessageBox, QSystemTrayIcon, QTabWidget, QToolBar, QToolButton, QVBoxLayout,
                                QWidget)
 
-from ..core import analisis, diagram2d, laporan
+from ..core import analisis, arti, catat, diagram2d, laporan
 from ..core import antrean as antreanmod
 from ..core import ekspor as eksmod
 from ..core import env as envmod
@@ -23,19 +23,12 @@ from ..core import sifat as sifat_mod
 from ..core import statistik as stat_mod
 from ..core.proyek import Proyek, nama_aman
 from . import icons, kerja, kit, theme
-from .dialog_ligan import DialogLigan
-from .dialog_reseptor import DialogReseptor
-from .dialog_bantuan import DialogApaBaru, DialogLapor, DialogLisensi
-from .dialogs import DialogAmbil, DialogProgresUnduh, Wizard
-from .dialog_ekspor import DialogEkspor
 from .panel_antrean import PanelAntrean
 from .panel_hasil import PanelHasil
 from .panel_interaksi import PanelInteraksi, TabDiagram
 from .tab_sifat import TabSifat
 from .tab_statistik import TabStatistik
 from .tab_uji import TabUji
-from .dialog_komposer import DialogKomposer
-from .dialog_animasi import DialogAnimasi
 from .panel_alur import DaftarLangkah, PanelLangkah, SKEMA_ALUR
 from .halaman_awal import HalamanAwal
 from .tab_banding import TabBanding
@@ -1047,9 +1040,13 @@ class JendelaUtama(QMainWindow):
                 A("Lapor masalah atau kirim saran…", None, self.lapor_masalah, None,
                   "Susun laporan beserta info sistem dan log (Anda yang mengirim)"),
                 A("Buka folder log", None, lambda: QDesktopServices.openUrl(QUrl.fromLocalFile(str(paths.LOG))), None),
-                A("Lisensi dan cara mengutip…", None, lambda: DialogLisensi(VERSI, self).exec(), None),
+                A("Lisensi dan cara mengutip…", None, self._buka_lisensi, None),
                 None,
                 A("Tentang VirmoDock", None, self.tentang, None)))
+
+    def _buka_lisensi(self):
+        from .dialog_bantuan import DialogLisensi
+        DialogLisensi(VERSI, self).exec()
 
     # ------------------------------------------------------------- bantu menu
     def _aksi_objek(self, aksi):
@@ -1099,6 +1096,7 @@ class JendelaUtama(QMainWindow):
         QDesktopServices.openUrl(QUrl.fromLocalFile(str(self.proyek.folder)))
 
     def apa_baru(self, sejak=None):
+        from .dialog_bantuan import DialogApaBaru
         d = DialogApaBaru(VERSI, self, sejak)
         d.setAttribute(Qt.WA_DeleteOnClose)
         d.show()
@@ -1349,6 +1347,7 @@ class JendelaUtama(QMainWindow):
         self.m_buka_di.addSeparator()
         self.m_buka_di.addAction("Atur lokasi program…", self.atur_eksternal)
         if wizard or not self.st.value("wizard_selesai", False, type=bool):
+            from .dialogs import Wizard
             w = Wizard(e, self.st.value("folder_kerja", str(paths.folder_kerja_bawaan())), self)
             if w.exec():
                 self.st.setValue("folder_kerja", w.ed_folder.text())
@@ -1817,6 +1816,7 @@ class JendelaUtama(QMainWindow):
         kerja.jalankan(kerjakan, selesai=self.tambah_objek, galat=self._galat, log=self.log.tulis)
 
     def ambil(self, tab):
+        from .dialogs import DialogAmbil, DialogProgresUnduh
         d = DialogAmbil(self, tab)
         if not d.exec():
             return
@@ -2733,6 +2733,7 @@ class JendelaUtama(QMainWindow):
         if not protein:
             self._galat("Belum ada protein. Muat struktur dulu di langkah 1 (Ambil dari RCSB PDB atau Buka berkas).")
             return
+        from .dialog_reseptor import DialogReseptor
         d = DialogReseptor(protein, {o.id: self._logam_dari(o) for o in protein}, self, self.aktif,
                            teks_sumber=self._teks_sumber_reseptor)
         d.r_baku.setChecked(self.st.value("prep/protonasi", "propka") == "templat")
@@ -2824,6 +2825,7 @@ class JendelaUtama(QMainWindow):
 
     def siapkan_ligan(self):
         calon = [o for o in self.objek.values() if o.jenis == "ligan" and not o.info.get("siap_docking")]
+        from .dialog_ligan import DialogLigan
         d = DialogLigan(calon, self.mode, self)
         d.siap.connect(self._ligan_siap)
         d.exec()
@@ -3228,7 +3230,8 @@ class JendelaUtama(QMainWindow):
                 protein = gabung_flex(protein, blok.flex)
             rekam["interaksi"] = hitung(interaksi(protein, mol))
             rekam["le"] = efisiensi_ligan(blok.energi, mol.GetNumHeavyAtoms())
-        except Exception:
+        except Exception as err:
+            catat.log.debug(f"Gagal menghitung interaksi pose: {err}")
             return
 
     def _gambar_syarat(self, o):
@@ -3563,6 +3566,7 @@ class JendelaUtama(QMainWindow):
             return
         if self.tab_tengah.currentWidget() is not self.w_view:
             self.tab_tengah.setCurrentWidget(self.w_view)
+        from .dialog_animasi import DialogAnimasi
         dlg = DialogAnimasi(self, self.viewer.height() / max(1, self.viewer.width()))
         if not dlg.exec():
             return
@@ -3959,6 +3963,7 @@ class JendelaUtama(QMainWindow):
     # ------------------------------------------------------------ komposer figur
     def buka_komposer(self):
         if not self.komposer:
+            from .dialog_komposer import DialogKomposer
             self.komposer = DialogKomposer(self)
             self.komposer.minta.connect(self._komposer_tambah)
             self.komposer.ekspor.connect(self._ekspor_komposer)
@@ -4508,6 +4513,7 @@ class JendelaUtama(QMainWindow):
     def buka_ekspor(self, kategori=0):
         ada_pose = bool(self._aktif_inter and self.objek.get(self._aktif_inter["oid"]) and
                         self.objek[self._aktif_inter["oid"]].jenis == "pose")
+        from .dialog_ekspor import DialogEkspor
         d = DialogEkspor((self.viewer.width(), self.viewer.height()), ada_pose, self, kategori)
         d.minta.connect(self._ekspor)
         d.exec()
@@ -5315,6 +5321,7 @@ class JendelaUtama(QMainWindow):
         kerja.jalankan(ujimandiri.uji, selesai=selesai, galat=self._galat, log=self.log.tulis)
 
     def lapor_masalah(self):
+        from .dialog_bantuan import DialogLapor
         DialogLapor(VERSI, self.env, self).exec()
 
     def _belum(self):
@@ -5326,7 +5333,8 @@ class JendelaUtama(QMainWindow):
         self.log.tulis(t)
 
     def _galat(self, g):
-        self.pesan.tulis(g)
+        g_edu = arti.edukasi_galat(g)
+        self.pesan.tulis(g_edu)
         self._pesan_belum_dibaca += 1
         if self._bawah_ditutup_pengguna:
             self._sinkron_bawah()      # pengguna sengaja menutup panel: cukup lencana di bilah status

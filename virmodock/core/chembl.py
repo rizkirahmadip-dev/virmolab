@@ -8,6 +8,8 @@ import statistics
 import urllib.parse
 import urllib.request
 
+from . import catat
+
 API = "https://www.ebi.ac.uk/chembl/api/data"
 RCSB = "https://data.rcsb.org/rest/v1/core"
 JENIS_AKTIVITAS = ["IC50", "Ki", "Kd", "EC50"]
@@ -34,7 +36,8 @@ def entitas_pdb(kode):
     for e in ent:
         try:
             d = _json(f"{RCSB}/polymer_entity/{kode}/{e}")
-        except Exception:
+        except Exception as err:
+            catat.log.debug(f"Gagal mengambil polymer_entity {kode}/{e}: {err}")
             continue
         org = d.get("rcsb_entity_source_organism") or [{}]
         hasil.append({"uniprot": d.get("rcsb_polymer_entity_container_identifiers", {}).get("uniprot_ids") or [],
@@ -63,7 +66,8 @@ def jumlah_aktivitas(target):
         d = _json(f"{API}/activity.json?target_chembl_id={target}&pchembl_value__isnull=false&limit=1&only="
                   "activity_id", timeout=30)
         return int((d.get("page_meta") or {}).get("total_count") or 0)
-    except Exception:
+    except Exception as err:
+        catat.log.debug(f"Gagal memeriksa jumlah aktivitas ChEMBL {target}: {err}")
         return None
 
 

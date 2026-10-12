@@ -21,7 +21,7 @@ from datetime import datetime
 from importlib import metadata
 from pathlib import PureWindowsPath
 
-from . import analisis
+from . import analisis, catat
 from . import ekspor as E
 from . import mesin as M
 from .prep_reseptor import pdbqt_ke_pdb
@@ -104,7 +104,8 @@ def buat(f_zip, pr, baris, cari_job, versi_app, info_mesin=None, n_kompleks=20, 
         for p, pd in zip(pose, l.get("pose") or [{}] * len(pose)):
             try:
                 m = analisis.pose_mol(teks_in, p.pdbqt)
-            except Exception:
+            except Exception as e:
+                catat.log.warning(f"Supplementary: gagal membangun pose_mol {b['ligan']} pose {p.peringkat}: {e}")
                 continue
             semua.append((m, f"{b['ligan']}_pose{p.peringkat}", dict(tag, Pose=p.peringkat, dG_kcal_mol=p.energi)))
         if semua:

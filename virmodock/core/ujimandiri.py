@@ -337,6 +337,112 @@ def uji(lapor=None):
         r = admet.prediksi(["CC(=O)Oc1ccccc1C(=O)O"])
         return f"aspirin HIA {r[0]['HIA_Hou']:.2f}, hERG {r[0]['hERG']:.2f}"
     cek("Prediksi ADMET (ADMET-AI, proses terpisah)", admet_uji)
+
+    def air_termo_uji():
+        from . import air_termo
+        pdb_mock = ("ATOM      1  N   ASP A   1       0.000   0.000   0.000  1.00 20.00           N\n"
+                    "ATOM      2  OD1 ASP A   1       2.500   0.000   0.000  1.00 20.00           O\n"
+                    "ATOM      3  CB  LEU A   2      10.000   0.000   0.000  1.00 20.00           C\n"
+                    "HETATM    7  O   HOH A 101       1.200   0.000   1.500  1.00 20.00           O\n"
+                    "HETATM    8  O   HOH A 102      11.000   0.000   1.200  1.00 20.00           O\nEND\n")
+        res = air_termo.analisis_termodinamika_air(pdb_mock)
+        if len(res) < 2:
+            raise RuntimeError("analisis air gagal")
+        return f"{len(res)} molekul air dianalisis (stabil & tidak stabil)"
+    cek("Termodinamika air sisi aktif", air_termo_uji)
+
+    def fbdd_uji():
+        from . import fbdd
+        tg = fbdd.tumbuhkan_fragmen("c1ccccc1O", "Fenol", maks_hasil=5)
+        tl = fbdd.sambung_fragmen("c1ccccc1", "c1ccncc1", maks_hasil=5)
+        if not tg or not tl:
+            raise RuntimeError("FBDD growing/linking gagal")
+        return f"growing {len(tg)} analog, linking {len(tl)} hibrida"
+    cek("Desain obat berbasis fragmen (FBDD)", fbdd_uji)
+
+    def ppi_uji():
+        from . import ppi
+        mock_dimer = ("ATOM      1  N   ASP A   1      10.000  10.000  10.000  1.00 20.00           N\n"
+                      "ATOM      2  CA  ASP A   1      11.000  10.000  10.000  1.00 20.00           C\n"
+                      "TER\n"
+                      "ATOM      3  N   ARG B   1      10.500  10.500  12.000  1.00 20.00           N\n"
+                      "ATOM      4  CA  ARG B   1      11.000  10.500  13.000  1.00 20.00           C\n"
+                      "TER\nEND\n")
+        skor = ppi.skor_antarmuka(mock_dimer, "A", "B", cutoff_jarak=5.0)
+        return f"kontak {skor.get('kontak_total', 0)}, BSA {skor.get('bsa_luas', 0):.1f} A2"
+    cek("Antarmuka protein-protein (PPI)", ppi_uji)
+
+    def protac_uji():
+        from . import protac
+        hasil = protac.rakit_protac("c1ccccc1C(=O)O", "CRBN_Pomalidomide", "PEG3")
+        if not hasil.get("smiles"):
+            raise RuntimeError("perakitan PROTAC gagal")
+        return f"MW {hasil['mw']} Da, linker {hasil['panjang_linker_est']} A"
+    cek("Perancang PROTAC & linker E3", protac_uji)
+
+    def metabolisme_uji():
+        from . import metabolisme
+        h = metabolisme.prediksi_titik_metabolisme("Cc1ccc(OC)cc1")
+        if h.get("jumlah_som", 0) == 0:
+            raise RuntimeError("deteksi SoM gagal")
+        return f"{h['jumlah_som']} titik SoM, stabilitas {h['skor_stabilitas']}/100"
+    cek("Titik metabolisme CYP450 (SoM)", metabolisme_uji)
+
+    def mmp_uji():
+        from . import mmp
+        lig = [("Toluena", "Cc1ccccc1"), ("Fenol", "Oc1ccccc1")]
+        d = {"Toluena": {"energi": -5.2}, "Fenol": {"energi": -6.8}}
+        p = mmp.cari_pasangan(lig)
+        t = mmp.tabel_rgroup(p, d)
+        if not t:
+            raise RuntimeError("analisis MMP gagal")
+        return f"{len(t)} pasangan matched pair"
+    cek("Molecular Matched Pair (MMP)", mmp_uji)
+
+    def kinetika_uji():
+        from . import kinetika
+        k = kinetika.estimasi_kinetika(-9.5, jum_hbond_terkubur=2, jum_kontak_hidrofobik=10)
+        return f"k_off {k['k_off']:.2e} s^-1, tau {k['tau_teks']}"
+    cek("Kinetika pengikatan (koff & residence time)", kinetika_uji)
+
+    def labplanner_uji():
+        from . import labplanner
+        p = labplanner.prediksi_ki_ic50(-8.18)
+        return f"Ki {p['ki_teks']}, IC50 {p['ic50_teks']}"
+    cek("Perencana uji lab basah (LabPlanner)", labplanner_uji)
+
+    def skrip_publikasi_uji():
+        from . import skrip_publikasi
+        teks_p = skrip_publikasi.buat_skrip_pymol("rec.pdbqt", "lig.pdbqt", ["ASP25"], "uji_pymol")
+        teks_c = skrip_publikasi.buat_skrip_chimerax("rec.pdbqt", "lig.pdbqt", ["ASP25"], "uji_chimerax")
+        if not teks_p or not teks_c:
+            raise RuntimeError("pembuatan skrip gagal")
+        return "PyMOL .pml + ChimeraX .cxc"
+    cek("Skrip visualisasi publikasi (PyMOL/ChimeraX)", skrip_publikasi_uji)
+
+    def konsensus_uji():
+        from . import konsensus
+        kolom = {
+            "adgpu": {"l1": -9.0, "l2": -7.0, "l3": -6.0},
+            "vina": {"l1": -8.5, "l2": -7.2, "l3": -6.1},
+        }
+        nama = {"l1": "Ligan 1", "l2": "Ligan 2", "l3": "Ligan 3"}
+        r = konsensus.hitung(kolom, nama)
+        if len(r.get("baris", [])) < 3:
+            raise RuntimeError(r.get("galat") or "perhitungan konsensus gagal")
+        w_val = r["W"][0] if r.get("W") else 0.0
+        return f"Kendall W {w_val:.2f}, {len(r['baris'])} ligan"
+    cek("Konsensus docking & perankingan", konsensus_uji)
+
+    def mpo_uji():
+        from . import mpo
+        s = {"mw": 250.0, "logp": 2.1, "tpsa": 45.0, "hbd": 1, "hba": 3, "rotb": 2, "qed": 0.82, "sascore": 2.1}
+        r = mpo.hitung_mpo(s, dg=-8.2, preset="cns")
+        if r.get("skor", 0) <= 0:
+            raise RuntimeError("perhitungan MPO gagal")
+        return f"skor MPO {r['skor']:.1f}/100 ({r['kategori']})"
+    cek("Multi-Parameter Optimization (MPO)", mpo_uji)
+
     return hasil
 
 

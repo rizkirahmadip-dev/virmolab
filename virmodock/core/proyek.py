@@ -34,6 +34,27 @@ def tulis_atomik(path, teks):
     os.replace(tmp, path)
 
 
+def migrasi_proyek(data: dict) -> dict:
+    """Migrasikan format data proyek dari versi lawas (0.9.x - 1.0.x) ke format terkini."""
+    if not isinstance(data, dict):
+        return {}
+    data.setdefault("format", VERSI_FORMAT)
+    data.setdefault("aplikasi", "VirmoDock")
+    data.setdefault("ligan", [])
+    data.setdefault("job", [])
+    data.setdefault("objek", [])
+    data.setdefault("uji_grafik", {})
+    data.setdefault("komposer", {})
+    data.setdefault("validasi", {})
+    data.setdefault("blast", {})
+    data.setdefault("syarat_jarak", {})
+    data.setdefault("eksperimen", {})
+    data.setdefault("md", [])
+    data.setdefault("templat", "")
+    data.setdefault("catatan", "")
+    return data
+
+
 class Proyek:
     def __init__(self, folder):
         self.folder = Path(folder).resolve()
@@ -99,6 +120,7 @@ class Proyek:
             if not cad:
                 raise
             d = json.loads(cad[-1].read_text(encoding="utf-8"))
+        d = migrasi_proyek(d)
         pr = cls(folder)
         pr.nama = d.get("nama", folder.stem)
         pr.dibuat = d.get("dibuat", pr.dibuat)

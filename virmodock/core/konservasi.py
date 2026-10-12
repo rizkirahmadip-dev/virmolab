@@ -12,6 +12,8 @@ import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
 
+from . import catat
+
 AA = "ARNDCQEGHILKMFPSTWYV"
 # BLOSUM62, urutan AA di atas. Sumber: Henikoff & Henikoff 1992.
 _B = """
@@ -426,7 +428,8 @@ def rcsb_sekuens(sekuens, n=12, timeout=60):
         pdbid, ent = kode.rsplit("_", 1)
         try:
             judul, urutan = _rcsb_satu(pdbid, ent, timeout)
-        except Exception:
+        except Exception as e:
+            catat.log.debug(f"Gagal mengambil sekuens RCSB {pdbid}_{ent}: {e}")
             continue
         if not urutan or urutan in lihat:
             continue
