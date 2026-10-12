@@ -32,7 +32,8 @@ def _sel(t, angka=None, align_right=False):
 
 class DialogSelektivitas(QDialog):
     def __init__(self, jw):
-        super().__init__(jw)
+        parent = jw if isinstance(jw, QWidget) else None
+        super().__init__(parent)
         self.jw = jw
         proyek_awal = jw.proyek
         self.setWindowTitle("Selektivitas multi-target")

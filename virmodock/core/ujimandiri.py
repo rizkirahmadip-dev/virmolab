@@ -443,6 +443,18 @@ def uji(lapor=None):
         return f"skor MPO {r['skor']:.1f}/100 ({r['kategori']})"
     cek("Multi-Parameter Optimization (MPO)", mpo_uji)
 
+    def sanitasi_uji():
+        from . import sanitasi_struktur
+        dummy_pdbqt = (
+            "ATOM      1  C1  LIG A   1       0.000   0.000   0.000  0.00  0.00     0.000 C \n"
+            "ATOM      2  C2  LIG A   1       1.500   0.000   0.000  0.00  0.00     0.000 C \n"
+        )
+        ok, bersih, cat = sanitasi_struktur.validasi_sanitasi_pdbqt(dummy_pdbqt, jenis="ligan")
+        if not ok or "ROOT" not in bersih:
+            raise RuntimeError("sanitasi PDBQT gagal menambahkan pohon ROOT")
+        return f"validasi PDBQT & auto-sanitizer OK ({len(cat)} catatan perbaikan)"
+    cek("Sanitasi & integritas PDBQT", sanitasi_uji)
+
     return hasil
 
 

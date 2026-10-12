@@ -8,7 +8,7 @@ from PySide6.QtWidgets import (QAbstractItemView, QDialog, QDialogButtonBox, QLa
                                QTableWidgetItem, QVBoxLayout)
 
 from ..core import kovalen as K
-from ..core.laporan import id_angka
+from . import kit
 
 MAKS_PRATINJAU = 60
 
@@ -67,7 +67,7 @@ class DialogKovalen(QDialog):
             it.setData(Qt.UserRole, (f"{c}:{i}", n))
             self.t_res.setItem(r, 0, it)
             self.t_res.setItem(r, 1, QTableWidgetItem(K.RESIDU[n][0][-1]))
-            self.t_res.setItem(r, 2, QTableWidgetItem(id_angka(f"{d:.1f}")))
+            self.t_res.setItem(r, 2, QTableWidgetItem(kit.f(d, 1)))
             if terpilih and f"{c}:{i}" == terpilih:
                 self.t_res.selectRow(r)
         self.t_res.resizeColumnsToContents()
@@ -108,7 +108,7 @@ class DialogKovalen(QDialog):
         if not self.t_res.rowCount():
             self.l_info.setText("Tidak ada Cys, Ser, atau Lys dengan atom nukleofil di dalam grid box. Pindahkan atau "
                                 "perbesar kotak sehingga mencakup residu sasaran.")
-            self.l_info.setStyleSheet("color: #c0392b;")
+            self.l_info.setStyleSheet(f"color: {kit.warna('bad').name()};")
             self.b_ok.setEnabled(False)
             return
         self.b_ok.setEnabled(p is not None)
@@ -130,18 +130,18 @@ class DialogKovalen(QDialog):
             else:
                 it = QTableWidgetItem("tidak ada - akan dilewati")
             if mol is None or not wh:
-                it.setForeground(Qt.gray)
+                it.setForeground(kit.warna("mut"))
             self.t_lig.setItem(r, 1, it)
         self.t_lig.resizeColumnToContents(0)
         n = len(self._ligan)
         self.l_lig.setText(f"Gugus reaktif ligan untuk {resn}" + (f" ({n} pertama dari {n + self._lebih})"
                                                                   if self._lebih else ""))
         if not n:
-            teks, warna = "Belum ada ligan siap; gugus reaktif diperiksa saat docking dijalankan.", "#c98a12"
+            teks, clr = "Belum ada ligan siap; gugus reaktif diperiksa saat docking dijalankan.", kit.warna("warn")
         elif cocok:
-            teks, warna = f"{cocok} dari {n} ligan punya gugus reaktif untuk {resn}.", ""
+            teks, clr = f"{cocok} dari {n} ligan punya gugus reaktif untuk {resn}.", None
         else:
-            teks, warna = (f"Tidak ada ligan yang punya gugus reaktif untuk {resn}; docking kovalen akan melewati "
-                           "semua ligan."), "#c98a12"
+            teks, clr = (f"Tidak ada ligan yang punya gugus reaktif untuk {resn}; docking kovalen akan melewati "
+                         "semua ligan."), kit.warna("warn")
         self.l_info.setText(teks + " Docking kovalen memakai AutoDock-GPU dan menonaktifkan residu fleksibel.")
-        self.l_info.setStyleSheet(f"color: {warna};" if warna else "")
+        self.l_info.setStyleSheet(f"color: {clr.name()};" if clr else "")

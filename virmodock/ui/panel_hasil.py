@@ -276,14 +276,31 @@ class PanelHasil(QWidget):
         except ValueError:
             batas = None
         n = 0
+        energi_tampil = []
         for i in range(self.pohon.topLevelItemCount()):
             it = self.pohon.topLevelItem(i)
             e = it.data(2, Qt.UserRole)
             tampil = (not teks or teks in it.text(1).lower() or teks in it.text(14).lower()) and \
                      (batas is None or (e is not None and e <= batas))
             it.setHidden(not tampil)
-            n += tampil
-        self.l_n.setText(f"{n} ligan")
+            if tampil:
+                n += 1
+                if isinstance(e, (int, float)):
+                    energi_tampil.append(e)
+
+        if not n:
+            self.l_n.setText("0 ligan")
+        elif len(energi_tampil) >= 2:
+            import math
+            e_min = min(energi_tampil)
+            mu = sum(energi_tampil) / len(energi_tampil)
+            var = sum((x - mu) ** 2 for x in energi_tampil) / (len(energi_tampil) - 1)
+            sd = math.sqrt(var)
+            self.l_n.setText(f"{n} ligan · Terkuat: {id_angka(f'{e_min:.2f}')} kcal/mol · Rerata: {id_angka(f'{mu:.2f}')} ± {id_angka(f'{sd:.2f}')}")
+        elif len(energi_tampil) == 1:
+            self.l_n.setText(f"1 ligan · ΔG: {id_angka(f'{energi_tampil[0]:.2f}')} kcal/mol")
+        else:
+            self.l_n.setText(f"{n} ligan")
 
     def _hitung_centang(self):
         n = len(self.dicentang())

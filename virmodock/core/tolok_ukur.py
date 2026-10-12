@@ -6,7 +6,6 @@ untuk mengukur kemampuan docking engine (AutoDock Vina / AutoDock-GPU) dalam:
 2. Mengidentifikasi interaksi katalitik krusial (dyad ASP25 / ASP125).
 3. Menghitung efisiensi ligan (LE) dan afinitas ikatan (ΔG).
 """
-import os
 import tempfile
 from pathlib import Path
 from typing import Any, Dict, Optional

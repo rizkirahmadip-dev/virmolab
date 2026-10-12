@@ -289,6 +289,19 @@ class Pelaksana(QObject):
             self._ubah(j)
             QTimer.singleShot(0, self._berikut)
             return
+
+        from . import sanitasi_struktur
+        ok_lig, teks_bersih, cat_lig = sanitasi_struktur.validasi_sanitasi_pdbqt(lig, jenis="ligan")
+        if not ok_lig:
+            l["status"], l["pesan"] = "gagal", f"berkas PDBQT cacat: {'; '.join(cat_lig)}"
+            self._ubah(j)
+            QTimer.singleShot(0, self._berikut)
+            return
+        if cat_lig and teks_bersih:
+            try:
+                lig.write_text(teks_bersih, encoding="utf-8")
+            except Exception:
+                pass
         kovalen = bool(j.get("kovalen"))
         if kovalen:
             flex = pr.p(l["flex"]) if l.get("flex") else None

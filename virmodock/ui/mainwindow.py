@@ -716,6 +716,8 @@ class JendelaUtama(QMainWindow):
                        "Pusatkan dan perbesar semua objek yang terlihat")
         self.a_putar = A("Putar otomatis", "rotate", lambda on: self.viewer.js("spin", on), None, cek=True)
         self.a_tema = A("Mode gelap", "moon", self.ganti_tema, "Ctrl+T", cek=True, tip="Ganti tema terang / gelap")
+        self.a_presentasi = A("Mode presentasi & fokus", None, self.toggle_mode_presentasi, "F11", cek=True,
+                              tip="Sembunyikan panel untuk tampilan bersih presentasi/publikasi (F11 atau Esc untuk kembali)")
         self.a_cek = A("Cek sistem dan GPU…", "gpu", lambda: self.deteksi(wizard=True), None,
                        "Deteksi ulang GPU/OpenCL, panduan driver, dan program pendukung")
         self.a_reset = A("Atur ulang tata letak", None, self.reset_layout, "Ctrl+Shift+0",
@@ -843,7 +845,7 @@ class JendelaUtama(QMainWindow):
         self._sub(m, "Panel", [d.toggleViewAction() for d in (
             self.d_langkah, self.d_hier, self.d_kerja, self.d_prop, self.d_tamp, self.d_inter, self.d_antre,
             self.d_log, self.d_pesan)])
-        isi(m, (self.a_tema, self.a_reset))
+        isi(m, (self.a_tema, self.a_presentasi, self.a_reset))
         m_alur = m.addMenu("Alur kerja")
         self.m_alur = m_alur
         self.grup_alur = QActionGroup(m_alur)
@@ -5172,6 +5174,41 @@ class JendelaUtama(QMainWindow):
             d.show()
         self._ukuran_dock_awal()
         self.atur_ruang(self._ruang_aktif or "siapkan")
+
+    def toggle_mode_presentasi(self, on=None):
+        """Mode presentasi/fokus bersih: sembunyikan dock & toolbar untuk tampilan publikasi/seminar."""
+        if on is None:
+            on = not getattr(self, "_mode_presentasi_aktif", False)
+        self._mode_presentasi_aktif = on
+        if hasattr(self, "a_presentasi"):
+            self.a_presentasi.setChecked(on)
+        if on:
+            self._vis_docks = {}
+            for d in (self.d_langkah, self.d_hier, self.d_kerja, self.d_prop, self.d_tamp,
+                      self.d_inter, self.d_antre, self.d_log, self.d_pesan):
+                if d is not None:
+                    self._vis_docks[d] = d.isVisible()
+                    d.hide()
+            self._vis_toolbars = []
+            for tb in self.findChildren(QToolBar):
+                if tb.isVisible():
+                    self._vis_toolbars.append(tb)
+                    tb.hide()
+            self.statusBar().showMessage("Mode Presentasi aktif — tekan F11 atau Esc untuk kembali.", 6000)
+        else:
+            for d, vis in getattr(self, "_vis_docks", {}).items():
+                if vis:
+                    d.show()
+            for tb in getattr(self, "_vis_toolbars", []):
+                tb.show()
+            self.statusBar().showMessage("Kembali ke mode kerja biasa.", 3000)
+
+    def keyPressEvent(self, ev):
+        if ev.key() == Qt.Key_Escape and getattr(self, "_mode_presentasi_aktif", False):
+            self.toggle_mode_presentasi(False)
+            ev.accept()
+            return
+        super().keyPressEvent(ev)
 
     def tentang(self):
         from PySide6.QtWidgets import QDialog, QDialogButtonBox
