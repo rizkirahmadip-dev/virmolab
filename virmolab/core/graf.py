@@ -36,13 +36,14 @@ TEMA_GRAF = {
 }
 
 
-def tata_letak(G: nx.Graph, metode: str = "spring", benih: int = 1) -> dict:
+def tata_letak(G: nx.Graph, metode: str = "spring", benih: int = 1, renggang: float = 1.0) -> dict:
     """Hitung posisi (x, y) simpul graf dalam rentang normalisasi [-1, 1].
 
     Parameter:
     - G: networkx.Graph
     - metode: 'spring' (Fruchterman-Reingold) atau 'kk' (Kamada-Kawai)
     - benih: integer random seed untuk reprodusibilitas
+    - renggang: pengali jarak ideal antar simpul pada metode 'spring' (> 1 = lebih renggang)
     """
     if len(G) == 0:
         return {}
@@ -50,18 +51,19 @@ def tata_letak(G: nx.Graph, metode: str = "spring", benih: int = 1) -> dict:
         simpul = list(G.nodes())[0]
         return {simpul: (0.0, 0.0)}
 
+    k = (renggang / (len(G) ** 0.5)) if renggang and renggang != 1.0 else None
     if metode == "kk":
         try:
             return nx.kamada_kawai_layout(G)
         except Exception:
             # Fallback ke spring bila graf tidak terhubung atau ada kendala matriks jarak
-            return nx.spring_layout(G, seed=benih)
-    return nx.spring_layout(G, seed=benih)
+            return nx.spring_layout(G, seed=benih, k=k)
+    return nx.spring_layout(G, seed=benih, k=k, iterations=80)
 
 
 def svg_graf(G: nx.Graph, posisi: dict | None = None, warna_simpul: dict | str | None = None,
              ukuran_simpul: dict | float | None = None, label: dict | bool | None = True,
-             lebar: int = 800, tinggi: int = 600, tema: str = "terang") -> str:
+             lebar: int = 800, tinggi: int = 600, tema: str = "terang", sorot: set | None = None) -> str:
     """Hasilkan string dokumen SVG valid untuk visualisasi graf jaringan.
 
     Parameter:
@@ -69,9 +71,10 @@ def svg_graf(G: nx.Graph, posisi: dict | None = None, warna_simpul: dict | str |
     - posisi: dict {node: (x, y)} (bila None, dihitung dengan tata_letak)
     - warna_simpul: dict {node: '#hex'} atau string warna tunggal
     - ukuran_simpul: dict {node: radius_px} atau float radius bawaan (bawaan 12.0)
-    - label: bool (tampilkan nama simpul) atau dict {node: 'teks_label'}
+    - label: bool (tampilkan nama simpul) atau dict {node: 'teks_label'}; simpul di luar dict tidak diberi label
     - lebar, tinggi: dimensi piksel SVG
     - tema: 'terang' atau 'gelap'
+    - sorot: simpul yang digambar bertepi tebal warna aksen (mis. simpul inti stabil uji sensitivitas)
     """
     t = TEMA_GRAF.get(tema, TEMA_GRAF["terang"])
     if posisi is None:
@@ -144,9 +147,12 @@ def svg_graf(G: nx.Graph, posisi: dict | None = None, warna_simpul: dict | str |
         else:
             warna = G.nodes[node].get("warna", t["simpul_bawaan"])
 
+        disorot = bool(sorot) and node in sorot
+        s_warna = t["tepi_aktif"] if disorot else t["stroke_simpul"]
+        s_lebar = 3.5 if disorot else 1.8
         out.append(
             f'<circle cx="{cx:.1f}" cy="{cy:.1f}" r="{r:.1f}" '
-            f'fill="{warna}" stroke="{t["stroke_simpul"]}" stroke-width="1.8"/>'
+            f'fill="{warna}" stroke="{s_warna}" stroke-width="{s_lebar}"/>'
         )
     out.append('</g>')
 
@@ -158,7 +164,9 @@ def svg_graf(G: nx.Graph, posisi: dict | None = None, warna_simpul: dict | str |
                 continue
             cx, cy = pos_px[node]
             if isinstance(label, dict):
-                teks = str(label.get(node, node))
+                if node not in label:      # simpul sengaja tanpa label (mis. agar graf padat tetap terbaca)
+                    continue
+                teks = str(label[node])
             else:
                 teks = str(G.nodes[node].get("label", node))
 

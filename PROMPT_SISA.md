@@ -69,6 +69,7 @@ Dua sesi sebelumnya melaporkan "selesai, uji lulus" padahal hasilnya salah. Pela
    `dev/cek_mutu_i18n.py` = 0 (jangan terjemahkan SQL, path, atau teks laporan).
 9. **Windows/Git Bash.** Skrip penyunting yang panjang atau berisi tanda kutip tiga → tulis dengan alat Write ke berkas,
    jalankan; jangan heredoc besar. Berkas Python berakhir baris CRLF — itu normal, jangan "diperbaiki".
+9b. **UI/UX tanpa "AI slop" (aturan tegas pengguna).** Tanpa emoji dekoratif, gradien/kartu hiasan, kalimat promosi atau isian, ikon tanpa fungsi, dan salinan mikro bertele-tele. Pakai komponen `ui/kit.py` dan tema yang ada; tiap elemen berfungsi; teks ringkas, spesifik, baku; keadaan kosong/galat menjelaskan sebab + langkah berikut. Bandingkan dengan dialog lain, buka tema terang dan gelap, lihat tangkapan layar sebelum menyatakan selesai.
 10. **Jangan menyatakan selesai sebelum** poin 1–8 terpenuhi. Laporan akhir wajib menyebut: uji apa yang dijalankan, apakah
     dialog dibuka dan dilihat tangkapan layarnya, dan apa yang **tidak** teruji (mis. jalur daring/GPU).
 
@@ -160,6 +161,73 @@ Tugas:
 6. Dokumen + paragraf metode dengan peringatan "hipotesis, butuh validasi eksperimen".
 7. Penutup: poin 1–8 Blok verifikasi wajib (termasuk membuka dialog dan melihat tangkapan layar).
 Aturan: jangan commit/build/regresi penuh. Laporan akhir ≤ 15 baris.
+```
+
+### P6 — status 13 Okt 2026 (opsi B)
+
+Hasil sesi P6 pertama ditolak: 56 reseptor .pdbqt sintetis (40 atom, koordinat bulat), RMSD redocking dan z_rata/z_sd
+diketik tangan, nilai bawaan z diam-diam, jalur "ChEMBL daring" yang selalu jatuh ke berkas mini karangan di `dev/data/`.
+Semua itu sudah **dibuang** (`virmolab/data/panel_target/`, `dev/susun_panel.py`, `dev/data/chembl_mini_target.json`).
+
+Yang dipertahankan dan sudah diperbaiki (belum di-commit):
+- `core/target_balik.py`: jalur ligan kini **ChEMBL REST sungguhan** (similarity ≥ 40 % → aktivitas pChEMBL ≥ 6, target
+  SINGLE PROTEIN, bawaan *Homo sapiens* → Tanimoto Morgan2 dihitung lokal; skor_knn = jumlah k terdekat / k). Galat
+  jaringan → `GalatTargetBalik`, tanpa data pengganti. Panel: `muat_panel_sah()` menolak entri tanpa reseptor, tanpa
+  z_rata/z_sd, atau RMSD > 2 Å — tidak ada nilai bawaan. Borda: target yang absen di satu jalur = peringkat N+1.
+  Paragraf metode dirakit dari parameter dan panel nyata (kosong bila tak ada jalur dijalankan).
+- `ui/dialog_target_balik.py`: kelas panel dibaca dari paket; tanpa panel → "(panel target belum dibangun)" dan
+  jalur struktur nonaktif. Kueri ChEMBL di QThread; jejak ChEMBL dicatat ke proyek.
+- `dev/uji_target_balik.py`: uji rumus dengan data sintetis berlabel (z-skor, Borda, Tanimoto, penolakan panel);
+  `--daring` memanggil ChEMBL nyata (ibuprofen → PTGS1 #1, PTGS2 #3 pada 13 Okt 2026).
+- spec: panel_target hanya ikut build bila foldernya ada.
+
+Kekurangan yang tersisa (dikerjakan P6b): panel nyata belum ada; dialog **belum** membuat job docking panel (jalur struktur
+hanya mengumpulkan job yang sudah ada); `gabung()` memakai gen sebagai kunci sehingga dua target ChEMBL dengan gen sama
+(mis. CXCR2) bertabrakan.
+
+### P6b — Bangun panel target nyata (Opus) · setelah P6
+
+```text
+Kerjakan P6b "panel target nyata" untuk penargetan balik VirmoLab. Folder: E:\Bikin Docking Simpel\VirmoDock.
+Python: .venv/Scripts/python.exe (PYTHONIOENCODING=utf-8, PYTHONPATH=.).
+Baca dulu: PROMPT_SISA.md bagian "Blok verifikasi wajib" dan "P6 — status"; core/target_balik.py;
+core/validasi_protokol.py (jalankan_redocking_mandiri); core/rcsb.py; core/prep_reseptor.py; core/antrean.py (job_baru).
+
+LARANGAN KERAS (pelanggaran = pekerjaan ditolak):
+- Tidak ada angka yang diketik tangan untuk rmsd_redocking, z_rata, z_sd, pusat, ukuran, resolusi. Semua dihasilkan
+  kode dari berkas PDB/hasil docking nyata. Tidak ada `import random` kecuali untuk memilih umpan dengan seed tercatat.
+- Tidak ada reseptor sintetis. Setiap .pdbqt panel harus berasal dari unduhan RCSB dan prep_reseptor
+  (ukuran wajar: ratusan KB; jumlah atom protein sesuai rantai).
+- Tidak ada nilai bawaan/fallback di kode aplikasi. Data hilang = target dilewati dan dilaporkan.
+- Bila waktu/GPU tidak cukup, BERHENTI dan laporkan target yang sudah selesai. Panel sebagian yang jujur lebih baik
+  daripada panel lengkap yang dikarang.
+
+Tugas:
+1. dev/susun_panel.py (alat pengembang, dapat dilanjutkan):
+   a. Daftar kandidat per kelas di dev/panel_kandidat/<kelas>.csv (pdb, rantai, kode ligan kristal, gen, uniprot,
+      alasan pemilihan + rujukan). Mulai 10 target/kelas (antibakteri, antiinflamasi). Periksa tiap PDB ID ke RCSB
+      (resolusi ≤ 2,5 Å, ligan ada, rantai benar) — data resolusi/tanggal diambil dari API, bukan diketik.
+   b. Per target: unduh → pisahkan ligan kristal → prep_reseptor → kotak = pusat ligan kristal + margin (dihitung)
+      → redocking (Vina, exhaustiveness 8, seed tercatat) → RMSD simetri-sadar terhadap pose kristal.
+      Hanya RMSD ≤ 2 Å yang masuk panel; yang gagal dicatat beserta alasannya.
+   c. Umpan: 50 molekul mirip-obat dari sumber nyata yang dicatat (mis. ChEMBL acak dengan seed tercatat, atau DUD-E
+      bila tersedia), sama untuk semua target; docking ke tiap target → z_rata, z_sd, n_umpan dari skor nyata.
+   d. Tulis virmolab/data/panel_target/<kelas>.json + <kelas>/<PDB>.pdbqt, dan dev/panel_kandidat/log_<kelas>.jsonl
+      (satu baris per langkah: waktu, PDB, langkah, hasil, durasi). Kemajuan disimpan per target sehingga skrip bisa
+      dilanjutkan setelah terputus (lewati target yang sudah selesai).
+   e. Jalankan di latar belakang; perkiraan waktu dihitung dari target pertama, laporkan ke pengguna sebelum lanjut.
+2. Dialog: tombol "Mulai" dengan jalur struktur aktif membuat job lewat antrean.job_baru (satu job per target sah,
+   jeda/lanjut memakai antrean yang ada); hasil dikumpulkan dengan target_balik.kumpulkan saat job selesai.
+3. gabung(): kunci per UniProt (bukan gen); target ChEMBL tanpa UniProt pakai target_chembl_id.
+4. Uji: dev/uji_target_balik.py tetap lulus; tambah uji yang memeriksa panel nyata: tiap .pdbqt > 50 KB dan berisi
+   ATOM protein, rmsd_redocking ≤ 2, n_umpan ≥ 30, z_sd > 0, dan tiap entri punya baris log redocking yang cocok.
+   Uji jalur struktur: 1 ligan (ibuprofen) × panel antiinflamasi → laporkan z-skor PTGS1/PTGS2 apa adanya
+   (jangan memaksa lulus).
+5. build_tools/virmolab.spec sudah menyertakan panel_target bila ada — pastikan ukuran total wajar.
+6. Penutup: poin 1–8 Blok verifikasi wajib; buka dialog via dev/uji_dialog_lanjut_gui.py target_balik dan lihat
+   tangkapan layar. Laporan akhir ≤ 15 baris: berapa target lolos/gagal per kelas dan alasannya, waktu total,
+   apa yang belum teruji.
+Aturan: jangan commit/build/regresi penuh.
 ```
 
 ### P7 — F3b Jaringan & pengayaan jalur (Opus) · setelah P6

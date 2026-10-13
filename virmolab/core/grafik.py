@@ -146,8 +146,11 @@ def histogram(nilai, label_x="", judul="", kelas=None, gelap=False, transparan=F
 
 
 def sebar(x, y, nama=None, label_x="", label_y="", judul="", regresi=None, gelap=False, transparan=False,
-          lebar=760, tinggi=560, label=False, pilih=None, catatan=""):
-    """regresi: dict dari statistik.korelasi (garis + pita kepercayaan 95 %) atau None."""
+          lebar=760, tinggi=560, label=False, pilih=None, catatan="", garis_x=(), garis_y=(), diagonal=False):
+    """regresi: dict dari statistik.korelasi (garis + pita kepercayaan 95 %) atau None.
+
+    garis_x / garis_y: [(nilai, label)] garis ambang putus-putus tegak / mendatar (mis. h* pada plot Williams).
+    diagonal: gambar garis identitas y = x (acuan ideal pada plot prediksi vs terukur)."""
     k = Kanvas(lebar, tinggi, gelap, transparan, judul)
     k.sumbu(list(x), list(y), label_x, label_y, pad=0.05)
     k.out.append(f'<defs><clipPath id="area"><rect x="{k.kiri}" y="{k.atas}" width="{k.pw}" height="{k.ph}"/>'
@@ -162,6 +165,26 @@ def sebar(x, y, nama=None, label_x="", label_y="", judul="", regresi=None, gelap
         f = lambda t: regresi["potong"] + regresi["kemiringan"] * t   # noqa: E731
         k.out.append(f'<line x1="{k.X(a):.2f}" y1="{k.Y(f(a)):.2f}" x2="{k.X(b):.2f}" y2="{k.Y(f(b)):.2f}" '
                      f'stroke="{AKSEN}" stroke-width="1.6" clip-path="url(#area)"/>')
+    if diagonal:
+        a_, b_ = max(k.x0, k.y0), min(k.x1, k.y1)
+        if b_ > a_:
+            k.out.append(f'<line x1="{k.X(a_):.2f}" y1="{k.Y(a_):.2f}" x2="{k.X(b_):.2f}" y2="{k.Y(b_):.2f}" '
+                         f'stroke="{k.w["tinta2"]}" stroke-width="1.2" stroke-dasharray="6,4" '
+                         f'clip-path="url(#area)"/>')
+    for nilai, teks_ in (garis_x or ()):
+        if k.x0 <= nilai <= k.x1:
+            px = k.X(nilai)
+            k.out.append(f'<line x1="{px:.2f}" y1="{k.atas}" x2="{px:.2f}" y2="{k.atas + k.ph}" '
+                         f'stroke="{MERAH}" stroke-width="1.3" stroke-dasharray="5,4"/>')
+            if teks_:
+                k.teks(px + 4, k.atas + 12, teks_, 10, warna_=MERAH)
+    for nilai, teks_ in (garis_y or ()):
+        if k.y0 <= nilai <= k.y1:
+            py = k.Y(nilai)
+            k.out.append(f'<line x1="{k.kiri}" y1="{py:.2f}" x2="{k.kiri + k.pw}" y2="{py:.2f}" '
+                         f'stroke="{k.w["tinta2"]}" stroke-width="1.1" stroke-dasharray="4,4"/>')
+            if teks_:
+                k.teks(k.kiri + 6, py - 5, teks_, 10, warna_=k.w["tinta2"])
     urut = list(range(len(x)))
     if pilih is not None and 0 <= pilih < len(x):
         urut.append(urut.pop(pilih))

@@ -2,8 +2,9 @@
 
 Warna selalu dari token tema (terang/gelap), jadi dialog tidak memakai warna tetap.
 """
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QColor, QGuiApplication, QPalette
+from PySide6.QtCore import QByteArray, QRectF, Qt, QTimer
+from PySide6.QtGui import QColor, QGuiApplication, QPainter, QPalette
+from PySide6.QtSvg import QSvgRenderer
 from PySide6.QtWidgets import (QAbstractItemView, QFrame, QHBoxLayout, QHeaderView, QLabel, QPushButton,
                                QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget)
 
@@ -311,6 +312,93 @@ class sibuk:
                 self.label.setText(self.teks_lama or "")
         QApplication.processEvents()
         return False
+
+
+class GambarSvg(QWidget):
+    """Tampilkan grafik SVG yang mengikuti ukuran panel.
+
+    `atur_pembuat(fn)` membuat grafik digambar ulang seukuran widget setiap kali panel berubah ukuran, sehingga
+    grafik tidak pernah teregang, tidak menyisakan ruang kosong, dan tebal garis serta ukuran teksnya tetap wajar.
+    `muat(svg)` dipakai untuk SVG yang ukurannya memang tetap; gambar itu diskalakan dengan rasio aspek terjaga.
+    """
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._renderer = QSvgRenderer(self)
+        self._renderer.repaintNeeded.connect(self.update)
+        self._pembuat = None
+        self._ukuran_render = (0, 0)
+        self._tunda = QTimer(self)
+        self._tunda.setSingleShot(True)
+        self._tunda.setInterval(120)       # gambar ulang setelah seretan ukuran berhenti, bukan tiap piksel
+        self._tunda.timeout.connect(self._gambar_ulang)
+        self.setMinimumHeight(240)
+
+    def atur_pembuat(self, fn):
+        """fn(lebar, tinggi) -> str SVG. None mengosongkan gambar."""
+        self._pembuat = fn
+        self._ukuran_render = (0, 0)
+        if fn is None:
+            self._renderer.load(QByteArray(b""))
+            self.update()
+            return
+        self._gambar_ulang()
+        # saat dipasang, tata letak sering belum selesai: gambar sekali lagi dengan ukuran final
+        QTimer.singleShot(0, self._gambar_ulang)
+
+    def muat(self, svg: str):
+        self._pembuat = None
+        self._renderer.load(QByteArray(svg.encode("utf-8")))
+        self.update()
+
+    def kosong(self) -> bool:
+        return not self._renderer.isValid()
+
+    def _gambar_ulang(self):
+        if not self._pembuat:
+            return
+        l, t = max(360, self.width()), max(240, self.height())
+        if (l, t) == self._ukuran_render:
+            return
+        try:
+            svg = self._pembuat(l, t)
+        except Exception:
+            return
+        if svg:
+            self._ukuran_render = (l, t)
+            self._renderer.load(QByteArray(svg.encode("utf-8")))
+            self.update()
+
+    def resizeEvent(self, e):
+        super().resizeEvent(e)
+        if not self._pembuat:
+            return
+        # perubahan besar (mis. tata letak pertama atau jendela dimaksimalkan) digambar segera agar grafik tidak
+        # sempat tampil dengan ukuran lama; seretan kecil ditunda supaya tidak menggambar ulang tiap piksel
+        if abs(self.width() - self._ukuran_render[0]) > 40 or abs(self.height() - self._ukuran_render[1]) > 40:
+            self._gambar_ulang()
+        else:
+            self._tunda.start()
+
+    def showEvent(self, e):
+        super().showEvent(e)
+        if self._pembuat:
+            self._tunda.start()
+
+    def paintEvent(self, e):
+        if not self._renderer.isValid():
+            return
+        ukuran = self._renderer.defaultSize()
+        if ukuran.isEmpty():
+            return
+        ukuran.scale(self.size(), Qt.KeepAspectRatio)
+        x = (self.width() - ukuran.width()) // 2
+        y = (self.height() - ukuran.height()) // 2
+        p = QPainter(self)
+        p.setRenderHint(QPainter.Antialiasing, True)
+        p.setRenderHint(QPainter.SmoothPixmapTransform, True)
+        self._renderer.render(p, QRectF(x, y, ukuran.width(), ukuran.height()))
+        p.end()
 
 
 def bilah_sibuk(teks="Sedang menghitung…"):

@@ -455,6 +455,93 @@ def uji(lapor=None):
         return f"validasi PDBQT & auto-sanitizer OK ({len(cat)} catatan perbaikan)"
     cek("Sanitasi & integritas PDBQT", sanitasi_uji)
 
+    def panel_target_uji():
+        """Panel penargetan balik ikut terpasang dan tiap entri punya reseptor + statistik umpan (bukan nilai bawaan)."""
+        from . import target_balik
+        kelas = target_balik.daftar_kelas_panel()
+        if not kelas:
+            raise RuntimeError("panel target tidak ikut terpasang")
+        rincian = []
+        for k in kelas:
+            sah, lewat = target_balik.muat_panel_sah(k)
+            if not sah:
+                raise RuntimeError(f"panel '{k}' tanpa entri sah ({len(lewat)} dilewati)")
+            rincian.append(f"{k}: {len(sah)} target" + (f", {len(lewat)} dilewati" if lewat else ""))
+        return "; ".join(rincian)
+    cek("Panel target penargetan balik", panel_target_uji)
+
+    def pengayaan_uji():
+        """Set gen bawaan terpasang dan uji hipergeometrik + BH memberi hasil yang benar pada contoh kecil."""
+        import math
+        from . import pengayaan
+        gmt = pengayaan.gmt_bawaan("reactome")
+        if len(gmt) < 500:
+            raise RuntimeError(f"berkas GMT Reactome tidak lengkap ({len(gmt)} set)")
+        latar = [f"G{i}" for i in range(1, 21)]
+        contoh = {"S": {"nama": "set uji", "gen": {"G1", "G2", "G3", "G4", "G5"}}}
+        p_hitung = pengayaan.hipergeometrik(["G1", "G2", "G3", "G9"], contoh, latar)[0]["p"]
+        p_manual = (math.comb(5, 3) * math.comb(15, 1) + math.comb(5, 4)) / math.comb(20, 4)
+        if abs(p_hitung - p_manual) > 1e-9:
+            raise RuntimeError(f"p hipergeometrik {p_hitung:.6f} != {p_manual:.6f}")
+        return f"{len(gmt)} set Reactome, {len(pengayaan.gmt_bawaan('go_bp'))} set GO; p uji = {p_hitung:.4f}"
+    cek("Pengayaan jalur (set gen bawaan)", pengayaan_uji)
+
+    def jaringan_uji():
+        """Graf berlapis dirakit benar dari bagian sintetis (tanpa internet)."""
+        from . import jaringan
+        G = jaringan.bangun({"uji": ["PTGS2", "MAPK14"]},
+                            [{"jalur": "R-1", "nama": "radang", "q": 0.01, "n_overlap": 2, "gen": ["PTGS2", "MAPK14"]}],
+                            [("PTGS2", "MAPK14", 0.9)], [("PTGS2", "MONDO_1", "artritis", 0.7)])
+        d = {n: dd.get("jenis") for n, dd in G.nodes(data=True)}
+        if sorted(d.values()).count("target") != 2 or "J:R-1" not in G or "P:MONDO_1" not in G:
+            raise RuntimeError("lapisan graf tidak lengkap")
+        m = {b["simpul"]: b["derajat"] for b in jaringan.metrik(G)}
+        if m.get("T:PTGS2") != 4:
+            raise RuntimeError(f"derajat PTGS2 = {m.get('T:PTGS2')}, seharusnya 4")
+        return f"{G.number_of_nodes()} simpul, {G.number_of_edges()} tepi, metrik OK"
+    cek("Jaringan farmakologi", jaringan_uji)
+
+    def qsar_uji():
+        """Pipeline QSAR berjalan utuh pada data kecil berhubungan: model harus menemukan hubungan dan menandai domain."""
+        from rdkit import Chem
+        from rdkit.Chem import Crippen
+        from . import qsar
+        data = []
+        for i in range(60):
+            smi = f"{'C' * (1 + i % 8)}c1ccc(cc1)C(=O)N{'C' * (1 + (i // 8) % 5)}"
+            m = Chem.MolFromSmiles(smi)
+            if m is None:
+                continue
+            data.append({"smiles": Chem.MolToSmiles(m), "pic50": round(4.0 + 0.6 * Crippen.MolLogP(m), 3),
+                         "nama": f"s{i}"})
+        unik = {d["smiles"]: d for d in data}
+        data = list(unik.values())
+        h = qsar.latih(data, "ridge", "deskriptor", "acak", benih=1, konformal=False)
+        r2 = h["eksternal"]["r2"]
+        if r2 < 0.5:
+            raise RuntimeError(f"R2 uji {r2:.2f} terlalu rendah pada data berhubungan")
+        p = qsar.prediksi(h, [data[0]["smiles"], "CCCCCCCCCCCCCCCCCCCC"])
+        if p[1]["dalam_domain"]:
+            raise RuntimeError("senyawa asing tidak ditandai di luar domain aplikabilitas")
+        return f"{len(data)} senyawa, R2 uji {r2:.2f}, domain aplikabilitas aktif"
+    cek("QSAR (pelatihan & domain)", qsar_uji)
+
+    def konformal_uji():
+        """Cakupan konformal mendekati taraf nominal pada data acak yang dapat dipertukarkan."""
+        import numpy as np
+        from . import konformal
+        rng = np.random.default_rng(0)
+        y, p = rng.normal(0, 1, 400), None
+        p = y + rng.normal(0, 0.5, 400)
+        k = konformal.KonformalRegresi(0.1)
+        k.kalibrasi(y, p)
+        y2 = rng.normal(0, 1, 600)
+        c = k.cakupan(y2, y2 + rng.normal(0, 0.5, 600))
+        if not 0.84 <= c <= 0.96:
+            raise RuntimeError(f"cakupan konformal {c:.3f} jauh dari taraf nominal 0,90")
+        return f"cakupan {c:.3f} pada taraf nominal 0,90 (q = {k.q:.3f})"
+    cek("Prediksi konformal", konformal_uji)
+
     return hasil
 
 

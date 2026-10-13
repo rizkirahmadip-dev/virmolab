@@ -32,6 +32,10 @@ datas += collect_data_files("admet_ai") + collect_data_files("chemprop") + colle
 datas += collect_data_files("lightning") + collect_data_files("lightning_fabric")
 datas += [(str(AKAR / "virmolab" / "i18n" / "en.json"), "virmolab/i18n")]
 datas += [(str(AKAR / "virmolab" / "data" / "nama_tanaman_id.csv"), "virmolab/data")]   # nama lokal tanaman obat (F1)
+if (AKAR / "virmolab" / "data" / "panel_target").exists():
+    datas += [(str(AKAR / "virmolab" / "data" / "panel_target"), "virmolab/data/panel_target")]   # panel target penargetan balik (F3)
+if (AKAR / "virmolab" / "data" / "gmt").exists():
+    datas += [(str(AKAR / "virmolab" / "data" / "gmt"), "virmolab/data/gmt")]   # set gen Reactome/GO untuk pengayaan jalur (F3b)
 # cuik_molmaker (chemprop; Apache-2.0) memuat .pyd lewat os.listdir di folder paketnya -> salin apa adanya
 _cuik = Path(__import__("cuik_molmaker").__file__).parent
 binaries = [(str(f), "cuik_molmaker") for f in _cuik.iterdir() if f.suffix in (".pyd", ".dll")]
@@ -43,6 +47,8 @@ for f in (AKAR / "vendor" / "ketcher").rglob("*"):
 hidden = collect_submodules("meeko") + collect_submodules("dimorphite_dl") + ["gemmi", "openpyxl", "rdkit.Chem.ChemicalFeatures"]
 hidden += collect_submodules("pdb2pqr") + collect_submodules("propka") + collect_submodules("admet_ai")
 hidden += collect_submodules("chemprop") + ["rdkit.Chem.Pharm2D.Gobbi_Pharm2D", "rdkit.Chem.Pharm2D.Generate"]
+# QSAR (core/qsar.py): scikit-learn memuat estimator lewat nama modul, joblib dipakai menyimpan model
+hidden += collect_submodules("sklearn") + ["joblib", "scipy.stats", "scipy.special.cython_special"]
 
 # ---- MD & MM/GBSA (core/md.py): OpenMM + PDBFixer + openmmforcefields + OpenFF (toolkit, Interchange, NAGL)
 import openmm as _omm  # noqa: E402

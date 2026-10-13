@@ -2,6 +2,26 @@
 
 Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x adalah pra-rilis.
 
+## [Belum dirilis] (1.3, dalam pengerjaan)
+
+### Baru
+- **Penargetan balik** (Analisis › Penapisan banyak ligan › Penargetan balik & jaringan…; `core/target_balik.py`, `ui/dialog_target_balik.py`):
+  - Jalur ligan memakai ChEMBL REST (daring, cache 7 hari): senyawa mirip, aktivitas pChEMBL >= 6 pada target protein tunggal, kemiripan Tanimoto Morgan2 dihitung lokal; target disatukan per UniProt.
+  - Jalur struktur: docking Vina (CPU) ke panel struktur kristal lewat antrean; z-skor terhadap 49-50 umpan obat disetujui per target. Panel bawaan: antiinflamasi 8 target, antibakteri 9 target, semuanya lolos redocking RMSD <= 2 Å (disusun `dev/susun_panel.py` dari RCSB; log per langkah di `dev/panel_kandidat/log_*.jsonl`). Kofaktor (NAD, heme) tidak disertakan sehingga target yang bergantung padanya ditolak apa adanya.
+  - Peringkat Borda (N+1 untuk target yang absen di satu jalur), label keyakinan, ekspor CSV, paragraf metode dirakit dari hasil nyata. Hasil adalah hipotesis komputasi.
+- **QSAR & model prediksi** (Analisis › Penapisan banyak ligan › QSAR & model prediksi…; `core/qsar.py`, `core/konformal.py`, `ui/dialog_qsar.py`):
+  - Wizard lima langkah: impor CSV atau tabel ChEMBL proyek, kurasi (pembakuan struktur, penggabungan duplikat sebagai median, penandaan rentang > 1 log dan activity cliff), pemilihan fitur dan algoritma, validasi, lalu prediksi.
+  - Fitur Morgan2/MACCS/deskriptor RDKit tersaring; model Random Forest, SVR, kNN, Gaussian Process, dan Ridge dengan penyetelan validasi silang 5 lipatan di dalam set latih saja.
+  - Validasi: Q² CV, R² dan RMSE set uji, Golbraikh-Tropsha, Y-randomization 50×, plot prediksi vs terukur, plot Williams, dan kepentingan fitur permutasi dengan bit Morgan disertai contoh substrukturnya.
+  - Pembagian acak dan kerangka Bemis-Murcko dilaporkan berdampingan; selisih R² yang besar ditandai sebagai peringatan bahwa model hanya mengenali kerangka yang sudah dilihat.
+  - Prediksi konformal split 90 % (`core/konformal.py`) dan domain aplikabilitas (leverage h* serta kemiripan Tanimoto kNN); senyawa di luar domain ditandai di dialog dan di kolom baru "pIC50 prediksi" panel Hasil.
+  - Model disimpan sebagai joblib beserta kartu model JSON (sidik data, metrik, hiperparameter, versi paket, tanggal).
+- **Jaringan farmakologi & pengayaan jalur** (tab "Jaringan & jalur"; `core/pengayaan.py`, `core/jaringan.py`):
+  - Pengayaan jalur hipergeometrik + Benjamini-Hochberg atas set gen bawaan Reactome v97 (2190 set) dan GO proses biologis (5552 set), dirakit `dev/buat_gmt.py` dari sumber resmi; latar dilaporkan apa adanya.
+  - Tepi target-target STRING v12.5 (ambang 0,4/0,7/0,9) dan target-penyakit Open Targets (API v4, data 2026.09), keduanya lewat `core/sumber_data.py` sehingga versi dan lisensi tercatat sebagai jejak proyek.
+  - Metrik graf (derajat, betweenness, closeness) dan uji sensitivitas lintas ambang yang melaporkan simpul inti stabil (muncul pada >= 80 % kombinasi).
+  - Kanvas graf SVG dengan zoom dan geser, tabel Jalur/Simpul/Sensitivitas, ekspor GraphML dan CSV tepi, kirim ke Komposer Figur, serta paragraf metode berisi basis data, versi, ambang, dan latar.
+
 ## [1.2.0] - 13 Oktober 2026
 
 ### Baru

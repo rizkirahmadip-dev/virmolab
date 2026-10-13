@@ -90,6 +90,28 @@ Obat disetujui (virmolab/aset/obat_disetujui.tsv.gz) diturunkan dari ChEMBL (max
   berlisensi CC BY-SA 3.0.
 ChEMBL (API), COCONUT 2.0 (CC0, diunduh pengguna), ZINC22 (situs) diakses atas tindakan pengguna.
 
+Ditambahkan di VirmoLab 1.3 (penargetan balik & farmakologi jaringan)
+-----------------------------------------------------------------------------
+Data dibundel:
+Panel target (virmolab/data/panel_target/) diturunkan dari struktur RCSB PDB (CC0 1.0) lewat redocking;
+  tiap entri mencantumkan ID PDB, rantai, dan resolusi. Kutip: Berman dkk. 2000, Nucleic Acids Res 28:235.
+  Statistik umpan dihitung dari ChEMBL (obat disetujui, CC BY-SA 3.0; lihat di atas).
+Set gen Reactome (virmolab/data/gmt/reactome_manusia.gmt)   CC BY 4.0   https://reactome.org/license
+  Turunan ReactomePathways.gmt v97. Kutip: Milacic dkk., Nucleic Acids Res (Reactome Pathway Knowledgebase).
+Set gen Gene Ontology (virmolab/data/gmt/go_bp_manusia.gmt)   CC BY 4.0   https://geneontology.org
+  Turunan goa_human.gaf + go-basic.obo (proses biologis). Kutip: Ashburner dkk. 2000, Nat Genet 25:25;
+  Gene Ontology Consortium, Nucleic Acids Res (rilis terbaru).
+
+Data uji pengembang (tidak ikut aplikasi terpasang):
+dev/data/qsar_ache.csv diturunkan dari ChEMBL (CHEMBL220, IC50), CC BY-SA 3.0 — EMBL-EBI; berkas turunan juga
+  CC BY-SA 3.0. Dipakai hanya oleh dev/uji_qsar.py.
+
+Daring (tidak dibundel — diakses atas tindakan pengguna):
+STRING   CC BY 4.0   https://string-db.org/cgi/access   (interaksi protein; API v12.5)
+  Kutip: Szklarczyk dkk., Nucleic Acids Res (STRING database).
+Open Targets Platform   CC BY 4.0 / CC0 per sumber   https://platform-docs.opentargets.org/licence
+  (asosiasi target-penyakit; API v4). Kutip: Ochoa dkk., Nucleic Acids Res (Open Targets Platform).
+
 Ditambahkan di VirmoLab 0.9.3 (data, tidak dibundel — diunduh atas tindakan pengguna)
 -----------------------------------------------------------------------------
 AlphaFold DB (EMBL-EBI & Google DeepMind)   CC BY 4.0   https://alphafold.ebi.ac.uk

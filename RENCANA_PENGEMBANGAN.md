@@ -315,11 +315,11 @@ Dua jalur yang saling melengkapi:
 
 | Data | Sumber | Lisensi | Catatan |
 |---|---|---|---|
-| Target ↔ penyakit | **Open Targets Platform** GraphQL | [cek] (selama ini terbuka) | pengganti DisGeNET (kini berbayar) |
-| Jalur | **Reactome** (berkas GMT / Analysis Service) | CC BY 4.0 [cek] | bawaan |
-| Gene Ontology | GO + anotasi GOA manusia (GMT) | CC BY 4.0 | bawaan |
+| Target ↔ penyakit | **Open Targets Platform** GraphQL | CC BY 4.0 / CC0 per sumber [terverifikasi 13 Okt 2026, platform-docs.opentargets.org/licence] | API v4, data 2026.09; pengganti DisGeNET (kini berbayar) |
+| Jalur | **Reactome** (berkas GMT) | CC BY 4.0 [terverifikasi 13 Okt 2026, reactome.org/license] | bawaan: v97, 2190 set gen manusia (dev/buat_gmt.py) |
+| Gene Ontology | GO + anotasi GOA manusia (GMT) | CC BY 4.0 [terverifikasi 13 Okt 2026, geneontology.org/docs/go-citation-policy] | bawaan: GO 2026-07-26 + GOA 2026-05-21, 5552 set BP (dev/buat_gmt.py) |
 | KEGG | REST | **hanya akademik, tidak boleh didistribusikan** | tautan luar saja, tidak dibundel |
-| Interaksi protein | STRING | CC BY 4.0 [cek] | API, ambang skor ≥ 0,7 bawaan |
+| Interaksi protein | STRING | CC BY 4.0 [terverifikasi 13 Okt 2026, string-db.org/cgi/access] | API v12.5, ambang skor ≥ 0,7 bawaan |
 
 - Uji pengayaan: hipergeometrik (`scipy.stats.hypergeom`) + koreksi **Benjamini–Hochberg**; latar = semua gen
   dalam panel/anotasi (bukan seluruh genom, dijelaskan di laporan).

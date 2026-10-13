@@ -1,0 +1,13 @@
+pdb,rantai,ligan,gen,uniprot,nama,alasan
+5IKR,A,ID8,PTGS2,P35354,Prostaglandin G/H synthase 2 (COX-2),target AINS utama; kompleks asam mefenamat
+4O1Z,A,MXM,PTGS1,P05979,Prostaglandin G/H synthase 1 (COX-1; domba),isoform COX-1; kompleks meloksikam
+1A9U,A,SB2,MAPK14,Q16539,MAP kinase p38 alfa,kinase sitokin proinflamasi; kompleks SB203580
+3KRR,A,DQX,JAK2,O60674,Tyrosine-protein kinase JAK2,jalur sitokin JAK-STAT
+4YL3,A,4U9,PTGES,O14684,Prostaglandin E synthase (mPGES-1),penghasil PGE2 hilir COX-2
+5P9J,A,8E8,BTK,Q06187,Tyrosine-protein kinase BTK,kinase sel imun; kompleks ibrutinib
+3ANS,A,S38,EPHX2,P34913,Epoxide hydrolase 2 (sEH),degradasi EET antiinflamasi
+1XOM,A,CIO,PDE4D,Q08499,cAMP-specific phosphodiesterase 4D,target antiinflamasi; kompleks cilomilast
+1D3G,A,BRE,DHODH,Q02127,Dihydroorotate dehydrogenase,target imunomodulator; kompleks analog brequinar
+3FH7,A,25P,LTA4H,P09960,Leukotriene A-4 hydrolase,penghasil LTB4
+1M2Z,A,DEX,NR3C1,P04150,Glucocorticoid receptor,reseptor glukokortikoid; kompleks deksametason
+2PRG,A,BRL,PPARG,P37231,PPAR gamma,reseptor nuklir antiinflamasi; kompleks rosiglitazon

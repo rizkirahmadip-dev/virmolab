@@ -1,0 +1,282 @@
+[
+  {
+    "pdb": "5P9J",
+    "uniprot": "Q06187",
+    "gen": "BTK",
+    "nama": "Tyrosine-protein kinase BTK",
+    "rantai": "A",
+    "ligan_kristal": "8E8",
+    "organisme": [
+      "Homo sapiens"
+    ],
+    "resolusi": 1.08,
+    "tanggal_rilis": "2017-05-24",
+    "pusat": [
+      19.812,
+      7.156,
+      3.617
+    ],
+    "ukuran": [
+      22.4,
+      20.0,
+      24.5
+    ],
+    "rmsd_redocking": 0.71,
+    "z_rata": -7.656,
+    "z_sd": 1.201,
+    "n_umpan": 49,
+    "kofaktor_disertakan": false,
+    "alasan": "kinase sel imun; kompleks ibrutinib",
+    "parameter_docking": {
+      "mesin": "vina",
+      "exhaustiveness": 8,
+      "num_modes": 9,
+      "seed": 42
+    }
+  },
+  {
+    "pdb": "1D3G",
+    "uniprot": "Q02127",
+    "gen": "DHODH",
+    "nama": "Dihydroorotate dehydrogenase",
+    "rantai": "A",
+    "ligan_kristal": "BRE",
+    "organisme": [
+      "Homo sapiens"
+    ],
+    "resolusi": 1.6,
+    "tanggal_rilis": "2000-09-13",
+    "pusat": [
+      50.827,
+      43.229,
+      -2.524
+    ],
+    "ukuran": [
+      21.8,
+      22.7,
+      20.0
+    ],
+    "rmsd_redocking": 0.21,
+    "z_rata": -8.563,
+    "z_sd": 1.48,
+    "n_umpan": 49,
+    "kofaktor_disertakan": false,
+    "alasan": "target imunomodulator; kompleks analog brequinar",
+    "parameter_docking": {
+      "mesin": "vina",
+      "exhaustiveness": 8,
+      "num_modes": 9,
+      "seed": 42
+    }
+  },
+  {
+    "pdb": "3KRR",
+    "uniprot": "O60674",
+    "gen": "JAK2",
+    "nama": "Tyrosine-protein kinase JAK2",
+    "rantai": "A",
+    "ligan_kristal": "DQX",
+    "organisme": [
+      "Homo sapiens"
+    ],
+    "resolusi": 1.8,
+    "tanggal_rilis": "2010-07-21",
+    "pusat": [
+      15.13,
+      11.389,
+      4.134
+    ],
+    "ukuran": [
+      20.3,
+      27.9,
+      20.0
+    ],
+    "rmsd_redocking": 0.57,
+    "z_rata": -7.674,
+    "z_sd": 1.25,
+    "n_umpan": 49,
+    "kofaktor_disertakan": false,
+    "alasan": "jalur sitokin JAK-STAT",
+    "parameter_docking": {
+      "mesin": "vina",
+      "exhaustiveness": 8,
+      "num_modes": 9,
+      "seed": 42
+    }
+  },
+  {
+    "pdb": "1A9U",
+    "uniprot": "Q16539",
+    "gen": "MAPK14",
+    "nama": "MAP kinase p38 alfa",
+    "rantai": "A",
+    "ligan_kristal": "SB2",
+    "organisme": [
+      "Homo sapiens"
+    ],
+    "resolusi": 2.5,
+    "tanggal_rilis": "1999-04-20",
+    "pusat": [
+      2.714,
+      14.686,
+      28.524
+    ],
+    "ukuran": [
+      21.3,
+      25.0,
+      20.0
+    ],
+    "rmsd_redocking": 0.57,
+    "z_rata": -7.119,
+    "z_sd": 1.072,
+    "n_umpan": 49,
+    "kofaktor_disertakan": false,
+    "alasan": "kinase sitokin proinflamasi; kompleks SB203580",
+    "parameter_docking": {
+      "mesin": "vina",
+      "exhaustiveness": 8,
+      "num_modes": 9,
+      "seed": 42
+    }
+  },
+  {
+    "pdb": "1M2Z",
+    "uniprot": "P04150",
+    "gen": "NR3C1",
+    "nama": "Glucocorticoid receptor",
+    "rantai": "A",
+    "ligan_kristal": "DEX",
+    "organisme": [
+      "Homo sapiens"
+    ],
+    "resolusi": 2.5,
+    "tanggal_rilis": "2003-07-15",
+    "pusat": [
+      30.453,
+      7.022,
+      13.256
+    ],
+    "ukuran": [
+      20.0,
+      20.0,
+      22.2
+    ],
+    "rmsd_redocking": 0.3,
+    "z_rata": -7.003,
+    "z_sd": 2.377,
+    "n_umpan": 49,
+    "kofaktor_disertakan": false,
+    "alasan": "reseptor glukokortikoid; kompleks deksametason",
+    "parameter_docking": {
+      "mesin": "vina",
+      "exhaustiveness": 8,
+      "num_modes": 9,
+      "seed": 42
+    }
+  },
+  {
+    "pdb": "1XOM",
+    "uniprot": "Q08499",
+    "gen": "PDE4D",
+    "nama": "cAMP-specific phosphodiesterase 4D",
+    "rantai": "A",
+    "ligan_kristal": "CIO",
+    "organisme": [
+      "Homo sapiens"
+    ],
+    "resolusi": 1.55,
+    "tanggal_rilis": "2004-12-14",
+    "pusat": [
+      14.349,
+      6.093,
+      13.028
+    ],
+    "ukuran": [
+      20.0,
+      20.0,
+      23.6
+    ],
+    "rmsd_redocking": 1.88,
+    "z_rata": -7.95,
+    "z_sd": 1.243,
+    "n_umpan": 49,
+    "kofaktor_disertakan": false,
+    "alasan": "target antiinflamasi; kompleks cilomilast",
+    "parameter_docking": {
+      "mesin": "vina",
+      "exhaustiveness": 8,
+      "num_modes": 9,
+      "seed": 42
+    }
+  },
+  {
+    "pdb": "4O1Z",
+    "uniprot": "P05979",
+    "gen": "PTGS1",
+    "nama": "Prostaglandin G/H synthase 1 (COX-1; domba)",
+    "rantai": "A",
+    "ligan_kristal": "MXM",
+    "organisme": [
+      "Ovis aries"
+    ],
+    "resolusi": 2.4,
+    "tanggal_rilis": "2014-01-22",
+    "pusat": [
+      252.162,
+      107.052,
+      4.737
+    ],
+    "ukuran": [
+      20.0,
+      20.0,
+      21.1
+    ],
+    "rmsd_redocking": 1.05,
+    "z_rata": -6.924,
+    "z_sd": 1.759,
+    "n_umpan": 49,
+    "kofaktor_disertakan": false,
+    "alasan": "isoform COX-1; kompleks meloksikam",
+    "parameter_docking": {
+      "mesin": "vina",
+      "exhaustiveness": 8,
+      "num_modes": 9,
+      "seed": 42
+    }
+  },
+  {
+    "pdb": "5IKR",
+    "uniprot": "P35354",
+    "gen": "PTGS2",
+    "nama": "Prostaglandin G/H synthase 2 (COX-2)",
+    "rantai": "A",
+    "ligan_kristal": "ID8",
+    "organisme": [
+      "Homo sapiens"
+    ],
+    "resolusi": 2.342,
+    "tanggal_rilis": "2016-05-25",
+    "pusat": [
+      38.457,
+      2.484,
+      61.23
+    ],
+    "ukuran": [
+      20.0,
+      20.0,
+      20.0
+    ],
+    "rmsd_redocking": 1.85,
+    "z_rata": -5.937,
+    "z_sd": 2.257,
+    "n_umpan": 49,
+    "kofaktor_disertakan": false,
+    "alasan": "target AINS utama; kompleks asam mefenamat",
+    "parameter_docking": {
+      "mesin": "vina",
+      "exhaustiveness": 8,
+      "num_modes": 9,
+      "seed": 42
+    }
+  }
+]

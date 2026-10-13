@@ -1,0 +1,317 @@
+[
+  {
+    "pdb": "4FDO",
+    "uniprot": "P9WJF1",
+    "gen": "dprE1",
+    "nama": "Decaprenylphosphoryl-beta-D-ribose oxidase (M. tuberculosis)",
+    "rantai": "A",
+    "ligan_kristal": "0T5",
+    "organisme": [
+      "Mycobacterium tuberculosis"
+    ],
+    "resolusi": 2.403,
+    "tanggal_rilis": "2012-07-04",
+    "pusat": [
+      38.871,
+      13.216,
+      11.761
+    ],
+    "ukuran": [
+      20.0,
+      20.0,
+      21.6
+    ],
+    "rmsd_redocking": 0.56,
+    "z_rata": -8.099,
+    "z_sd": 1.338,
+    "n_umpan": 49,
+    "kofaktor_disertakan": false,
+    "alasan": "dinding sel mikobakteri",
+    "parameter_docking": {
+      "mesin": "vina",
+      "exhaustiveness": 8,
+      "num_modes": 9,
+      "seed": 42
+    }
+  },
+  {
+    "pdb": "3G1M",
+    "uniprot": "P9WMC1",
+    "gen": "ethR",
+    "nama": "Represor transkripsi EthR (M. tuberculosis)",
+    "rantai": "A",
+    "ligan_kristal": "RF3",
+    "organisme": [
+      "Mycobacterium tuberculosis"
+    ],
+    "resolusi": 1.7,
+    "tanggal_rilis": "2009-07-21",
+    "pusat": [
+      32.325,
+      71.371,
+      11.645
+    ],
+    "ukuran": [
+      20.0,
+      27.0,
+      20.0
+    ],
+    "rmsd_redocking": 1.2,
+    "z_rata": -7.748,
+    "z_sd": 1.564,
+    "n_umpan": 49,
+    "kofaktor_disertakan": false,
+    "alasan": "penguat etionamida; tanpa kofaktor",
+    "parameter_docking": {
+      "mesin": "vina",
+      "exhaustiveness": 8,
+      "num_modes": 9,
+      "seed": 42
+    }
+  },
+  {
+    "pdb": "3SRW",
+    "uniprot": "P0A017",
+    "gen": "folA",
+    "nama": "Dihidrofolat reduktase (S. aureus)",
+    "rantai": "X",
+    "ligan_kristal": "Q27",
+    "organisme": [
+      "Staphylococcus aureus"
+    ],
+    "resolusi": 1.7,
+    "tanggal_rilis": "2011-08-31",
+    "pusat": [
+      -5.147,
+      -32.121,
+      6.066
+    ],
+    "ukuran": [
+      20.0,
+      21.5,
+      20.0
+    ],
+    "rmsd_redocking": 0.47,
+    "z_rata": -7.963,
+    "z_sd": 1.181,
+    "n_umpan": 49,
+    "kofaktor_disertakan": false,
+    "alasan": "jalur folat; target trimetoprim",
+    "parameter_docking": {
+      "mesin": "vina",
+      "exhaustiveness": 8,
+      "num_modes": 9,
+      "seed": 42
+    }
+  },
+  {
+    "pdb": "5D7R",
+    "uniprot": "P0A0K8",
+    "gen": "gyrB",
+    "nama": "DNA gyrase subunit B (S. aureus)",
+    "rantai": "A",
+    "ligan_kristal": "57Y",
+    "organisme": [
+      "Staphylococcus aureus"
+    ],
+    "resolusi": 1.55,
+    "tanggal_rilis": "2015-11-18",
+    "pusat": [
+      0.884,
+      -24.725,
+      24.14
+    ],
+    "ukuran": [
+      23.2,
+      25.5,
+      20.0
+    ],
+    "rmsd_redocking": 0.87,
+    "z_rata": -7.16,
+    "z_sd": 0.83,
+    "n_umpan": 49,
+    "kofaktor_disertakan": false,
+    "alasan": "domain ATPase gyrase; seri inhibitor berbeda dari 3G75",
+    "parameter_docking": {
+      "mesin": "vina",
+      "exhaustiveness": 8,
+      "num_modes": 9,
+      "seed": 42
+    }
+  },
+  {
+    "pdb": "3U2D",
+    "uniprot": "P0A0K8",
+    "gen": "gyrB",
+    "nama": "DNA gyrase subunit B (S. aureus)",
+    "rantai": "A",
+    "ligan_kristal": "08B",
+    "organisme": [
+      "Staphylococcus aureus"
+    ],
+    "resolusi": 1.85,
+    "tanggal_rilis": "2012-01-11",
+    "pusat": [
+      0.195,
+      2.568,
+      24.19
+    ],
+    "ukuran": [
+      22.3,
+      23.2,
+      20.0
+    ],
+    "rmsd_redocking": 0.46,
+    "z_rata": -7.115,
+    "z_sd": 0.803,
+    "n_umpan": 49,
+    "kofaktor_disertakan": false,
+    "alasan": "domain ATPase gyrase; kelas pirolamida",
+    "parameter_docking": {
+      "mesin": "vina",
+      "exhaustiveness": 8,
+      "num_modes": 9,
+      "seed": 42
+    }
+  },
+  {
+    "pdb": "3TTZ",
+    "uniprot": "P0A0K8",
+    "gen": "gyrB",
+    "nama": "DNA gyrase subunit B (S. aureus)",
+    "rantai": "A",
+    "ligan_kristal": "07N",
+    "organisme": [
+      "Staphylococcus aureus"
+    ],
+    "resolusi": 1.63,
+    "tanggal_rilis": "2011-11-16",
+    "pusat": [
+      0.318,
+      2.949,
+      24.168
+    ],
+    "ukuran": [
+      21.5,
+      25.1,
+      20.0
+    ],
+    "rmsd_redocking": 0.68,
+    "z_rata": -7.164,
+    "z_sd": 0.866,
+    "n_umpan": 49,
+    "kofaktor_disertakan": false,
+    "alasan": "domain ATPase gyrase; inhibitor topoisomerase",
+    "parameter_docking": {
+      "mesin": "vina",
+      "exhaustiveness": 8,
+      "num_modes": 9,
+      "seed": 42
+    }
+  },
+  {
+    "pdb": "4BAE",
+    "uniprot": "P0C559",
+    "gen": "gyrB",
+    "nama": "DNA gyrase subunit B (M. smegmatis)",
+    "rantai": "A",
+    "ligan_kristal": "RWX",
+    "organisme": [
+      "Mycolicibacterium smegmatis"
+    ],
+    "resolusi": 2.35,
+    "tanggal_rilis": "2013-10-30",
+    "pusat": [
+      5.715,
+      -4.615,
+      -17.839
+    ],
+    "ukuran": [
+      20.0,
+      20.0,
+      27.7
+    ],
+    "rmsd_redocking": 0.75,
+    "z_rata": -7.363,
+    "z_sd": 1.196,
+    "n_umpan": 49,
+    "kofaktor_disertakan": false,
+    "alasan": "model ATPase gyrase mikobakteri",
+    "parameter_docking": {
+      "mesin": "vina",
+      "exhaustiveness": 8,
+      "num_modes": 9,
+      "seed": 42
+    }
+  },
+  {
+    "pdb": "2VES",
+    "uniprot": "P47205",
+    "gen": "lpxC",
+    "nama": "UDP-3-O-acyl-GlcNAc deacetylase (P. aeruginosa)",
+    "rantai": "A",
+    "ligan_kristal": "GVR",
+    "organisme": [
+      "Pseudomonas aeruginosa PAO1"
+    ],
+    "resolusi": 1.9,
+    "tanggal_rilis": "2008-01-15",
+    "pusat": [
+      57.288,
+      37.663,
+      16.165
+    ],
+    "ukuran": [
+      20.0,
+      21.8,
+      20.0
+    ],
+    "rmsd_redocking": 0.42,
+    "z_rata": -7.174,
+    "z_sd": 0.953,
+    "n_umpan": 49,
+    "kofaktor_disertakan": false,
+    "alasan": "sintesis lipid A gram-negatif",
+    "parameter_docking": {
+      "mesin": "vina",
+      "exhaustiveness": 8,
+      "num_modes": 9,
+      "seed": 42
+    }
+  },
+  {
+    "pdb": "5V3Y",
+    "uniprot": "I6X8D2",
+    "gen": "pks13",
+    "nama": "Polyketide synthase Pks13 domain TE (M. tuberculosis)",
+    "rantai": "A",
+    "ligan_kristal": "5V8",
+    "organisme": [
+      "Mycobacterium tuberculosis"
+    ],
+    "resolusi": 1.98,
+    "tanggal_rilis": "2017-07-05",
+    "pusat": [
+      4.797,
+      26.286,
+      7.481
+    ],
+    "ukuran": [
+      20.0,
+      24.2,
+      20.0
+    ],
+    "rmsd_redocking": 0.79,
+    "z_rata": -7.592,
+    "z_sd": 1.103,
+    "n_umpan": 49,
+    "kofaktor_disertakan": false,
+    "alasan": "dinding sel mikobakteri; inhibitor domain tioesterase",
+    "parameter_docking": {
+      "mesin": "vina",
+      "exhaustiveness": 8,
+      "num_modes": 9,
+      "seed": 42
+    }
+  }
+]

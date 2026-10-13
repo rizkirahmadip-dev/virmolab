@@ -10,14 +10,15 @@ from . import theme
 
 KOLOM = ["#", "Ligan", "ΔG (kcal/mol)", "Ki perkiraan", "LE", "Klaster", "RMSD kristal (Å)", "RMSD ref (Å)",
          "PoseBusters", "H", "HF", "π", "Lain", "Mesin", "Job", "IFP vs kristal", "MM/GBSA (kcal/mol)",
-         "GNINA (kcal/mol)", "CNNscore", "CNNaffinity (pK)", "Syarat jarak (Å)"]
-NUM = {0, 2, 4, 5, 6, 7, 9, 10, 11, 12, 15, 16, 17, 18, 19, 20}
+         "GNINA (kcal/mol)", "CNNscore", "CNNaffinity (pK)", "Syarat jarak (Å)", "pIC50 prediksi"]
+NUM = {0, 2, 4, 5, 6, 7, 9, 10, 11, 12, 15, 16, 17, 18, 19, 20, 21}
 K_IFP = 15
 K_MMGBSA = 16
 K_GNINA = 17
 K_CNN = 18
 K_PK = 19
 K_JARAK = 20
+K_QSAR = 21
 K_QC = 8
 # kolom tampil bawaan (sisanya lewat klik kanan pada judul kolom)
 TAMPIL_BAWAAN = {0, 1, 2, 4, 6, K_QC, 9, K_IFP, K_MMGBSA, K_GNINA, K_CNN, K_PK, K_JARAK}
@@ -45,6 +46,8 @@ class PanelHasil(QWidget):
     def __init__(self):
         super().__init__()
         self.mode = "terang"
+        self._qsar = {}                  # {nama ligan: hasil prediksi QSAR} dari dialog QSAR
+        self._qsar_klasifikasi = False
         lay = QVBoxLayout(self)
         lay.setContentsMargins(0, 0, 0, 0)
         lay.setSpacing(0)
@@ -175,6 +178,44 @@ class PanelHasil(QWidget):
         if k in NUM:
             it.setTextAlignment(k, Qt.AlignRight | Qt.AlignVCenter)
 
+    def set_qsar(self, peta, klasifikasi=False):
+        """Terima prediksi QSAR {nama ligan: hasil} dari dialog QSAR dan tampilkan di kolom pIC50 prediksi."""
+        self._qsar = dict(peta or {})
+        self._qsar_klasifikasi = bool(klasifikasi)
+        self._isi_qsar()
+        from ..core import paths
+        tampil = self._kolom_tampil()
+        if self._qsar and K_QSAR not in tampil:
+            paths.settings().setValue("kolom_hasil", sorted(tampil | {K_QSAR}))
+            self._terapkan_kolom()
+
+    def _isi_qsar(self):
+        """Isi kolom QSAR untuk baris yang namanya ada di hasil prediksi (baris lain dibiarkan kosong)."""
+        if not getattr(self, "_qsar", None):
+            return
+        t = theme.TOKEN[self.mode]
+        for i in range(self.pohon.topLevelItemCount()):
+            it = self.pohon.topLevelItem(i)
+            p = self._qsar.get(it.text(1))
+            if not p:
+                continue
+            if self._qsar_klasifikasi:
+                it.setText(K_QSAR, ("aktif" if p.get("kelas") else "tidak aktif")
+                           + (f" ({id_angka(format(p['peluang_aktif'], '.2f'))})" if p.get("peluang_aktif") is not None else ""))
+                it.setData(K_QSAR, Qt.UserRole, p.get("peluang_aktif"))
+            else:
+                self._sel(it, K_QSAR, p.get("pic50"))
+                if p.get("bawah") is not None:
+                    it.setText(K_QSAR, it.text(K_QSAR) + f" ± {id_angka(format((p['atas'] - p['bawah']) / 2, '.2f'))}")
+            luar = not p.get("dalam_domain", True)
+            if luar:
+                it.setText(K_QSAR, "⚠ " + it.text(K_QSAR))
+                it.setForeground(K_QSAR, QColor(t["warn"]))
+            it.setToolTip(K_QSAR, ("Di luar domain aplikabilitas model: angka ini tidak boleh ditafsirkan sebagai "
+                                   "nilai kuantitatif." if luar else "Di dalam domain aplikabilitas model.")
+                          + f" Kemiripan Tanimoto ke 5 tetangga terdekat set latih: "
+                            f"{id_angka(format(p.get('tanimoto', 0.0), '.2f'))}.")
+
     def muat(self, baris):
         """baris: dari core.ekspor.baris_hasil."""
         t = theme.TOKEN[self.mode]
@@ -265,6 +306,7 @@ class PanelHasil(QWidget):
         self.pohon.sortItems(2, Qt.AscendingOrder)
         self.pohon.setVisible(bool(baris))
         self.l_kosong.setVisible(not baris)
+        self._isi_qsar()
         self.pohon.blockSignals(False)
         self._saring()
         self._hitung_centang()

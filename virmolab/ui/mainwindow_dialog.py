@@ -286,3 +286,16 @@ class PembukaDialog:
         d.setAttribute(Qt.WA_DeleteOnClose)
         d.show()
 
+    def buka_qsar(self):
+        from .dialog_qsar import DialogQSAR
+        d = DialogQSAR(self, proyek=self.proyek)
+        d.setAttribute(Qt.WA_DeleteOnClose)
+        d.show()
+
+    def buka_target_balik(self):
+        from .dialog_target_balik import DialogTargetBalik
+        d = DialogTargetBalik(self, proyek=self.proyek)
+        d.setAttribute(Qt.WA_DeleteOnClose)
+        d.show()
+
+

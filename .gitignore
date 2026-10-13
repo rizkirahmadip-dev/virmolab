@@ -46,3 +46,7 @@ uji_mandiri.json
 
 # Keluaran video & gambar promosi (dibangun ulang dari build_tools/logo/*promosi*.py)
 branding/promosi/
+dev/gmt_sumber/
+dev/panel_kandidat/pdb/
+dev/panel_kandidat/umpan_pdbqt/
+dev/panel_kandidat/*.out

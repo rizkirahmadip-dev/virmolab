@@ -63,6 +63,9 @@ PETUNJUK_KOLOM = {
     17: BUTIR[3][0] + " (" + BUTIR[3][1] + "): " + BUTIR[3][2],
     18: BUTIR[4][0] + " (" + BUTIR[4][1] + "): " + BUTIR[4][2],
     19: BUTIR[5][0] + " (" + BUTIR[5][1] + "): " + BUTIR[5][2],
+    21: "pIC50 yang diprediksi model QSAR Anda sendiri (Analisis › QSAR & model prediksi), "
+         "beserta setengah lebar interval konformal 90 %. Tanda ⚠ berarti senyawa berada di luar domain "
+         "aplikabilitas model, sehingga angkanya hanya indikasi kasar.",
     20: "Jarak terdekat (Å) atom berat pose ke salah satu residu yang disyaratkan. "
          "Baris ligan memakai pose berenergi terbaik yang lolos. Pose lain tetap di bawahnya. "
          "Pencarian docking tidak dipaksa mendekat. Sel kosong berarti syarat belum diatur.",

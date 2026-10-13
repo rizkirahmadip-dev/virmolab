@@ -1,0 +1,21 @@
+pdb,rantai,ligan,gen,uniprot,nama,alasan
+3G75,A,B48,gyrB,P0A0K8,DNA gyrase subunit B (S. aureus),target antibakteri; domain ATPase
+4DUH,A,RLI,gyrB,P0AES6,DNA gyrase subunit B (E. coli),domain ATPase gyrase gram-negatif
+4EM7,A,0RA,parE,Q59961,DNA topoisomerase IV subunit B (S. pneumoniae),domain ATPase topoisomerase IV
+4ALK,A,E9P,fabI,A0A0J9X1X7,Enoyl-ACP reductase FabI (S. aureus),sintesis asam lemak; kelas triklosan
+1QSG,A,TCL,fabI,P0AEK4,Enoyl-ACP reductase FabI (E. coli),kompleks triklosan
+3SRW,X,Q27,folA,P0A017,Dihidrofolat reduktase (S. aureus),jalur folat; target trimetoprim
+6XG5,A,TOP,folA,P0ABQ4,Dihidrofolat reduktase (E. coli),kompleks trimetoprim
+4TZK,A,641,inhA,P9WGR1,Enoyl-ACP reductase InhA (M. tuberculosis),target isoniazid/tuberkulosis
+2NSD,A,4PI,inhA,P9WGR1,Enoyl-ACP reductase InhA (M. tuberculosis),inhibitor InhA langsung
+2VES,A,GVR,lpxC,P47205,UDP-3-O-acyl-GlcNAc deacetylase (P. aeruginosa),sintesis lipid A gram-negatif
+1LRU,A,BB2,def,P0A6K3,Peptida deformilase (E. coli),target aktinonin
+4FDO,A,0T5,dprE1,P9WJF1,Decaprenylphosphoryl-beta-D-ribose oxidase (M. tuberculosis),dinding sel mikobakteri
+5V3Y,A,5V8,pks13,I6X8D2,Polyketide synthase Pks13 domain TE (M. tuberculosis),dinding sel mikobakteri; inhibitor domain tioesterase
+5D7R,A,57Y,gyrB,P0A0K8,DNA gyrase subunit B (S. aureus),domain ATPase gyrase; seri inhibitor berbeda dari 3G75
+3U2D,A,08B,gyrB,P0A0K8,DNA gyrase subunit B (S. aureus),domain ATPase gyrase; kelas pirolamida
+3TTZ,A,07N,gyrB,P0A0K8,DNA gyrase subunit B (S. aureus),domain ATPase gyrase; inhibitor topoisomerase
+4BAE,A,RWX,gyrB,P0C559,DNA gyrase subunit B (M. smegmatis),model ATPase gyrase mikobakteri
+3G1M,A,RF3,ethR,P9WMC1,Represor transkripsi EthR (M. tuberculosis),penguat etionamida; tanpa kofaktor
+1L2S,A,STC,ampC,P00811,Beta-laktamase AmpC (E. coli),resistensi beta-laktam; inhibitor non-kovalen
+4EYL,A,0RV,blaNDM-1,C7C422,Metallo-beta-laktamase NDM-1 (K. pneumoniae),resistensi karbapenem; Zn2+ pada kantong

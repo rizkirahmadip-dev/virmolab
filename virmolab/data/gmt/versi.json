@@ -1,0 +1,22 @@
+{
+  "reactome_manusia.gmt": {
+    "sumber": "Reactome",
+    "lisensi": "CC BY 4.0",
+    "url": "https://reactome.org/download/current/ReactomePathways.gmt.zip",
+    "n_set": 2190,
+    "n_gen": 11682,
+    "sha1": "a02642bf6f38",
+    "dirakit": "2026-10-13",
+    "versi": "Reactome v97"
+  },
+  "go_bp_manusia.gmt": {
+    "sumber": "Gene Ontology (GOA manusia, Biological Process)",
+    "lisensi": "CC BY 4.0",
+    "url": "https://current.geneontology.org/annotations/goa_human.gaf.gz ; https://purl.obolibrary.org/obo/go/go-basic.obo",
+    "n_set": 5552,
+    "n_gen": 18751,
+    "sha1": "376678343773",
+    "dirakit": "2026-10-13",
+    "versi": "GO releases/2026-07-26; GOA 2026-05-21T08:10"
+  }
+}

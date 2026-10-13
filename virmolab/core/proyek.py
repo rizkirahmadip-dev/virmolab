@@ -53,6 +53,7 @@ def migrasi_proyek(data: dict) -> dict:
     data.setdefault("templat", "")
     data.setdefault("catatan", "")
     data.setdefault("jejak", [])
+    data.setdefault("target_balik", [])
     return data
 
 
@@ -77,6 +78,7 @@ class Proyek:
         self.md = []                  # riwayat MD / MM-GBSA: {id, mode, tanggal, status, folder, ligan, opsi}
         self.eksperimen = {}          # data aktivitas eksperimen (ChEMBL): target, aktivitas [{chembl, nama, smiles, inchikey, pchembl, …}]
         self.jejak = []               # riwayat sumber data internet: [{sumber, versi, diambil, kueri, lisensi}]
+        self.target_balik = []        # penargetan balik: [{ligan_id, kelas, hasil, parameter, jejak}]
 
     def catat_jejak(self, jejak):
         """Catat jejak sumber data internet (objek Jejak atau dict) tanpa duplikat (kunci sumber+kueri)."""
@@ -101,7 +103,7 @@ class Proyek:
         return Path(path).resolve().relative_to(self.folder.resolve()).as_posix()
 
     def siapkan_folder(self):
-        for d in ("objek", "reseptor", "ligan/sumber", "ligan/pdbqt", "grid", "hasil", ".cadangan"):
+        for d in ("objek", "reseptor", "ligan/sumber", "ligan/pdbqt", "grid", "hasil", "model", ".cadangan"):
             self.p(d).mkdir(parents=True, exist_ok=True)
 
     # ---------------------------------------------------------- simpan/buka
@@ -113,7 +115,7 @@ class Proyek:
                 "objek": self.objek, "catatan": self.catatan, "validasi": self.validasi,
                 "blast": self.blast, "syarat_jarak": self.syarat_jarak,
                 "eksperimen": self.eksperimen, "md": self.md, "templat": self.templat,
-                "jejak": self.jejak}
+                "jejak": self.jejak, "target_balik": self.target_balik}
 
     def simpan(self):
         self.siapkan_folder()
@@ -158,6 +160,7 @@ class Proyek:
         pr.md = d.get("md") or []
         pr.templat = d.get("templat") or ""
         pr.jejak = d.get("jejak") or []
+        pr.target_balik = d.get("target_balik") or []
         # job yang terputus (aplikasi ditutup/crash) bisa dilanjutkan
         for j in pr.job:
             if j.get("status") in ("berjalan", "menunggu"):

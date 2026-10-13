@@ -306,6 +306,36 @@
 <li><b>Langkah 4 (Ringkasan &amp; publikasi):</b> Kartu metrik hanya dari uji yang dijalankan (yang belum tampil "–"), persentase pose valid PoseBusters dari QC yang sudah tercatat pada hasil docking proyek, paragraf metode (Bahasa Indonesia &amp; Inggris) yang hanya memuat uji yang dijalankan, laporan HTML satu halaman, dan pengiriman kurva ROC ke Komposer Figur.</li>
 </ul>
 
+<h3 id="target-balik">Penargetan balik</h3>
+<p><b>Analisis › Penapisan banyak ligan › Penargetan balik &amp; jaringan…</b> mencari target protein yang mungkin untuk satu senyawa:</p>
+<ul>
+<li><b>Jalur ligan (ChEMBL, daring):</b> senyawa mirip di ChEMBL beserta target tempat senyawa itu aktif ($p\text{ChEMBL} \ge 6$). Kemiripan diukur dengan koefisien Tanimoto sidik jari Morgan.</li>
+<li><b>Jalur struktur (panel target):</b> docking ke panel struktur kristal tervalidasi redocking, dinormalisasi dengan z-skor terhadap umpan acak. Pilihan ini nonaktif bila paket belum memuat panel.</li>
+<li><b>Peringkat Borda:</b> peringkat kedua jalur dijumlahkan; keyakinan tinggi bila target masuk 10 besar di keduanya. Target yang gagal docking tidak diberi peringkat.</li>
+<li>Seluruh hasil adalah hipotesis komputasi yang perlu diuji di laboratorium.</li>
+</ul>
+<h3 id="jaringan-jalur">Jaringan &amp; jalur</h3>
+<p>Tab <b>Jaringan &amp; jalur</b> pada dialog yang sama merangkai target terpilih menjadi jaringan farmakologi. Tekan <b>Kirim target terpilih ke Jaringan</b> di tab penargetan balik (baris yang disorot, atau target berkeyakinan tinggi bila tidak ada yang disorot), lalu <b>Bangun jaringan</b>.</p>
+<ul>
+<li><b>Pengayaan jalur:</b> uji hipergeometrik satu sisi terhadap set gen Reactome atau Gene Ontology (proses biologis) yang ikut dalam paket, dengan koreksi Benjamini-Hochberg. Latar adalah seluruh gen beranotasi pada berkas tersebut dan jumlahnya disebut di paragraf metode.</li>
+<li><b>Interaksi protein (STRING):</b> tepi antar target dengan skor gabungan di atas ambang pilihan (0,4 / 0,7 / 0,9). Skor STRING mencakup bukti ko-ekspresi dan penambangan teks, bukan hanya interaksi fisik.</li>
+<li><b>Asosiasi penyakit (Open Targets):</b> lima penyakit teratas per target dengan skor asosiasi di atas ambang pilihan.</li>
+<li><b>Uji sensitivitas:</b> jaringan dibangun ulang pada ambang STRING 0,4/0,7/0,9 dan 5/10/20 target teratas. Gen yang tetap berderajat tinggi pada setidaknya 80&nbsp;% kombinasi ditandai sebagai simpul inti stabil (bertepi tebal pada graf).</li>
+<li>Graf dapat diperbesar dengan gulir dan digeser dengan seret. Hasil diekspor sebagai GraphML (Cytoscape, Gephi), CSV tepi, atau dikirim ke Komposer Figur. Tombol <b>Salin paragraf metode</b> menuliskan basis data, versi, ambang, hasil uji sensitivitas, dan latar pengayaan.</li>
+<li>Seluruh jaringan adalah hipotesis komputasi yang perlu diuji di laboratorium.</li>
+</ul>
+
+<h3 id="qsar">QSAR &amp; model prediksi</h3>
+<p><b>Analisis › Penapisan banyak ligan › QSAR &amp; model prediksi…</b> membangun model dari data aktivitas Anda sendiri lewat lima langkah: Data → Kurasi → Model → Validasi → Prediksi.</p>
+<ul>
+<li><b>Data:</b> tabel aktivitas ChEMBL yang sudah diambil di proyek, atau berkas CSV berkolom <code>smiles</code> dan <code>nilai</code> (satuan nM, uM, atau M) atau <code>smiles</code> dan <code>pIC50</code>. Nilai bertanda &gt; atau &lt; dilewati karena bukan pengukuran pasti.</li>
+<li><b>Kurasi:</b> struktur dibakukan (fragmen terbesar, netralisasi), senyawa anorganik dan serpihan dibuang beserta alasannya, pengukuran ganda digabung sebagai median, lalu rentang pengukuran yang lebih dari 1 log dan pasangan <i>activity cliff</i> (kemiripan Tanimoto &ge; 0,85 dengan beda &ge; 1,5 log) ditandai untuk Anda putuskan.</li>
+<li><b>Model:</b> regresi atau klasifikasi; fitur Morgan2, MACCS, deskriptor RDKit 2D, atau gabungan; algoritma Random Forest, SVR, kNN, Gaussian Process, atau Ridge. Hiperparameter disetel dengan validasi silang 5 lipatan <i>di dalam set latih saja</i>.</li>
+<li><b>Validasi:</b> dua pembagian dilaporkan berdampingan. Pembagian acak hampir selalu lebih baik daripada pembagian kerangka Bemis-Murcko; selisih yang besar berarti model hanya mengenali kerangka yang sudah dilihat, dan aplikasi menuliskan peringatan itu. Tersedia pula Q&sup2;, R&sup2; set uji, kriteria Golbraikh-Tropsha, Y-randomization 50&times;, plot prediksi vs terukur, plot Williams, dan kepentingan fitur permutasi (bit Morgan disertai contoh substrukturnya).</li>
+<li><b>Prediksi:</b> ligan proyek diprediksi beserta interval konformal 90 % dan penanda domain aplikabilitas. Hasilnya dapat ditulis ke kolom <i>pIC50 prediksi</i> di panel Hasil, diekspor ke CSV, atau modelnya disimpan bersama kartu model (berisi sidik data, metrik, versi paket, dan tanggal).</li>
+<li>Senyawa di luar domain tetap diberi angka, tetapi ditandai dan tidak boleh ditafsirkan sebagai nilai kuantitatif.</li>
+</ul>
+
 <h2 id="cli">Baris perintah (VirmoLab-cli)</h2>
 <p><code>VirmoLab-cli.exe</code> ada di folder instalasi VirmoLab. Buka Command Prompt di folder itu (atau tulis jalur lengkapnya), lalu misalnya:</p>
 <pre>VirmoLab-cli dock -r 1HSG -l kandidat.smi --acuan auto -o hasil_1hsg
