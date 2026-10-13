@@ -21,6 +21,18 @@ Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x 
   - Tepi target-target STRING v12.5 (ambang 0,4/0,7/0,9) dan target-penyakit Open Targets (API v4, data 2026.09), keduanya lewat `core/sumber_data.py` sehingga versi dan lisensi tercatat sebagai jejak proyek.
   - Metrik graf (derajat, betweenness, closeness) dan uji sensitivitas lintas ambang yang melaporkan simpul inti stabil (muncul pada >= 80 % kombinasi).
   - Kanvas graf SVG dengan zoom dan geser, tabel Jalur/Simpul/Sensitivitas, ekspor GraphML dan CSV tepi, kirim ke Komposer Figur, serta paragraf metode berisi basis data, versi, ambang, dan latar.
+- **Pelacak hipotesis → uji laboratorium (F12)** (tab "Hipotesis" di dialog Rencana uji lab; `core/hipotesis.py`, `ui/dialog_labplanner.py`):
+  - Perluasan model data `proyek.eksperimen` menyimpan entri hasil uji `{id, ligan_id, assay, nilai, satuan, pIC50, tanggal, catatan, status_hipotesis}` (status: diajukan, diuji, didukung, ditolak) dengan migrasi round-trip utuh bagi data lama (ChEMBL dll).
+  - Evaluasi korelasi prediksi in silico vs hasil lab nyata: Spearman ρ dan Kendall τ disertai 95% Confidence Interval bootstrap 1000×, peringatan sampel kecil n < 8, dan penanganan transparan bagi ligan tanpa pasangan.
+  - Impor CSV: tabel IC50 per ligan, atau matriks bacaan plate reader 96-well. Bacaan mentah dinormalisasi dengan sumur blanko dan kendali pelarut menurut denah pelat, % inhibisi di-fit 4PL per ligan (semua replikat), dan IC50 hanya dilaporkan bila berada di dalam rentang uji; di luar itu ditandai tersensor (mis. "IC50 > 100 µM") dan tidak ikut dikorelasikan. Z′ dihitung dari kendali pelarut vs kontrol positif.
+  - Prediksi pembanding: ΔG docking, MM/GBSA (dibaca dari run MD selesai, rerata replika), dan pIC50 estimasi dari ΔG; pilihan tanpa data di proyek dinonaktifkan.
+  - Visualisasi grafik sebar Prediksi vs Terukur (SVG) dengan garis regresi dan pita kepercayaan 95%.
+  - Tombol "Latih ulang QSAR dengan data baru" membuka wizard QSAR dengan aktivitas uji lab proyek sudah dimuat (SMILES ligan proyek dibaca lewat `Proyek.smiles_ligan`).
+- **Penapisan berbasis ligan 3D (F4)** (Analisis › Penapisan banyak ligan › Penapisan farmakofor & bentuk 3D…; `core/farmakofor.py`, `core/bentuk.py`, `ui/dialog_farmakofor.py`):
+  - Kueri farmakofor 3D dari pose aktif di penampil atau ligan ko-kristal proyek, dengan bola eksklusi dari atom berat reseptor proyek (4 Å); pembangkitan konformer ETKDGv3, pencocokan fitur per konformer terselaraskan (RMSD fitur dan penalti eksklusi), serta penapisan paralel ProcessPoolExecutor (kelompok ≤ 500 senyawa, dibagi rata ke semua proses). `VirmoLab.pyw` dan `VirmoLab_cli.py` kini memanggil `multiprocessing.freeze_support()` agar proses pekerja di build PyInstaller tidak membuka ulang aplikasi.
+  - Keselarasan bentuk dan warna farmakofor via `rdkit.Chem.rdShapeAlign` dengan skor gabungan berbobot dapat diatur.
+  - Visualisasi ligan acuan, bola farmakofor, dan bola eksklusi di penampil 3D mengikuti tema; kandidat teratas dikirim sebagai ligan ke jendela utama lalu dialog Siapkan ligan dibuka (protonasi dan PDBQT sebelum docking).
+  - Validasi kueri: aktif dari ChEMBL (pChEMBL ≥ 7, beragam kerangka) atau CSV, decoy sepadan gaya DUD-E dibangkitkan otomatis, lalu ROC-AUC, BEDROC, dan EF1% (EF1% hanya untuk himpunan ≥ 100 senyawa). Tolok ukur uji: kueri MK1 (1HSG) membedakan 8 inhibitor protease HIV dari 520 decoy obat sepadan dengan AUC 0,66 (0,71 tanpa bola eksklusi); pengayaan awal lemah, sehingga hasil penapisan diperlakukan sebagai saringan kasar sebelum docking.
 
 ## [1.2.0] - 13 Oktober 2026
 

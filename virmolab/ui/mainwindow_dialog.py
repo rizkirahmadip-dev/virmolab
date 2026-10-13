@@ -291,10 +291,17 @@ class PembukaDialog:
         d = DialogQSAR(self, proyek=self.proyek)
         d.setAttribute(Qt.WA_DeleteOnClose)
         d.show()
+        return d
 
     def buka_target_balik(self):
         from .dialog_target_balik import DialogTargetBalik
         d = DialogTargetBalik(self, proyek=self.proyek)
+        d.setAttribute(Qt.WA_DeleteOnClose)
+        d.show()
+
+    def buka_farmakofor(self):
+        from .dialog_farmakofor import DialogFarmakofor
+        d = DialogFarmakofor(self)
         d.setAttribute(Qt.WA_DeleteOnClose)
         d.show()
 

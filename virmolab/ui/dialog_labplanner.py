@@ -13,8 +13,10 @@ from PySide6.QtWidgets import (QComboBox, QDialog, QDoubleSpinBox, QFileDialog, 
                                QHBoxLayout, QHeaderView, QLabel, QPushButton,
                                QSpinBox, QSplitter, QTabWidget, QTableWidget, QTableWidgetItem,
                                QTextEdit, QVBoxLayout, QWidget)
+from PySide6.QtSvgWidgets import QSvgWidget
 
 from ..core import ekspor as eksmod
+from ..core import hipotesis
 from ..core import labplanner
 from ..core.laporan import id_angka
 from . import kit
@@ -220,6 +222,10 @@ class DialogLabPlanner(QDialog):
         t3lay.addWidget(self.txt_protokol)
         self.tab.addTab(t3, "Draf Protokol Siap Cetak")
 
+        # Tab 4: Pelacak Hipotesis -> Uji Lab (F12)
+        t4 = self._buat_tab_hipotesis()
+        self.tab.addTab(t4, "Hipotesis")
+
         rlay.addWidget(self.tab, 1)
         sp.addWidget(kanan)
         sp.setStretchFactor(0, 3)
@@ -270,6 +276,7 @@ class DialogLabPlanner(QDialog):
         self.cb_ligan.blockSignals(False)
         if self.ligan_data:
             self._pilih_ligan_berubah()
+        self._muat_data_hipotesis()
 
     def _pilih_ligan_berubah(self):
         idx = self.cb_ligan.currentIndex()
@@ -452,3 +459,424 @@ class DialogLabPlanner(QDialog):
                         baris_csv.append("")
                 w.writerow(baris_csv)
         self.jw.status.showMessage(f"Denah pelat mikro disimpan ke {path}", 3000)
+
+    # ------------------------------------------------------------------ Tab Hipotesis (F12)
+    def _buat_tab_hipotesis(self):
+        w = QWidget()
+        lay = QVBoxLayout(w)
+        lay.setContentsMargins(6, 6, 6, 6)
+        lay.setSpacing(6)
+
+        # Bilah kontrol atas
+        top = QHBoxLayout()
+        top.addWidget(QLabel("Prediksi pembanding:"))
+        self.cb_jenis_pred = QComboBox()
+        self.cb_jenis_pred.addItem("ΔG Docking (kcal/mol)", "dg")
+        self.cb_jenis_pred.addItem("MM/GBSA (kcal/mol)", "mmgbsa")
+        self.cb_jenis_pred.addItem("pIC50 estimasi dari ΔG", "pic50_pred")
+        self.cb_jenis_pred.setItemData(2, "Transformasi monoton ΔG (Ki → IC50); korelasi peringkatnya sama dengan ΔG.",
+                                       Qt.ToolTipRole)
+        self.cb_jenis_pred.currentIndexChanged.connect(self._muat_data_hipotesis)
+        top.addWidget(self.cb_jenis_pred)
+
+        top.addSpacing(8)
+        b_impor = QPushButton("Impor CSV plate reader…")
+        b_impor.clicked.connect(self._impor_csv_plate_reader)
+        top.addWidget(b_impor)
+
+        b_tambah = QPushButton("+ Tambah entri")
+        b_tambah.clicked.connect(self._tambah_baris_hipotesis)
+        top.addWidget(b_tambah)
+
+        b_simpan = QPushButton("Simpan entri ke proyek")
+        b_simpan.clicked.connect(self._simpan_hipotesis_ke_proyek)
+        top.addWidget(b_simpan)
+
+        top.addStretch(1)
+
+        b_qsar = QPushButton("Latih ulang QSAR dengan data baru")
+        b_qsar.setToolTip("Gunakan data aktivitas eksperimen yang terukur untuk melatih model QSAR (P8)")
+        b_qsar.clicked.connect(self._latih_ulang_qsar)
+        top.addWidget(b_qsar)
+
+        lay.addLayout(top)
+
+        # Splitter horizontal: Kiri (Tabel) vs Kanan (Statistik & Plot)
+        sp_h = QSplitter(Qt.Horizontal)
+
+        # Kiri: Tabel Ligan x Hipotesis
+        kiri_w = QWidget()
+        klay = QVBoxLayout(kiri_w)
+        klay.setContentsMargins(0, 0, 0, 0)
+        klay.setSpacing(4)
+
+        self.tabel_hipotesis = QTableWidget()
+        self.tabel_hipotesis.setColumnCount(9)
+        self.tabel_hipotesis.setHorizontalHeaderLabels([
+            "ID Ligan", "Nama", "Prediksi", "Nilai Terukur", "Satuan", "pIC50 Terukur",
+            "Status Hipotesis", "Assay", "Catatan"
+        ])
+        th = self.tabel_hipotesis.horizontalHeader()
+        th.setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        th.setSectionResizeMode(1, QHeaderView.ResizeToContents)
+        th.setSectionResizeMode(2, QHeaderView.ResizeToContents)
+        th.setSectionResizeMode(3, QHeaderView.ResizeToContents)
+        th.setSectionResizeMode(4, QHeaderView.ResizeToContents)
+        th.setSectionResizeMode(5, QHeaderView.ResizeToContents)
+        th.setSectionResizeMode(6, QHeaderView.ResizeToContents)
+        th.setSectionResizeMode(7, QHeaderView.ResizeToContents)
+        th.setSectionResizeMode(8, QHeaderView.Stretch)
+        th.setMinimumSectionSize(60)
+        # ID ligan hampir selalu sama dengan nama; disimpan di kolom tersembunyi untuk kunci entri
+        self.tabel_hipotesis.setColumnHidden(0, True)
+        self.tabel_hipotesis.verticalHeader().setVisible(False)
+        self.tabel_hipotesis.cellChanged.connect(self._sel_hipotesis_berubah)
+        klay.addWidget(self.tabel_hipotesis, 1)
+
+        sp_h.addWidget(kiri_w)
+
+        # Kanan: Evaluasi Statistik & Plot SVG
+        kanan_w = QWidget()
+        rlay = QVBoxLayout(kanan_w)
+        rlay.setContentsMargins(0, 0, 0, 0)
+        rlay.setSpacing(6)
+
+        # Kartu Evaluasi Korelasi
+        gb_eval = QGroupBox("Evaluasi korelasi prediksi vs terukur")
+        glay = QVBoxLayout(gb_eval)
+        glay.setContentsMargins(8, 8, 8, 8)
+        glay.setSpacing(4)
+
+        self.l_n_sampel = QLabel("Sampel terpasang: - | Dilewati: -")
+        self.l_spearman = QLabel("Spearman ρ: - | 95% CI: -")
+        self.l_kendall = QLabel("Kendall τ: - | 95% CI: -")
+        self.l_arah = QLabel("")
+        self.l_arah.setWordWrap(True)
+        self.l_arah.setObjectName("muted")
+        self.l_peringatan_sampel = QLabel("")
+        self.l_peringatan_sampel.setWordWrap(True)
+        self.l_peringatan_sampel.setVisible(False)
+
+        glay.addWidget(self.l_n_sampel)
+        glay.addWidget(self.l_spearman)
+        glay.addWidget(self.l_kendall)
+        glay.addWidget(self.l_arah)
+        glay.addWidget(self.l_peringatan_sampel)
+        rlay.addWidget(gb_eval)
+
+        # Plot SVG
+        self.svg_plot = QSvgWidget()
+        self.svg_plot.setMinimumSize(340, 300)
+        rlay.addWidget(self.svg_plot, 1)
+
+        # Tombol aksi grafik
+        gb_aksi = QHBoxLayout()
+        b_salin_svg = QPushButton("Salin SVG")
+        b_salin_svg.clicked.connect(self._salin_grafik_svg)
+        b_simpan_svg = QPushButton("Simpan SVG…")
+        b_simpan_svg.clicked.connect(self._simpan_grafik_svg)
+        gb_aksi.addWidget(b_salin_svg)
+        gb_aksi.addWidget(b_simpan_svg)
+        gb_aksi.addStretch(1)
+        rlay.addLayout(gb_aksi)
+
+        sp_h.addWidget(kanan_w)
+        # Tabel butuh ruang untuk 7 kolom isian; grafik tetap terbaca di ~40 %
+        sp_h.setStretchFactor(0, 3)
+        sp_h.setStretchFactor(1, 2)
+        sp_h.setSizes([600, 400])
+
+        lay.addWidget(sp_h, 1)
+        return w
+
+    def _muat_data_hipotesis(self):
+        pr = self.jw.proyek
+        if not pr:
+            return
+        jenis_pred = self.cb_jenis_pred.currentData() or "dg"
+        baris_tabel, stats_hasil = hipotesis.kumpulkan_data_tabel(pr, jenis_pred)
+
+        self.tabel_hipotesis.blockSignals(True)
+        self.tabel_hipotesis.setRowCount(len(baris_tabel))
+
+        for r, b in enumerate(baris_tabel):
+            # 0: ID Ligan
+            it_id = QTableWidgetItem(str(b["ligan_id"]))
+            it_id.setFlags(it_id.flags() & ~Qt.ItemIsEditable)
+            self.tabel_hipotesis.setItem(r, 0, it_id)
+
+            # 1: Nama Ligan
+            it_nama = QTableWidgetItem(str(b["nama"]))
+            it_nama.setFlags(it_nama.flags() & ~Qt.ItemIsEditable)
+            it_nama.setToolTip(f"ID ligan: {b['ligan_id']}")
+            self.tabel_hipotesis.setItem(r, 1, it_nama)
+
+            # 2: Prediksi
+            pred_v = b.get("prediksi_tampil")
+            pred_teks = kit.f(pred_v, 2)
+            it_pred = QTableWidgetItem(pred_teks)
+            it_pred.setFlags(it_pred.flags() & ~Qt.ItemIsEditable)
+            it_pred.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
+            self.tabel_hipotesis.setItem(r, 2, it_pred)
+
+            # 3: Nilai Terukur
+            val_t = b.get("nilai_terukur")
+            it_val = QTableWidgetItem(id_angka(f"{val_t:g}") if val_t is not None else "")
+            it_val.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
+            self.tabel_hipotesis.setItem(r, 3, it_val)
+
+            # 4: Satuan
+            it_sat = QTableWidgetItem(str(b.get("satuan_terukur") or "uM"))
+            it_sat.setTextAlignment(Qt.AlignCenter)
+            self.tabel_hipotesis.setItem(r, 4, it_sat)
+
+            # 5: pIC50 Terukur
+            p_val = b.get("pic50_terukur")
+            p_teks = kit.f(p_val, 2)
+            it_p = QTableWidgetItem(p_teks)
+            it_p.setFlags(it_p.flags() & ~Qt.ItemIsEditable)
+            it_p.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
+            self.tabel_hipotesis.setItem(r, 5, it_p)
+
+            # 6: Status Hipotesis (Combobox)
+            cb_status = QComboBox()
+            for st in hipotesis.STATUS_HIPOTESIS:
+                cb_status.addItem(st.capitalize(), st)
+            st_aktif = str(b.get("status_hipotesis") or "diajukan").lower()
+            idx_st = hipotesis.STATUS_HIPOTESIS.index(st_aktif) if st_aktif in hipotesis.STATUS_HIPOTESIS else 0
+            cb_status.setCurrentIndex(idx_st)
+            cb_status.currentIndexChanged.connect(lambda _i, row=r: self._status_berubah(row))
+            self.tabel_hipotesis.setCellWidget(r, 6, cb_status)
+
+            # 7: Assay
+            self.tabel_hipotesis.setItem(r, 7, QTableWidgetItem(str(b.get("assay") or "Inhibisi")))
+
+            # 8: Catatan
+            self.tabel_hipotesis.setItem(r, 8, QTableWidgetItem(str(b.get("catatan") or "")))
+
+        self.tabel_hipotesis.blockSignals(False)
+
+        # Perbarui Kartu Statistik
+        n_pasang = stats_hasil.get("n", 0)
+        n_skip = stats_hasil.get("n_dilewati", 0)
+        self.l_n_sampel.setText(f"Sampel terpasang: {n_pasang} | Dilewati / tidak lengkap: {n_skip}")
+
+        sp_val = stats_hasil.get("spearman")
+        p_sp = stats_hasil.get("p_spearman")
+        ci_sp = stats_hasil.get("ci_spearman")
+        if sp_val is not None:
+            ci_sp_teks = f"[{kit.f(ci_sp[0], 2)}; {kit.f(ci_sp[1], 2)}]" if ci_sp else "–"
+            self.l_spearman.setText(f"Spearman ρ = {kit.f(sp_val, 3)} (p {_teks_p(p_sp)}; CI 95 % {ci_sp_teks})")
+        else:
+            self.l_spearman.setText("Spearman ρ = –")
+
+        kd_val = stats_hasil.get("kendall")
+        p_kd = stats_hasil.get("p_kendall")
+        ci_kd = stats_hasil.get("ci_kendall")
+        if kd_val is not None:
+            ci_kd_teks = f"[{kit.f(ci_kd[0], 2)}; {kit.f(ci_kd[1], 2)}]" if ci_kd else "–"
+            self.l_kendall.setText(f"Kendall τ = {kit.f(kd_val, 3)} (p {_teks_p(p_kd)}; CI 95 % {ci_kd_teks})")
+        else:
+            self.l_kendall.setText("Kendall τ = –")
+
+        if jenis_pred in ("dg", "mmgbsa"):
+            self.l_arah.setText("Energi dibalik tanda (−ΔG) sehingga ρ dan τ positif berarti peringkat prediksi "
+                                "sejalan dengan pIC50 terukur.")
+        else:
+            self.l_arah.setText("ρ dan τ positif berarti peringkat prediksi sejalan dengan pIC50 terukur.")
+
+        per = stats_hasil.get("peringatan")
+        if n_pasang == 0:
+            # Belum ada data lab: keadaan awal, bukan galat
+            per = "Belum ada pIC50 terukur yang berpasangan dengan prediksi. Isi kolom Nilai terukur atau impor CSV."
+            self.l_peringatan_sampel.setStyleSheet(f"color: {kit.warna('mut').name()};")
+        else:
+            self.l_peringatan_sampel.setStyleSheet(f"color: {kit.warna('warn').name()};")
+        self.l_peringatan_sampel.setText(per or "")
+        self.l_peringatan_sampel.setVisible(bool(per))
+
+        # Pilihan prediksi tanpa satu nilai pun di proyek dinonaktifkan
+        model = self.cb_jenis_pred.model()
+        for i in range(self.cb_jenis_pred.count()):
+            kunci = self.cb_jenis_pred.itemData(i)
+            ada = kunci == jenis_pred or hipotesis.ada_prediksi(pr, kunci)
+            model.item(i).setEnabled(ada)
+
+        # Render Grafik SVG
+        gelap = kit.mode() == "gelap"
+        svg_teks = hipotesis.buat_grafik_prediksi_vs_terukur(baris_tabel, jenis_pred, gelap=gelap)
+        self.svg_plot_teks = svg_teks
+        self.svg_plot.load(bytearray(svg_teks, "utf-8"))
+
+    def _status_berubah(self, _row):
+        self._simpan_hipotesis_ke_proyek()
+
+    def _sel_hipotesis_berubah(self, row, col):
+        if col in (3, 4):  # Nilai atau Satuan diubah
+            it_val = self.tabel_hipotesis.item(row, 3)
+            it_sat = self.tabel_hipotesis.item(row, 4)
+            val_s = _ke_float_teks(it_val.text()) if it_val else ""
+            sat_s = it_sat.text().strip() if it_sat else "uM"
+            try:
+                val_f = float(val_s) if val_s else None
+            except ValueError:
+                val_f = None
+            pic_f = hipotesis.ke_pic50(val_f, sat_s) if val_f is not None else None
+
+            self.tabel_hipotesis.blockSignals(True)
+            it_p = QTableWidgetItem(kit.f(pic_f, 2))
+            it_p.setFlags(it_p.flags() & ~Qt.ItemIsEditable)
+            it_p.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
+            self.tabel_hipotesis.setItem(row, 5, it_p)
+            self.tabel_hipotesis.blockSignals(False)
+
+            self._simpan_hipotesis_ke_proyek()
+
+    def _tambah_baris_hipotesis(self):
+        r = self.tabel_hipotesis.rowCount()
+        self.tabel_hipotesis.blockSignals(True)
+        self.tabel_hipotesis.insertRow(r)
+        self.tabel_hipotesis.setItem(r, 0, QTableWidgetItem(""))
+        it_nama = QTableWidgetItem(f"Senyawa {r + 1}")
+        it_nama.setToolTip("Ketik nama ligan persis seperti di proyek agar terpasang dengan prediksinya")
+        self.tabel_hipotesis.setItem(r, 1, it_nama)
+        self.tabel_hipotesis.setItem(r, 2, QTableWidgetItem("–"))
+        self.tabel_hipotesis.setItem(r, 3, QTableWidgetItem(""))
+        self.tabel_hipotesis.setItem(r, 4, QTableWidgetItem("uM"))
+        self.tabel_hipotesis.setItem(r, 5, QTableWidgetItem("–"))
+
+        cb_status = QComboBox()
+        for st in hipotesis.STATUS_HIPOTESIS:
+            cb_status.addItem(st.capitalize(), st)
+        cb_status.setCurrentIndex(0)
+        cb_status.currentIndexChanged.connect(lambda _i, row=r: self._status_berubah(row))
+        self.tabel_hipotesis.setCellWidget(r, 6, cb_status)
+
+        self.tabel_hipotesis.setItem(r, 7, QTableWidgetItem("Inhibisi Enzim"))
+        self.tabel_hipotesis.setItem(r, 8, QTableWidgetItem(""))
+        self.tabel_hipotesis.blockSignals(False)
+        self.tabel_hipotesis.scrollToBottom()
+        self.tabel_hipotesis.editItem(it_nama)
+
+    def _simpan_hipotesis_ke_proyek(self):
+        pr = self.jw.proyek
+        if not pr:
+            return
+        daftar_entri = []
+        for r in range(self.tabel_hipotesis.rowCount()):
+            it_id = self.tabel_hipotesis.item(r, 0)
+            it_val = self.tabel_hipotesis.item(r, 3)
+            it_sat = self.tabel_hipotesis.item(r, 4)
+            it_pic = self.tabel_hipotesis.item(r, 5)
+            w_st = self.tabel_hipotesis.cellWidget(r, 6)
+            it_asy = self.tabel_hipotesis.item(r, 7)
+            it_cat = self.tabel_hipotesis.item(r, 8)
+
+            it_nama = self.tabel_hipotesis.item(r, 1)
+            lid = (it_id.text().strip() if it_id else "") or (it_nama.text().strip() if it_nama else "")
+            if not lid:
+                continue
+            val_s = _ke_float_teks(it_val.text()) if it_val else ""
+            sat_s = it_sat.text().strip() if it_sat else "uM"
+            pic_s = _ke_float_teks(it_pic.text()) if it_pic else ""
+            st_s = w_st.currentData() if isinstance(w_st, QComboBox) else "diajukan"
+            asy_s = it_asy.text().strip() if it_asy else "Inhibisi"
+            cat_s = it_cat.text().strip() if it_cat else ""
+
+            try:
+                val_f = float(val_s) if val_s else None
+            except ValueError:
+                val_f = None
+            try:
+                pic_f = float(pic_s) if pic_s else None
+            except ValueError:
+                pic_f = None
+
+            daftar_entri.append({
+                "id": f"EXP{r+1:03d}",
+                "ligan_id": lid,
+                "assay": asy_s,
+                "nilai": val_f,
+                "satuan": sat_s,
+                "pIC50": pic_f,
+                "catatan": cat_s,
+                "status_hipotesis": st_s,
+            })
+
+        hipotesis.simpan_entri_proyek(pr, daftar_entri)
+        self.jw.minta_simpan()
+
+    def _impor_csv_plate_reader(self):
+        path, _ = QFileDialog.getOpenFileName(
+            self, "Pilih berkas CSV hasil uji / plate reader", "",
+            "Berkas CSV (*.csv *.tsv *.txt)"
+        )
+        if not path:
+            return
+        try:
+            entri_baru = hipotesis.impor_csv_hasil(path, self.denah_aktif)
+        except Exception as e:
+            kit.pesan_peringatan(self, f"Gagal mengimpor CSV: {e}")
+            return
+
+        if not entri_baru:
+            self.jw.status.showMessage("Tidak ada data valid yang ditemukan pada berkas CSV.", 4000)
+            return
+
+        pr = self.jw.proyek
+        if pr:
+            lama = hipotesis.ambil_entri_proyek(pr)
+            peta_lama = {e["ligan_id"]: e for e in lama}
+            for eb in entri_baru:
+                peta_lama[eb["ligan_id"]] = eb
+            hipotesis.simpan_entri_proyek(pr, list(peta_lama.values()))
+            self.jw.minta_simpan()
+            self._muat_data_hipotesis()
+            self.jw.status.showMessage(f"Berhasil mengimpor {len(entri_baru)} entri hasil uji.", 3000)
+
+    def _latih_ulang_qsar(self):
+        self._simpan_hipotesis_ke_proyek()
+        pr = self.jw.proyek
+        if not pr:
+            return
+        eks = getattr(pr, "eksperimen", None) or {}
+        entri = eks.get("entri") or []
+        ada_pic = [e for e in entri if e.get("pIC50") is not None]
+        if len(ada_pic) < 3:
+            kit.pesan_peringatan(
+                self, "Data eksperimen belum mencukupi untuk melatih model QSAR (minimal 3 entri ber-pIC50 terukur)."
+            )
+            return
+        if hasattr(self.jw, "buka_qsar"):
+            d = self.jw.buka_qsar()
+            if d is not None and hasattr(d, "_muat_eksperimen_lab"):
+                d._muat_eksperimen_lab()
+            self.jw.status.showMessage("Modul QSAR dibuka dengan data aktivitas uji lab proyek.", 3000)
+
+    def _salin_grafik_svg(self):
+        teks = getattr(self, "svg_plot_teks", "")
+        if teks:
+            QGuiApplication.clipboard().setText(teks)
+            self.jw.status.showMessage("Grafik SVG berhasil disalin ke papan klip.", 3000)
+
+    def _simpan_grafik_svg(self):
+        teks = getattr(self, "svg_plot_teks", "")
+        if not teks:
+            return
+        path, _ = QFileDialog.getSaveFileName(self, "Simpan Grafik Hipotesis", "prediksi_vs_terukur.svg", "Berkas SVG (*.svg)")
+        if path:
+            from pathlib import Path
+            Path(path).write_text(teks, encoding="utf-8")
+            self.jw.status.showMessage(f"Grafik SVG disimpan ke {path}", 3000)
+
+
+def _ke_float_teks(teks: str) -> str:
+    """Teks angka gaya Indonesia ('1,5', '−6,30', '–') menjadi teks yang bisa di-float ('' bila kosong)."""
+    t = (teks or "").strip().replace("−", "-").replace(",", ".")
+    return "" if t in ("", "-", "–") else t
+
+
+def _teks_p(p) -> str:
+    if p is None:
+        return "= –"
+    return "< 0,0001" if p < 1e-4 else f"= {kit.f(p, 4)}"

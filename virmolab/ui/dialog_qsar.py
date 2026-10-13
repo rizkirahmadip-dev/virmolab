@@ -96,6 +96,8 @@ class DialogQSAR(QDialog):
         h = QHBoxLayout()
         self.b_chembl = kit.tombol("Ambil dari ChEMBL proyek", self._muat_chembl)
         h.addWidget(self.b_chembl)
+        self.b_lab = kit.tombol("Ambil dari uji lab proyek", self._muat_eksperimen_lab)
+        h.addWidget(self.b_lab)
         h.addWidget(kit.tombol("Impor CSV…", self._muat_csv))
         h.addStretch(1)
         v.addLayout(h)
@@ -115,6 +117,33 @@ class DialogQSAR(QDialog):
             return
         self.baris_mentah = qsar.muat_chembl(akt)
         self.sumber_data = f"ChEMBL target {eks.get('target', '')}".strip()
+        self._tampil_data()
+
+    def _muat_eksperimen_lab(self):
+        eks = getattr(self.proyek, "eksperimen", None) or {}
+        entri = eks.get("entri") or []
+        # Entri ligan proyek tidak selalu berkunci 'smiles'; smiles_ligan membaca cache sifat / SDF sumber
+        smi_map = {}
+        for l in getattr(self.proyek, "ligan", []):
+            smi = self.proyek.smiles_ligan(l) if hasattr(self.proyek, "smiles_ligan") else str(l.get("smiles") or "")
+            smi_map[str(l.get("id"))] = smi
+            if l.get("nama"):
+                smi_map[str(l["nama"])] = smi
+        baris = []
+        for e in entri:
+            p = e.get("pIC50")
+            if p is not None:
+                lid = str(e.get("ligan_id", "")).strip()
+                smi = smi_map.get(lid, "")
+                ent = {"smiles": smi, "nama": lid, "pic50": float(p)}
+                if not smi:
+                    ent["galat"] = "SMILES ligan tidak ditemukan di proyek"
+                baris.append(ent)
+        if not baris:
+            self.l_status.setText("Belum ada entri uji laboratorium dengan pIC50 terukur di proyek.")
+            return
+        self.baris_mentah = baris
+        self.sumber_data = "Uji laboratorium proyek"
         self._tampil_data()
 
     def _muat_csv(self):

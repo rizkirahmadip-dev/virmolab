@@ -377,24 +377,65 @@ const VM = {
     });
     this.v.render();
   },
-  /* farmakofor: bola kerangka berwarna per fitur (bentuk transparan 3Dmol tidak tergambar di sini) + titik pusat
-     buram kecil; label opsional (nama fitur / frekuensi). daftar kosong = hapus. */
-  farmakofor(daftar, opsi) {
+  /* farmakofor 3D: bola transparan per jenis + bola eksklusi abu-abu + bola kawat & titik pusat */
+  tampilFarmakofor(fitur, opsi) {
     this.clearShapes('farma');
     opsi = opsi || {};
-    (daftar || []).forEach(f => {
+    let daftar = [];
+    let eksklusi = [];
+    if (Array.isArray(fitur)) {
+      fitur.forEach(f => {
+        if (f.jenis === 'eksklusi' || f.famili === 'Exclusion' || f.eksklusi) {
+          eksklusi.push(f);
+        } else {
+          daftar.push(f);
+        }
+      });
+    } else if (fitur && typeof fitur === 'object') {
+      daftar = fitur.fitur || [];
+      eksklusi = fitur.eksklusi || [];
+    }
+
+    // Bola fitur farmakofor
+    daftar.forEach(f => {
       const c = this.xyz(f.xyz);
-      this.shapes.farma.push(this.v.addSphere({center: c, radius: f.radius, color: f.warna, wireframe: true,
-        linewidth: 1.2}));
-      this.shapes.farma.push(this.v.addSphere({center: c, radius: 0.16, color: f.warna}));
-      if (opsi.label)
-        this.labels.farma.push(this.v.addLabel(f.label || f.nama, {position: c, fontSize: 10, font: 'Segoe UI',
-          berat: 600, fontColor: f.warna, backgroundColor: this.bgc, backgroundOpacity: 0.85, borderColor: f.warna,
-          borderOpacity: 0.4, borderThickness: 1, bayang: false, padX: 4, padY: 0.5, inFront: true,
-          alignment: 'bottomCenter'}));
+      const r = f.toleransi || f.radius || 1.0;
+      const w = f.warna || '#2f6fd6';
+      // Bola transparan
+      this.shapes.farma.push(this.v.addSphere({center: c, radius: r, color: w, alpha: 0.35}));
+      // Kerangka kawat untuk penegas kedalaman 3D
+      this.shapes.farma.push(this.v.addSphere({center: c, radius: r, color: w, wireframe: true, linewidth: 1.1}));
+      // Titik pusat
+      this.shapes.farma.push(this.v.addSphere({center: c, radius: 0.16, color: w}));
+      if (opsi.label || f.label) {
+        this.labels.farma.push(this.v.addLabel(f.label || f.nama || f.famili, {
+          position: c, fontSize: 10, font: 'Segoe UI', berat: 600, fontColor: w,
+          backgroundColor: this.bgc, backgroundOpacity: 0.85, borderColor: w,
+          borderOpacity: 0.4, borderThickness: 1, bayang: false, padX: 4, padY: 0.5,
+          inFront: true, alignment: 'bottomCenter'
+        }));
+      }
     });
+
+    // Bola eksklusi protein (abu-abu)
+    eksklusi.forEach(e => {
+      const c = this.xyz(e.xyz);
+      const r = e.radius || 1.2;
+      const w = e.warna || '#888888';
+      this.shapes.farma.push(this.v.addSphere({center: c, radius: r, color: w, alpha: 0.25}));
+      this.shapes.farma.push(this.v.addSphere({center: c, radius: r, color: '#666666', wireframe: true, linewidth: 0.9}));
+    });
+
+    if (opsi.fokus !== false) this.v.zoomTo();
     this.v.render();
-    return (daftar || []).length;
+    return daftar.length + eksklusi.length;
+  },
+  hapusFarmakofor() {
+    this.clearShapes('farma');
+    this.v.render();
+  },
+  farmakofor(daftar, opsi) {
+    return this.tampilFarmakofor(daftar, opsi);
   },
   _kontribId: null,
   kontribusi(id, daftar, opsi) {

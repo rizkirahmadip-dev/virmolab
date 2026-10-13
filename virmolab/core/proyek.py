@@ -48,7 +48,14 @@ def migrasi_proyek(data: dict) -> dict:
     data.setdefault("validasi", {})
     data.setdefault("blast", {})
     data.setdefault("syarat_jarak", {})
-    data.setdefault("eksperimen", {})
+    # Eksperimen & Hipotesis (F12): pertahankan data lama (ChEMBL dll) dan sediakan daftar entri
+    eks = data.get("eksperimen")
+    if eks is None:
+        data["eksperimen"] = {"entri": []}
+    elif isinstance(eks, list):
+        data["eksperimen"] = {"entri": eks}
+    elif isinstance(eks, dict):
+        eks.setdefault("entri", [])
     data.setdefault("md", [])
     data.setdefault("templat", "")
     data.setdefault("catatan", "")
@@ -76,7 +83,7 @@ class Proyek:
         self.syarat_jarak = {}        # {rantai, resi, jarak} saringan pose sesudah docking
         self.templat = ""             # kunci templat proyek (core/templat.py), bila dibuat dari templat
         self.md = []                  # riwayat MD / MM-GBSA: {id, mode, tanggal, status, folder, ligan, opsi}
-        self.eksperimen = {}          # data aktivitas eksperimen (ChEMBL): target, aktivitas [{chembl, nama, smiles, inchikey, pchembl, …}]
+        self.eksperimen = {"entri": []}  # data aktivitas & hipotesis eksperimen: target, entri [{id, ligan_id, assay, nilai, satuan, pIC50, tanggal, catatan, status_hipotesis}]
         self.jejak = []               # riwayat sumber data internet: [{sumber, versi, diambil, kueri, lisensi}]
         self.target_balik = []        # penargetan balik: [{ligan_id, kelas, hasil, parameter, jejak}]
 
@@ -156,7 +163,13 @@ class Proyek:
         pr.validasi = d.get("validasi") or {}
         pr.blast = d.get("blast") or {}
         pr.syarat_jarak = d.get("syarat_jarak") or {}
-        pr.eksperimen = d.get("eksperimen") or {}
+        pr.eksperimen = d.get("eksperimen")
+        if pr.eksperimen is None:
+            pr.eksperimen = {"entri": []}
+        elif isinstance(pr.eksperimen, list):
+            pr.eksperimen = {"entri": pr.eksperimen}
+        elif isinstance(pr.eksperimen, dict):
+            pr.eksperimen.setdefault("entri", [])
         pr.md = d.get("md") or []
         pr.templat = d.get("templat") or ""
         pr.jejak = d.get("jejak") or []

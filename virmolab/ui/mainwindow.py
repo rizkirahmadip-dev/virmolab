@@ -430,7 +430,8 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
                      "laporan": lambda: self.buka_ekspor(4), "mpo": self.buka_mpo, "labplanner": self.buka_labplanner,
                      "md": self.buka_md, "penapisan": self.buka_penapisan, "ppi": self.buka_ppi,
                      "fbdd": self.buka_fbdd, "kantong": self.buka_kantong,
-                     "target_balik": self.buka_target_balik, "qsar": self.buka_qsar}
+                     "target_balik": self.buka_target_balik, "qsar": self.buka_qsar,
+                     "farmakofor": self.buka_farmakofor}
         if k in aksi_peta:
             aksi_peta[k]()
 
@@ -989,6 +990,8 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
               "penapisan banyak ligan"),
             A("Selektivitas multi-target…", "grid", self.buka_selektivitas, None,
               "Bandingkan afinitas ligan pada beberapa target, normalisasi Z-score, dan celah selektivitas"),
+            A("Penapisan farmakofor && bentuk 3D…", "puzzle", self.buka_farmakofor, None,
+              "Tapis pustaka senyawa berdasarkan fitur farmakofor 3D dan keselarasan bentuk ligan acuan"),
             A("Penargetan balik & jaringan…", "target", self.buka_target_balik, None,
               "Identifikasi target protein potensial untuk senyawa (profil kemiripan ChEMBL + docking panel target)"),
             A("QSAR && model prediksi…", "chart", self.buka_qsar, None,

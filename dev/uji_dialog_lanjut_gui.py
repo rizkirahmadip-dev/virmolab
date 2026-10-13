@@ -9,6 +9,8 @@ import sys
 import traceback
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 from PySide6.QtCore import QSettings, QTimer
 
 PILIH = sys.argv[1:]
@@ -60,7 +62,7 @@ def _tangkap(t, v, tb):
 sys.excepthook = _tangkap
 
 DIALOG = ["admet", "mpo", "labplanner", "penapisan", "mmp", "selektivitas", "interpretasi", "ppi", "kantong", "fbdd",
-          "skrip_publikasi", "diagnostik", "terowongan", "kinetika", "protac", "metabolisme", "rescore_ml", "tanaman", "validasi_protokol", "target_balik", "qsar"]
+          "skrip_publikasi", "diagnostik", "terowongan", "kinetika", "protac", "metabolisme", "rescore_ml", "tanaman", "validasi_protokol", "target_balik", "qsar", "farmakofor"]
 if PILIH:
     DIALOG = [d for d in DIALOG if d in PILIH]
 
