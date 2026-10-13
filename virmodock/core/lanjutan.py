@@ -250,7 +250,7 @@ def tulis_gro(topologi, posisi, jalur):
     import numpy as np
     from openmm import unit
     nm = posisi.value_in_unit(unit.nanometer) if hasattr(posisi, "value_in_unit") else posisi
-    baris = ["Kompleks VirmoDock", str(topologi.getNumAtoms())]
+    baris = ["Kompleks VirmoLab", str(topologi.getNumAtoms())]
     for i, (atom, p) in enumerate(zip(topologi.atoms(), nm), start=1):
         res = atom.residue
         try:

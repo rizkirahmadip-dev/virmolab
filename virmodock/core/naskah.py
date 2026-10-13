@@ -121,11 +121,11 @@ def draf_skripsi(info):
         teks_sumber = paragraf_sumber_data(pr)
 
     metode_paragraf = [
-        f"Reseptor yang digunakan adalah {info.get('reseptor') or 'struktur yang disiapkan di VirmoDock'}. "
+        f"Reseptor yang digunakan adalah {info.get('reseptor') or 'struktur yang disiapkan di VirmoLab'}. "
         f"Docking dijalankan dengan {info.get('mesin') or 'mesin yang dipilih di aplikasi'}"
         + (f" ({info.get('parameter')})" if info.get("parameter") else "") + ". "
         "Preparasi reseptor memakai gemmi dan Meeko; ligan diprotonasi lalu diubah ke PDBQT. "
-        "Interaksi dikenali dengan kriteria jarak dan sudut yang tercantum di laporan metode VirmoDock. "
+        "Interaksi dikenali dengan kriteria jarak dan sudut yang tercantum di laporan metode VirmoLab. "
         "Skor docking adalah prediksi komputasi, bukan bukti aktivitas biologis."
     ]
     if teks_sumber:

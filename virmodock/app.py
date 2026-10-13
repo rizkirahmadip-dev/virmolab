@@ -1,4 +1,4 @@
-"""Titik masuk aplikasi VirmoDock.
+"""Titik masuk aplikasi VirmoLab.
 
 Argumen:
   berkas...                 buka struktur (PDB/PDBQT/CIF/SDF/MOL2/SMILES), folder proyek .vmd, atau cadangan .vmdbackup
@@ -77,7 +77,7 @@ def main():
         w.buka_proyek(a)
     if berkas:
         w.impor(berkas)
-    if os.environ.get("VD_TANGKAP"):  # uji build: simpan gambar jendela VirmoDock sendiri (bukan layar), lalu keluar
+    if os.environ.get("VD_TANGKAP"):  # uji build: simpan gambar jendela VirmoLab sendiri (bukan layar), lalu keluar
         from PySide6.QtCore import QTimer
         QTimer.singleShot(int(os.environ.get("VD_TANGKAP_MS", "15000")),
                           lambda: (w.grab().save(os.environ["VD_TANGKAP"]), w.close(), app.quit()))

@@ -161,5 +161,5 @@ class MediaAnimasi:
             return
         self.st.setValue("bahasa", kode)
         QMessageBox.information(self, "Bahasa / Language",
-                                "Bahasa antarmuka akan berganti setelah VirmoDock dibuka ulang.\n"
-                                "The interface language will change after VirmoDock is restarted.")
+                                "Bahasa antarmuka akan berganti setelah VirmoLab dibuka ulang.\n"
+                                "The interface language will change after VirmoLab is restarted.")

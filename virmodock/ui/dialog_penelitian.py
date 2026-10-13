@@ -127,7 +127,7 @@ class DialogPenelitian(QDialog):
         v.addWidget(self.e_fasta, 1)
         v.addWidget(self.e_uniprot)
         lab = QLabel("BLAST Swiss-Prot mengirim sekuens rantai ke NCBI. Bila NCBI masih antre, "
-                     "VirmoDock mencoba UniProt lalu EBI. Bila keduanya tidak menjawab, homolog diambil "
+                     "VirmoLab mencoba UniProt lalu EBI. Bila keduanya tidak menjawab, homolog diambil "
                      "dari pencarian sekuens di RCSB PDB. Identitas tetap dihitung di komputer ini.")
         lab.setWordWrap(True)
         v.addWidget(lab)

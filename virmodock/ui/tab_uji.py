@@ -66,7 +66,7 @@ ELEMEN_JENIS = {"kolom": ("grafik", "judul", "label_y", "sumbu_y", "sumbu_x", "g
                 "dua_faktor": ("grafik", "judul", "label_y", "sumbu_y", "sumbu_x", "grup")}
 # gaya bawaan (tidak bisa dihapus). Kunci 'palet' ikut disimpan bersama kunci G.KUNCI_PRESET.
 PRESET_BAWAAN = {
-    "Bawaan VirmoDock": {"palet": "okabe"},
+    "Bawaan VirmoLab": {"palet": "okabe"},
     "Jurnal hitam-putih": {"palet": "abu", "font": 11, "font_label": 12, "font_judul": 13, "font_tanda": 12,
                            "opasitas": 0.15, "tebal": 1.2, "ukuran_titik": 3.0},
     "Kolom jurnal (ringkas)": {"tinggi": 380, "font": 10, "font_label": 11, "font_judul": 12, "font_tanda": 11,
@@ -647,6 +647,11 @@ class TabUji(QWidget):
         b_ekspor.setMenu(m_eks)
         bar2.addWidget(b_ekspor)
 
+        self.b_validasi = QPushButton("Paket validasi protokol…")
+        self.b_validasi.setToolTip("Buka wizard paket validasi protokol docking terstandar untuk naskah ilmiah")
+        self.b_validasi.clicked.connect(self._buka_wizard_validasi)
+        bar2.addWidget(self.b_validasi)
+
         self.b_format = QToolButton()
         self.b_format.setText("Format ▸")
         self.b_format.setCheckable(True)
@@ -704,6 +709,15 @@ class TabUji(QWidget):
         self.c_palet.currentIndexChanged.connect(lambda *_: self.format._segarkan_warna())
         self.mintaDocking = lambda _k: None      # diganti JendelaUtama
         self._ganti_jenis()
+
+    def _buka_wizard_validasi(self):
+        induk = self.window()
+        if hasattr(induk, "buka_validasi_protokol"):
+            induk.buka_validasi_protokol()
+        else:
+            from .dialog_validasi_protokol import DialogValidasiProtokol
+            d = DialogValidasiProtokol(self)
+            d.exec()
 
     def _tampil_format(self, v):
         self.gulir_format.setVisible(v)
@@ -1136,7 +1150,7 @@ class TabUji(QWidget):
                              "(log[inhibitor] vs respons, kemiringan standar Hill = 1)")
                           + (" yang dipilih dengan uji F extra sum-of-squares terhadap model tiga parameter (α = 0,05)"
                              if (self.c_uji.currentData() == "auto" and bd.get("F") is not None) else "")
-                          + " menggunakan VirmoDock (SciPy).")
+                          + " menggunakan VirmoLab (SciPy).")
             self.info.setHtml("".join(o))
             return
         if j == "roc":

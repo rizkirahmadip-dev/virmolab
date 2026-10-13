@@ -328,7 +328,7 @@ def siapkan(teks, opsi=None, fmt="pdb", lapor=None):
     jumlah_h = sum(1 for b in baris if b.startswith(("ATOM", "HETATM")) and b[77:].split()[:1] == ["HD"])
     q_total = sum(float(b[70:76]) for b in baris if b.startswith(("ATOM", "HETATM")) and _angka(b[70:76]))
     h.laporan = "\n".join([
-        "Laporan preparasi reseptor (VirmoDock)",
+        "Laporan preparasi reseptor (VirmoLab)",
         f"Metode       : {metode}",
         f"Rantai       : {', '.join(ch.name for ch in bersih[0])}",
         f"Residu       : {h.residu}",

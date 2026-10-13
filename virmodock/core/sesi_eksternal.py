@@ -27,7 +27,7 @@ def _hex_pymol(h):
 
 
 def _pml(daftar, rec_f, lig_f, judul):
-    b = [f"# Sesi PyMOL dari VirmoDock: {judul}",
+    b = [f"# Sesi PyMOL dari VirmoLab: {judul}",
          "# Buka di PyMOL: File > Run Script, atau seret berkas ini ke jendela PyMOL.",
          "reinitialize", f"load {rec_f}, reseptor", f"load {lig_f}, ligan",
          "hide everything", "show cartoon, reseptor", "set cartoon_transparency, 0.45",
@@ -63,7 +63,7 @@ def _pml(daftar, rec_f, lig_f, judul):
 
 
 def _cxc(daftar, rec_f, lig_f, judul):
-    b = [f"# Sesi ChimeraX dari VirmoDock: {judul}",
+    b = [f"# Sesi ChimeraX dari VirmoLab: {judul}",
          "# Buka di ChimeraX: File > Open, pilih berkas ini.",
          "close session", f"open {rec_f}", f"open {lig_f}",
          "hide #1 atoms", "cartoon #1", "color #1 lightgray", "transparency #1 45 target c",

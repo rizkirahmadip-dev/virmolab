@@ -115,7 +115,7 @@ function tampil(i, tr){
 }
 let aktif = 0;
 function pilihan(){ return aktif; }
-function selKontak(p){ // residu kontak (≤ 4 Å, dihitung VirmoDock) pada model reseptor
+function selKontak(p){ // residu kontak (≤ 4 Å, dihitung VirmoLab) pada model reseptor
   const daftar = p.kontak.map(([c,r]) => c ? {chain:c, resi:r} : {resi:r});
   return daftar.length ? {model:recModel, or:daftar} : {model:recModel, resi:-999999}; }
 function alat(k){
@@ -159,7 +159,7 @@ def buat(judul, html_laporan, baris, pose, reseptor, fmt_reseptor, js3dmol, jeni
     kepala_tabel = "".join(f"<th class='{c}' title='Klik untuk mengurutkan'>{escape(t)}</th>" for _k, t, c in KOLOM)
     return f"""<!doctype html>
 <html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="generator" content="VirmoDock"><title>{escape(judul)}</title>
+<meta name="generator" content="VirmoLab"><title>{escape(judul)}</title>
 <style>{CSS}{gaya_lap}</style>
 <script>/* 3Dmol.js - BSD 3-Clause License, (c) University of Pittsburgh. https://3dmol.org */
 {js3dmol}</script>
@@ -178,6 +178,6 @@ def buat(judul, html_laporan, baris, pose, reseptor, fmt_reseptor, js3dmol, jeni
 <p style="color:var(--mut);font-size:12px;margin:6px 2px 0">Baris berwarna gelap dapat diklik untuk melihat pose 3D
 (ligan teratas). Klik judul kolom untuk mengurutkan.</p></div></div></section>
 <section id="laporan" class="tab"><div class="lap">{isi}</div></section></main>
-<footer>Dibuat dengan VirmoDock. Hasil docking adalah prediksi komputasi, bukan bukti aktivitas biologis.</footer>
+<footer>Dibuat dengan VirmoLab. Hasil docking adalah prediksi komputasi, bukan bukti aktivitas biologis.</footer>
 <script type="application/json" id="data">{data_json}</script>
 <script>{JS}</script></body></html>"""

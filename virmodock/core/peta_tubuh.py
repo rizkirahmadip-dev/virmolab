@@ -42,7 +42,7 @@ ORGAN = [
      "Penyerapan di usus: permeabilitas, kelarutan, dan pengaruh pompa P-gp.", (0.50, 0.475)),
     ("ginjal", "Ginjal dan pembuangan", ["Clearance_Microsome_AZ", "VDss_Lombardo", "PPBR_AZ"],
      "Laju pembersihan mikrosom, sebaran ke jaringan, dan ikatan protein plasma. "
-     "Tidak ada model transporter ginjal (OCT2) di VirmoDock.", (0.50, 0.565)),
+     "Tidak ada model transporter ginjal (OCT2) di VirmoLab.", (0.50, 0.565)),
     ("kulit", "Kulit", ["Skin_Reaction"], "Peluang reaksi kulit (sensitisasi).", (0.305, 0.30)),
     ("sel", "Inti sel dan genotoksisitas", ["AMES", "Carcinogens_Lagunin", "SR-p53", "NR-AhR"],
      "Mutagenisitas Ames, karsinogenisitas, respons stres p53, dan reseptor AhR (panel Tox21).", (0.695, 0.30)),

@@ -14,7 +14,7 @@ def langkah_tur(jw):
         return jw.grp_ruang.buttons()[0].parentWidget() if getattr(jw, "grp_ruang", None) else None
 
     return [
-        (lambda: None, "Selamat datang di VirmoDock",
+        (lambda: None, "Selamat datang di VirmoLab",
          "Tur singkat ini menunjukkan bagian utama jendela (± 1 menit). Tekan Lanjut, atau Esc untuk berhenti."),
         (lambda: jw.d_langkah, "Langkah",
          "Alur docking dari 1 sampai 5: Protein → Ligan → Area docking → Jalankan → Hasil. Centang hijau = selesai. "

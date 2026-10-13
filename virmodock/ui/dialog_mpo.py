@@ -46,7 +46,7 @@ class DialogMPO(QDialog):
         self.cb_preset = QComboBox()
         self.cb_preset.addItem("Oral Drug-like MPO (Lipinski, SAScore, QED, ΔG)", "oral")
         self.cb_preset.addItem("CNS-MPO parsial (4 dari 6 suku Wager et al. 2010)", "cns")
-        self.cb_preset.setToolTip("CNS-MPO Pfizer memakai MW, ClogP, ClogD, TPSA, HBD, dan pKa. VirmoDock "
+        self.cb_preset.setToolTip("CNS-MPO Pfizer memakai MW, ClogP, ClogD, TPSA, HBD, dan pKa. VirmoLab "
                                   "menghitung empat suku pertama (ClogP didekati WLOGP); ClogD dan pKa tidak "
                                   "tersedia, jadi skornya tidak sebanding dengan nilai CNS-MPO 0–6 asli.")
         self.cb_preset.currentIndexChanged.connect(self._hitung_ulang)

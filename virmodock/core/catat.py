@@ -19,7 +19,7 @@ def mulai(versi=""):
     log.addHandler(h)
     log.setLevel(logging.INFO)
     log.info("=" * 60)
-    log.info(f"VirmoDock {versi} mulai · Python {platform.python_version()} · {platform.platform()}"
+    log.info(f"VirmoLab {versi} mulai · Python {platform.python_version()} · {platform.platform()}"
              + (" · portable" if paths.PORTABLE else ""))
     lama = sys.excepthook
 

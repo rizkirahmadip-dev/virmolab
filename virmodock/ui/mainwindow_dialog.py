@@ -31,7 +31,7 @@ class PembukaDialog:
     def buka_md(self):
         from ..core import md as mdmod
         if not mdmod.tersedia():
-            self._galat("Modul MD (OpenMM/OpenFF) tidak terpasang. Pasang ulang VirmoDock.")
+            self._galat("Modul MD (OpenMM/OpenFF) tidak terpasang. Pasang ulang VirmoLab.")
             return
         if not self.proyek or not any(l["status"] == "selesai" for j in self.proyek.job for l in j["ligan"]):
             self._galat("Belum ada hasil docking. Jalankan docking dulu (langkah 4), lalu buka MD & MM/GBSA.")
@@ -279,3 +279,10 @@ class PembukaDialog:
         d = DialogTanaman(self)
         d.setAttribute(Qt.WA_DeleteOnClose)
         d.show()
+
+    def buka_validasi_protokol(self):
+        from .dialog_validasi_protokol import DialogValidasiProtokol
+        d = DialogValidasiProtokol(self, proyek=self.proyek)
+        d.setAttribute(Qt.WA_DeleteOnClose)
+        d.show()
+

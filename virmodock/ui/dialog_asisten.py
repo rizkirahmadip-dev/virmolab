@@ -33,7 +33,7 @@ class DialogAsisten(QDialog):
         lay_tanya.setContentsMargins(8, 8, 8, 8)
         lay_tanya.setSpacing(6)
 
-        lab = QLabel("Tanya dalam Bahasa Indonesia. Jawaban panduan bersumber langsung dari basis pengetahuan VirmoDock. "
+        lab = QLabel("Tanya dalam Bahasa Indonesia. Jawaban panduan bersumber langsung dari basis pengetahuan VirmoLab. "
                      "Bila Ollama aktif di komputer ini, jawaban diperluas secara otomatis oleh LLM lokal.")
         lab.setWordWrap(True)
         lay_tanya.addWidget(lab)
@@ -111,7 +111,7 @@ class DialogAsisten(QDialog):
             self.l_status_ai.setText(f"✓ Ollama aktif (Model: {m}). Narasi akan diperkaya oleh AI lokal.")
             kit.atur_nada(self.l_status_ai, "ok")
         else:
-            self.l_status_ai.setText("ℹ Ollama tidak aktif di 127.0.0.1:11434. Narasi akan disusun otomatis oleh Mesin Pakar VirmoDock.")
+            self.l_status_ai.setText("ℹ Ollama tidak aktif di 127.0.0.1:11434. Narasi akan disusun otomatis oleh Mesin Pakar VirmoLab.")
             kit.atur_nada(self.l_status_ai, "info")
 
     def _tanya(self):

@@ -1,4 +1,4 @@
-"""Baris perintah VirmoDock (tanpa jendela) - untuk skrip, batch, dan reproduksibilitas metode.
+"""Baris perintah VirmoLab (tanpa jendela) - untuk skrip, batch, dan reproduksibilitas metode.
 
   VirmoDock-cli.exe <perintah> [opsi]        (dari kode sumber: python -m virmodock.cli <perintah> [opsi])
 
@@ -339,7 +339,7 @@ def cmd_dock(a):
         _galat(f"Folder keluaran {out} tidak kosong. Pakai folder lain atau --timpa.")
     out.mkdir(parents=True, exist_ok=True)
     log = out / "log.txt"
-    log.write_text(f"VirmoDock CLI {datetime.now().isoformat(timespec='seconds')}\n$ {' '.join(sys.argv)}\n",
+    log.write_text(f"VirmoLab CLI {datetime.now().isoformat(timespec='seconds')}\n$ {' '.join(sys.argv)}\n",
                    encoding="utf-8")
     rigid, flex, info_rec, objs = _siapkan_reseptor(a, out)
     (out / "reseptor.pdbqt").write_text(rigid, encoding="utf-8")
@@ -382,7 +382,7 @@ def cmd_dock(a):
     if kv and mesin != "adgpu":
         _galat("Docking kovalen membutuhkan AutoDock-GPU (OpenCL); program tidak tersedia.")
     if flex and mesin == "ad4":
-        _galat("AutoDock4 belum mendukung residu fleksibel di VirmoDock; pakai --mesin adgpu atau vina.")
+        _galat("AutoDock4 belum mendukung residu fleksibel di VirmoLab; pakai --mesin adgpu atau vina.")
     p = M.Parameter(mesin=mesin, nrun=a.run, exhaustiveness=a.exhaustiveness, num_modes=a.pose,
                     energy_range=a.rentang_energi, cpu=a.cpu, seed=a.seed, devnum=a.gpu or 0)
     folder_pose = out / "pose"
@@ -509,7 +509,7 @@ def _tulis_metode(out, a, rec, kotak, sumber_kotak, p, mesin, n_lig, flex):
     else:
         cari = f"ga_run {p.nrun}, populasi {p.pop}, {p.nev} evaluasi"
     teks = [
-        f"VirmoDock {__version__} (baris perintah), {datetime.now():%Y-%m-%d %H:%M}",
+        f"VirmoLab {__version__} (baris perintah), {datetime.now():%Y-%m-%d %H:%M}",
         f"Perintah: {_perintah()}",
         "",
         f"Reseptor: {rec.get('nama')} - {rec.get('metode')}"
@@ -606,7 +606,7 @@ def cmd_mmgbsa(a):
 def cmd_info(a):
     from . import __version__
     from .core import env, mesin as M, paths
-    _cetak(f"VirmoDock {__version__}")
+    _cetak(f"VirmoLab {__version__}")
     _cetak(f"Folder program: {paths.BIN}")
     for k in ("adgpu", "vina", "ad4"):
         _cetak(f"  {M.MESIN[k]:<15} {'ada' if M.tersedia(k) else 'TIDAK ADA'}")
@@ -657,7 +657,7 @@ def _opsi_ligan_arg(p):
 
 
 def parser():
-    ap = argparse.ArgumentParser(prog="VirmoDock-cli", description="VirmoDock tanpa jendela (docking batch & skrip).",
+    ap = argparse.ArgumentParser(prog="VirmoDock-cli", description="VirmoLab tanpa jendela (docking batch & skrip).",
                                  formatter_class=argparse.RawDescriptionHelpFormatter,
                                  epilog=__doc__.split("Contoh:")[1].join(["Contoh:", ""]))
     sub = ap.add_subparsers(dest="perintah", metavar="perintah")

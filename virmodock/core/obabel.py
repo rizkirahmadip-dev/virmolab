@@ -29,7 +29,7 @@ def konversi(teks, dari, ke, opsi=(), timeout=120):
     d = folder()
     exe = d / "obabel.exe"
     if not exe.exists():
-        raise GalatObabel("obabel.exe tidak ditemukan di folder bin/openbabel. Pasang ulang VirmoDock.")
+        raise GalatObabel("obabel.exe tidak ditemukan di folder bin/openbabel. Pasang ulang VirmoLab.")
     env = dict(os.environ, BABEL_LIBDIR=str(d), BABEL_DATADIR=str(d / "data"))
     cmd = [str(exe), f"-i{dari}", f"-o{ke}", *opsi]
     try:

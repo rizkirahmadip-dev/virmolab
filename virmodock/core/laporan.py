@@ -84,7 +84,7 @@ def html(proyek, baris, info, interaksi_terbaik=None, ada_gambar3d=False, ada_di
     n = datetime.now()
     bulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober",
              "November", "Desember"][n.month - 1]
-    o.append(f"<p class='mut'>{n.day} {bulan} {n.year}, {n:%H:%M} · VirmoDock {escape(info.get('versi', ''))}"
+    o.append(f"<p class='mut'>{n.day} {bulan} {n.year}, {n:%H:%M} · VirmoLab {escape(info.get('versi', ''))}"
              + (f" · {escape(penulis)}" if penulis else "") + "</p>")
 
     # ---- validasi

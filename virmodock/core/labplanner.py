@@ -231,7 +231,7 @@ def buat_teks_protokol(nama_ligan: str, dg_kkal: float, ki_info: Dict[str, Any],
     """Hasilkan teks draf protokol laboratorium terformat dalam Bahasa Indonesia."""
     lines = []
     lines.append("PROTOKOL PENGUJIAN IN VITRO (WET-LAB PLANNER)")
-    lines.append("VirmoDock - Penambatan Molekuler ke Uji Laboratorium")
+    lines.append("VirmoLab - Penambatan Molekuler ke Uji Laboratorium")
     lines.append("=" * 65)
     lines.append(f"Senyawa Uji     : {nama_ligan}")
     lines.append(f"Skor Docking ΔG : {dg_kkal:.2f} kcal/mol")

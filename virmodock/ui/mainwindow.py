@@ -1,4 +1,4 @@
-"""Jendela utama VirmoDock."""
+"""Jendela utama VirmoLab."""
 import copy
 import os
 import subprocess
@@ -51,7 +51,7 @@ UBIN_PX = 4096                  # gambar 3D lebih besar dari ini dirender per ub
 class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("VirmoDock")
+        self.setWindowTitle("VirmoLab")
         self.setObjectName("VirmoDock")
         self.setAcceptDrops(True)
         self.setDockNestingEnabled(True)
@@ -425,7 +425,8 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
             return
         aksi_peta = {"rcsb": lambda: self.ambil(0), "alphafold": lambda: self.ambil(3), "pubchem": lambda: self.ambil(1), "smiles": lambda: self.ambil(2),
                      "pustaka": self.buka_pustaka, "tanaman": self.buka_tanaman, "buka": self.buka_berkas, "reseptor": self.siapkan_reseptor, "ligan": self.siapkan_ligan,
-                     "validasi": self.validasi_redocking, "ekspor": lambda: self.buka_ekspor(3),
+                     "validasi": self.validasi_redocking, "validasi_protokol": self.buka_validasi_protokol,
+                     "ekspor": lambda: self.buka_ekspor(3),
                      "laporan": lambda: self.buka_ekspor(4), "mpo": self.buka_mpo, "labplanner": self.buka_labplanner,
                      "md": self.buka_md, "penapisan": self.buka_penapisan, "ppi": self.buka_ppi,
                      "fbdd": self.buka_fbdd, "kantong": self.buka_kantong}
@@ -625,7 +626,7 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
                            "Docking satu ligan, virtual screening, validasi redocking, pembanding obat standar, "
                            "repurposing obat, atau proyek contoh HIV-1 protease (offline)")
         self.a_buka_proyek = A("Buka proyek…", "folder", lambda: self.buka_proyek(), "Ctrl+Shift+O",
-                               "Buka folder proyek VirmoDock (.vmd) yang tersimpan")
+                               "Buka folder proyek VirmoLab (.vmd) yang tersimpan")
         self.a_terakhir = A("Buka proyek terakhir", "rotate",
                             lambda: self.buka_proyek(self.st.value("proyek_terakhir", "")), None,
                             "Lanjutkan proyek yang terakhir dibuka")
@@ -651,7 +652,7 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
                            "kemiripan lalu impor")
         self.a_tanaman = A("Senyawa dari tanaman obat…", "lig", self.buka_tanaman, None,
                            "Cari senyawa yang dilaporkan dari suatu tanaman (LOTUS/Wikidata, COCONUT), lengkap dengan rujukan, lalu impor ke proyek")
-        self.a_keluar = A("Keluar", None, self.close, "Ctrl+Q", "Tutup VirmoDock (docking berjalan akan dijeda)")
+        self.a_keluar = A("Keluar", None, self.close, "Ctrl+Q", "Tutup VirmoLab (docking berjalan akan dijeda)")
         # --- ekspor
         self.a_ekspor = A("Pusat ekspor…", "dl", lambda: self.buka_ekspor(3), "Ctrl+E",
                           "Semua ekspor dalam satu jendela: gambar, diagram, struktur, tabel, laporan")
@@ -932,7 +933,10 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
               "Tandai pose yang atom beratnya lebih jauh dari residu yang dipilih. Pencarian docking tidak dipaksa")))
 
         self._sub(m, "Validasi dan mutu", (
-            self.a_validasi, self.a_qc,
+            self.a_validasi,
+            A("Paket validasi protokol…", "check", self.buka_validasi_protokol, None,
+              "Validasi terstandarisasi untuk naskah: redocking, cross-docking, pengayaan decoy DUD-E, dan PoseBusters"),
+            self.a_qc,
             A("Konsensus skor…", "table", self.buka_konsensus, None,
               "Gabungkan beberapa mesin/fungsi skor (termasuk rescoring Vina & Vinardo) menjadi peringkat "
               "konsensus + Kendall W"),
@@ -947,7 +951,7 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
 
         self._sub(m, "Struktur reseptor", (
             A("Deteksi kantong pengikatan (geometri)…", "cube", self.buka_kantong, None,
-              "Pencari rongga bawaan VirmoDock (kisi geometri, tanpa Java). Untuk peringkat kantong "
+              "Pencari rongga bawaan VirmoLab (kisi geometri, tanpa Java). Untuk peringkat kantong "
               "berbasis pembelajaran mesin, pakai Siapkan › Deteksi kantong (P2Rank)"),
             A("Saluran akses ligan…", "cube", self.buka_terowongan, None,
               "Jalur lurus dari sisi aktif ke pelarut: jari-jari leher, panjang, dan residu penjaga"),
@@ -988,7 +992,7 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
         self._sub(m, "Simulasi dan penelitian lanjut", (
             A("MD && MM/GBSA…", "play", self.buka_md, None,
               "Minimisasi + MM/GBSA, atau dinamika molekul (OpenMM) pelarut implisit/eksplisit: RMSD, RMSF, "
-              "interaksi persisten, ΔG MM/GBSA - VirmoDock menyarankan tingkat sesuai kemampuan laptop"),
+              "interaksi persisten, ΔG MM/GBSA - VirmoLab menyarankan tingkat sesuai kemampuan laptop"),
             A("Penelitian lanjutan…", "chart", self.buka_penelitian, None,
               "Konservasi, energi per residu, umpan, enumerasi, mutasi, draf skripsi, film trajektori")))
 
@@ -1002,7 +1006,7 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
               "Gabungkan grafik, diagram 2D, dan gambar 3D menjadi satu figur berlabel A/B/C siap jurnal")))
         isi(m, (A("Interpretasi hasil docking…", "chart", self.buka_interpretasi, None,
                   "Draf ringkasan dan Bab Hasil & Pembahasan dari angka proyek; memakai Ollama di komputer "
-                  "sendiri bila terpasang, selain itu mesin pakar VirmoDock"),))
+                  "sendiri bila terpasang, selain itu mesin pakar VirmoLab"),))
 
         # ---------------------------------------------------------------- Alat
         m = menu("A&lat")
@@ -1053,7 +1057,7 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
                 A("Buka folder log", None, lambda: QDesktopServices.openUrl(QUrl.fromLocalFile(str(paths.LOG))), None),
                 A("Lisensi dan cara mengutip…", None, self._buka_lisensi, None),
                 None,
-                A("Tentang VirmoDock", None, self.tentang, None)))
+                A("Tentang VirmoLab", None, self.tentang, None)))
 
     def _buka_lisensi(self):
         from .dialog_bantuan import DialogLisensi
@@ -2214,7 +2218,7 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
         """P2Rank pada protein (siap docking diutamakan) -> dialog daftar kantong -> grid box."""
         from ..core import p2rank
         if not p2rank.tersedia():
-            self._galat("P2Rank atau Java (folder bin/p2rank, bin/jre) tidak ditemukan. Pasang ulang VirmoDock.")
+            self._galat("P2Rank atau Java (folder bin/p2rank, bin/jre) tidak ditemukan. Pasang ulang VirmoLab.")
             return
         o = next((x for x in self.objek.values() if x.jenis == "protein" and x.info.get("siap_docking")), None) \
             or next((x for x in self.objek.values() if x.jenis == "protein"), None)
@@ -2485,7 +2489,7 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
     def _set_proyek(self, pr):
         self.proyek = pr
         self.pelaksana.atur_proyek(pr)
-        self.setWindowTitle(f"{pr.nama} - VirmoDock" if pr else "VirmoDock")
+        self.setWindowTitle(f"{pr.nama} - VirmoLab" if pr else "VirmoLab")
         self.s_folder.setText(str(pr.folder) if pr else self.st.value("folder_kerja", ""))
         if pr:
             self.st.setValue("proyek_terakhir", str(pr.folder))
@@ -2603,7 +2607,7 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
         """Proyek contoh offline: 1HSG (dibundel) + 9 inhibitor HIV-1 protease + aspirin (kontrol negatif)."""
         from ..core import templat as T
         if not T.CONTOH_PDB.exists():
-            self._galat("Data contoh tidak ditemukan. Pasang ulang VirmoDock.")
+            self._galat("Data contoh tidak ditemukan. Pasang ulang VirmoLab.")
             return
         self.impor([str(T.CONTOH_PDB)])
 
@@ -2652,7 +2656,7 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
         self._cache_mol, self._cache_rec = {}, {}
         self.p_inter.kosong()
         self.diagram.tampil("", theme.TOKEN[self.mode]["surf"])
-        self.setWindowTitle("VirmoDock")
+        self.setWindowTitle("VirmoLab")
         self._ringkasan()
 
     def buka_proyek(self, folder=None):
@@ -2709,7 +2713,7 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
         f = self.st.value("sesi_terbuka", "")
         if f and Path(f, "proyek.json").exists() and not self.proyek:
             if QMessageBox.question(self, "Pulihkan pekerjaan",
-                                    f"VirmoDock tidak ditutup dengan normal sebelumnya.\n\nPulihkan proyek terakhir?\n{f}"
+                                    f"VirmoLab tidak ditutup dengan normal sebelumnya.\n\nPulihkan proyek terakhir?\n{f}"
                                     ) == QMessageBox.Yes:
                 self.buka_proyek(f)
                 return
@@ -2910,7 +2914,7 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
             mesin, alat = "vina", "cpu"
             self.pesan.tulis("AutoDock-GPU membutuhkan GPU dengan OpenCL; job dijalankan dengan AutoDock Vina (CPU).")
         if not mesinmod.tersedia(mesin):
-            self._galat(f"{mesinmod.PROGRAM[mesin]} tidak ditemukan di folder bin. Pasang ulang VirmoDock.")
+            self._galat(f"{mesinmod.PROGRAM[mesin]} tidak ditemukan di folder bin. Pasang ulang VirmoLab.")
             return
         k = mesinmod.Kotak(pusat=self.box["pusat"], ukuran=self.box["ukuran"], spasi=self.box.get("spasi", 0.375))
         if mesin in ("adgpu", "ad4") and k.terpotong():
@@ -4069,7 +4073,7 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
         if not f:
             return
         rec = self._reseptor_objek()
-        info = {"Proyek": pr.nama, "Folder": pr.folder.name, "VirmoDock": VERSI,
+        info = {"Proyek": pr.nama, "Folder": pr.folder.name, "VirmoLab": VERSI,
                 "Reseptor": (pr.reseptor or {}).get("nama"), "Metode reseptor": (pr.reseptor or {}).get("metode"),
                 "Perangkat": self.s_gpu.text().lstrip("● ")}
         sifat_lig = [x for x in self._data_sifat() if isinstance(x[1], dict)]   # di thread GUI (cursor)
@@ -4176,7 +4180,7 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
                                     QPageLayout.Millimeter))
         w.setResolution(150)
         w.setTitle(judul)
-        w.setCreator(f"VirmoDock {VERSI}")
+        w.setCreator(f"VirmoLab {VERSI}")
         doc.setPageSize(w.pageLayout().paintRectPixels(150).size().toSizeF())
         doc.print_(w)
         selesai()
@@ -4224,7 +4228,7 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
                                             "jarak": h["jarak"], "p": h["p"], "l": h["l"]} for h in daftar]})
             js = (paths.VIEWER / "3Dmol-min.js").read_text(encoding="utf-8")
             n = datetime.now()
-            sub = (f"{n:%d-%m-%Y %H:%M} · VirmoDock {VERSI}" + (f" · {d.get('penulis')}" if d.get("penulis") else "")
+            sub = (f"{n:%d-%m-%Y %H:%M} · VirmoLab {VERSI}" + (f" · {d.get('penulis')}" if d.get("penulis") else "")
                    + f" · {len(lapor_baris)} hasil")
             teks = laporan_interaktif.buat(f"Laporan docking - {pr.nama}", html, lapor_baris, pose, rec_teks,
                                            rec_fmt, js, [(k, analisis.NAMA_JENIS[k]) for k in analisis.URUT_JENIS],
@@ -4243,7 +4247,7 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
         if ik.isNull():
             ik = QIcon(icons.pixmap("logo", "#1f5fbf", 32))
         self.tray = QSystemTrayIcon(ik, self)
-        self.tray.setToolTip("VirmoDock")
+        self.tray.setToolTip("VirmoLab")
         self.tray.activated.connect(lambda *_: (self.showNormal(), self.raise_(), self.activateWindow()))
         self.tray.show()
 
@@ -4437,7 +4441,7 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
         from PySide6.QtWidgets import QDialog, QDialogButtonBox
         from .logo import Logo
         d = QDialog(self)
-        d.setWindowTitle("Tentang VirmoDock")
+        d.setWindowTitle("Tentang VirmoLab")
         lay = QVBoxLayout(d)
         lay.setContentsMargins(28, 24, 28, 16)
         lay.addWidget(Logo(64, self.mode == "gelap"))
@@ -4508,8 +4512,8 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
         self.st.setValue(KUNCI_LAYOUT, self.saveState())
         self.st.setValue("layar_layout", self._kunci_layar())
         f, _ = QFileDialog.getSaveFileName(self, "Ekspor pengaturan & proyek",
-                                           str(Path.home() / f"VirmoDock_{datetime.now():%Y%m%d}.vmdbackup"),
-                                           "Cadangan VirmoDock (*.vmdbackup)")
+                                           str(Path.home() / f"VirmoLab_{datetime.now():%Y%m%d}.vmdbackup"),
+                                           "Cadangan VirmoLab (*.vmdbackup)")
         if not f:
             return
         kerja.jalankan(pindah.ekspor, f, self.st, ikut, VERSI, log=self.log.tulis, galat=self._galat,
@@ -4522,7 +4526,7 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
         from ..core import pindah
         if not f:
             f, _ = QFileDialog.getOpenFileName(self, "Impor pengaturan & proyek", str(Path.home()),
-                                               "Cadangan VirmoDock (*.vmdbackup)")
+                                               "Cadangan VirmoLab (*.vmdbackup)")
         if not f:
             return
         try:
@@ -4531,7 +4535,7 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
             self._galat(f"Berkas cadangan tidak terbaca: {e}")
             return
         if QMessageBox.question(self, "Impor pengaturan",
-                                f"Cadangan VirmoDock {meta.get('versi', '')} dari {meta.get('dibuat', '')}.\n"
+                                f"Cadangan VirmoLab {meta.get('versi', '')} dari {meta.get('dibuat', '')}.\n"
                                 f"Proyek di dalamnya: {', '.join(meta.get('proyek') or []) or '-'}\n\n"
                                 "Pengaturan saat ini akan ditimpa. Lanjutkan?") != QMessageBox.Yes:
             return
@@ -4548,7 +4552,7 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
                 self.buka_proyek(proyek[0])
             else:
                 QMessageBox.information(self, "Impor selesai", "Pengaturan dipulihkan. Tata letak jendela dipakai saat "
-                                                               "VirmoDock dibuka berikutnya.")
+                                                               "VirmoLab dibuka berikutnya.")
         kerja.jalankan(pindah.impor, f, self.st, tujuan, log=self.log.tulis, selesai=selesai, galat=self._galat)
 
     # --------------------------------------------------------------- help
@@ -4606,7 +4610,7 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
         d = getattr(self, "_dlg_md", None)
         if d is not None and d.proses_berjalan():
             r = QMessageBox.question(self, "MD sedang berjalan",
-                                     "MD/MM-GBSA masih berjalan. Tutup VirmoDock?\n\nMD akan dijeda dengan checkpoint "
+                                     "MD/MM-GBSA masih berjalan. Tutup VirmoLab?\n\nMD akan dijeda dengan checkpoint "
                                      "dan bisa dilanjutkan dari Analisis › MD & MM/GBSA.")
             if r != QMessageBox.Yes:
                 e.ignore()
@@ -4614,7 +4618,7 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
             d.hentikan_untuk_keluar()
         if self.pelaksana.sibuk():
             r = QMessageBox.question(self, "Docking sedang berjalan",
-                                     "Docking masih berjalan. Tutup VirmoDock?\n\nJob akan dijeda dan bisa dilanjutkan "
+                                     "Docking masih berjalan. Tutup VirmoLab?\n\nJob akan dijeda dan bisa dilanjutkan "
                                      "saat proyek dibuka lagi (ligan yang sudah selesai tidak diulang).\n\n"
                                      "Tip: minimize jendela agar docking tetap berjalan.")
             if r != QMessageBox.Yes:

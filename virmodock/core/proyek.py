@@ -1,4 +1,4 @@
-"""Model data proyek VirmoDock (folder *.vmd).
+"""Model data proyek VirmoLab (folder *.vmd).
 
   NamaProyek.vmd/
     proyek.json          semua metadata & parameter (ditulis atomik, 5 cadangan di .cadangan/)
@@ -130,7 +130,7 @@ class Proyek:
         folder = Path(folder)
         f = folder / "proyek.json"
         if not f.exists():
-            raise FileNotFoundError(f"{folder} bukan folder proyek VirmoDock (proyek.json tidak ada).")
+            raise FileNotFoundError(f"{folder} bukan folder proyek VirmoLab (proyek.json tidak ada).")
         try:
             d = json.loads(f.read_text(encoding="utf-8"))
         except json.JSONDecodeError:

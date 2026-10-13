@@ -1,4 +1,4 @@
-"""Tema VirmoDock: palet netral, satu aksen biru, mode terang dan gelap.
+"""Tema VirmoLab: palet netral, satu aksen biru, mode terang dan gelap.
 
 Semua warna antarmuka didefinisikan di sini sebagai token, lalu dirangkai
 menjadi Qt Style Sheet. Widget lain cukup memakai objectName / property.

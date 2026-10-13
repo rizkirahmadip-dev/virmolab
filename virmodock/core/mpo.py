@@ -56,7 +56,7 @@ PRESET_ORAL = [
 ]
 
 # CNS-MPO Pfizer (Wager et al., ACS Chem Neurosci 2010; ditinjau ulang 2016) memakai enam suku:
-# MW, ClogP, ClogD(7,4), TPSA, HBD, dan pKa basa terkuat. VirmoDock hanya menghitung empat di antaranya
+# MW, ClogP, ClogD(7,4), TPSA, HBD, dan pKa basa terkuat. VirmoLab hanya menghitung empat di antaranya
 # (ClogP didekati dengan WLOGP RDKit); ClogD dan pKa butuh prediktor berbayar sehingga tidak disertakan.
 # Jadi skor di sini adalah CNS-MPO parsial — jangan dilaporkan sebagai nilai CNS-MPO 0–6 Pfizer.
 PRESET_CNS = [

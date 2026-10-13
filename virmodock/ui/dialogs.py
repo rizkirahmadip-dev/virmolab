@@ -61,7 +61,7 @@ class DialogAmbil(QDialog):
         self.pdbid.setMaxLength(4)
         f1.addRow("ID PDB", self.pdbid)
         v.addLayout(f1)
-        v.addWidget(self._ket("Belum tahu kodenya? Cari dengan nama protein, gen, ligan, atau penyakit - VirmoDock "
+        v.addWidget(self._ket("Belum tahu kodenya? Cari dengan nama protein, gen, ligan, atau penyakit - VirmoLab "
                               "menyarankan struktur terbaik untuk docking (sinar-X, ada ligan kristal, resolusi terkecil)."))
         h = QHBoxLayout()
         self.rc_kueri = QLineEdit()
@@ -264,7 +264,7 @@ class Wizard(QWizard):
 
     def __init__(self, env, folder, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Selamat datang di VirmoDock")
+        self.setWindowTitle("Selamat datang di VirmoLab")
         self.setWizardStyle(QWizard.ModernStyle)
         self.setMinimumSize(620, 460)
         self.setButtonText(QWizard.NextButton, "Lanjut")
@@ -276,7 +276,7 @@ class Wizard(QWizard):
 
         p1 = QWizardPage()
         p1.setTitle("Pemeriksaan sistem")
-        p1.setSubTitle("VirmoDock memeriksa perangkat keras dan program pendukung di laptop ini.")
+        p1.setSubTitle("VirmoLab memeriksa perangkat keras dan program pendukung di laptop ini.")
         v = QVBoxLayout(p1)
         from .logo import Logo
         v.addWidget(Logo(52))
@@ -341,10 +341,10 @@ class Wizard(QWizard):
             judul, url, langkah = p
             self.panduan.setText(f"<b>{judul}</b> agar docking bisa memakai GPU:<ol>"
                                  + "".join(f"<li>{s}</li>" for s in langkah)
-                                 + f"</ol><a href='{url}'>{url}</a><br><br>Sementara itu VirmoDock tetap bisa "
+                                 + f"</ol><a href='{url}'>{url}</a><br><br>Sementara itu VirmoLab tetap bisa "
                                    "dipakai dengan mode CPU.")
         else:
-            self.panduan.setText("Tidak ada GPU yang bisa dipakai. VirmoDock akan memakai AutoDock Vina di CPU.")
+            self.panduan.setText("Tidak ada GPU yang bisa dipakai. VirmoLab akan memakai AutoDock Vina di CPU.")
 
     def _pilih_folder(self):
         d = QFileDialog.getExistingDirectory(self, "Pilih folder kerja", self.ed_folder.text())

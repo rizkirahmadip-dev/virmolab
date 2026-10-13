@@ -307,7 +307,7 @@ class Pelaksana(QObject):
             flex = pr.p(l["flex"]) if l.get("flex") else None
             if j["mesin"] != "adgpu":
                 l["status"] = "dilewati"
-                l["pesan"] = "docking kovalen di VirmoDock hanya didukung AutoDock-GPU"
+                l["pesan"] = "docking kovalen di VirmoLab hanya didukung AutoDock-GPU"
                 self._ubah(j)
                 QTimer.singleShot(0, self._berikut)
                 return
@@ -325,7 +325,7 @@ class Pelaksana(QObject):
             return
         if flex is not None and j["mesin"] == "ad4":
             l["status"] = "dilewati"
-            l["pesan"] = "AutoDock4 di VirmoDock belum mendukung residu fleksibel; pakai AutoDock-GPU atau Vina"
+            l["pesan"] = "AutoDock4 di VirmoLab belum mendukung residu fleksibel; pakai AutoDock-GPU atau Vina"
             self._ubah(j)
             QTimer.singleShot(0, self._berikut)
             return
@@ -378,7 +378,7 @@ class Pelaksana(QObject):
 
     def _jalankan(self, cmd, cwd):
         if not cmd[0]:
-            self.pesan.emit("Program mesin tidak ditemukan di folder bin. Pasang ulang VirmoDock.")
+            self.pesan.emit("Program mesin tidak ditemukan di folder bin. Pasang ulang VirmoLab.")
             self.job["status"] = "gagal"
             self._ubah(self.job)
             return

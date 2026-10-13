@@ -1,11 +1,11 @@
-"""Plugin pengguna (rencana v2.0): berkas .py di folder plugin VirmoDock, dimuat ke menu Alat › Plugin.
+"""Plugin pengguna (rencana v2.0): berkas .py di folder plugin VirmoLab, dimuat ke menu Alat › Plugin.
 
 Format plugin (satu berkas .py):
 
     PLUGIN = {"nama": "Nama plugin", "versi": "1.0", "keterangan": "Apa yang dilakukan"}
 
     def pasang(vd):
-        # vd = jendela utama VirmoDock (lihat KONTEKS di konsol: vd.proyek, vd.objek, vd.log.tulis, …)
+        # vd = jendela utama VirmoLab (lihat KONTEKS di konsol: vd.proyek, vd.objek, vd.log.tulis, …)
         return [("Jalankan sesuatu", lambda: fungsi(vd))]   # daftar (label menu, fungsi)
 
 Plugin menjalankan kode Python bebas dengan hak pengguna - pasang hanya plugin dari sumber tepercaya.
@@ -20,7 +20,7 @@ from pathlib import Path
 from . import paths
 
 FOLDER = paths.APPDATA / "plugin"
-CONTOH = '''"""Contoh plugin VirmoDock: ringkasan ΔG hasil docking ke panel Pesan.
+CONTOH = '''"""Contoh plugin VirmoLab: ringkasan ΔG hasil docking ke panel Pesan.
 
 Salin berkas ini dengan nama lain (tanpa awalan "_"), ubah sesukanya, lalu Alat › Plugin › Muat ulang plugin.
 """

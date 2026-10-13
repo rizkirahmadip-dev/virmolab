@@ -297,8 +297,14 @@
 <h3 id="skrip-figur">Skrip figur publikasi</h3>
 <p><b>Alat › Skrip figur publikasi (PyMOL / ChimeraX)…</b> menulis berkas <code>.pml</code> dan <code>.cxc</code> siap jalan: kartun protein, stik ligan dan residu kantong, garis putus ikatan hidrogen, permukaan kantong transparan, serta render 2400 × 1800 piksel. Salinan reseptor dan pose ikut ditulis ke folder tujuan sehingga jalur di dalam skrip tetap sahih bila foldernya dipindahkan.</p>
 
-<h3 id="diagnostik">Pemeriksa kesehatan sistem</h3>
-<p><b>Bantuan › Pemeriksa kesehatan sistem…</b> memeriksa kesiapan Python, RDKit, NumPy/Gemmi, mesin docking, OpenMM dan GPU, WSL2 (untuk GNINA/Boltz), serta Ollama, lengkap dengan saran tindakan dan tombol salin laporan — lampirkan hasilnya bila melaporkan masalah.</p>
+<h3 id="validasi-protokol">Paket validasi protokol docking (publikasi ilmiah)</h3>
+<p><b>Analisis › Validasi dan mutu › Paket validasi protokol…</b> (atau tombol di toolbar tab <b>Uji</b>) menyediakan wizard 4 langkah terstandar untuk memvalidasi protokol docking komputasi sebelum penapisan virtual skala besar:</p>
+<ul>
+<li><b>Langkah 1 (Redocking kristal):</b> Menguji apakah protokol mereproduksi pose kristal (RMSD simetri ≤ 2,0 Å). Pilihan A memakai validasi redocking proyek Anda sendiri (reseptor, kotak, dan mesin proyek); pilihan B menjalankan redocking dari berkas PDB kompleks lain. Bila ligan kristal ada beberapa salinan, yang dipakai satu residu terbesar.</li>
+<li><b>Langkah 2 (Cross-docking):</b> Butuh ≥ 2 berkas PDB kompleks dari target yang sama. Struktur disuperposisikan lewat Cα bersama sebelum RMSD dihitung; pasangan yang tidak dapat disejajarkan atau gagal di-docking ditandai abu-abu "gagal", tidak diisi nol.</li>
+<li><b>Langkah 3 (Pengayaan):</b> Memakai reseptor dan kotak proyek. Aktif diambil dari ChEMBL (atau CSV Anda) dengan kerangka beragam; decoy dipilih acak dari obat disetujui dan produk alam dengan sifat fisikokimia yang cocok dan Tanimoto &lt; 0,3 terhadap semua aktif, lalu setiap ligan di-docking sungguhan. Ligan yang gagal di-docking dikeluarkan dan dilaporkan, bukan dihitung sebagai skor 0. Keluaran: ROC-AUC, BEDROC (α = 20), EF 1%, logAUC. <b>Batasan:</b> decoy ini bukan decoy DUD-E dari ZINC; pencocokan sifat tidak menghapus perbedaan topologi, jadi anggap nilai sebagai perkiraan atas. Gunakan ≥ 10 aktif dan ≥ 100 decoy untuk kesimpulan yang dapat dipertanggungjawabkan.</li>
+<li><b>Langkah 4 (Ringkasan &amp; publikasi):</b> Kartu metrik hanya dari uji yang dijalankan (yang belum tampil "–"), persentase pose valid PoseBusters dari QC yang sudah tercatat pada hasil docking proyek, paragraf metode (Bahasa Indonesia &amp; Inggris) yang hanya memuat uji yang dijalankan, laporan HTML satu halaman, dan pengiriman kurva ROC ke Komposer Figur.</li>
+</ul>
 
 <h2 id="cli">Baris perintah (VirmoDock-cli)</h2>
 <p><code>VirmoDock-cli.exe</code> ada di folder instalasi VirmoDock. Buka Command Prompt di folder itu (atau tulis jalur lengkapnya), lalu misalnya:</p>

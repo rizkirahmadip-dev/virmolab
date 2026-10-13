@@ -26,7 +26,7 @@ def _kanonikal_smiles(smi: str) -> str:
 
 
 def muat_proyek_ganda(daftar_jalur: List[Union[str, Path, Proyek]]) -> List[Tuple[str, Proyek]]:
-    """Muat beberapa proyek VirmoDock dari direktori atau objek proyek.
+    """Muat beberapa proyek VirmoLab dari direktori atau objek proyek.
 
     Kembalikan list of (nama_target, proyek_obj).
     """

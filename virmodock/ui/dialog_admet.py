@@ -159,7 +159,7 @@ class DialogAdmet(QDialog):
             f"<p>{escape(o['keterangan'])}</p>"
             f"<table cellspacing=3 width='100%'>{''.join(baris)}</table>"
             f"<p style='color:{kit.hx('mut')};font-size:9pt;margin-top:10px'>Kolom kanan = skor kelayakan 0–100 tiap "
-            f"endpoint. Organ tanpa model di VirmoDock: {escape(tanpa)}.</p>"
+            f"endpoint. Organ tanpa model di VirmoLab: {escape(tanpa)}.</p>"
             f"<p style='color:{kit.hx('mut')};font-size:9pt'>Sitasi: {escape(AD.SITASI)}</p>")
 
     def _simpan_peta(self, fmt):

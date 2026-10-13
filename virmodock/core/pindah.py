@@ -54,7 +54,7 @@ def impor(path, st, folder_proyek, lapor=None):
     with zipfile.ZipFile(path) as z:
         meta = json.loads(z.read("meta.json"))
         if meta.get("aplikasi") != "VirmoDock":
-            raise ValueError("Berkas bukan cadangan VirmoDock.")
+            raise ValueError("Berkas bukan cadangan VirmoLab.")
         data = json.loads(z.read("pengaturan.json"))
         n = 0
         for k, v in data.items():

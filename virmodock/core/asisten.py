@@ -1,6 +1,6 @@
 """Asisten berbahasa Indonesia: catatan tetap di aplikasi, plus Ollama bila pengguna memasangnya.
 
-VirmoDock tidak mengunduh dan tidak membundel model bahasa.
+VirmoLab tidak mengunduh dan tidak membundel model bahasa.
 """
 import json
 import urllib.request
@@ -9,9 +9,9 @@ from typing import Tuple
 # (kata kunci, jawaban). Yang pertama cocok dipakai.
 _ATURAN = (
     (("ollama", "asisten"),
-     "Asisten ini menjawab dari catatan VirmoDock tanpa internet. Bila Ollama sudah berjalan "
+     "Asisten ini menjawab dari catatan VirmoLab tanpa internet. Bila Ollama sudah berjalan "
      "di komputer ini (alamat 127.0.0.1:11434) dan ada satu model, pertanyaan yang sama juga "
-     "dikirim ke model itu. VirmoDock tidak mengunduh model."),
+     "dikirim ke model itu. VirmoLab tidak mengunduh model."),
     (("blast", "konservasi", "homolog"),
      "Konservasi diwarnai sebagai persen identitas pada kolom B-faktor. Homolog bisa ditempel, "
      "dicari namanya di UniProt, atau diminta lewat BLAST NCBI pada Swiss-Prot. "
@@ -83,7 +83,7 @@ def tanya_ollama(pertanyaan, model, timeout=180):
     body = json.dumps({
         "model": model,
         "stream": False,
-        "prompt": ("Kamu asisten VirmoDock untuk docking molekuler. Jawab singkat dalam Bahasa Indonesia. "
+        "prompt": ("Kamu asisten VirmoLab untuk docking molekuler. Jawab singkat dalam Bahasa Indonesia. "
                     "Jangan mengarang angka energi atau RMSD. Pertanyaan:\n" + pertanyaan),
     }).encode()
     req = urllib.request.Request(
@@ -113,7 +113,7 @@ def jawab(pertanyaan):
     if catatan:
         return catatan + "\n\nOllama tidak berjalan di komputer ini, jadi hanya catatan di atas yang dipakai."
     return ("Tidak ada catatan untuk pertanyaan itu, dan Ollama tidak berjalan. "
-            "Pasang Ollama lalu unduh satu model bila ingin jawaban bebas. VirmoDock tidak mengunduh model.")
+            "Pasang Ollama lalu unduh satu model bila ingin jawaban bebas. VirmoLab tidak mengunduh model.")
 
 
 # -----------------------------------------------------------------------------
@@ -311,6 +311,6 @@ def interpretasi(proyek, mode: str = "ringkasan", jobs=None, timeout: int = 180)
 
     # Fallback ke mesin pakar lokal bila Ollama tidak aktif
     teks_pakar = _fallback_template(mode, data_dict)
-    return (f"{teks_pakar}\n\n*(Ollama tidak aktif. Teks di atas dirangkai VirmoDock langsung "
+    return (f"{teks_pakar}\n\n*(Ollama tidak aktif. Teks di atas dirangkai VirmoLab langsung "
             "dari angka proyek menurut templat tetap — periksa dan tulis ulang dengan kalimat Anda sendiri.)*")
 

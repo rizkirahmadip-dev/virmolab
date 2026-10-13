@@ -14,4 +14,4 @@ for nama, judul in NAV:
             f'<footer>VirmoDock {versi} · dokumentasi offline · GPL-3.0-or-later</footer></main></body></html>\n')
     Path(f"docs/{nama}.html").write_text(html, encoding="utf-8")
     print("docs/" + nama + ".html")
-import shutil; shutil.copy("virmodock/aset/virmodock_256.png", "docs/gambar/ikon.png"); shutil.copy("branding/virmodock_logo_horizontal_putih.svg", "docs/gambar/logo_putih.svg"); shutil.copy("branding/virmodock_logo_horizontal.svg", "docs/gambar/logo_horizontal.svg")
+import shutil; shutil.copy("virmodock/aset/virmodock_256.png", "docs/gambar/ikon.png"); shutil.copy("branding/virmolab_logo_horizontal_putih.svg", "docs/gambar/logo_putih.svg"); shutil.copy("branding/virmolab_logo_horizontal.svg", "docs/gambar/logo_horizontal.svg")

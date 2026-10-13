@@ -322,7 +322,7 @@ def klaster_pose(daftar_pdb_teks: List[str], rmsd_ambang: float = 4.0) -> List[D
 def berkas_cluspro(folder_tujuan: str, pdb_reseptor: str, pdb_ligan: str) -> Dict[str, Any]:
     """Siapkan dua berkas PDB untuk diunggah sendiri ke ClusPro 2.0 lewat peramban.
 
-    VirmoDock tidak mengirim struktur ke server mana pun: pengunggahan dilakukan pengguna di
+    VirmoLab tidak mengirim struktur ke server mana pun: pengunggahan dilakukan pengguna di
     https://cluspro.bu.edu/ dengan akun miliknya sendiri (ClusPro mewajibkan pendaftaran dan
     hanya gratis untuk penggunaan non-komersial).
     """
@@ -333,4 +333,4 @@ def berkas_cluspro(folder_tujuan: str, pdb_reseptor: str, pdb_ligan: str) -> Dic
     rec.write_text(pdb_reseptor, encoding="utf-8")
     lig.write_text(pdb_ligan, encoding="utf-8")
     return {"reseptor": str(rec), "ligan": str(lig), "url": "https://cluspro.bu.edu/",
-            "catatan": "Unggah kedua berkas di laman ClusPro memakai akun Anda; VirmoDock tidak mengirim data."}
+            "catatan": "Unggah kedua berkas di laman ClusPro memakai akun Anda; VirmoLab tidak mengirim data."}

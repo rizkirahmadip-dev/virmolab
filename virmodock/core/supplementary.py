@@ -10,7 +10,7 @@ Struktur:
   tabel/hasil.csv            tabel hasil lengkap (pemisah ; dan koma desimal) + hasil_titik.csv (pemisah , titik)
   parameter/                 parameter tiap job (JSON: mesin, grid box, seed, residu fleksibel) + proyek.json ringkas
   mmgbsa/                    hasil MD & MM/GBSA (hasil.json; tanpa trajektori besar)
-  versi_perangkat_lunak.txt  versi VirmoDock, mesin, dan pustaka
+  versi_perangkat_lunak.txt  versi VirmoLab, mesin, dan pustaka
   SHA256SUMS.txt             checksum semua berkas
 """
 import hashlib
@@ -32,7 +32,7 @@ PUSTAKA = ["rdkit", "meeko", "gemmi", "numpy", "scipy", "posebusters", "propka",
 
 
 def _versi_teks(versi_app, info_mesin=None):
-    baris = [f"VirmoDock {versi_app}", f"Dibuat: {datetime.now():%Y-%m-%d %H:%M}", ""]
+    baris = [f"VirmoLab {versi_app}", f"Dibuat: {datetime.now():%Y-%m-%d %H:%M}", ""]
     for k, v in (info_mesin or {}).items():
         baris.append(f"{k}: {v}")
     baris.append("")
@@ -46,7 +46,7 @@ def _versi_teks(versi_app, info_mesin=None):
 
 def _readme(pr, versi_app, n_ligan, n_kompleks, ada_mm):
     return f"""Paket Supplementary - {pr.nama}
-Dibuat dengan VirmoDock {versi_app} pada {datetime.now():%Y-%m-%d %H:%M}
+Dibuat dengan VirmoLab {versi_app} pada {datetime.now():%Y-%m-%d %H:%M}
 
 Isi
   reseptor/        Reseptor siap docking (reseptor.pdbqt), struktur bersih (bersih.pdb), laporan preparasi,
@@ -58,11 +58,11 @@ Isi
   kompleks/        Kompleks reseptor-ligan (PDB) untuk {n_kompleks} ligan teratas.
   tabel/           hasil.csv (pemisah ;, koma desimal - Excel Indonesia) dan hasil_titik.csv (pemisah ,, titik desimal).
   parameter/       Parameter tiap job (mesin, grid box, ketelitian, seed, residu fleksibel) dan ringkasan proyek.
-{"  mmgbsa/         Hasil MD & MM/GBSA (hasil.json per proses)." + chr(10) if ada_mm else ""}  versi_perangkat_lunak.txt   Versi VirmoDock, mesin docking, dan pustaka.
+{"  mmgbsa/         Hasil MD & MM/GBSA (hasil.json per proses)." + chr(10) if ada_mm else ""}  versi_perangkat_lunak.txt   Versi VirmoLab, mesin docking, dan pustaka.
   SHA256SUMS.txt   Checksum SHA-256 untuk memeriksa keutuhan berkas.
 
 Cara membuka
-  SDF/PDB/PDBQT: PyMOL, UCSF ChimeraX, Discovery Studio Visualizer, atau VirmoDock (Berkas › Buka).
+  SDF/PDB/PDBQT: PyMOL, UCSF ChimeraX, Discovery Studio Visualizer, atau VirmoLab (Berkas › Buka).
   CSV: Excel / LibreOffice / R / Python. JSON: editor teks.
   Memeriksa checksum (Windows PowerShell): Get-FileHash <berkas> -Algorithm SHA256
 

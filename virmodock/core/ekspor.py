@@ -227,7 +227,7 @@ def kompleks_pdb(teks_reseptor_pdb, mol_pose, remark=None, resn="LIG", rantai="L
         a.SetMonomerInfo(info)
     blok = Chem.MolToPDBBlock(m, flavor=0).splitlines()
     out = [f"REMARK   1 {t}"[:80] for t in (remark or [])]
-    out.append("REMARK   1 Dibuat oleh VirmoDock " + datetime.now().strftime("%Y-%m-%d %H:%M"))
+    out.append("REMARK   1 Dibuat oleh VirmoLab " + datetime.now().strftime("%Y-%m-%d %H:%M"))
     for i, b in enumerate(rec, 1):
         out.append(b[:6] + f"{i % 100000:5d}" + b[11:])
     out.append("TER")

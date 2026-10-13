@@ -35,10 +35,10 @@ class DialogLapor(QDialog):
         lay = QVBoxLayout(self)
         lay.addWidget(_ket("Tulis apa yang terjadi atau saran Anda di bagian atas. Info sistem dan log terakhir di "
                            "bawahnya membantu menemukan penyebab - periksa dan hapus bagian yang tidak ingin dibagikan. "
-                           "VirmoDock tidak mengirim apa pun secara otomatis: salin teks ini lalu kirim lewat email "
+                           "VirmoLab tidak mengirim apa pun secara otomatis: salin teks ini lalu kirim lewat email "
                            "atau halaman Issues proyek."))
         g = env.gpu_utama if env else None
-        info = [f"VirmoDock {versi}" + (" (portable)" if paths.PORTABLE else ""),
+        info = [f"VirmoLab {versi}" + (" (portable)" if paths.PORTABLE else ""),
                 f"Windows: {platform.platform()}",
                 f"CPU: {env.cpu if env else '-'} · {env.inti if env else '-'} thread · RAM {env.ram_gb if env else '-'} GB",
                 f"GPU: {g.nama + ' · ' + str(g.vram_gb) + ' GB · driver ' + g.driver + (' · OpenCL' if g.opencl else ' · tanpa OpenCL') if g else 'tidak ada'}"]
@@ -73,7 +73,7 @@ class DialogLapor(QDialog):
         import zipfile
         from datetime import datetime
         f, _ = QFileDialog.getSaveFileName(self, "Simpan paket laporan",
-                                           str(paths.folder_kerja_bawaan() / f"laporan_VirmoDock_{datetime.now():%Y%m%d_%H%M}.zip"),
+                                           str(paths.folder_kerja_bawaan() / f"laporan_VirmoLab_{datetime.now():%Y%m%d_%H%M}.zip"),
                                            "Arsip zip (*.zip)")
         if not f:
             return
@@ -97,9 +97,9 @@ class DialogLisensi(QDialog):
         kutip = QTextBrowser()
         kutip.setOpenExternalLinks(True)
         kutip.setHtml(
-            "<h3>Mengutip VirmoDock dan perangkat lunak di dalamnya</h3>"
-            f"<p>VirmoDock {versi}. Aplikasi desktop molecular docking (open-source, GPL-3.0-or-later).</p>"
-            "<p>Kutip juga mesin dan pustaka yang Anda pakai (laporan VirmoDock mencantumkannya otomatis):</p><ol>"
+            "<h3>Mengutip VirmoLab dan perangkat lunak di dalamnya</h3>"
+            f"<p>VirmoLab {versi}. Aplikasi desktop molecular docking (open-source, GPL-3.0-or-later).</p>"
+            "<p>Kutip juga mesin dan pustaka yang Anda pakai (laporan VirmoLab mencantumkannya otomatis):</p><ol>"
             + "".join(f"<li>{v}</li>" for v in SITASI.values()) + "</ol>"
             "<p>Bila memakai kontrol kualitas pose, sifat ligan, atau BOILED-Egg:</p><ol>"
             + "".join(f"<li>{v}</li>" for v in [SITASI_QC] + SITASI_SIFAT) + "</ol>"
@@ -157,7 +157,7 @@ class DialogApaBaru(QDialog):
 
     def __init__(self, versi, parent=None, sejak=None):
         super().__init__(parent)
-        self.setWindowTitle(f"Apa yang baru di VirmoDock {versi}")
+        self.setWindowTitle(f"Apa yang baru di VirmoLab {versi}")
         self.resize(720, 620)
         lay = QVBoxLayout(self)
         tb = QTextBrowser()

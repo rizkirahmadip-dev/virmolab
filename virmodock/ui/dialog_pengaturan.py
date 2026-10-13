@@ -1,4 +1,4 @@
-"""Dialog Pengaturan Aplikasi VirmoDock."""
+"""Dialog Pengaturan Aplikasi VirmoLab."""
 
 from PySide6.QtWidgets import (
     QDialog, QFileDialog, QFormLayout, QGroupBox, QHBoxLayout,

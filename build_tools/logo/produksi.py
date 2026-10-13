@@ -1,4 +1,6 @@
-"""Produksi logo final VirmoDock -> branding/ (SVG vektor + PNG + ICO + lembar panduan merek).
+"""ARSIP: logo lama VirmoDock -> branding/arsip_virmodock/. Logo aktif: produksi_virmolab.py.
+
+Produksi logo VirmoDock -> branding/arsip_virmodock/ (SVG vektor + PNG + ICO + lembar panduan merek).
 
   .venv\\Scripts\\python.exe build_tools\\logo\\produksi.py
 """
@@ -12,7 +14,7 @@ from PySide6.QtCore import QRectF, Qt  # noqa: E402
 from PySide6.QtGui import QColor, QFont, QImage, QPainter  # noqa: E402
 
 AKAR = Path(__file__).resolve().parents[2]
-B = AKAR / "branding"
+B = AKAR / "branding" / "arsip_virmodock"
 B.mkdir(exist_ok=True)
 
 GEO = {"bentuk": "kantong", "g": 0.16, "t": 0.70, "atas": 1.15}

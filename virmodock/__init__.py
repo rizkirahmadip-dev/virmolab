@@ -1,2 +1,2 @@
-"""VirmoDock - aplikasi molecular docking desktop."""
-__version__ = "1.1.2"
+"""VirmoLab - aplikasi molecular docking desktop."""
+__version__ = "1.2.0"

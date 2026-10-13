@@ -1,6 +1,6 @@
-"""Konsol Python di dalam VirmoDock (Alat › Konsol Python) - untuk pengguna mahir dan pembuat plugin.
+"""Konsol Python di dalam VirmoLab (Alat › Konsol Python) - untuk pengguna mahir dan pembuat plugin.
 
-Variabel siap pakai: vd (jendela utama), proyek, objek, np, dan modul inti VirmoDock (molekul, mesin, analisis, ekspor,
+Variabel siap pakai: vd (jendela utama), proyek, objek, np, dan modul inti VirmoLab (molekul, mesin, analisis, ekspor,
 md, prep_ligan, prep_reseptor). Kode berjalan di thread antarmuka: perintah lama membuat jendela tidak merespons
 sampai selesai. Riwayat perintah: ↑/↓.
 """
@@ -12,7 +12,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont, QTextCursor
 from PySide6.QtWidgets import QHBoxLayout, QLabel, QLineEdit, QPlainTextEdit, QPushButton, QVBoxLayout, QWidget
 
-SAMBUTAN = ("Konsol Python VirmoDock. Variabel: vd, proyek, objek, np, molekul, mesin, analisis, ekspor, md, prep_ligan, "
+SAMBUTAN = ("Konsol Python VirmoLab. Variabel: vd, proyek, objek, np, molekul, mesin, analisis, ekspor, md, prep_ligan, "
             "prep_reseptor.\nContoh:  [o.nama for o in objek.values()]   ·   ekspor.baris_hasil(proyek)[:3]   ·   "
             "help(vd.tambah_objek)\n")
 

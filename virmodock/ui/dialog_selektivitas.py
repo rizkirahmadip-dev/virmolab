@@ -182,13 +182,13 @@ class DialogSelektivitas(QDialog):
             self.list_target.addItem(it)
 
     def _tambah_proyek(self):
-        folder = QFileDialog.getExistingDirectory(self, "Pilih Folder Proyek VirmoDock (*.vmd)")
+        folder = QFileDialog.getExistingDirectory(self, "Pilih Folder Proyek VirmoLab (*.vmd)")
         if not folder:
             return
 
         p = Path(folder)
         if not (p / "proyek.json").exists():
-            QMessageBox.warning(self, "Bukan Proyek VirmoDock", "Folder yang dipilih tidak mengandung berkas 'proyek.json'.")
+            QMessageBox.warning(self, "Bukan Proyek VirmoLab", "Folder yang dipilih tidak mengandung berkas 'proyek.json'.")
             return
 
         try:

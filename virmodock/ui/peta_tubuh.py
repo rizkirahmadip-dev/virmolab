@@ -454,7 +454,7 @@ class PetaTubuh(QWidget):
         gen.setFileName(str(jalur))
         gen.setSize(QRectF(0, 0, LEBAR, TINGGI).size().toSize())
         gen.setViewBox(QRectF(0, 0, LEBAR, TINGGI))
-        gen.setTitle("Peta ADMET per organ - VirmoDock")
+        gen.setTitle("Peta ADMET per organ - VirmoLab")
         p = QPainter(gen)
         p.setRenderHint(QPainter.Antialiasing)
         hidup, self._alur_hidup = self._alur_hidup, False

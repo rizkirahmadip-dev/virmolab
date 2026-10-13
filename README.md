@@ -1,4 +1,8 @@
-# VirmoDock
+<p align="center"><img src="branding/virmolab_logo_horizontal.svg" alt="VirmoLab" width="420"></p>
+
+# VirmoLab
+
+> **VirmoLab** adalah nama baru VirmoDock. Nama berkas program (`VirmoDock.exe`, `VirmoDock-cli.exe`), folder data, dan format proyek `.vmd` tetap sama, jadi proyek dan pengaturan lama langsung terbaca.
 
 Aplikasi desktop Windows untuk *molecular docking* — gratis dan open-source (GPL-3.0-or-later).
 Pengganti alur AutoDockTools: impor protein/ligan, preparasi, grid box, docking, analisis interaksi,
@@ -102,9 +106,9 @@ SHA-256, hasil di `rilis/`.
 
 ## Lisensi & mengutip
 
-VirmoDock: GPL-3.0-or-later ([`LICENSE`](LICENSE)). Komponen pihak ketiga dan tawaran kode sumbernya:
+VirmoLab: GPL-3.0-or-later ([`LICENSE`](LICENSE)). Komponen pihak ketiga dan tawaran kode sumbernya:
 [`LISENSI_PIHAK_KETIGA.txt`](LISENSI_PIHAK_KETIGA.txt) dan folder [`licenses/`](licenses/).
-Bila memakai VirmoDock dalam publikasi, kutip juga mesin dan pustaka yang dipakai (daftar sitasi
+Bila memakai VirmoLab dalam publikasi, kutip juga mesin dan pustaka yang dipakai (daftar sitasi
 ada di Help › Lisensi & cara mengutip dan di laporan PDF).
 
 © 2026 apt. Rizki Rahmadi Pratama, M. Farm

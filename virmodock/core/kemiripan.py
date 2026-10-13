@@ -235,7 +235,7 @@ def ringkas_fitur(fs):
 
 def pml_farmakofor(fs, nama="farmakofor"):
     """Skrip PyMOL (pseudoatom bola berwarna) untuk farmakofor."""
-    out = [f"# Farmakofor VirmoDock ({len(fs)} fitur)"]
+    out = [f"# Farmakofor VirmoLab ({len(fs)} fitur)"]
     for i, f in enumerate(fs, 1):
         x, y, z = f["xyz"]
         h = f["warna"].lstrip("#")

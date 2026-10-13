@@ -88,7 +88,7 @@ POLA_GALAT_EDUKATIF = [
      "Biner mesin docking tidak ditemukan di folder instalasi atau PATH sistem.",
      "Jalankan menu Alat › Uji mandiri komponen atau unduh ulang paket biner dari menu Bantuan."),
     (r"Permission denied|akses ditolak",
-     "VirmoDock tidak memiliki izin untuk menulis berkas ke folder kerja yang dipilih.",
+     "VirmoLab tidak memiliki izin untuk menulis berkas ke folder kerja yang dipilih.",
      "Simpan proyek di folder dengan izin tulis penuh pengguna (misal Dokumen atau folder kerja lokal, bukan Program Files)."),
 ]
 

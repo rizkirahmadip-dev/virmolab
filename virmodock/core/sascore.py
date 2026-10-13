@@ -100,7 +100,7 @@ def kategori(skor):
 
 
 def token_warna(skor):
-    """Kunci warna tema VirmoDock: 'ok' (hijau), 'warn' (kuning), 'bad' (merah)."""
+    """Kunci warna tema VirmoLab: 'ok' (hijau), 'warn' (kuning), 'bad' (merah)."""
     if skor is None:
         return "ink"
     if skor <= 3.0:

@@ -24,7 +24,7 @@ def buat_skrip_pymol(
     p_lig = Path(jalur_ligan).as_posix()
 
     skrip = f"""# ==============================================================================
-# Skrip Visualisasi Publikasi PyMOL - Dihasilkan oleh VirmoDock
+# Skrip Visualisasi Publikasi PyMOL - Dihasilkan oleh VirmoLab
 # Buka di PyMOL: File -> Run Script -> pilih berkas ini, atau jalankan via terminal:
 # pymol {nama_output}.pml
 # ==============================================================================
@@ -120,7 +120,7 @@ def buat_skrip_chimerax(
     p_lig = Path(jalur_ligan).as_posix()
 
     skrip = f"""# ==============================================================================
-# Skrip Visualisasi Publikasi UCSF ChimeraX - Dihasilkan oleh VirmoDock
+# Skrip Visualisasi Publikasi UCSF ChimeraX - Dihasilkan oleh VirmoLab
 # Buka di ChimeraX: File -> Open -> pilih berkas ini, atau jalankan di Command line
 # ==============================================================================
 

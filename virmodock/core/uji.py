@@ -381,7 +381,7 @@ def _teks(h, nama):
     else:
         met = (f"Perbedaan antar kelompok dianalisis dengan {h['nama_uji'].split(' + ')[0]}"
                + (f" diikuti uji {h.get('nama_posthoc')}" if h.get("nama_posthoc") else "") + f". {norm}")
-    met += " Nilai p < 0,05 dianggap bermakna. Analisis dilakukan dengan VirmoDock (SciPy)."
+    met += " Nilai p < 0,05 dianggap bermakna. Analisis dilakukan dengan VirmoLab (SciPy)."
     return inter, met
 
 
@@ -590,7 +590,7 @@ def roc(negatif, positif, rendah_positif=False):
            "beserta interval kepercayaan 95 % metode DeLong; titik potong optimal ditentukan dengan indeks Youden. "
            "Pengayaan dini dinilai dengan faktor pengayaan (EF1%, EF5%), BEDROC (α = 20; Truchon & Bayly 2007) dan "
            "logAUC pada FPR 0,001-1 (Mysinger & Shoichet 2010); interval kepercayaan 95 % EF dan BEDROC dari "
-           f"{n_boot} ulangan bootstrap terstratifikasi. Analisis dilakukan dengan VirmoDock (SciPy).")
+           f"{n_boot} ulangan bootstrap terstratifikasi. Analisis dilakukan dengan VirmoLab (SciPy).")
     peringatan = []
     if auc < 0.5:
         peringatan.append("AUC < 0,5: skor justru membedakan ke arah sebaliknya - periksa pilihan arah "
@@ -660,7 +660,7 @@ def kontingensi(obs, baris, kolom):
            + ("uji eksak Fisher; rasio odds dan risiko relatif dilaporkan dengan interval kepercayaan 95 % "
               "(metode Woolf/Katz)." if o.shape == (2, 2) else
               h["nama_uji"].replace("Uji", "uji") + "; ukuran efek dinyatakan dengan Cramér V.")
-           + " Nilai p < 0,05 dianggap bermakna. Analisis dilakukan dengan VirmoDock (SciPy).")
+           + " Nilai p < 0,05 dianggap bermakna. Analisis dilakukan dengan VirmoLab (SciPy).")
     h["interpretasi"], h["metode"] = inter, met
     return h
 
@@ -767,6 +767,6 @@ def anova_dua_arah(y, fa, fb, koreksi="sidak"):
     met = ("Data dianalisis dengan ANOVA dua arah (faktor A, faktor B, dan interaksinya; jumlah kuadrat tipe III), "
            f"dilanjutkan perbandingan antar level faktor A di setiap level faktor B dengan koreksi {KOREKSI[koreksi]}. "
            "Normalitas residu diuji dengan Shapiro-Wilk dan homogenitas varians dengan Brown-Forsythe. Nilai p < 0,05 "
-           "dianggap bermakna. Analisis dilakukan dengan VirmoDock (NumPy/SciPy).")
+           "dianggap bermakna. Analisis dilakukan dengan VirmoLab (NumPy/SciPy).")
     h["interpretasi"], h["metode"] = inter, met
     return h

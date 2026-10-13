@@ -394,9 +394,11 @@ Windows 10, Ryzen 7 5800H, 16 GB RAM, RTX 3060 Laptop 6 GB (driver 610.74), Pyth
 | `core/tanaman.py` | taksonomi tanaman, kueri SPARQL LOTUS (P703), gabung COCONUT 2.0, standarisasi RDKit |
 | `data/nama_tanaman_id.csv` | basis data 62 tanaman obat Indonesia terverifikasi takson Wikidata (P225) |
 | `ui/dialog_tanaman.py` | dialog pencarian senyawa tanaman, saringan MW/Lipinski/QED/stereo, pratinjau 2D, impor ligan |
-| `ui/dialog_pengaturan.py` | dialog pengaturan direktori kerja, program visualisasi eksternal, dan cache HTTP |
 | `core/md_analisis.py` | analisis trajektori MD lengkap: Rg, SASA rdFreeSASA/NumPy, barcode RLE, PCA, FEL 2D, klaster ligan, block averaging |
 | `ui/dialog_md.py` | dialog MD 7 tab: Ringkasan, Stabilitas, Interaksi, PCA & FEL, Klaster medoid ensemble, Replika, Log |
+| `core/decoy.py` | generator decoy DUD-E lokal: saringan fisikokimia, Tanimoto Morgan2, dan uji 2-sampel Kolmogorov-Smirnov tanpa bias |
+| `core/validasi_protokol.py` | orkestrasi validasi: redocking RMSD simetri, cross-docking, penapisan aktif vs decoy (ROC/BEDROC/EF/logAUC), PoseBusters, SVG heatmap, laporan HTML/Word |
+| `ui/dialog_validasi_protokol.py` | wizard 4 langkah validasi: redocking kristal, cross-docking, pengayaan decoy, kartu metrik, draf metode, ekspor HTML, dan komposer figur |
 
 Aturan yang dipegang: jangan menamai variabel lokal sama dengan modul yang diimpor (`kerja`, `kit`, `theme`) —
 pernah menyebabkan geser ligan dan GNINA mati total tanpa pesan. Linter `pyflakes` di CI menangkapnya sekarang.

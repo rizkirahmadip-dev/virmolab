@@ -173,7 +173,7 @@ class DialogPustaka(QDialog):
         w = QWidget()
         v = QVBoxLayout(w)
         v.setContentsMargins(0, 0, 0, 0)
-        t = QLabel("ZINC22 (Irwin et al., J Chem Inf Model 2023) memakai verifikasi anti-bot, sehingga VirmoDock tidak "
+        t = QLabel("ZINC22 (Irwin et al., J Chem Inf Model 2023) memakai verifikasi anti-bot, sehingga VirmoLab tidak "
                    "mengaksesnya otomatis. Buka situs, cari/saring senyawa (mis. tranche 'in-stock' atau mirip SMILES), "
                    "unduh sebagai SDF/SMILES, lalu impor lewat <b>Berkas › Buka</b> atau seret berkas ke jendela.")
         t.setWordWrap(True)

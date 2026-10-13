@@ -204,13 +204,13 @@ PANDUAN_DRIVER = {
                ["Buka tautan di bawah, pilih seri dan model GPU laptop Anda.",
                 "Unduh 'Game Ready' atau 'Studio Driver' lalu jalankan installer.",
                 "Pilih instalasi Express, tunggu selesai, lalu restart laptop.",
-                "Buka VirmoDock lagi: GPU akan terdeteksi otomatis."]),
+                "Buka VirmoLab lagi: GPU akan terdeteksi otomatis."]),
     "AMD": ("Pasang AMD Software (Adrenalin)", "https://www.amd.com/en/support/download/drivers.html",
             ["Buka tautan, pilih 'Auto-Detect and Install'.", "Jalankan installer dan ikuti langkahnya.",
-             "Restart laptop, lalu buka VirmoDock lagi."]),
+             "Restart laptop, lalu buka VirmoLab lagi."]),
     "Intel": ("Pasang Intel Graphics Driver", "https://www.intel.com/content/www/us/en/support/detect.html",
               ["Buka tautan dan jalankan Intel Driver & Support Assistant.", "Pasang pembaruan grafis yang disarankan.",
-               "Restart laptop, lalu buka VirmoDock lagi."]),
+               "Restart laptop, lalu buka VirmoLab lagi."]),
 }
 
 

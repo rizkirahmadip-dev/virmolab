@@ -15,7 +15,7 @@ import shutil
 
 
 def periksa_semua() -> List[Dict[str, Any]]:
-    """Jalankan audit diagnostik seluruh komponen dan dependensi VirmoDock."""
+    """Jalankan audit diagnostik seluruh komponen dan dependensi VirmoLab."""
     hasil = []
 
     # 1. Sistem Operasi & Arsitektur
@@ -151,7 +151,7 @@ def periksa_semua() -> List[Dict[str, Any]]:
             "komponen": "Ollama AI Assistant",
             "status": "warn",
             "detail": "Tidak aktif (127.0.0.1:11434)",
-            "keterangan": "Asisten akan berjalan menggunakan Mesin Pakar VirmoDock bawaan (offline)",
+            "keterangan": "Asisten akan berjalan menggunakan Mesin Pakar VirmoLab bawaan (offline)",
             "solusi": "Jalankan aplikasi Ollama bila ingin jawaban diperkaya LLM",
         })
 

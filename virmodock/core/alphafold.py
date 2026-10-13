@@ -182,7 +182,7 @@ def rentang(buang):
 
 
 def unduh(aksesi, ambang=50.0, hanya_ujung=True, pangkas_aktif=True, lapor=None):
-    """Unduh model PDB -> (objek-objek VirmoDock, teks PDB asli, metadata)."""
+    """Unduh model PDB -> (objek-objek VirmoLab, teks PDB asli, metadata)."""
     from . import molekul
     m = info(aksesi)
     url = m.get("pdbUrl")
