@@ -8,6 +8,7 @@ from PySide6.QtWidgets import (QButtonGroup, QCheckBox, QComboBox, QDoubleSpinBo
 
 from ..core import mesin as M
 from ..core import paths
+from . import kit
 from .panels import judul_seksi
 
 PRESET = {
@@ -47,7 +48,7 @@ class PanelDocking(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self._diam = False
-        self.warna_warn = "#c98a12"
+        self.warna_warn = kit.hx("warn")
         self.st = paths.settings()
         # Dua halaman yang ditempatkan JendelaUtama di panel Langkah:
         #   self.hal_area   -> langkah 3 "Area docking" (grid box)

@@ -37,6 +37,10 @@ class DialogFBDD(QDialog):
         lay_utama = QVBoxLayout(self)
         lay_utama.setContentsMargins(12, 12, 12, 12)
         lay_utama.setSpacing(8)
+        lay_utama.addWidget(kit.judul(
+            "Desain berbasis fragmen",
+            "Kembangkan, tautkan, atau gabungkan fragmen dari pose docking untuk memperoleh kandidat ligan "
+            "baru."))
 
         # Bilah mode pemilihan strategi
         self.tabs_strategi = QTabWidget()

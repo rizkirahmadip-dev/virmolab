@@ -12,6 +12,7 @@ from PySide6.QtWidgets import (QAbstractItemView, QCheckBox, QComboBox, QDialog,
 
 from ..core import komposer as K
 from .panel_interaksi import KanvasSvg
+from . import kit
 
 SUMBER = (("uji", "Grafik Uji & Grafik"), ("statistik", "Grafik Statistik"), ("diagram", "Diagram interaksi 2D"),
           ("sifat", "BOILED-Egg (Sifat ligan)"), ("3d", "Gambar viewport 3D"), ("berkas", "Berkas gambar (PNG/JPG/SVG)…"))
@@ -56,7 +57,7 @@ class DialogKomposer(QDialog):
         kiri = QWidget()
         kl = QVBoxLayout(kiri)
         kl.setContentsMargins(0, 0, 0, 0)
-        kl.addWidget(QLabel("<b>Panel</b> <span style='color:#7b8698'>(seret untuk mengurutkan)</span>"))
+        kl.addWidget(QLabel(f"<b>Panel</b> <span style='color:{kit.hx('mut')}'>(seret untuk mengurutkan)</span>"))
         self.daftar = QListWidget()
         self.daftar.setIconSize(QSize(56, 56))
         self.daftar.setDragDropMode(QAbstractItemView.InternalMove)
@@ -181,25 +182,26 @@ class DialogKomposer(QDialog):
         self._diam = False
 
     def segarkan(self, pilih=None):
-        self._diam = True
-        baris = self.daftar.currentRow() if pilih is None else pilih
-        self.daftar.clear()
-        for i, p in enumerate(self.panel):
-            label = K.teks_label(self.opsi["label"], i)
-            it = QListWidgetItem(ikon_panel(p), f"{label + '  ' if label else ''}{p.get('nama', 'Panel')}"
-                                 + ("  · penuh" if p.get("penuh") else ""))
-            it.setData(Qt.UserRole, i)
-            self.daftar.addItem(it)
-        self.daftar.setCurrentRow(min(baris, len(self.panel) - 1) if self.panel else -1)
-        self._diam = False
-        self._pilih(self.daftar.currentRow())
-        s, (w, h) = self.svg()
-        self.kanvas.set_svg(s)
-        if self.panel:
-            mm = self.opsi["lebar_mm"]
-            self.l_info.setText(f"{len(self.panel)} panel · ukuran cetak {mm} × {mm * h / w:.0f} mm")
-        else:
-            self.l_info.setText("Belum ada panel. Klik ＋ Tambah, atau tombol ＋ Komposer di tab Uji & Grafik.")
+        with kit.sibuk(self.l_info, "Menyusun ulang figur…"):
+            self._diam = True
+            baris = self.daftar.currentRow() if pilih is None else pilih
+            self.daftar.clear()
+            for i, p in enumerate(self.panel):
+                label = K.teks_label(self.opsi["label"], i)
+                it = QListWidgetItem(ikon_panel(p), f"{label + '  ' if label else ''}{p.get('nama', 'Panel')}"
+                                     + ("  · penuh" if p.get("penuh") else ""))
+                it.setData(Qt.UserRole, i)
+                self.daftar.addItem(it)
+            self.daftar.setCurrentRow(min(baris, len(self.panel) - 1) if self.panel else -1)
+            self._diam = False
+            self._pilih(self.daftar.currentRow())
+            s, (w, h) = self.svg()
+            self.kanvas.set_svg(s)
+            if self.panel:
+                mm = self.opsi["lebar_mm"]
+                self.l_info.setText(f"{len(self.panel)} panel · ukuran cetak {mm} × {mm * h / w:.0f} mm")
+            else:
+                self.l_info.setText("Belum ada panel. Klik ＋ Tambah, atau tombol ＋ Komposer di tab Uji & Grafik.")
 
     def _pilih(self, i):
         ada = 0 <= i < len(self.panel)

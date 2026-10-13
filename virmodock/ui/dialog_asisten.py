@@ -18,6 +18,10 @@ class DialogAsisten(QDialog):
         lay_utama = QVBoxLayout(self)
         lay_utama.setContentsMargins(10, 10, 10, 10)
         lay_utama.setSpacing(6)
+        lay_utama.addWidget(kit.judul(
+            "Asisten interpretasi hasil",
+            "Tanya jawab dan ringkasan otomatis dari hasil docking proyek; periksa ulang setiap kesimpulan "
+            "sebelum dipakai."))
 
         self.tabs = QTabWidget()
 

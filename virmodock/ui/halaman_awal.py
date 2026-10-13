@@ -36,7 +36,20 @@ class _Ubin(QFrame):
         h.addLayout(v, 1)
 
     def warnai(self, mode):
-        self.l_ikon.setPixmap(icons.pixmap(self.nama_ikon, theme.TOKEN[mode]["acc"], 22))
+        self.mode = mode
+        self._lukis_ikon(False)
+
+    def _lukis_ikon(self, sorot):
+        t = theme.TOKEN[getattr(self, "mode", "terang")]
+        self.l_ikon.setPixmap(icons.pixmap(self.nama_ikon, t["acct"] if sorot else t["ink2"], 22))
+
+    def enterEvent(self, e):
+        self._lukis_ikon(True)
+        super().enterEvent(e)
+
+    def leaveEvent(self, e):
+        self._lukis_ikon(False)
+        super().leaveEvent(e)
 
     def mouseReleaseEvent(self, e):
         if e.button() == Qt.LeftButton and self.rect().contains(e.position().toPoint()):

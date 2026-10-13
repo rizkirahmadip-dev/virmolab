@@ -110,7 +110,7 @@ def platform_terbaik(pilih="auto"):
         try:
             p = mm.Platform.getPlatformByName(nama)
         except Exception:
-            continue
+            continue   # platform tidak tersedia di komputer ini (mis. tanpa CUDA): coba kandidat berikutnya
         prop = {"Precision": "mixed"} if nama in ("CUDA", "OpenCL") else {}
         try:
             s = mm.System()

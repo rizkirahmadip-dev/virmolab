@@ -227,7 +227,7 @@ class PanelHasil(QWidget):
                 ambang = b.get("syarat_ambang")
                 pose_sj = b.get("syarat_pose")
                 it.setToolTip(K_JARAK, arti.PETUNJUK_KOLOM[K_JARAK]
-                              + (f" Ambang {ambang:.1f} Å." if isinstance(ambang, float) else "")
+                              + (f" Ambang {id_angka(f'{ambang:.1f}')} Å." if isinstance(ambang, float) else "")
                               + (f" Pose {pose_sj}." if pose_sj else "")
                               + (f" {b.get('syarat_atom')}." if b.get("syarat_atom") else ""))
                 if pose_sj and pose_sj != 1 and b.get("syarat_lolos"):
@@ -239,7 +239,7 @@ class PanelHasil(QWidget):
                                   + " Tidak ada pose di bawah ambang. Baris tetap pose terbaik docking.")
             if b.get("mmgbsa") is not None:
                 it.setToolTip(K_MMGBSA, f"{b.get('mmgbsa_metode') or 'MM/GBSA'}"
-                              + (f" · SD {b['mmgbsa_sd']:.2f}" if b.get("mmgbsa_sd") else "")
+                              + (f" · SD {id_angka(format(b['mmgbsa_sd'], '.2f'))}" if b.get("mmgbsa_sd") else "")
                               + " - peringkat relatif; entropi tidak dihitung")
             it.setToolTip(K_IFP, "Kemiripan Tanimoto sidik jari interaksi (residu × jenis, tanpa vdW) pose terbaik "
                                  "terhadap pose kristal ligan asli; 1 = pola interaksi sama persis")

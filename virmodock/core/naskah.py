@@ -47,7 +47,7 @@ def periksa_figur(dpi, lebar_mm, font_pt, warna=()):
         try:
             rgb.append((w, _hex(w)))
         except Exception:
-            continue
+            continue   # warna yang tidak dikenali dilewati; pemeriksaan buta warna memakai sisanya
     for i in range(len(rgb)):
         for j in range(i + 1, len(rgb)):
             asli = _jarak(rgb[i][1], rgb[j][1])

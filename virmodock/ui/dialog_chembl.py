@@ -21,7 +21,7 @@ from ..core import grafik
 from ..core import kemiripan as K
 from ..core import statistik as st
 from ..core.laporan import id_angka
-from . import kerja, theme
+from . import kerja, kit, theme
 from .panel_interaksi import KanvasSvg
 
 
@@ -50,11 +50,10 @@ class DialogChembl(QDialog):
         pr = jw.proyek
         lama = (pr.eksperimen if pr else {}) or {}
         lay = QVBoxLayout(self)
-        ket = QLabel("Data bioaktivitas ChEMBL (EMBL-EBI, CC BY-SA 3.0) diambil lewat internet. pChEMBL = −log₁₀ "
-                     "(IC₅₀/Ki/Kd/EC₅₀ molar): makin besar makin poten (6 = 1 µM, 9 = 1 nM).")
-        ket.setWordWrap(True)
-        ket.setObjectName("muted")
-        lay.addWidget(ket)
+        lay.addWidget(kit.judul(
+            "Data aktivitas eksperimen dari ChEMBL",
+            "Data bioaktivitas ChEMBL (EMBL-EBI, CC BY-SA 3.0) diambil lewat internet. pChEMBL = −log₁₀ "
+            "(IC₅₀/Ki/Kd/EC₅₀ molar): makin besar makin poten (6 = 1 µM, 9 = 1 nM)."))
         # --- 1. target
         h = QHBoxLayout()
         h.addWidget(QLabel("<b>1</b>  Target"))

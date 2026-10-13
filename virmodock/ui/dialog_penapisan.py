@@ -51,6 +51,10 @@ class DialogPenapisan(QDialog):
         lay_utama = QVBoxLayout(self)
         lay_utama.setContentsMargins(12, 12, 12, 12)
         lay_utama.setSpacing(8)
+        lay_utama.addWidget(kit.judul(
+            "Dasbor penapisan virtual",
+            "Ringkasan skor, efisiensi ligan, dan sebaran hasil per job untuk memilih kandidat terbaik dari "
+            "penapisan besar."))
 
         # Bilah atas: Pemilihan Job & Ringkasan Cepat
         bar_atas = QHBoxLayout()

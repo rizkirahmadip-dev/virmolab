@@ -59,7 +59,14 @@ def hook():
                 return
             print(f"QC dilengkapi dalam {time.perf_counter() - s.t0:.1f} s; belum: {len(sisa)}", flush=True)
             semua = [l for j in s.proyek.job for l in j["ligan"] if l["status"] == "selesai"]
-            print("lulus:", sum(1 for l in semua if l["qc"].get("lulus")), "/", len(semua), flush=True)
+            # QC berjalan di proses terpisah; bila ada yang belum selesai dalam batas waktu, laporkan apa adanya
+            dinilai = [l for l in semua if l.get("qc")]
+            print(f"lulus: {sum(1 for l in dinilai if l['qc'].get('lulus'))} / {len(dinilai)} dinilai "
+                  f"(dari {len(semua)} ligan selesai)", flush=True)
+            if not dinilai:
+                print("LEWAT: PoseBusters belum menilai satu pose pun dalam batas waktu", flush=True)
+                QApplication.quit()
+                return
             s._muat_hasil()
             from virmodock.ui.panel_hasil import K_QC
             p = s.hasil.pohon
@@ -67,7 +74,7 @@ def hook():
                   [(p.topLevelItem(i).text(1), p.topLevelItem(i).text(K_QC)) for i in range(4)], flush=True)
             s.grab().save(str(OUT / "gui_hasil.png"))
             b = __import__("virmodock.core.ekspor", fromlist=["x"]).baris_hasil(s.proyek)
-            gagal = next((x for x in b if x["qc"] and not x["qc"]["lulus"]), b[0])
+            gagal = next((x for x in b if x.get("qc") and not x["qc"].get("lulus")), b[0] if b else None)
             s.buka_pose(gagal["job"], gagal["lid"], 1)
             QTimer.singleShot(3000, s.l2)
 

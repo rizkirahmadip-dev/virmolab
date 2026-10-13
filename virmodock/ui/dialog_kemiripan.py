@@ -16,6 +16,7 @@ from ..core import ekspor as eksmod
 from ..core import mesin as mesinmod
 from ..core.laporan import id_angka
 from . import kerja, theme
+from . import kit
 from .panel_interaksi import KanvasSvg
 
 
@@ -42,6 +43,10 @@ class DialogKemiripan(QDialog):
         self.fps, self.m, self.klaster = [], None, []
         self.farma = []
         lay = QVBoxLayout(self)
+        lay.addWidget(kit.judul(
+            "Kemiripan, ruang kimia, dan farmakofor",
+            "Bandingkan ligan proyek dengan sidik jari Tanimoto, klaster Butina, peta ruang kimia, dan fitur "
+            "farmakofor."))
         bar = QHBoxLayout()
         self.c_fp = QComboBox()
         for k, t in K.SIDIK:
@@ -216,52 +221,54 @@ class DialogKemiripan(QDialog):
 
     # ------------------------------------------------------------------ data
     def muat(self):
-        jw = self.jw
-        dg = {}
-        if jw.proyek:
-            for b in eksmod.baris_hasil(jw.proyek):
-                dg[b["lid"]] = min(dg.get(b["lid"], 0.0), b["energi"])
-        self.lig, gagal = [], []
-        for kunci, nama, teks, fmt, _l in jw._sumber_sifat():
-            try:
-                self.lig.append({"nama": nama, "kunci": kunci, "mol": K.mol_dari(teks, fmt), "dg": dg.get(kunci)})
-            except Exception:
-                gagal.append(nama)
-        self.c_acuan.blockSignals(True)
-        self.c_acuan.clear()
-        for i, l in enumerate(self.lig):
-            self.c_acuan.addItem(l["nama"], i)
-        kr = next((i for i, l in enumerate(self.lig) if "kristal" in l["nama"].lower()), 0)
-        self.c_acuan.setCurrentIndex(kr)
-        self.c_acuan.blockSignals(False)
-        self.c_job.clear()
-        if jw.proyek:
-            terbaik, n_maks = 0, 0
-            for j in reversed(jw.proyek.job):
-                n = sum(1 for l in j["ligan"] if l["status"] == "selesai" and "kristal" not in l["nama"].lower())
-                if n:
-                    self.c_job.addItem(f"{mesinmod.MESIN.get(j['mesin'], j['mesin'])} · {j['id']} · {n} ligan", j["id"])
-                    if n > n_maks:      # bawaan: job dengan ligan terbanyak (bukan job validasi kristal)
-                        terbaik, n_maks = self.c_job.count() - 1, n
-            self.c_job.setCurrentIndex(terbaik)
-        self.l_info.setText(f"{len(self.lig)} ligan" + (f" ({len(gagal)} tak terbaca)" if gagal else ""))
-        self.hitung()
+        with kit.sibuk(self.l_info, "Membaca ligan proyek…"):
+            jw = self.jw
+            dg = {}
+            if jw.proyek:
+                for b in eksmod.baris_hasil(jw.proyek):
+                    dg[b["lid"]] = min(dg.get(b["lid"], 0.0), b["energi"])
+            self.lig, gagal = [], []
+            for kunci, nama, teks, fmt, _l in jw._sumber_sifat():
+                try:
+                    self.lig.append({"nama": nama, "kunci": kunci, "mol": K.mol_dari(teks, fmt), "dg": dg.get(kunci)})
+                except Exception:
+                    gagal.append(nama)
+            self.c_acuan.blockSignals(True)
+            self.c_acuan.clear()
+            for i, l in enumerate(self.lig):
+                self.c_acuan.addItem(l["nama"], i)
+            kr = next((i for i, l in enumerate(self.lig) if "kristal" in l["nama"].lower()), 0)
+            self.c_acuan.setCurrentIndex(kr)
+            self.c_acuan.blockSignals(False)
+            self.c_job.clear()
+            if jw.proyek:
+                terbaik, n_maks = 0, 0
+                for j in reversed(jw.proyek.job):
+                    n = sum(1 for l in j["ligan"] if l["status"] == "selesai" and "kristal" not in l["nama"].lower())
+                    if n:
+                        self.c_job.addItem(f"{mesinmod.MESIN.get(j['mesin'], j['mesin'])} · {j['id']} · {n} ligan", j["id"])
+                        if n > n_maks:      # bawaan: job dengan ligan terbanyak (bukan job validasi kristal)
+                            terbaik, n_maks = self.c_job.count() - 1, n
+                self.c_job.setCurrentIndex(terbaik)
+            self.l_info.setText(f"{len(self.lig)} ligan" + (f" ({len(gagal)} tak terbaca)" if gagal else ""))
+            self.hitung()
 
     def hitung(self, *_):
-        if len(self.lig) < 2:
-            self.k_peta.set_svg("")
-            self.l_info.setText("Butuh ≥ 2 ligan (impor atau siapkan ligan dulu).")
-            return
-        jenis = self.c_fp.currentData()
-        self.fps = [K.sidik_jari(l["mol"], jenis) for l in self.lig]
-        self.m = K.matriks(self.fps)
-        self.klaster, _ = K.butina(self.m, self.s_amb.value())
-        self.gambar_peta()
-        self.gambar_matriks()
-        self.isi_mirip()
-        self.isi_klaster()
+        with kit.sibuk(self.l_info, "Menghitung kemiripan dan klaster…"):
+            if len(self.lig) < 2:
+                self.k_peta.set_svg("")
+                self.l_info.setText("Butuh ≥ 2 ligan (impor atau siapkan ligan dulu).")
+                return
+            jenis = self.c_fp.currentData()
+            self.fps = [K.sidik_jari(l["mol"], jenis) for l in self.lig]
+            self.m = K.matriks(self.fps)
+            self.klaster, _ = K.butina(self.m, self.s_amb.value())
+            self.gambar_peta()
+            self.gambar_matriks()
+            self.isi_mirip()
+            self.isi_klaster()
 
-    # ------------------------------------------------------------------ peta & matriks
+        # ------------------------------------------------------------------ peta & matriks
     def _svg_peta(self, gelap=False, transparan=False):
         if self.m is None:
             return ""
@@ -340,24 +347,25 @@ class DialogKemiripan(QDialog):
             self.gambar_peta()
 
     def isi_klaster(self):
-        grup = {}
-        for i, k in enumerate(self.klaster):
-            grup.setdefault(k, []).append(i)
-        t = self.t_kl
-        t.setRowCount(len(grup))
-        for r, k in enumerate(sorted(grup)):
-            ang = grup[k]
-            pusat = max(ang, key=lambda i: sum(self.m[i][j] for j in ang))
-            dgs = [(self.lig[i]["dg"], self.lig[i]["nama"]) for i in ang if self.lig[i]["dg"] is not None]
-            terbaik = min(dgs) if dgs else None
-            t.setItem(r, 0, _sel(str(k), k))
-            t.setItem(r, 1, _sel(str(len(ang)), len(ang)))
-            t.setItem(r, 2, _sel(self.lig[pusat]["nama"]))
-            t.setItem(r, 3, _sel(f"{_f(terbaik[0], 2)} ({terbaik[1]})" if terbaik else "-"))
-            t.setItem(r, 4, _sel(", ".join(self.lig[i]["nama"] for i in ang)))
-        t.resizeColumnsToContents()
+        with kit.sibuk(self.l_info, "Mengelompokkan ligan…"):
+            grup = {}
+            for i, k in enumerate(self.klaster):
+                grup.setdefault(k, []).append(i)
+            t = self.t_kl
+            t.setRowCount(len(grup))
+            for r, k in enumerate(sorted(grup)):
+                ang = grup[k]
+                pusat = max(ang, key=lambda i: sum(self.m[i][j] for j in ang))
+                dgs = [(self.lig[i]["dg"], self.lig[i]["nama"]) for i in ang if self.lig[i]["dg"] is not None]
+                terbaik = min(dgs) if dgs else None
+                t.setItem(r, 0, _sel(str(k), k))
+                t.setItem(r, 1, _sel(str(len(ang)), len(ang)))
+                t.setItem(r, 2, _sel(self.lig[pusat]["nama"]))
+                t.setItem(r, 3, _sel(f"{_f(terbaik[0], 2)} ({terbaik[1]})" if terbaik else "-"))
+                t.setItem(r, 4, _sel(", ".join(self.lig[i]["nama"] for i in ang)))
+            t.resizeColumnsToContents()
 
-    # ------------------------------------------------------------------ farmakofor bersama
+        # ------------------------------------------------------------------ farmakofor bersama
     def hitung_farma(self):
         jw = self.jw
         jid = self.c_job.currentData()

@@ -66,7 +66,7 @@ def tersedia():
     try:
         return importlib.util.find_spec("posebusters") is not None
     except Exception:
-        return False
+        return False   # pencarian paket gagal = anggap tidak terpasang; PoseBusters memang opsional
 
 
 def _busters():

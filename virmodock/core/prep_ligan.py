@@ -143,7 +143,7 @@ def varian_dimorphite(mol, ph, maks=1):
         from loguru import logger
         logger.disable("dimorphite_dl")
     except Exception:
-        pass
+        pass   # loguru opsional: kalau tidak ada, cukup diamkan lewat logging bawaan di baris berikut
     logging.getLogger("dimorphite_dl").setLevel(logging.ERROR)
     smi = Chem.MolToSmiles(Chem.RemoveHs(mol))
     if maks <= 1:

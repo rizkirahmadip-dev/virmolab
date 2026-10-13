@@ -21,6 +21,7 @@ from PySide6.QtWidgets import (QCheckBox, QColorDialog, QComboBox, QDoubleSpinBo
 
 from ..core import grafik_uji as G
 from ..core import paths
+from . import kit
 from ..core import uji as U
 from . import theme
 from .panel_interaksi import KanvasSvg
@@ -102,7 +103,7 @@ class KanvasKlik(KanvasSvg):
         self.daerah = []
         self.pilih = None
         self._sorot = None
-        self.aksen = QColor("#1f5fbf")
+        self.aksen = kit.warna("acc")
         self.setMouseTracking(True)
 
     def _geo(self):

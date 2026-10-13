@@ -28,12 +28,11 @@ class DialogAdmet(QDialog):
         self.resize(1280, 760)
         self.lig = []          # [{nama, smiles, lig (dict proyek | None), hasil}]
         lay = QVBoxLayout(self)
-        ket = QLabel("Prediksi model pembelajaran mesin (Chemprop-RDKit, 41 dataset TDC). Angka 0-1 = probabilitas "
-                     "kelas; warna hijau = menguntungkan, merah = berisiko. Ini skrining awal, bukan pengganti uji "
-                     "in vitro/in vivo.")
-        ket.setWordWrap(True)
-        ket.setObjectName("muted")
-        lay.addWidget(ket)
+        lay.addWidget(kit.judul(
+            "Prediksi ADMET dengan ADMET-AI",
+            "Prediksi model pembelajaran mesin (Chemprop-RDKit, 41 dataset TDC). Angka 0-1 = probabilitas "
+            "kelas; warna hijau = menguntungkan, merah = berisiko. Ini skrining awal, bukan pengganti uji "
+            "in vitro/in vivo."))
         self.tab = QTabWidget()
         lay.addWidget(self.tab, 1)
         w_tabel = QWidget()
@@ -137,18 +136,18 @@ class DialogAdmet(QDialog):
         o = self.peta.organ_kunci(kunci)
         if not o:
             return
-        warna = {"baik": "#2e9e5b", "sedang": "#c98a12", "risiko": "#cf3f3f", "kosong": "#7b8698"}[o["status"]]
+        warna = kit.hx({"baik": "ok", "sedang": "warn", "risiko": "bad", "kosong": "mut"}[o["status"]])
         skor = "tidak dinilai" if o["skor"] is None else f"{o['skor']:.0f} / 100"
         baris = []
         for e in o["endpoint"]:
             nilai = AD.teks_nilai(e["kunci"], e["nilai"])
             if e["netral"]:
-                ket, w = "tidak dipakai menilai (netral)", "#7b8698"
+                ket, w = "tidak dipakai menilai (netral)", kit.hx("mut")
             elif e["skor"] is None:
-                ket, w = "belum ada nilai", "#7b8698"
+                ket, w = "belum ada nilai", kit.hx("mut")
             else:
                 pct = int(round(e["skor"] * 100))
-                w = "#2e9e5b" if pct >= 70 else ("#c98a12" if pct >= 40 else "#cf3f3f")
+                w = kit.hx("ok" if pct >= 70 else ("warn" if pct >= 40 else "bad"))
                 lebar = max(2, pct)
                 ket = (f"<span style='background:{w};color:{w}'>{'&nbsp;' * (lebar // 6)}</span> {pct}")
             baris.append(f"<tr><td width='58%'>{escape(e['label'])}</td>"
@@ -159,9 +158,9 @@ class DialogAdmet(QDialog):
             f"<p style='font-size:14px;font-weight:600;color:{warna}'>{escape(o['nama'])} — {skor}</p>"
             f"<p>{escape(o['keterangan'])}</p>"
             f"<table cellspacing=3 width='100%'>{''.join(baris)}</table>"
-            f"<p style='color:#7b8698;font-size:9pt;margin-top:10px'>Kolom kanan = skor kelayakan 0–100 tiap "
+            f"<p style='color:{kit.hx('mut')};font-size:9pt;margin-top:10px'>Kolom kanan = skor kelayakan 0–100 tiap "
             f"endpoint. Organ tanpa model di VirmoDock: {escape(tanpa)}.</p>"
-            f"<p style='color:#7b8698;font-size:9pt'>Sitasi: {escape(AD.SITASI)}</p>")
+            f"<p style='color:{kit.hx('mut')};font-size:9pt'>Sitasi: {escape(AD.SITASI)}</p>")
 
     def _simpan_peta(self, fmt):
         x = self.lig[self.tabel.currentRow()] if 0 <= self.tabel.currentRow() < len(self.lig) else None
@@ -245,7 +244,7 @@ class DialogAdmet(QDialog):
                     if kk != kel:
                         continue
                     v = x["hasil"].get(k)
-                    w = AD.warna(k, v) or "#465263"
+                    w = AD.warna(k, v) or kit.hx("ink2")
                     o.append(f"<tr><td width='70%'>{escape(label)}</td><td align=right style='color:{w};font-weight:600'>"
                              f"{escape(AD.teks_nilai(k, v))}</td><td style='color:#5b6b82'>"
                              f"{'' if jenis == 'p' else escape(jenis)}</td></tr>")

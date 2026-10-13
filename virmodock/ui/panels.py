@@ -8,6 +8,7 @@ from PySide6.QtWidgets import (QAbstractItemView, QColorDialog, QComboBox, QForm
 
 from ..core.laporan import id_angka
 from . import icons
+from . import kit
 
 IKON_JENIS = {"protein": "rec", "ligan": "lig", "air": "water", "ion": "ion", "pose": "lig", "kompleks": "layers",
               "grid": "box"}
@@ -63,13 +64,13 @@ class PanelHierarki(QWidget):
         lay.addWidget(self.pohon)
         self._item = {}
         self._diam = False
-        self.warna_ikon = "#465263"
+        self.warna_ikon = kit.hx("ink2")        # disegarkan lewat set_mode saat tema berganti
 
     def _baru(self, induk, teks, info="", data=None, cek=None, ikon=None):
         it = QTreeWidgetItem(induk, [teks, info])
         it.setData(0, Qt.UserRole, data)
         it.setTextAlignment(1, Qt.AlignRight | Qt.AlignVCenter)
-        it.setForeground(1, QColor("#7b8698"))
+        it.setForeground(1, kit.warna("mut"))
         f = it.font(1)
         f.setFamily("Cascadia Mono")
         f.setPointSizeF(8.2)
@@ -408,6 +409,7 @@ class PanelTampilan(QWidget):
         g.addLayout(h)
         pal = QHBoxLayout()
         pal.setSpacing(3)
+        # palet pilihan warna molekul: tetap sama di kedua tema supaya warna objek tidak berubah ikut tema
         for w in ["#2fb3a0", "#33a852", "#1f5fbf", "#7b5cd6", "#c25bb5", "#d4594a", "#d98a1c", "#e8c547", "#8a94a6", "#f2f2f2"]:
             b = QPushButton()
             b.setFixedSize(20, 18)

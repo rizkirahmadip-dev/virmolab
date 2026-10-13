@@ -339,3 +339,8 @@ def bilah_sibuk(teks="Sedang menghitung…"):
 
     w.atur = atur
     return w
+
+
+def hx(kunci):
+    """Nilai heks token tema aktif, untuk teks HTML/QSS yang butuh string warna (mis. "#2e9e5b")."""
+    return theme.TOKEN[mode()][kunci]

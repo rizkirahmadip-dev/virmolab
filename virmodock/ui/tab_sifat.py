@@ -5,6 +5,7 @@ from PySide6.QtWidgets import (QCheckBox, QHeaderView, QLabel, QPushButton, QSpl
                                QTreeWidgetItem, QVBoxLayout, QWidget)
 
 from ..core import sifat
+from ..core.laporan import id_angka
 from . import theme
 from .panel_interaksi import KanvasSvg
 
@@ -128,14 +129,14 @@ class TabSifat(QWidget):
                 elif kunci == "nama":
                     v, teks = nama, nama
                 elif kunci == "dg":
-                    v, teks = dg, "" if dg is None else f"{dg:.2f}"
+                    v, teks = dg, "" if dg is None else id_angka(f"{dg:.2f}")
                 elif kunci in ATURAN or kunci in ("pains", "brenk"):
                     teks = sifat.sel(s, kunci)
                     v = teks
                 else:
                     v = s.get(kunci)
-                    teks = "" if v is None else (f"{v:.3f}" if kunci == "qed" else
-                                                 f"{v:.2f}" if isinstance(v, float) else str(v))
+                    teks = "" if v is None else (id_angka(f"{v:.3f}") if kunci == "qed" else
+                                                 id_angka(f"{v:.2f}") if isinstance(v, float) else str(v))
                 it.setData(k, Qt.UserRole, v)
                 it.setText(k, teks)
                 if k in NUM:

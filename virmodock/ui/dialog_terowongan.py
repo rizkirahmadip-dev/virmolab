@@ -13,6 +13,7 @@ from ..core import terowongan
 from . import kerja, kit
 
 KOLOM = ["Saluran", "Leher (Å)", "Rerata (Å)", "Panjang (Å)", "Residu penjaga"]
+# warna lintasan di viewport 3D: tetap sama di kedua tema agar cocok dengan warna interaksi molekul
 WARNA_JALUR = ["#2f8fd6", "#c98a12", "#7b5cd6", "#1aa3a3", "#cf3f3f", "#2e9e5b"]
 
 

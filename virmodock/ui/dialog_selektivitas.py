@@ -58,6 +58,10 @@ class DialogSelektivitas(QDialog):
         lay_utama = QVBoxLayout(self)
         lay_utama.setContentsMargins(12, 12, 12, 12)
         lay_utama.setSpacing(8)
+        lay_utama.addWidget(kit.judul(
+            "Selektivitas multi-target",
+            "Bandingkan skor ligan yang sama di beberapa proyek target untuk menilai selektivitas dan risiko "
+            "efek samping."))
 
         # Bilah atas
         bar_atas = QHBoxLayout()

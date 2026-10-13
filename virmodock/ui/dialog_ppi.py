@@ -47,6 +47,10 @@ class DialogPPI(QDialog):
         lay_utama = QVBoxLayout(self)
         lay_utama.setContentsMargins(12, 12, 12, 12)
         lay_utama.setSpacing(8)
+        lay_utama.addWidget(kit.judul(
+            "Antarmuka protein–protein",
+            "Residu kontak, ikatan hidrogen, jembatan garam, dan luas permukaan terkubur di antarmuka dua "
+            "rantai protein."))
 
         # Bilah Masukan Berkas Protein
         gb_input = QGroupBox("Pemilihan Struktur Protein (PDB)")

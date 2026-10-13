@@ -1,0 +1,270 @@
+"""Pembuka dialog analisis untuk jendela utama.
+
+Dipisahkan dari `mainwindow.py` (yang sudah lebih dari lima ribu baris) agar penambahan alat baru tidak lagi
+menyenggol kode viewer, antrean, atau ekspor. Semua metode di sini memakai `self` milik JendelaUtama: kelas
+`PembukaDialog` dipasang sebagai mixin, bukan kelas berdiri sendiri.
+
+Pola tiap pembuka: periksa syarat (proyek, reseptor, pose aktif) → beri pesan jelas bila belum terpenuhi →
+buat dialog, sambungkan sinyalnya, lalu tampilkan dengan WA_DeleteOnClose supaya tidak menumpuk di memori.
+"""
+from PySide6.QtCore import Qt
+
+from ..core import molekul
+from . import kit
+
+
+class PembukaDialog:
+    """Kumpulan metode `buka_*` JendelaUtama (mixin; lihat mainwindow.JendelaUtama)."""
+
+    def buka_asisten(self):
+        from .dialog_asisten import DialogAsisten
+        d = DialogAsisten(self)
+        d.setAttribute(Qt.WA_DeleteOnClose)
+        d.show()
+
+    def buka_penelitian(self):
+        from .dialog_penelitian import DialogPenelitian
+        d = DialogPenelitian(self)
+        d.setAttribute(Qt.WA_DeleteOnClose)
+        d.show()
+
+    def buka_md(self):
+        from ..core import md as mdmod
+        if not mdmod.tersedia():
+            self._galat("Modul MD (OpenMM/OpenFF) tidak terpasang. Pasang ulang VirmoDock.")
+            return
+        if not self.proyek or not any(l["status"] == "selesai" for j in self.proyek.job for l in j["ligan"]):
+            self._galat("Belum ada hasil docking. Jalankan docking dulu (langkah 4), lalu buka MD & MM/GBSA.")
+            return
+        d = getattr(self, "_dlg_md", None)
+        if d is None or (d.proyek_awal is not self.proyek and not d.proses_berjalan()):
+            from .dialog_md import DialogMD
+            d = self._dlg_md = DialogMD(self)
+            d.selesai.connect(self.terapkan_md)
+        else:
+            d.muat()
+        d.show()
+        d.raise_()
+        d.activateWindow()
+
+    def terapkan_md(self, h, run):
+        """Tulis ΔG MM/GBSA ke ligan job (kolom Hasil, Statistik, ekspor, laporan)."""
+        pr = self.proyek
+        if not pr:
+            return
+        o = h.get("opsi") or {}
+        for x in h.get("ligan", []):
+            if not x.get("selesai"):
+                continue
+            j = self.pelaksana.cari(x.get("job"))
+            l = next((y for y in (j or {}).get("ligan", []) if y["id"] == x.get("lid")), None)
+            if l is None:
+                continue
+            md_ = x.get("mmgbsa")
+            mn = x.get("mmgbsa_min") or {}
+            if md_:
+                metode = (f"MM/GBSA OBC2, MD {'air eksplisit' if o.get('pelarut') == 'eksplisit' else 'implisit'} "
+                          f"{o.get('ns')} ns, {md_.get('n')} frame")
+                l["mmgbsa"] = {"dG": md_["dG"], "sd": md_.get("sd"), "sem": md_.get("sem"), "min": mn.get("dG"),
+                               "vdw": md_.get("vdw"), "elek": md_.get("elek"), "gb": md_.get("gb"), "sa": md_.get("sa"),
+                               "metode": metode, "md": run.get("id")}
+                tr = x.get("trajektori") or {}
+                if tr.get("rmsd_ligan"):
+                    l["mmgbsa"]["rmsd_ligan"] = sum(tr["rmsd_ligan"]) / len(tr["rmsd_ligan"])
+            elif mn:
+                l["mmgbsa"] = {"dG": mn["dG"], "sd": None, "min": mn["dG"], "vdw": mn.get("vdw"), "elek": mn.get("elek"),
+                               "gb": mn.get("gb"), "sa": mn.get("sa"), "metode": "MM/GBSA OBC2 (minimisasi)",
+                               "md": run.get("id")}
+        pr.md = [r for r in pr.md if r.get("id") != run.get("id")] + [dict(run, status="selesai")]
+        self._muat_hasil()
+        self.minta_simpan()
+        n = sum(1 for x in h.get("ligan", []) if x.get("selesai"))
+        self.pesan.tulis(f"MM/GBSA: {n} ligan diperbarui di tabel Hasil (kolom MM/GBSA). Nilai untuk peringkat relatif; "
+                         "entropi konformasi tidak dihitung.")
+        if any((x.get("logam") or 0) > 0 for x in h.get("ligan", [])):
+            self.pesan.tulis("MM/GBSA: reseptor memuat ion logam (model nonbonded 12-6) - energi interaksi logam-ligan "
+                             "bersifat pendekatan; bandingkan hanya antar-ligan dengan mode ikatan logam yang sama.")
+
+    def buka_admet(self):
+        if not self._sumber_sifat():
+            self._galat("Belum ada ligan. Impor atau siapkan ligan dulu.")
+            return
+        from .dialog_admet import DialogAdmet
+        d = DialogAdmet(self)
+        d.setAttribute(Qt.WA_DeleteOnClose)
+        d.show()
+
+    def buka_pustaka(self):
+        from .dialog_pustaka import DialogPustaka
+        d = DialogPustaka(self)
+        d.setAttribute(Qt.WA_DeleteOnClose)
+        d.show()
+
+    def buka_chembl(self, tab=0):
+        from .dialog_chembl import DialogChembl
+        d = DialogChembl(self, tab)
+        d.setAttribute(Qt.WA_DeleteOnClose)
+        d.show()
+
+    def buka_kemiripan(self):
+        from .dialog_kemiripan import DialogKemiripan
+        if len(self._sumber_sifat()) < 2:
+            self._galat("Butuh minimal 2 ligan (impor atau siapkan ligan dulu).")
+            return
+        d = DialogKemiripan(self)
+        d.setAttribute(Qt.WA_DeleteOnClose)
+        d.show()
+
+    def buka_konsensus(self):
+        if not self.proyek or not self.proyek.job:
+            self._galat("Belum ada hasil docking.")
+            return
+        from .dialog_konsensus import DialogKonsensus
+        DialogKonsensus(self).exec()
+
+    def buka_mpo(self):
+        if not self.proyek or not self.proyek.ligan:
+            self._galat("Belum ada ligan di dalam proyek.")
+            return
+        from .dialog_mpo import DialogMPO
+        d = DialogMPO(self)
+        d.setAttribute(Qt.WA_DeleteOnClose)
+        d.show()
+
+    def buka_labplanner(self):
+        if not self.proyek or not self.proyek.ligan:
+            self._galat("Belum ada ligan di dalam proyek.")
+            return
+        from .dialog_labplanner import DialogLabPlanner
+        d = DialogLabPlanner(self)
+        d.setAttribute(Qt.WA_DeleteOnClose)
+        d.show()
+
+    def _pilih_ligan_dari_nama(self, nama):
+        if not self.proyek:
+            return
+        for j in getattr(self.proyek, "job", []):
+            for l in j.get("ligan", []):
+                if l.get("nama") == nama or l.get("id") == nama:
+                    self.buka_pose(j["id"], l["id"], 1)
+                    return
+
+    def buka_penapisan(self):
+        if not self.proyek or not self.proyek.ligan:
+            self._galat("Belum ada ligan di dalam proyek.")
+            return
+        from .dialog_penapisan import DialogPenapisan
+        d = DialogPenapisan(self)
+        d.liganDipilih.connect(self._pilih_ligan_dari_nama)
+        d.setAttribute(Qt.WA_DeleteOnClose)
+        d.show()
+
+    def buka_mmp(self):
+        if not self.proyek or not self.proyek.ligan:
+            self._galat("Belum ada ligan di dalam proyek.")
+            return
+        from .dialog_mmp import DialogMMP
+        d = DialogMMP(self)
+        d.liganDipilih.connect(self._pilih_ligan_dari_nama)
+        d.setAttribute(Qt.WA_DeleteOnClose)
+        d.show()
+
+    def buka_selektivitas(self):
+        if not self.proyek:
+            self._galat("Belum ada proyek yang terbuka.")
+            return
+        from .dialog_selektivitas import DialogSelektivitas
+        d = DialogSelektivitas(self)
+        d.setAttribute(Qt.WA_DeleteOnClose)
+        d.show()
+
+    def buka_interpretasi(self):
+        from .dialog_asisten import DialogAsisten
+        d = DialogAsisten(self, tab_awal=1)
+        d.setAttribute(Qt.WA_DeleteOnClose)
+        d.show()
+
+    def buka_ppi(self):
+        from .dialog_ppi import DialogPPI
+        d = DialogPPI(self)
+        d.setAttribute(Qt.WA_DeleteOnClose)
+        d.show()
+
+    def buka_kantong(self):
+        if not self.proyek or not self.proyek.reseptor:
+            self._galat("Belum ada reseptor (makromolekul) di dalam proyek.")
+            return
+        from .dialog_kantong import DialogKantong
+        d = DialogKantong(self)
+        d.kotakDipilih.connect(lambda k: self._atur_kotak(k["pusat"], k["ukuran"], sumber="kantong terdeteksi"))
+        d.setAttribute(Qt.WA_DeleteOnClose)
+        d.show()
+
+    def impor_smiles(self, nama, smiles, sebutan="Ligan"):
+        """Tambahkan molekul dari SMILES sebagai objek ligan di viewer (belum disiapkan untuk docking)."""
+        try:
+            objs = molekul.dari_smiles(smiles, nama)
+        except Exception as e:
+            self._galat(f"Gagal membuat 3D untuk '{nama}': {e}")
+            return False
+        for o in objs:
+            o.tampil = False
+        self.tambah_objek(objs, fokus=False)
+        self._info(f"{sebutan} '{nama}' ditambahkan. Lanjutkan di Siapkan ligan untuk didocking.")
+        return True
+
+    def buka_fbdd(self):
+        from .dialog_fbdd import DialogFBDD
+        d = DialogFBDD(self)
+        d.liganDiimpor.connect(lambda n, s: self.impor_smiles(n, s, "Turunan FBDD"))
+        d.setAttribute(Qt.WA_DeleteOnClose)
+        d.show()
+
+    def buka_skrip_publikasi(self):
+        from .dialog_skrip_publikasi import DialogSkripPublikasi
+        d = DialogSkripPublikasi(self)
+        d.setAttribute(Qt.WA_DeleteOnClose)
+        d.show()
+
+    def buka_diagnostik(self):
+        from .dialog_diagnostik import DialogDiagnostik
+        d = DialogDiagnostik(self)
+        d.setAttribute(Qt.WA_DeleteOnClose)
+        d.show()
+
+    def buka_terowongan(self):
+        from .dialog_terowongan import DialogTerowongan
+        if not kit.reseptor_proyek(self)[0]:
+            self._galat("Belum ada reseptor (makromolekul) yang bisa dipindai.")
+            return
+        d = DialogTerowongan(self)
+        d.setAttribute(Qt.WA_DeleteOnClose)
+        d.show()
+
+    def buka_kinetika(self):
+        from .dialog_kinetika import DialogKinetika
+        d = DialogKinetika(self)
+        d.setAttribute(Qt.WA_DeleteOnClose)
+        d.show()
+
+    def buka_protac(self):
+        from .dialog_protac import DialogPROTAC
+        d = DialogPROTAC(self)
+        d.protacDiimpor.connect(lambda n, s: self.impor_smiles(n, s, "PROTAC"))
+        d.setAttribute(Qt.WA_DeleteOnClose)
+        d.show()
+
+    def buka_metabolisme(self):
+        from .dialog_metabolisme import DialogMetabolisme
+        d = DialogMetabolisme(self)
+        d.setAttribute(Qt.WA_DeleteOnClose)
+        d.show()
+
+    def buka_rescore_ml(self):
+        if not kit.pose_aktif(self):
+            self._galat("Buka satu pose hasil docking dulu (tab Hasil › klik pose), lalu ulangi.")
+            return
+        from .dialog_rescore_ml import DialogRescoreML
+        d = DialogRescoreML(self)
+        d.setAttribute(Qt.WA_DeleteOnClose)
+        d.show()

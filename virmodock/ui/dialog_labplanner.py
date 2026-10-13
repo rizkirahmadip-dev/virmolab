@@ -36,6 +36,9 @@ class DialogLabPlanner(QDialog):
         lay = QVBoxLayout(self)
         lay.setContentsMargins(12, 12, 12, 12)
         lay.setSpacing(8)
+        lay.addWidget(kit.judul(
+            "Rencana uji laboratorium basah",
+            "Susun denah pelat, seri pengenceran, dan protokol uji untuk ligan terpilih dari hasil docking."))
 
         # Splitter: Parameter & Kontrol (Kiri) vs Visualisasi Denah & Protokol (Kanan)
         sp = QSplitter(Qt.Horizontal)

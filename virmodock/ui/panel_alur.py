@@ -499,9 +499,23 @@ class PanelLangkah(QStackedWidget):
         return 0
 
     def set_mode(self, mode):
+        """Ikon tombol: putih pada tombol utama, netral pada tombol biasa (aksen muncul saat disorot)."""
         t = theme.TOKEN[mode]
         for b, ik, utama in _SEMUA_TOMBOL:
-            b.setIcon(icons.ikon(ik, "#ffffff" if utama else t["acc"]))
+            b.setIcon(icons.ikon(ik, "#ffffff" if utama else t["ink2"], t["acct"]))
+            if not utama:
+                b.setProperty("ikon_nama", ik)
+                b.setProperty("ikon_warna", (t["ink2"], t["acct"]))
+                b.installEventFilter(self)
+
+    def eventFilter(self, obj, e):
+        """Tukar warna ikon tombol saat tetikus masuk/keluar — aksen hanya pada yang sedang disorot."""
+        from PySide6.QtCore import QEvent
+        nama = obj.property("ikon_nama") if hasattr(obj, "property") else None
+        if nama and e.type() in (QEvent.Enter, QEvent.Leave):
+            diam, sorot = obj.property("ikon_warna")
+            obj.setIcon(icons.ikon(nama, sorot if e.type() == QEvent.Enter else diam))
+        return super().eventFilter(obj, e)
 
     def set_status(self, protein="", ligan="", hasil=""):
         self.s_protein.setText(protein)

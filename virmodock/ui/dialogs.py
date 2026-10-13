@@ -5,6 +5,8 @@ from PySide6.QtWidgets import (QAbstractItemView, QCheckBox, QComboBox, QDialog,
                                QListWidgetItem, QPlainTextEdit, QProgressBar, QPushButton, QTabWidget, QTreeWidget, QTreeWidgetItem,
                                QVBoxLayout, QWidget, QWizard, QWizardPage)
 
+from . import kit
+
 ORGANISME = [("Semua organisme", None), ("Homo sapiens (manusia)", 9606), ("Mus musculus (mencit)", 10090),
              ("Rattus norvegicus (tikus)", 10116), ("SARS-CoV-2", 2697049), ("Escherichia coli K-12", 83333),
              ("Mycobacterium tuberculosis H37Rv", 83332), ("Plasmodium falciparum 3D7", 36329),
@@ -109,7 +111,7 @@ class DialogAmbil(QDialog):
 
     def _rc_cari(self):
         from ..core import rcsb
-        from . import kerja
+        from . import kerja, kit
         q = self.rc_kueri.text().strip()
         if not q:
             return
@@ -317,8 +319,8 @@ class Wizard(QWizard):
         baris = []
         if g:
             baris.append(f"<b>GPU</b>: {g.nama} · {g.vram_gb:g} GB · driver {g.driver or '-'} · "
-                         + ("<span style='color:#2e9e5b'>siap untuk AutoDock-GPU (OpenCL)</span>" if g.opencl
-                            else "<span style='color:#cf3f3f'>OpenCL tidak tersedia</span>"))
+                         + (f"<span style='color:{kit.hx('ok')}'>siap untuk AutoDock-GPU (OpenCL)</span>" if g.opencl
+                            else f"<span style='color:{kit.hx('bad')}'>OpenCL tidak tersedia</span>"))
         else:
             baris.append("<b>GPU</b>: tidak ada GPU yang mendukung OpenCL")
         baris.append(f"<b>CPU</b>: {e.cpu} · {e.inti} thread · RAM {e.ram_gb:g} GB")

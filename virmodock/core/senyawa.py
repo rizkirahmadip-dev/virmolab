@@ -119,7 +119,7 @@ def _jalan_reaksi(mol, smarts):
         try:
             Chem.SanitizeMol(m)
         except Exception:
-            continue
+            continue   # produk reaksi yang tidak sah secara kimia memang dibuang dari daftar calon
         smi = Chem.MolToSmiles(m)
         if smi:
             out.append(smi)

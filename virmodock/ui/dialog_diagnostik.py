@@ -31,6 +31,10 @@ class DialogDiagnostik(QDialog):
         lay_utama = QVBoxLayout(self)
         lay_utama.setContentsMargins(12, 12, 12, 12)
         lay_utama.setSpacing(8)
+        lay_utama.addWidget(kit.judul(
+            "Pemeriksa kesehatan sistem",
+            "Memeriksa mesin docking, pustaka Python, GPU, WSL, dan Ollama agar masalah ketahuan sebelum "
+            "perhitungan berjalan."))
 
         # Bilah atas
         bar_atas = QHBoxLayout()

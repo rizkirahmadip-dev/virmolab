@@ -11,7 +11,7 @@ from PySide6.QtWidgets import (QCheckBox, QComboBox, QDialog, QDoubleSpinBox, QH
 
 from ..core import pustaka as P
 from ..core.laporan import id_angka
-from . import kerja
+from . import kerja, kit
 
 
 def _sel(t, angka=None):
@@ -36,6 +36,9 @@ class DialogPustaka(QDialog):
         self.hasil = []
         self._batal = None
         lay = QVBoxLayout(self)
+        lay.addWidget(kit.judul(
+            "Pustaka ligan",
+            "Cari dan impor senyawa dari obat disetujui, bahan alam COCONUT, atau ZINC22 ke dalam proyek."))
         h = QHBoxLayout()
         h.addWidget(QLabel("Sumber"))
         self.c_sumber = QComboBox()

@@ -47,6 +47,10 @@ class DialogMMP(QDialog):
         lay_utama = QVBoxLayout(self)
         lay_utama.setContentsMargins(12, 12, 12, 12)
         lay_utama.setSpacing(8)
+        lay_utama.addWidget(kit.judul(
+            "Pasangan molekul berpadanan",
+            "Pasangan ligan yang berbeda satu transformasi kecil, beserta perubahan skornya, untuk membaca "
+            "hubungan struktur–aktivitas."))
 
         # Bilah atas
         bar_atas = QHBoxLayout()

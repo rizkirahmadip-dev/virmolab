@@ -12,6 +12,7 @@ from PySide6.QtWidgets import (QComboBox, QDialog, QDoubleSpinBox, QFileDialog, 
 
 from ..core import konsensus as K
 from ..core import mesin as M
+from . import kit
 from ..core.laporan import id_angka
 from . import kerja, theme
 
@@ -25,11 +26,10 @@ class DialogKonsensus(QDialog):
         self.resize(1180, 720)
         self.hasil = None
         lay = QVBoxLayout(self)
-        ket = QLabel("Peringkat yang bertahan di beberapa fungsi skor lebih dapat dipercaya daripada skor satu mesin. "
-                     "Pilih kolom skor (job dengan mesin berbeda dan/atau rescoring pose terbaik), lalu Hitung.")
-        ket.setWordWrap(True)
-        ket.setObjectName("muted")
-        lay.addWidget(ket)
+        lay.addWidget(kit.judul(
+            "Konsensus beberapa fungsi skor",
+            "Peringkat yang bertahan di beberapa fungsi skor lebih dapat dipercaya daripada skor satu mesin. "
+            "Pilih kolom skor (job dengan mesin berbeda dan/atau rescoring pose terbaik), lalu Hitung."))
         bagi = QSplitter(Qt.Horizontal)
         kiri = QWidget()
         kl = QVBoxLayout(kiri)
@@ -145,7 +145,7 @@ class DialogKonsensus(QDialog):
                 self.jw.minta_simpan()
             self._susun(pilih, j_pose, perlu)
             if gagal:
-                self.info.append(f"<p style='color:#c98a12'>⚠ Rescoring gagal untuk {gagal} ligan (lihat Log).</p>")
+                self.info.append(f"<p style='color:{kit.hx('warn')}'>⚠ Rescoring gagal untuk {gagal} ligan (lihat Log).</p>")
 
         if tugas:
             self.info.setHtml(f"<p>Rescoring {len(tugas)} pose dengan {', '.join(perlu)}…</p>")

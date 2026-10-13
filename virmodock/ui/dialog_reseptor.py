@@ -7,9 +7,15 @@ from PySide6.QtWidgets import (QButtonGroup, QCheckBox, QComboBox, QDialog, QDou
                                QStackedWidget, QTextBrowser, QVBoxLayout, QWidget)
 
 from ..core.prep_reseptor import OpsiReseptor
+from . import kit
 
 LANGKAH = ["Periksa struktur", "Pembersihan", "Protonasi dan hidrogen", "Ringkasan"]
-WARNA_TINGKAT = {"ok": "#2e9e5b", "info": "#5b6b82", "peringatan": "#c98a12", "masalah": "#cf3f3f"}
+TINGKAT_TOKEN = {"ok": "ok", "info": "ink2", "peringatan": "warn", "masalah": "bad"}
+
+
+def warna_tingkat(tingkat):
+    """Warna tingkat pemeriksaan menurut tema aktif, bukan nilai tetap tema terang."""
+    return kit.hx(TINGKAT_TOKEN.get(tingkat, "ink2"))
 SIMBOL = {"ok": "✓", "info": "•", "peringatan": "!", "masalah": "✕"}
 
 
@@ -211,7 +217,7 @@ class DialogReseptor(QDialog):
     def _lanjut(self):
         i = self.stak.currentIndex()
         if i == 0 and not any(cb.isChecked() for cb in self.cek_rantai.values()):
-            self.t_periksa.setHtml("<p style='color:#cf3f3f'>Pilih minimal satu rantai.</p>")
+            self.t_periksa.setHtml(f"<p style='color:{kit.hx('bad')}'>Pilih minimal satu rantai.</p>")
             return
         if i < len(LANGKAH) - 1:
             self.l_langkah.setCurrentRow(i + 1)
@@ -251,14 +257,14 @@ class DialogReseptor(QDialog):
             return
         from ..core.periksa_protein import skor
         s = skor(info)
-        warna = {"baik": "#2e9e5b", "peringatan": "#c98a12", "masalah": "#cf3f3f"}[s]
+        warna = kit.hx({"baik": "ok", "peringatan": "warn", "masalah": "bad"}[s])
         kepala = {"baik": "Struktur layak untuk docking", "peringatan": "Layak dengan catatan",
                   "masalah": "Ada masalah - periksa sebelum docking"}[s]
         o_ = [f"<p style='font-size:14px;font-weight:600;color:{warna}'>{kepala}</p>",
               f"<p style='color:#5b6b82'>{escape(info['metode'] or 'Metode tidak tercantum')} · {info['residu']} residu "
               f"· {info['atom']} atom · {len(info['ligan'])} ligan/aditif · {info['air']} air</p><table cellspacing=4>"]
         for t, teks in info["temuan"]:
-            o_.append(f"<tr><td style='color:{WARNA_TINGKAT[t]};font-weight:700' valign=top>{SIMBOL[t]}</td>"
+            o_.append(f"<tr><td style='color:{warna_tingkat(t)};font-weight:700' valign=top>{SIMBOL[t]}</td>"
                       f"<td>{escape(teks)}</td></tr>")
         o_.append("</table>")
         self.t_periksa.setHtml("".join(o_))

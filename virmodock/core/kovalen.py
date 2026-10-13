@@ -191,7 +191,7 @@ def buat_aduk(mol, resn, ca, cb, kunci_warhead=None, seed=42):
     try:
         AllChem.MMFFOptimizeMolecule(aduk, maxIters=500)
     except Exception:
-        pass
+        pass   # MMFF tidak mengenali semua gugus; koordinat hasil penyematan sudah cukup untuk penambatan
     # sejajarkan sumbu CA-CB aduk ke CA-CB kristal (ditambah satu titik semu agar transformasi tertentu penuh)
     acuan = Chem.RWMol()
     for _ in range(2):

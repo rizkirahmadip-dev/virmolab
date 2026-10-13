@@ -2,6 +2,23 @@
 
 Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x adalah pra-rilis.
 
+## [1.1.2] - 13 Oktober 2026
+
+- **Terjemahan bahasa Inggris dilengkapi dan diaudit menyeluruh untuk seluruh fitur 0.9.7–1.1.2**: Kamus `en.json` diperluas menjadi 2.921 teks dan 659 pola dengan terminologi komputasi/kimia medisinal baku; seluruh teks antarmuka bebas teks campur sari, konsisten spasi/baris baru, dan lolos uji verifikasi `dev/uji_bahasa.py` serta audit mutu otomatis `dev/cek_mutu_i18n.py` (0 teks bermasalah).
+- **Ikon tidak lagi berwarna saat diam.** Ubin halaman awal dan tombol panel langkah menggambar ikonnya dengan warna aksen, sementara toolbar dan panel Objek memakai abu-abu netral — dua gaya dalam satu jendela. Kini semua ikon netral saat diam dan menyala aksen hanya ketika disorot tetikus atau pada tombol utama.
+- **29 warna tetap yang menduplikasi token tema** diganti pemanggilan token (`kit.hx`, `kit.warna`), jadi mode gelap memakai nilai tema gelap, bukan nilai tema terang yang dipatok di kode: dialog ADMET, wizard reseptor, MD, konsensus, komposer, residu fleksibel, panel docking, tab Uji, panel Objek, dan dialog perangkat. Warna yang memang harus tetap (palet pewarnaan molekul, lintasan saluran di viewport, ikon baki sistem) diberi keterangan agar tidak ikut terganti di kemudian hari.
+- **Angka di tab Sifat ligan dan panel Hasil** ikut gaya Indonesia (QED, massa, ΔG, ambang syarat jarak, SD MM/GBSA), menyusul tabel Hasil yang sudah lebih dulu.
+- **Angka di panel Properti** memakai gaya Indonesia seperti tabel Hasil (koma desimal, minus sebenarnya): ΔG, skor kovalen, RMSD kristal/masukan/l.b.–u.b., skor lokal, resolusi, dan massa molekul.
+
+### Diubah
+- **`mainwindow.py` dipecah jadi tiga mixin**: 27 pembuka dialog analisis ke `ui/mainwindow_dialog.py` (`PembukaDialog`), komposer figur ke `ui/mainwindow_komposer.py` (`KomposerFigur`), dan perekaman video ke `ui/mainwindow_media.py` (`MediaAnimasi`). Berkas utama turun dari 5.365 ke 4.628 baris, sehingga menambah alat analisis, mengubah tata letak figur, atau menyentuh perekaman video tidak lagi berbagi berkas yang sama — penyebab bug `kerja` yang tertutupi pada 1.1.1.
+- **Kepala dialog seragam**: 14 dialog analisis lama (ADMET, ChEMBL, konsensus, MD, asisten, diagnostik, FBDD, kemiripan, rencana lab, MMP, penapisan, PPI, pustaka, selektivitas) kini dibuka dengan judul dan satu kalimat penjelasan lewat `kit.judul`, sama seperti dialog yang lebih baru. Keterangan pengantar yang sudah ada dipindah ke subjudul, bukan ditulis ulang.
+- **Tanda proses** ditambahkan pada hitungan berat dialog lama: pemuatan ligan, perhitungan kemiripan, pengelompokan Butina, dan penyusunan ulang figur komposer.
+- **Penanganan galat yang sengaja diam diberi alasan tertulis** di delapan tempat (sanitasi pose untuk diagram, stereo dari geometri 3D, optimasi MMFF aduk kovalen, warna tak dikenal pada pemeriksa figur, loguru opsional, pencarian platform OpenMM, deteksi PoseBusters, produk reaksi tak sah pada enumerasi) sehingga tidak terbaca sebagai kelalaian saat ditinjau.
+
+### Baru
+- **Uji mandiri untuk tiga modul inti yang selama ini tidak teruji**: `dev/uji_proyek.py` (simpan–buka pulang-pergi, penulisan atomik dan cadangan, migrasi format lawas, id ligan unik, SMILES dari REMARK PDBQT, penolakan folder bukan proyek), `dev/uji_molekul.py` (pemecahan 1HSG jadi protein/ligan/air, SMILES→3D, SDF bolak-balik, impor berkas, penolakan berkas asing, elemen PDBQT), dan `dev/uji_prep_ligan.py` (PDBQT Meeko, protonasi pH 7,4, mode tanpa minimisasi, pelaporan ligan gagal, pemrosesan banyak ligan), dan `dev/uji_analisis_inti.py` (deteksi interaksi MK1–protease HIV-1 pada 1HSG: ikatan hidrogen, kontak hidrofobik, residu katalitik ASP 25 dan flap ILE 50, sidik jari interaksi, Tanimoto IFP, efisiensi ligan).
+
 ## [1.1.1] - 12 Oktober 2026
 
 ### Baru

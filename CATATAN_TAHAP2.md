@@ -373,3 +373,19 @@ Uji akhir Tahap 4 (8 Okt 2026, build 0.9.0 di `rilis/`): installer dipasang diam
 
 ## 8. Lingkungan laptop pengguna
 Windows 10, Ryzen 7 5800H, 16 GB RAM, RTX 3060 Laptop 6 GB (driver 610.74), Python 3.14 (C:\Python314), VS 2026 Build Tools, Git, WSL Ubuntu (AutoDock-GPU CUDA lama di ~/AutoDock-GPU — tidak dipakai lagi oleh VirmoDock), MGLTools 1.5.6/1.5.7, Open Babel 2.4.1, Discovery Studio Visualizer 2021. Data docking lama: `D:\16. Data Penelitian Tambahan\Semua Data Docking` (contoh uji: `1ITBCasticin\` berisi maps + Casticin.pdbqt + dock.dlg).
+
+## Peta berkas jendela utama (sejak 1.1.2)
+
+`ui/mainwindow.py` tidak lagi memegang semua hal. Sebelum menambah fitur, cari tempatnya dulu:
+
+| Berkas | Isi |
+|---|---|
+| `ui/mainwindow.py` | kerangka jendela, menu, dok, viewer, antrean, hasil, ekspor, proyek |
+| `ui/mainwindow_dialog.py` | semua `buka_*` dialog analisis (mixin `PembukaDialog`) |
+| `ui/mainwindow_komposer.py` | komposer figur panel A/B/C (mixin `KomposerFigur`) |
+| `ui/mainwindow_media.py` | animasi dan perekaman video (mixin `MediaAnimasi`) |
+| `ui/kit.py` | komponen bersama dialog: kartu, tabel, lencana, `kit.sibuk`, `kit.f`, `kit.hx`, data proyek |
+| `ui/bentuk_organ.py` | ikon organ peta ADMET |
+
+Aturan yang dipegang: jangan menamai variabel lokal sama dengan modul yang diimpor (`kerja`, `kit`, `theme`) —
+pernah menyebabkan geser ligan dan GNINA mati total tanpa pesan. Linter `pyflakes` di CI menangkapnya sekarang.

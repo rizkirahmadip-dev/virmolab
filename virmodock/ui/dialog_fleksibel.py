@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (QAbstractItemView, QDialog, QDialogButtonBox, QDo
                                QPushButton, QTableWidget, QTableWidgetItem, QVBoxLayout)
 
 from ..core.laporan import id_angka
+from . import kit
 from ..core.prep_reseptor import MAKS_FLEKSIBEL
 
 # perkiraan torsi rantai samping (termasuk CA-CB) per residu, untuk estimasi ruang pencarian
@@ -139,7 +140,7 @@ class DialogFleksibel(QDialog):
             warna = "#c0392b"
         elif len(pilih) > 6 or t > 12:
             teks += " Banyak residu: naikkan exhaustiveness Vina (≥ 32) atau jumlah run AD-GPU (≥ 100)."
-            warna = "#c98a12"
+            warna = kit.hx("warn")
         if not self.tabel.rowCount():
             teks = "Tidak ada residu dengan rantai samping fleksibel dalam jarak ini. Perbesar jarak atau periksa grid box."
         self.l_info.setText(teks)

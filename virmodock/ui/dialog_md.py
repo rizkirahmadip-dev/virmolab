@@ -22,13 +22,15 @@ from PySide6.QtWidgets import (QAbstractItemView, QButtonGroup, QComboBox, QDial
 
 from ..core import grafik, paths
 from ..core.laporan import id_angka
+from . import kit
 from .panel_interaksi import KanvasSvg
 
 TINGKAT = [("ringan", "Ringan", "Minimisasi kompleks + MM/GBSA satu titik (menit; semua laptop)"),
            ("sedang", "Sedang", "MD pelarut implisit (OBC2) + RMSD/RMSF + MM/GBSA rata-rata (puluhan menit-jam)"),
            ("lengkap", "Lengkap", "MD air eksplisit (TIP3P, PME) + MM/GBSA banyak frame (butuh GPU; standar publikasi)")]
-STATUS = {"disarankan": ("Disarankan", "#2f9e6b"), "bisa": ("Bisa (lama)", "#c98a12"),
-          "tidak": ("Tidak disarankan", "#cf3f3f"), "": ("", "#7d8796")}
+# (label, token tema) — warnanya diambil saat dipakai supaya ikut mode gelap
+STATUS = {"disarankan": ("Disarankan", "ok"), "bisa": ("Bisa (lama)", "warn"),
+          "tidak": ("Tidak disarankan", "bad"), "": ("", "mut")}
 
 
 def pakai_baterai():
@@ -70,12 +72,11 @@ class DialogMD(QDialog):
         self.kecepatan = None        # {platform, implisit, eksplisit, atom_i, atom_e}
         self._buf = ""
         lay = QVBoxLayout(self)
-        ket = QLabel("Penyempurnaan pasca-docking: kompleks diminimisasi atau disimulasikan dengan OpenMM (protein "
-                     "Amber ff14SB, ligan OpenFF Sage 2.3 dengan muatan NAGL setara AM1-BCC). ΔG MM/GBSA berguna untuk "
-                     "membandingkan ligan secara relatif (entropi tidak dihitung), bukan sebagai afinitas absolut.")
-        ket.setWordWrap(True)
-        ket.setObjectName("muted")
-        lay.addWidget(ket)
+        lay.addWidget(kit.judul(
+            "Dinamika molekul dan MM/GBSA",
+            "Penyempurnaan pasca-docking: kompleks diminimisasi atau disimulasikan dengan OpenMM (protein "
+            "Amber ff14SB, ligan OpenFF Sage 2.3 dengan muatan NAGL setara AM1-BCC). ΔG MM/GBSA berguna untuk "
+            "membandingkan ligan secara relatif (entropi tidak dihitung), bukan sebagai afinitas absolut."))
         bagi = QSplitter(Qt.Horizontal)
         # ---- kiri: ligan + tingkat + opsi
         kiri = QWidget()
@@ -159,7 +160,7 @@ class DialogMD(QDialog):
         vk.addLayout(hk)
         self.l_baterai = QLabel()
         self.l_baterai.setWordWrap(True)
-        self.l_baterai.setStyleSheet("color:#c98a12;")
+        self.l_baterai.setStyleSheet(f"color:{kit.hx('warn')};")
         vk.addWidget(self.l_baterai)
         bagi.addWidget(kiri)
         # ---- kanan: hasil
@@ -331,7 +332,8 @@ class DialogMD(QDialog):
                 est[kunci] = jam + n * (40 if kunci == "lengkap" else 25) / 3600.0
                 st[kunci] = "disarankan" if est[kunci] < 2 else "bisa" if est[kunci] <= 12 else "tidak"
         for kunci, *_ in TINGKAT:
-            t, w = STATUS[st.get(kunci, "")]
+            t, tok = STATUS[st.get(kunci, "")]
+            w = kit.hx(tok)
             self.l_stat[kunci].setText(f"<span style='color:{w}; font-weight:600'>{t}</span>" if t else "")
             self.l_est[kunci].setText(_jam(est[kunci]) if kunci in est else "belum diukur")
         if k and st.get("lengkap") == "tidak" and self.tingkat() == "lengkap":
@@ -551,7 +553,7 @@ class DialogMD(QDialog):
                     it.setData(Qt.UserRole, v)
                 self.t_hasil.setItem(r, c, it)
             if rm and sum(rm) / len(rm) > 3.0:
-                self.t_hasil.item(r, 7).setForeground(QColor("#cf3f3f"))
+                self.t_hasil.item(r, 7).setForeground(kit.warna("bad"))
                 self.t_hasil.item(r, 7).setToolTip("RMSD rerata > 3 Å: pose tidak stabil selama MD")
         self.t_hasil.resizeColumnsToContents()
         if L:

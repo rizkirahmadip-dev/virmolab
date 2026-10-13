@@ -32,14 +32,14 @@ def svg(mol, daftar, lebar=960, tinggi=720, judul="", gelap=False, transparan=Fa
     try:
         Chem.SanitizeMol(m)
     except Exception:
-        pass
+        pass   # pose docking kadang tidak lolos sanitasi penuh; diagram tetap digambar dari struktur apa adanya
     # E/Z & R/S dari geometri pose 3D; ikatan rangkap yang tetap tak tentu (STEREOANY) jangan digambar
     # sebagai ikatan silang - tampak cacat pada diagram interaksi (mis. hidrazon C=N).
     if m.GetNumConformers() and m.GetConformer().Is3D():
         try:
             Chem.AssignStereochemistryFrom3D(m)
         except Exception:
-            pass
+            pass   # stereo gagal dibaca: diagram tetap dibuat, hanya tanpa penanda E/Z dan R/S
     for b in m.GetBonds():
         if b.GetStereo() == Chem.BondStereo.STEREOANY:
             b.SetStereo(Chem.BondStereo.STEREONONE)
