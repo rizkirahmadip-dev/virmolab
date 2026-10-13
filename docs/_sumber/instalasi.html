@@ -1,5 +1,5 @@
 <h1>Instalasi</h1>
-<p class="lead">VirmoDock berjalan di Windows 10/11 64-bit tanpa perlu Python, WSL, MGLTools, atau program lain. Semua mesin docking sudah disertakan.</p>
+<p class="lead">VirmoLab berjalan di Windows 10/11 64-bit tanpa perlu Python, WSL, MGLTools, atau program lain. Semua mesin docking sudah disertakan.</p>
 
 <h2>Kebutuhan minimum</h2>
 <table>
@@ -13,17 +13,17 @@
 
 <h2>Pilihan A — Installer (disarankan)</h2>
 <ol class="langkah">
-<li>Jalankan <code>VirmoDock-Setup-x.y.z.exe</code>. Bila Windows SmartScreen muncul (“Windows protected your PC”), klik <b>More info › Run anyway</b> — installer belum ditandatangani sertifikat berbayar.</li>
-<li>Pilih folder instalasi (bawaan: <code>C:\Program Files\VirmoDock</code>, atau folder pengguna bila tanpa hak admin).</li>
-<li>Pilih tugas tambahan: ikon Desktop, kaitkan berkas <code>.pdbqt</code>/<code>.vmdbackup</code> dengan VirmoDock (opsional).</li>
-<li>Klik <b>Pasang</b>, lalu <b>Selesai</b> untuk membuka VirmoDock.</li>
+<li>Jalankan <code>VirmoLab-Setup-x.y.z.exe</code>. Bila Windows SmartScreen muncul (“Windows protected your PC”), klik <b>More info › Run anyway</b> — installer belum ditandatangani sertifikat berbayar.</li>
+<li>Pilih folder instalasi (bawaan: <code>C:\Program Files\VirmoLab</code>, atau folder pengguna bila tanpa hak admin).</li>
+<li>Pilih tugas tambahan: ikon Desktop, kaitkan berkas <code>.pdbqt</code>/<code>.vmdbackup</code> dengan VirmoLab (opsional).</li>
+<li>Klik <b>Pasang</b>, lalu <b>Selesai</b> untuk membuka VirmoLab.</li>
 </ol>
-<p>Hapus pemasangan lewat <b>Settings › Apps › VirmoDock › Uninstall</b>. Proyek di folder kerja (bawaan <code>Documents\VirmoDock</code>) tidak ikut terhapus.</p>
+<p>Hapus pemasangan lewat <b>Settings › Apps › VirmoLab › Uninstall</b>. Proyek di folder kerja (bawaan <code>Documents\VirmoLab</code>) tidak ikut terhapus.</p>
 
 <h2>Pilihan B — Versi portable (tanpa instalasi)</h2>
 <ol class="langkah">
-<li>Ekstrak <code>VirmoDock-Portable-x.y.z.zip</code> ke folder mana saja (mis. flashdisk atau <code>D:\VirmoDock</code>). Hindari folder yang dilindungi seperti <code>C:\Program Files</code>.</li>
-<li>Jalankan <code>VirmoDock.exe</code>.</li>
+<li>Ekstrak <code>VirmoLab-Portable-x.y.z.zip</code> ke folder mana saja (mis. flashdisk atau <code>D:\VirmoLab</code>). Hindari folder yang dilindungi seperti <code>C:\Program Files</code>.</li>
+<li>Jalankan <code>VirmoLab.exe</code>.</li>
 </ol>
 <p>Versi portable menyimpan pengaturan di <code>data\pengaturan.ini</code> dan proyek bawaan di <code>Proyek\</code> di dalam folder itu sendiri — tidak menyentuh registry. Penanda portable adalah berkas <code>portable.flag</code>; jangan dihapus.</p>
 
@@ -34,13 +34,13 @@
 <li><b>Software pendukung</b>: PyMOL, ChimeraX, Discovery Studio Visualizer dideteksi untuk tombol “Buka di…”. Semuanya opsional.</li>
 <li><b>Folder kerja</b>: tempat proyek baru disimpan.</li>
 </ol>
-<p>Deteksi GPU dijalankan ulang setiap kali VirmoDock dibuka, jadi setelah pindah laptop atau memperbarui driver tidak perlu mengatur apa pun. Wizard bisa dibuka lagi lewat <b>Alat › Cek sistem dan GPU…</b>.</p>
+<p>Deteksi GPU dijalankan ulang setiap kali VirmoLab dibuka, jadi setelah pindah laptop atau memperbarui driver tidak perlu mengatur apa pun. Wizard bisa dibuka lagi lewat <b>Alat › Cek sistem dan GPU…</b>.</p>
 
 <h2>Lokasi berkas</h2>
 <table>
 <tr><th>Isi</th><th>Terpasang</th><th>Portable</th></tr>
 <tr><td>Program</td><td>Folder instalasi</td><td>Folder hasil ekstrak</td></tr>
-<tr><td>Pengaturan</td><td>Registry <code>HKCU\Software\VirmoDock</code></td><td><code>data\pengaturan.ini</code></td></tr>
-<tr><td>Log (untuk lapor masalah)</td><td><code>%LOCALAPPDATA%\VirmoDock\log</code></td><td><code>data\log</code></td></tr>
-<tr><td>Proyek</td><td><code>Documents\VirmoDock</code> (bisa diubah)</td><td><code>Proyek\</code></td></tr>
+<tr><td>Pengaturan</td><td>Registry <code>HKCU\Software\VirmoLab</code></td><td><code>data\pengaturan.ini</code></td></tr>
+<tr><td>Log (untuk lapor masalah)</td><td><code>%LOCALAPPDATA%\VirmoLab\log</code></td><td><code>data\log</code></td></tr>
+<tr><td>Proyek</td><td><code>Documents\VirmoLab</code> (bisa diubah)</td><td><code>Proyek\</code></td></tr>
 </table>

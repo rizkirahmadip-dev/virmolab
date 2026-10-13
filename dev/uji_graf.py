@@ -14,7 +14,7 @@ AKAR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(AKAR))
 
 import networkx as nx
-from virmodock.core.graf import ekspor_csv_tepi, ekspor_graphml, svg_graf, tata_letak
+from virmolab.core.graf import ekspor_csv_tepi, ekspor_graphml, svg_graf, tata_letak
 
 OUT = AKAR / "dev" / "uji" / "graf"
 shutil.rmtree(OUT, ignore_errors=True)

@@ -11,15 +11,15 @@ from PySide6.QtCore import QSettings, QTimer
 sys.argv = [sys.argv[0]]
 KERJA = Path("dev/uji/pustaka").resolve()
 KERJA.mkdir(parents=True, exist_ok=True)
-st = QSettings("VirmoDock", "VirmoDock")
+st = QSettings("VirmoLab", "VirmoLab")
 for k in ("sesi_terbuka", "proyek_terakhir"):
     st.remove(k)
 st.setValue("wizard_selesai", True)
 
-import virmodock.app as A
+import virmolab.app as A
 from PySide6.QtWidgets import QApplication, QMessageBox
 
-from virmodock.core import pustaka as P
+from virmolab.core import pustaka as P
 
 QMessageBox.information = staticmethod(lambda *a, **k: None)
 BUAT_DB = P.coconut_ada() is None
@@ -28,7 +28,7 @@ if BUAT_DB:
 
 
 def hook():
-    from virmodock.ui import mainwindow
+    from virmolab.ui import mainwindow
 
     class U(mainwindow.JendelaUtama):
         def __init__(s):
@@ -45,7 +45,7 @@ def hook():
                 QTimer.singleShot(300, lambda: s._tunggu(syarat, lanjut, n + 1))
 
         def l1(s):
-            from virmodock.ui.dialog_pustaka import DialogPustaka
+            from virmolab.ui.dialog_pustaka import DialogPustaka
             d = s.dlg = DialogPustaka(s)
             d.show()
             d.o_atc.setCurrentIndex(d.o_atc.findData("N"))

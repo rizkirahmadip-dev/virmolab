@@ -15,7 +15,7 @@ sys.argv = [sys.argv[0]]
 KERJA = Path("dev/uji/kemiripan").resolve()
 shutil.rmtree(KERJA, ignore_errors=True)
 shutil.copytree(SUMBER, KERJA / SUMBER.name)
-st = QSettings("VirmoDock", "VirmoDock")
+st = QSettings("VirmoLab", "VirmoLab")
 for k in ("sesi_terbuka", "proyek_terakhir", "layout_v2"):
     st.remove(k)
 st.setValue("wizard_selesai", True)
@@ -36,14 +36,14 @@ SMILES = {"ritonavir": "CC(C)c1nc(CN(C)C(=O)N[C@@H](C(C)C)C(=O)N[C@@H](Cc2ccccc2
           "parasetamol": "CC(=O)Nc1ccc(O)cc1",
           "salisilat": "OC(=O)c1ccccc1O"}
 
-import virmodock.app as A
+import virmolab.app as A
 from PySide6.QtWidgets import QApplication, QMessageBox
 
 QMessageBox.information = staticmethod(lambda *a, **k: None)
 
 
 def hook():
-    from virmodock.ui import mainwindow
+    from virmolab.ui import mainwindow
 
     class U(mainwindow.JendelaUtama):
         def __init__(s):
@@ -59,7 +59,7 @@ def hook():
             QTimer.singleShot(4000, s.l2)
 
         def l2(s):
-            from virmodock.core import molekul
+            from virmolab.core import molekul
             ob = []
             for n, smi in SMILES.items():
                 ob += molekul.dari_smiles(smi, n)
@@ -74,7 +74,7 @@ def hook():
 
         def l3(s):
             s.viewer.grab().save(str(KERJA / "farmakofor_pose.png"))
-            from virmodock.ui.dialog_kemiripan import DialogKemiripan
+            from virmolab.ui.dialog_kemiripan import DialogKemiripan
             d = s.dlg = DialogKemiripan(s)
             d.resize(1300, 820)
             d.show()

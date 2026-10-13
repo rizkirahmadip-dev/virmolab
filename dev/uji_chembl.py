@@ -14,19 +14,19 @@ sys.argv = [sys.argv[0]]
 KERJA = Path("dev/uji/chembl").resolve()
 shutil.rmtree(KERJA, ignore_errors=True)
 shutil.copytree(SUMBER, KERJA / SUMBER.name)
-st = QSettings("VirmoDock", "VirmoDock")
+st = QSettings("VirmoLab", "VirmoLab")
 for k in ("sesi_terbuka", "proyek_terakhir"):
     st.remove(k)
 st.setValue("wizard_selesai", True)
 
-import virmodock.app as A
+import virmolab.app as A
 from PySide6.QtWidgets import QApplication, QMessageBox
 
 QMessageBox.information = staticmethod(lambda *a, **k: None)
 
 
 def hook():
-    from virmodock.ui import mainwindow
+    from virmolab.ui import mainwindow
 
     class U(mainwindow.JendelaUtama):
         def __init__(s):
@@ -42,7 +42,7 @@ def hook():
             QTimer.singleShot(4000, s.l2)
 
         def l2(s):
-            from virmodock.ui.dialog_chembl import DialogChembl
+            from virmolab.ui.dialog_chembl import DialogChembl
             d = s.dlg = DialogChembl(s)
             d.show()
             print("kueri awal:", d.e_cari.text(), flush=True)
@@ -79,7 +79,7 @@ def hook():
 
         def l5(s):
             s.dlg.close()
-            from virmodock.ui.dialog_chembl import DialogChembl
+            from virmolab.ui.dialog_chembl import DialogChembl
             d2 = DialogChembl(s, 1)       # buka ulang: data tersimpan di proyek
             print("buka ulang, senyawa tersimpan:", len(d2.senyawa), flush=True)
             d2.close()

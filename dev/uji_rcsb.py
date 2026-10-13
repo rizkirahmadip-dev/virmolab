@@ -9,16 +9,16 @@ from pathlib import Path
 
 from PySide6.QtWidgets import QApplication
 
-from virmodock.app import siapkan_kimia
+from virmolab.app import siapkan_kimia
 
 siapkan_kimia()
 app = QApplication(sys.argv)
 app.setStyle("Fusion")
-from virmodock.ui import theme
+from virmolab.ui import theme
 
 app.setPalette(theme.palet("terang"))
 app.setStyleSheet(theme.qss("terang").replace("ICON_CHECK", ""))
-from virmodock.ui.dialogs import DialogAmbil
+from virmolab.ui.dialogs import DialogAmbil
 
 OUT = Path("dev/uji/v095")
 OUT.mkdir(parents=True, exist_ok=True)

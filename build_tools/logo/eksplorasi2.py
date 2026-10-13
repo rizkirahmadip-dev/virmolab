@@ -17,7 +17,7 @@ lembar(item, 5, 300, 300, "eksplorasi_kantong.png")
 wm = [("Bahnschrift 600", lockup_svg({"keluarga": "Bahnschrift", "berat": 600})),
       ("Bahnschrift 300/600", lockup_svg({"keluarga": "Bahnschrift", "potong": [("Virmo", 300), ("Dock", 600)]})),
       ("BAHNSCHRIFT KAPITAL 500 +tagline", lockup_svg({"keluarga": "Bahnschrift", "berat": 500, "spasi": 0.08,
-                                              "potong": [("VIRMODOCK", 500)]}, tagline="MOLECULAR DOCKING")),
+                                              "potong": [("VIRMOLAB", 500)]}, tagline="MOLECULAR DOCKING")),
       ("Bahnschrift 600 + tagline", lockup_svg({"keluarga": "Bahnschrift", "berat": 600},
                                                tagline="MOLECULAR DOCKING"))]
 lembar([(a, b, None) for a, b in wm], 2, 760, 240, "eksplorasi_lockup.png")

@@ -6,9 +6,9 @@ from pathlib import Path
 
 import numpy as np
 
-from virmodock.core import grafik, statistik
-from virmodock.core.ekspor import baris_hasil
-from virmodock.core.proyek import Proyek
+from virmolab.core import grafik, statistik
+from virmolab.core.ekspor import baris_hasil
+from virmolab.core.proyek import Proyek
 
 # data sintetis dengan korelasi diketahui
 rng = np.random.default_rng(1)

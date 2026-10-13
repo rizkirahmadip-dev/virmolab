@@ -15,7 +15,7 @@ import unittest
 from rdkit import Chem, DataStructs
 from rdkit.Chem import Descriptors, rdFingerprintGenerator, rdMolDescriptors
 
-from virmodock.core import decoy, mesin, paths, prep_reseptor, validasi_protokol
+from virmolab.core import decoy, mesin, paths, prep_reseptor, validasi_protokol
 
 _gen_morgan = rdFingerprintGenerator.GetMorganGenerator(radius=2, fpSize=2048)
 
@@ -398,7 +398,7 @@ class UjiKejujuranHasil(unittest.TestCase):
     def test_11_dialog_terbuka_dan_tanpa_angka_karangan(self):
         from PySide6.QtWidgets import QApplication
         app = QApplication.instance() or QApplication([])
-        from virmodock.ui.dialog_validasi_protokol import DialogValidasiProtokol
+        from virmolab.ui.dialog_validasi_protokol import DialogValidasiProtokol
         d = DialogValidasiProtokol(None, proyek=None)
         self.assertEqual(d._ringkasan_dict(), {}, "dialog baru tidak boleh memuat hasil apa pun")
         d._ke(3)

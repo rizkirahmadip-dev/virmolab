@@ -2,7 +2,7 @@
 AD-GPU + Vina dengan flex -> pose + objek rantai samping -> interaksi memakai posisi flex -> kembali kaku.
 
   PYTHONIOENCODING=utf-8 PYTHONPATH=. .venv/Scripts/python.exe dev/uji_fleksibel.py
-Keluaran: dev/uji/fleksibel/ (proyek, gui_*.png = grab jendela VirmoDock saja).
+Keluaran: dev/uji/fleksibel/ (proyek, gui_*.png = grab jendela VirmoLab saja).
 """
 import shutil
 import sys
@@ -11,7 +11,7 @@ from pathlib import Path
 from PySide6.QtCore import QSettings, Qt, QTimer
 
 sys.argv = [sys.argv[0]]
-st = QSettings("VirmoDock", "VirmoDock")
+st = QSettings("VirmoLab", "VirmoLab")
 st.setValue("tema", "terang")
 st.remove("layout")
 st.remove("sesi_terbuka")
@@ -20,7 +20,7 @@ shutil.rmtree(OUT, ignore_errors=True)
 OUT.mkdir(parents=True, exist_ok=True)
 PILIH = ("A:25", "B:25", "A:50", "B:50")
 
-import virmodock.app as A
+import virmolab.app as A
 from PySide6.QtWidgets import QApplication, QMessageBox
 
 QMessageBox.information = staticmethod(lambda *a, **k: print("INFO:", a[2] if len(a) > 2 else a, flush=True))
@@ -34,11 +34,11 @@ def cek(kondisi, pesan):
 
 
 def hook():
-    from virmodock.core import antrean as AN
-    from virmodock.core import mesin as M
-    from virmodock.core import prep_reseptor as R
-    from virmodock.core.proyek import Proyek
-    from virmodock.ui import dialog_fleksibel, mainwindow
+    from virmolab.core import antrean as AN
+    from virmolab.core import mesin as M
+    from virmolab.core import prep_reseptor as R
+    from virmolab.core.proyek import Proyek
+    from virmolab.ui import dialog_fleksibel, mainwindow
 
     def exec_uji(self):
         self.resize(560, 560)

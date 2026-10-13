@@ -12,8 +12,8 @@ import sys
 import tempfile
 from pathlib import Path
 
-from virmodock.core import pustaka
-from virmodock.core import tanaman
+from virmolab.core import pustaka
+from virmolab.core import tanaman
 
 
 def uji_resolusi_nama_lokal():
@@ -162,7 +162,7 @@ def uji_daring():
 
 
 def main():
-    print("=== Uji Fitur Tanaman VirmoDock ===")
+    print("=== Uji Fitur Tanaman VirmoLab ===")
     uji_resolusi_nama_lokal()
     uji_lotus_luring()
     uji_penggabungan_duplikat()

@@ -6,13 +6,13 @@ from PySide6.QtCore import QSettings, Qt, QTimer
 
 sys.argv = [sys.argv[0]]
 OUT = Path("docs/gambar").resolve()
-st = QSettings("VirmoDock", "VirmoDock")
+st = QSettings("VirmoLab", "VirmoLab")
 for k in ("layout", "layout_v2", "sesi_terbuka", "geometri"):
     st.remove(k)
 st.setValue("wizard_selesai", True)
 st.setValue("tema", "terang")
 
-import virmodock.app as A
+import virmolab.app as A
 from PySide6.QtWidgets import QApplication
 
 
@@ -25,8 +25,8 @@ def simpan(w, nama):
 
 
 def hook():
-    from virmodock.ui import mainwindow
-    from virmodock.ui.dialogs import DialogAmbil
+    from virmolab.ui import mainwindow
+    from virmolab.ui.dialogs import DialogAmbil
 
     class U(mainwindow.JendelaUtama):
         def __init__(s):

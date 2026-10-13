@@ -8,8 +8,8 @@ from pathlib import Path
 
 from PySide6.QtCore import QCoreApplication, QTimer
 
-from virmodock.core import antrean as A
-from virmodock.core import proyek as P
+from virmolab.core import antrean as A
+from virmolab.core import proyek as P
 
 app = QCoreApplication([])
 SUMBER = sorted(Path("dev/uji/kerja").glob("*.vmd"))[-1]

@@ -1,6 +1,6 @@
-"""Gabungkan terjemahan ke virmodock/i18n/en.json.
+"""Gabungkan terjemahan ke virmolab/i18n/en.json.
 
-Sumber: virmodock/i18n/en.json (kamus lama, dipertahankan) + dev/i18n_tambahan.json ({"teks": {id: en},
+Sumber: virmolab/i18n/en.json (kamus lama, dipertahankan) + dev/i18n_tambahan.json ({"teks": {id: en},
 "pola": {pola: en}}) — entri tambahan menimpa. Teks baru: jalankan dev/ekstrak_teks.py (-> dev/i18n_teks_baru.json),
 terjemahkan, tulis ke i18n_tambahan.json, lalu jalankan skrip ini.
 (Riwayat: kamus awal dibuat dari dev/i18n_teks.json + i18n_b*/p*.json berbasis indeks; berkas indeks itu kini
@@ -12,7 +12,7 @@ import json
 import re
 from pathlib import Path
 
-KELUAR = Path("virmodock/i18n/en.json")
+KELUAR = Path("virmolab/i18n/en.json")
 kamus = json.loads(KELUAR.read_text(encoding="utf-8")) if KELUAR.exists() else {"teks": {}, "pola": {}}
 src = Path("dev/i18n_teks.json")
 if src.exists():

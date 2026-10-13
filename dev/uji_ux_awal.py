@@ -9,7 +9,7 @@ from pathlib import Path
 from PySide6.QtCore import QSettings, QTimer
 
 sys.argv = [sys.argv[0]]
-st = QSettings("VirmoDock", "VirmoDock")
+st = QSettings("VirmoLab", "VirmoLab")
 st.setValue("tema", os.environ.get("VD_TEMA", "terang"))
 st.setValue("wizard_selesai", True)
 for k in ("layout", "layout_v2", "sesi_terbuka"):
@@ -19,12 +19,12 @@ OUT = Path("dev/uji/ux").resolve()
 OUT.mkdir(parents=True, exist_ok=True)
 akhir = f"_{st.value('tema')}"
 
-import virmodock.app as A
+import virmolab.app as A
 from PySide6.QtWidgets import QApplication
 
 
 def hook():
-    from virmodock.ui import mainwindow
+    from virmolab.ui import mainwindow
     Asli = mainwindow.JendelaUtama
 
     class Uji(Asli):

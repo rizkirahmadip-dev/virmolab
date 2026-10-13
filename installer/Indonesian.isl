@@ -1,4 +1,4 @@
-﻿; Terjemahan Bahasa Indonesia untuk installer VirmoDock (Inno Setup 6).
+﻿; Terjemahan Bahasa Indonesia untuk installer VirmoLab (Inno Setup 6).
 ; Mencakup pesan alur normal; pesan yang jarang muncul memakai bawaan Inggris.
 
 [LangOptions]

@@ -1,6 +1,6 @@
 import sys, shutil
 from PySide6.QtCore import QCoreApplication, QTimer
-from virmodock.core import proyek as P, antrean as A, mesin as M
+from virmolab.core import proyek as P, antrean as A, mesin as M
 app=QCoreApplication([])
 pr=P.Proyek.baru("dev/uji/proj","Uji 1HSG")
 shutil.copy("dev/uji/1HSG_rec.pdbqt", pr.p("reseptor","reseptor.pdbqt"))

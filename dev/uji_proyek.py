@@ -11,7 +11,7 @@ from pathlib import Path
 AKAR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(AKAR))
 
-from virmodock.core.proyek import Proyek, VERSI_FORMAT, migrasi_proyek, nama_aman
+from virmolab.core.proyek import Proyek, VERSI_FORMAT, migrasi_proyek, nama_aman
 
 OUT = AKAR / "dev" / "uji" / "proyek"
 shutil.rmtree(OUT, ignore_errors=True)
@@ -45,7 +45,7 @@ cek(pr2.catatan == pr.catatan, "catatan dengan tanda kutip dan karakter Å pulih
 cek(len(pr2.ligan) == 1 and pr2.ligan[0]["id"] == "MK1", "daftar ligan pulih")
 
 data = json.loads((pr.folder / "proyek.json").read_text(encoding="utf-8"))
-cek(data.get("format") == VERSI_FORMAT and data.get("aplikasi") == "VirmoDock",
+cek(data.get("format") == VERSI_FORMAT and data.get("aplikasi") == "VirmoLab",
     f"berkas menyimpan penanda format {data.get('format')} dan aplikasi")
 
 # ------------------------------------------------------------------ cadangan dan penulisan atomik

@@ -5,7 +5,7 @@ import sys
 # Tambahkan direktori kerja ke path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from virmodock.core import air_termo
+from virmolab.core import air_termo
 
 # Mock PDB dengan 2 molekul air:
 # Water 1 (HOH 101): dekat dengan 2 atom O/N (Stabil)

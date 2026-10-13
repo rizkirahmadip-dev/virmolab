@@ -1,14 +1,14 @@
 cff-version: 1.2.0
-message: "Bila Anda menggunakan VirmoDock dalam penelitian, silakan kutip perangkat lunak ini sesuai metadata berikut."
-title: "VirmoDock: Perangkat Lunak Penambatan Molekuler Terpadu (AutoDock-GPU, Vina, AD4)"
+message: "Bila Anda menggunakan VirmoLab dalam penelitian, silakan kutip perangkat lunak ini sesuai metadata berikut."
+title: "VirmoLab: Perangkat Lunak Penambatan Molekuler Terpadu (AutoDock-GPU, Vina, AD4)"
 authors:
-  - family-names: "VirmoDock Contributors"
+  - family-names: "VirmoLab Contributors"
     given-names: "Tim Pengembang"
 version: 1.1.1
 date-released: "2026-10-13"
 license: "GPL-3.0-or-later"
-repository-code: "https://github.com/virmodock/virmodock"
-url: "https://virmodock.org"
+repository-code: "https://github.com/virmolab/virmolab"
+url: "https://virmolab.org"
 keywords:
   - "molecular docking"
   - "autodock-gpu"
@@ -20,7 +20,7 @@ keywords:
   - "rdkit"
   - "meeko"
 abstract: >-
-  VirmoDock adalah platform penambatan molekuler (molecular docking) desktop modern berbasis
+  VirmoLab adalah platform penambatan molekuler (molecular docking) desktop modern berbasis
   Python dan PySide6 yang mengintegrasikan mesin AutoDock-GPU OpenCL, AutoDock Vina, dan AutoDock4
   dengan antarmuka grafis interaktif, visualisasi 3Dmol.js, kontrol kualitas pose (PoseBusters),
   analisis interaksi non-kovalen, pemodelan dinamis molekuler (OpenMM MM/GBSA),

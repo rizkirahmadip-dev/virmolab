@@ -13,13 +13,13 @@ sys.argv = [sys.argv[0]]
 OUT = Path("dev/uji/tata_letak").resolve()
 shutil.rmtree(OUT, ignore_errors=True)
 OUT.mkdir(parents=True)
-st = QSettings("VirmoDock", "VirmoDock")
+st = QSettings("VirmoLab", "VirmoLab")
 st.setValue("tema", "terang")
 for k in ("layout_v2", "geometri", "sesi_terbuka", "layar_layout"):
     st.remove(k)
 st.setValue("folder_kerja", str(OUT))
 
-import virmodock.app as A
+import virmolab.app as A
 from PySide6.QtWidgets import QApplication
 
 UKURAN = [(1366, 768), (1600, 900), (1920, 1080), (2560, 1440)]
@@ -33,7 +33,7 @@ def cek(kondisi, pesan):
 
 
 def hook():
-    from virmodock.ui import mainwindow
+    from virmolab.ui import mainwindow
     Asli = mainwindow.JendelaUtama
 
     class Uji(Asli):

@@ -10,15 +10,15 @@ from pathlib import Path
 AKAR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(AKAR))
 
-from virmodock.app import siapkan_kimia
+from virmolab.app import siapkan_kimia
 
 siapkan_kimia()
-from virmodock.core import molekul as M
+from virmolab.core import molekul as M
 
 OUT = AKAR / "dev" / "uji" / "molekul"
 shutil.rmtree(OUT, ignore_errors=True)
 OUT.mkdir(parents=True)
-PDB = AKAR / "virmodock" / "aset" / "contoh" / "1HSG.pdb"
+PDB = AKAR / "virmolab" / "aset" / "contoh" / "1HSG.pdb"
 gagal = []
 
 

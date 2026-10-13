@@ -9,10 +9,10 @@ from pathlib import Path
 AKAR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(AKAR))
 
-from virmodock.app import siapkan_kimia
+from virmolab.app import siapkan_kimia
 
 siapkan_kimia()
-from virmodock.core import prep_ligan as L
+from virmolab.core import prep_ligan as L
 
 gagal = []
 ASPIRIN = "CC(=O)Oc1ccccc1C(=O)O"

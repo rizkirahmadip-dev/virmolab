@@ -10,7 +10,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from rdkit import Chem
 from rdkit.Chem import AllChem
 
-from virmodock.core import (air, energi_residu, kampanye, konservasi, kovalen, mutasi, naskah, senyawa, syarat)
+from virmolab.core import (air, energi_residu, kampanye, konservasi, kovalen, mutasi, naskah, senyawa, syarat)
 
 gagal = []
 
@@ -108,7 +108,7 @@ def t_lain():
           "ATOM      2  CG  LYS A  12       2.800   0.500   0.000  1.00  0.00           C\nEND\n"
     ala, _ = mutasi.mutasi(pdb, "A", "12", "A")
     assert "ALA" in ala and "CG" not in ala
-    from virmodock.core import lanjutan
+    from virmolab.core import lanjutan
     assert lanjutan.ringkas_gnina("Affinity: -1.0\nCNNscore: 0.20\nlain") == "Affinity: -1.0\nCNNscore: 0.20"
     import openmm as mm
     from openmm import app, unit
@@ -139,7 +139,7 @@ def t_lain():
 
 
 def t_baru():
-    from virmodock.core import asisten, lanjutan, lokal
+    from virmolab.core import asisten, lanjutan, lokal
     xml = """<BlastOutput><BlastOutput_iterations><Iteration><Iteration_hits>
       <Hit><Hit_def>sp|P00000|TES</Hit_def><Hit_hsps><Hsp><Hsp_hseq>AC-DE</Hsp_hseq></Hsp></Hit_hsps></Hit>
     </Iteration_hits></Iteration></BlastOutput_iterations></BlastOutput>"""
@@ -198,7 +198,7 @@ def t_baru():
     gagal_semua = syarat.pilih_pose_syarat(
         [{"peringkat": 1, "energi": -11.0, "min": 6.0}, {"peringkat": 2, "energi": -9.0, "min": 5.0}], 3.5)
     assert gagal_semua["peringkat"] == 1
-    from virmodock.core.ekspor import baris_hasil
+    from virmolab.core.ekspor import baris_hasil
 
     class _Proyek:
         def __init__(self):
@@ -229,14 +229,14 @@ def t_baru():
     assert baris[0]["energi"] == -9.0 and baris[0]["syarat_pose"] == 2
     assert pr.job[0]["ligan"][0]["energi"] == -11.0
     assert baris[0]["pose"][0]["syarat_lolos"] is False and baris[0]["pose"][1]["syarat_jarak"] == 2.8
-    from virmodock.core.proyek import Proyek
+    from virmolab.core.proyek import Proyek
     pr = Proyek.__new__(Proyek)
     pr.nama, pr.dibuat = "uji", "2026-01-01"
     pr.reseptor = pr.kotak = None
     pr.ligan, pr.job, pr.objek, pr.md = [], [], [], []
     pr.parameter = pr.uji_grafik = pr.komposer = pr.eksperimen = {}
     pr.catatan = pr.templat = ""
-    pr.validasi = {}
+    pr.validasi, pr.jejak = {}, []
     pr.blast = {"rid": "CNV570T8014", "rantai": "A"}
     pr.syarat_jarak = {"rantai": "A", "resi": "25", "jarak": 3.5}
     d = pr.ke_dict()
@@ -245,8 +245,8 @@ def t_baru():
     xml_ebi = ("<x><hit><description>sp|P00000|TES</description><alignments>"
                "<alignment><matchSeq>AC-DE</matchSeq></alignment></alignments></hit></x>")
     assert konservasi.urai_ebi(xml_ebi) == [("sp|P00000|TES", "ACDE")]
-    import virmodock.ui.dialog_asisten
-    import virmodock.ui.dialog_penelitian
+    import virmolab.ui.dialog_asisten
+    import virmolab.ui.dialog_penelitian
 
 
 if __name__ == "__main__":

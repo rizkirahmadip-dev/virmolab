@@ -1,11 +1,11 @@
-# Catatan perubahan VirmoDock
+# Catatan perubahan VirmoLab
 
 Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x adalah pra-rilis.
 
 ## [1.2.0] - 13 Oktober 2026
 
 ### Baru
-- **Fondasi bersama VirmoDock 1.2**:
+- **Fondasi bersama VirmoLab 1.2**:
   - **Modul sumber data terpusat (`core/sumber_data.py`)**: Klien HTTP bersama dengan pencatatan `Jejak` asal-usul data daring (sumber, versi, tanggal ambil, kueri, lisensi), cache berkas lokal di `APPDATA/cache_http` dengan hash SHA-256 dan waktu kedaluwarsa, mode luring otomatis saat jaringan terputus, pembatas laju per domain (min. 0,5 detik; Wikidata 1,0 detik), User-Agent terstandarisasi, dan penanganan galat ramah Bahasa Indonesia.
   - **Pencatatan jejak sumber data di proyek (`core/proyek.py`)**: Atribut `Proyek.jejak` dan metode `catat_jejak` tanpa duplikat berdasarkan kunci sumber+kueri; tersimpan dan dipulihkan pulang-pergi di `proyek.json`, dengan kompatibilitas penuh untuk proyek lama.
   - **Bagian Sumber Data di Laporan Ilmiah & Draf Skripsi (`core/laporan.py`, `core/naskah.py`)**: Laporan otomatis memuat tabel sumber data daring beserta tanggal akses dan lisensi bila proyek memiliki jejak; penyertaan kalimat atribusi wajib untuk data berlisensi CC BY; fungsi `paragraf_sumber_data` menyusun draf metode Bab III skripsi dalam Bahasa Indonesia.
@@ -40,9 +40,10 @@ Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x 
   - **Integrasi alur kerja**: Menu `Analisis › Validasi dan mutu › Paket validasi protokol…`, tombol toolbar tab `Uji`, dan entri palet perintah `Ctrl+K`.
 
 ### Diubah
-- **Nama baru: VirmoLab.** Logo baru "heksa-kantong faset": cincin heksagon yang sisi atasnya terlipat membentuk V (kantong pengikatan sekaligus huruf V), ligan heksagon azure masuk ke kantong, lima faset navy. Palet navy `#12305A` + azure `#2F74E0`; huruf Figtree (SIL OFL). Set lengkap + panduan di `branding/virmolab_*` (`build_tools/logo/produksi_virmolab.py`); logo lama diarsipkan di `branding/arsip_virmodock/`.
+- **Nama baru: VirmoLab.** Logo baru "heksa-kantong faset": cincin heksagon yang sisi atasnya terlipat membentuk V (kantong pengikatan sekaligus huruf V), ligan heksagon azure masuk ke kantong, lima faset navy. Palet navy `#12305A` + azure `#2F74E0`; huruf Figtree (SIL OFL). Set lengkap + panduan di `branding/virmolab_*` (`build_tools/logo/produksi_virmolab.py`); logo lama diarsipkan di `branding/arsip_logo_lama/`.
 - Ikon aplikasi, logo halaman awal/Tentang/wizard, gambar installer, dan semua teks antarmuka (termasuk kamus Inggris) memakai nama VirmoLab.
-- **Sengaja tetap "VirmoDock"** agar proyek dan pengaturan lama langsung terbaca: nama program `VirmoDock.exe`/`VirmoDock-cli.exe`, paket Python `virmodock`, folder data `%LOCALAPPDATA%\VirmoDock`, pengaturan, penanda format proyek `.vmd` dan cadangan `.vmdbackup`.
+- **Rebrand total ke VirmoLab**: program `VirmoLab.exe`/`VirmoLab-cli.exe`, paket Python `virmolab`, folder data `%LOCALAPPDATA%\VirmoLab`, pengaturan `HKCU\Software\VirmoLab`, berkas installer/portable `VirmoLab-*`, folder proyek bawaan `Documents\VirmoLab`, dan tutorial `Tutorial_Docking_VirmoLab.pdf`. Ekstensi `.vmd` dan `.vmdbackup` tetap.
+- **Migrasi otomatis dari nama lama (versi ≤ 1.1.2)**: saat pertama jalan, isi folder data lama di `%LOCALAPPDATA%` dipindah/disalin (tanpa menimpa) dan pengaturan registry lama disalin bila pengaturan baru masih kosong; folder proyek lama di `Documents` yang sudah ada tetap dipakai; cadangan `.vmdbackup` buatan versi lama tetap bisa diimpor. Installer memakai AppId yang sama sehingga memasang sebagai upgrade: folder program, pintasan, dan asosiasi berkas lama dibersihkan.
 
 ## [1.1.2] - 13 Oktober 2026
 
@@ -78,7 +79,7 @@ Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x 
 - **Perancang PROTAC menghasilkan molekul utuh**: perakitan dulu sering jatuh ke SMILES bertitik (`warhead.linker.E3`), yaitu tiga fragmen terpisah, lalu sifat fisikokimianya dihitung dari fragmen itu. Kini warhead, linker, dan pengikat E3 disambung kovalen lewat titik lekat RDKit dan rakitan yang gagal ditolak dengan pesan jelas.
 - **Periksa kontak atom pose (dulu "Re-scoring Machine Learning")**: perhitungan kontak divektorkan dan hanya memakai atom reseptor di sekitar pose; ukuran baru kerapatan kontak per atom berat dan pangsa kontak polar; klaim "model Random Forest terlatih PDBbind" diganti keterangan jujur bahwa skornya bobot linier sederhana.
 - **CNS-MPO**: preset dulu memakai RotB dan SAScore yang bukan bagian CNS-MPO Pfizer. Kini hanya empat suku Wager et al. 2010 yang bisa dihitung (MW, ClogP≈WLOGP, TPSA, HBD) dengan keterangan bahwa ClogD dan pKa tidak disertakan, sehingga nilainya tidak disamakan dengan CNS-MPO 0–6 asli.
-- **Pengiriman ClusPro palsu dihapus**: fungsi lama menembak URL yang bukan API ClusPro, mengarang nomor job dari panjang teks, dan melaporkan "berhasil dikirim" untuk respons HTTP apa pun — padahal struktur dan alamat surel pengguna sudah terkirim ke luar. Penggantinya hanya menyiapkan dua berkas PDB untuk diunggah sendiri oleh pengguna; VirmoDock tidak mengirim data ke mana pun.
+- **Pengiriman ClusPro palsu dihapus**: fungsi lama menembak URL yang bukan API ClusPro, mengarang nomor job dari panjang teks, dan melaporkan "berhasil dikirim" untuk respons HTTP apa pun — padahal struktur dan alamat surel pengguna sudah terkirim ke luar. Penggantinya hanya menyiapkan dua berkas PDB untuk diunggah sendiri oleh pengguna; VirmoLab tidak mengirim data ke mana pun.
 - **Telaah air sisi aktif**: angka yang dulu disebut "ΔG penggusuran (kkal/mol)" sebenarnya skor heuristik tanpa satuan dan kini dinamai demikian, lengkap dengan catatan bahwa termodinamika air sesungguhnya memerlukan WaterMap/GIST/3D-RISM.
 - **Skrip figur publikasi**: perintah ChimeraX yang tidak sahih (`select #1 & (zone #2 4.5)`, `transparency sel 70`) diperbaiki, urutan `orient`/`zoom` PyMOL dibetulkan, label residu memakai rantai yang benar, dan struktur yang dirujuk ikut disalin ke folder tujuan sehingga skrip bisa langsung dijalankan.
 - **Sifat ligan pada proyek lama**: ligan tanpa berkas SDF sumber (hanya PDBQT) kini dibaca dari `REMARK SMILES`, sehingga tab Sifat, MPO, MMP, penapisan, dan kalkulator lab basah tidak lagi kosong.
@@ -122,7 +123,7 @@ Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x 
 - **Dashboard Penapisan Virtual (Batch Virtual Screening)** (Analisis › Dashboard Penapisan Virtual…): antarmuka interaktif untuk menganalisis hasil penapisan skala besar (>100 ligan). Peta panas (heatmap) ligan × parameter, multi-variabel scatter plot (ΔG vs SAScore bergradien warna QED/MPO), histogram distribusi afinitas dengan garis rata-rata & median, filter multi-kriteria dengan slider & checkbox (Lipinski, Veber, PAINS, Brenk, GI), peringkat komposit multi-dimensi, auto-flag "Top Hits", serta ekspor CSV data terfilter (`penapisan.py`, `dialog_penapisan.py`, `grafik.heatmap_svg`, `grafik.scatter_multi_svg`, `grafik.histogram_distribusi_svg`).
 - **Analisis Molecular Matched Pair (MMP)** (Analisis › Analisis Molecular Matched Pair…): deteksi otomatis pasangan molekul yang berbeda hanya satu variasi substituen (RDKit `rdMMPA`), tabel transformasi R-group terhadap perubahan afinitas (ΔΔG), drug-likeness (ΔQED), dan kemudahan sintesis (ΔSAScore), deteksi SAR Activity Cliffs (|ΔΔG| ≥ 1.5 kcal/mol dengan kemiripan struktur tinggi), serta panel rekomendasi substitusi gugus R yang paling konsisten meningkatkan afinitas pada target (`mmp.py`, `dialog_mmp.py`).
 - **Selektivitas Multi-Target & Matriks Ensemble Docking** (Analisis › Selektivitas Multi-Target…): membandingkan afinitas ligan ke beberapa target protein secara simultan. Menghasilkan matriks ligan × target berbasis SMILES kanonik, normalisasi Z-score relatif per target, klasifikasi otomatis profil farmakologis (Selektif Kuat, Semi-selektif, Promiskuitas obat), serta indeks gap selektivitas ΔΔG (`selektivitas.py`, `dialog_selektivitas.py`).
-- **Interpretasi Hasil Docking AI (Ollama Enhanced & Expert Engine)** (Analisis › Interpretasi Hasil Docking (AI)…): generator narasi ilmiah otomatis untuk merangkum hasil simulasi docking dalam Bahasa Indonesia baku. Menyediakan mode Ringkasan Eksekutif dan draf Bab Hasil & Pembahasan karya ilmiah/skripsi yang menganalisis validitas RMSD, urutan afinitas ΔG, konstanta inhibisi Ki, Ligand Efficiency, dan jaringan ikatan hidrogen/hidrofobik. Terintegrasi langsung dengan model AI lokal Ollama (jika terpasang) atau fallback mulus ke Mesin Pakar VirmoDock (`asisten.py`, `dialog_asisten.py`).
+- **Interpretasi Hasil Docking AI (Ollama Enhanced & Expert Engine)** (Analisis › Interpretasi Hasil Docking (AI)…): generator narasi ilmiah otomatis untuk merangkum hasil simulasi docking dalam Bahasa Indonesia baku. Menyediakan mode Ringkasan Eksekutif dan draf Bab Hasil & Pembahasan karya ilmiah/skripsi yang menganalisis validitas RMSD, urutan afinitas ΔG, konstanta inhibisi Ki, Ligand Efficiency, dan jaringan ikatan hidrogen/hidrofobik. Terintegrasi langsung dengan model AI lokal Ollama (jika terpasang) atau fallback mulus ke Mesin Pakar VirmoLab (`asisten.py`, `dialog_asisten.py`).
 - **Docking Protein–Protein (PPI) & Analisis Antarmuka** (Analisis › Docking Protein–Protein…): modul docking dan telaah interaksi makromolekul protein-protein. Prediksi residu permukaan/antarmuka aktif berbasis Solvent Accessible Surface Area (SASA Shrake-Rupley), evaluasi kompleks antarmuka (kontak atom berat, ikatan hidrogen antar-rantai, jembatan garam, Buried Surface Area / ΔSASA, dan skor komplementaritas), klastering pose rigid-body berdasarkan RMSD C-alfa, integrasi antrean ClusPro 2.0, serta visualisasi kompleks di viewer 3D (`ppi.py`, `dialog_ppi.py`).
 
 ## [0.9.7] - 11 Oktober 2026
@@ -170,8 +171,8 @@ Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x 
 
 ### Baru
 - **Docking kovalen** (Siapkan › Docking kovalen…, atau *Atur…* di langkah 4): pilih residu nukleofil (Cys, Ser, Lys) di dalam grid box; ligan yang punya gugus reaktif diikat secara kimia ke rantai sampingnya dan di-docking sebagai satu aduk dengan metode *tethered* (AutoDock-GPU `--flexres`). Gugus reaktif yang dikenali: akseptor Michael (akrilamida/enon/vinil sulfon), alkuna teraktivasi, α-haloketon/haloasetamida, sulfonil fluorida, nitril, aldehida (termasuk basa Schiff untuk Lys). Dialog menampilkan deteksi per ligan sebelum dijalankan; ligan tanpa gugus reaktif yang cocok dilewati. Rantai samping residu sasaran tampil sebagai objek pose tersendiri dan interaksi dihitung pada posisi itu. Validasi: 6OIM (KRAS G12C–sotorasib) RMSD 1,34 Å dari SMILES.
-- Docking kovalen di baris perintah: `VirmoDock-cli dock … --kovalen A:12`.
-- **Pencarian struktur RCSB PDB** di dialog Impor: cari dengan nama protein/gen/ligan, saring organisme, "hanya dengan ligan", dan resolusi; VirmoDock menandai ★ struktur terbaik untuk docking (difraksi sinar-X, ada ligan kristal, resolusi terkecil).
+- Docking kovalen di baris perintah: `VirmoLab-cli dock … --kovalen A:12`.
+- **Pencarian struktur RCSB PDB** di dialog Impor: cari dengan nama protein/gen/ligan, saring organisme, "hanya dengan ligan", dan resolusi; VirmoLab menandai ★ struktur terbaik untuk docking (difraksi sinar-X, ada ligan kristal, resolusi terkecil).
 - **Templat proyek** dan **proyek contoh HIV-1 protease** yang bisa dibuka sepenuhnya offline (1HSG + 9 inhibitor disetujui + aspirin sebagai kontrol).
 - **Urungkan/Ulangi** (Ctrl+Z / Ctrl+Y) untuk grid box dan gaya tampilan.
 - **Palet perintah** (Ctrl+K): cari dan jalankan perintah menu mana pun dengan mengetik.
@@ -196,11 +197,11 @@ Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x 
  - **Sedang** - MD pelarut implisit OBC2 + RMSD/RMSF + MM/GBSA rata-rata;
  - **Lengkap** - MD air eksplisit TIP3P/PME + MM/GBSA banyak frame.
 - **Penilaian kemampuan laptop otomatis**: saat dialog pertama dibuka, kecepatan diukur pada kompleks Anda sendiri (implisit & eksplisit, disimpan per perangkat) → perkiraan waktu dan status *Disarankan / Bisa (lama) / Tidak disarankan*; peringatan bila laptop memakai baterai.
-- **Jeda & lanjut**: checkpoint tiap ±5 menit; MD bisa dijeda dan dilanjutkan, juga setelah aplikasi ditutup (menutup VirmoDock saat MD berjalan otomatis menjeda dengan checkpoint).
+- **Jeda & lanjut**: checkpoint tiap ±5 menit; MD bisa dijeda dan dilanjutkan, juga setelah aplikasi ditutup (menutup VirmoLab saat MD berjalan otomatis menjeda dengan checkpoint).
 - Hasil: ΔG MM/GBSA (vdW, elektrostatik, GB, SA) ± SD, grafik RMSD/RMSF/MM-GBSA per waktu (SVG/PDF/PNG/TIFF), **interaksi persisten** sepanjang trajektori, berkas kompleks terminimisasi (PDB) dan trajektori zat terlarut (DCD) untuk PyMOL/VMD.
 - Kolom **MM/GBSA** di tabel Hasil, variabel MM/GBSA di Statistik, kolom di ekspor CSV/XLSX, serta bagian MM/GBSA, kalimat metode, dan sitasi (OpenMM 8, ff14SB, Sage, OpenFF, OBC, MM/GBSA) di laporan.
 - Pose dari docking **residu fleksibel** dipakai lengkap: rantai samping diposisikan seperti di pose.
-- Baris perintah: `VirmoDock-cli mmgbsa` (minimisasi, atau `--md` dengan `--pelarut implisit|eksplisit`) dari folder hasil `dock` atau pose SDF → `mmgbsa.csv`; `dock` kini juga menyimpan reseptor ber-H dengan keadaan protonasi docking.
+- Baris perintah: `VirmoLab-cli mmgbsa` (minimisasi, atau `--md` dengan `--pelarut implisit|eksplisit`) dari folder hasil `dock` atau pose SDF → `mmgbsa.csv`; `dock` kini juga menyimpan reseptor ber-H dengan keadaan protonasi docking.
 
 ### Diubah
 - Uji mandiri kini 25 komponen (+ MD & MM/GBSA OpenMM/OpenFF).
@@ -210,10 +211,10 @@ Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x 
 
 ### Baru
 - **Protein dari AlphaFold DB** (Siapkan › Protein dari AlphaFold DB…, atau tab *AlphaFold DB* di dialog impor): cari kode UniProt atau nama protein/gen (UniProt, saring organisme), unduh model prediksi terbaru. Protein diwarnai menurut **pLDDT** (pita resmi AlphaFold; juga pilihan warna *pLDDT* di panel Tampilan), ringkasan pLDDT di Properti dan Pesan, ujung N/C tak beraturan (pLDDT < 50) dipangkas otomatis (bisa diatur/dimatikan).
-- **Peringatan pLDDT di grid box**: bila residu di area docking model AlphaFold ber-pLDDT rendah, VirmoDock mengingatkan bahwa pose dan ΔG kurang andal.
+- **Peringatan pLDDT di grid box**: bila residu di area docking model AlphaFold ber-pLDDT rendah, VirmoLab mengingatkan bahwa pose dan ΔG kurang andal.
 - **P2Rank untuk model AlphaFold** memakai konfigurasi resmi `alphafold` (tanpa fitur B-factor, yang di model AlphaFold berisi pLDDT).
 - **Residu fleksibel** (Siapkan › Residu fleksibel…, atau *Atur…* di langkah Jalankan): pilih 1–8 rantai samping kantong (calon diurutkan menurut jarak ke ligan asli) yang boleh berotasi selama docking - AutoDock-GPU (`--flexres`) dan Vina (`--flex`). Rantai samping tiap pose tampil sebagai objek tersendiri, dan analisis interaksi, PoseBusters, serta laporan memakai posisi rantai samping pada pose itu.
-- **Baris perintah `VirmoDock-cli.exe`** (di folder instalasi): `info`, `uji`, `reseptor`, `ligan`, `kantong`, `alphafold`, dan `dock` - satu perintah dari kode PDB/AF-UniProt/berkas sampai `ringkasan.csv` (ΔG, Ki, LE, interaksi, residu kontak) dan `metode.txt` (parameter lengkap + perintah yang bisa diulang) untuk skrip, batch, dan reproduksibilitas.
+- **Baris perintah `VirmoLab-cli.exe`** (di folder instalasi): `info`, `uji`, `reseptor`, `ligan`, `kantong`, `alphafold`, dan `dock` - satu perintah dari kode PDB/AF-UniProt/berkas sampai `ringkasan.csv` (ΔG, Ki, LE, interaksi, residu kontak) dan `metode.txt` (parameter lengkap + perintah yang bisa diulang) untuk skrip, batch, dan reproduksibilitas.
 - Laporan mencantumkan sumber model AlphaFold (entri, versi, pLDDT, residu dipangkas) dan residu fleksibel.
 
 ### Diperbaiki

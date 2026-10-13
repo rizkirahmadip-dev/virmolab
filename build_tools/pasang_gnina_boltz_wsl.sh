@@ -1,9 +1,9 @@
 #!/bin/bash
-# Pasang GNINA 1.3.3 dan Boltz 2.2.1 di WSL (bukan di dalam installer VirmoDock).
+# Pasang GNINA 1.3.3 dan Boltz 2.2.1 di WSL (bukan di dalam installer VirmoLab).
 # GNINA: biner Linux CUDA 12.8, lisensi GPL-2.0 karena menyertakan OpenBabel.
 # Boltz: MIT, lingkungan Python 3.12 terpisah (paket PyPI menolak Python 3.14).
 set -euo pipefail
-ALAT="$HOME/virmodock-alat"
+ALAT="$HOME/virmolab-alat"
 mkdir -p "$ALAT"
 if [[ ! -x "$ALAT/gnina" ]]; then
   echo "UNDUH_GNINA"

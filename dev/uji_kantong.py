@@ -11,7 +11,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from virmodock.core import kantong
+from virmolab.core import kantong
 
 PUSAT_MK1 = (13.07, 22.47, 5.56)
 TOLERANSI = 5.0     # Å dari pusat ligan kristal
@@ -20,7 +20,7 @@ TOLERANSI = 5.0     # Å dari pusat ligan kristal
 def jalan():
     print("=== Uji deteksi kantong pengikatan (1HSG) ===")
     gagal = 0
-    pdb = Path(__file__).resolve().parents[1] / "virmodock" / "aset" / "contoh" / "1HSG.pdb"
+    pdb = Path(__file__).resolve().parents[1] / "virmolab" / "aset" / "contoh" / "1HSG.pdb"
     if not pdb.exists():
         print("GAGAL 1HSG.pdb tidak ditemukan")
         return 1

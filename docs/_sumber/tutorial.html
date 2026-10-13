@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="id"><head><meta charset="utf-8">
-<title>Tutorial Docking Molekuler dengan VirmoDock</title>
+<title>Tutorial Docking Molekuler dengan VirmoLab</title>
 <style>
 @page { size: A4; margin: 0; }
 :root { --ink:#1b2430; --ink2:#465263; --mut:#7b8698; --line:#d3d9e1; --panel:#f3f5f8; --acc:#1f5fbf; --accs:#e2ebf8;
@@ -63,15 +63,15 @@ ol.langkah > li::before { content: counter(l); position: absolute; left: 0; top:
 <!-- ====================================================== SAMPUL -->
 <section class="sampul">
   <div class="pita">
-    <div class="kecil">VIRMODOCK · TUTORIAL</div>
+    <div class="kecil">VIRMOLAB · TUTORIAL</div>
     <h1>Docking Molekuler dari Awal sampai Akhir</h1>
     <div class="sub">Impor protein, preparasi, grid box, validasi redocking, docking ligan, analisis interaksi,
-      ekspor gambar publikasi, dan laporan PDF — semuanya di dalam VirmoDock.</div>
+      ekspor gambar publikasi, dan laporan PDF — semuanya di dalam VirmoLab.</div>
   </div>
   <div class="tengah"><img src="../gambar/t05_sampul.png" alt=""><div class="cap">Indinavir hasil docking AutoDock-GPU di situs aktif HIV-1 protease; garis putus-putus = interaksi.</div></div>
   <div class="bawah">
     <div>Contoh kasus: HIV-1 protease (PDB 1HSG) dengan indinavir (MK1) dan senyawa flavonoid dari PubChem<br>
-      VirmoDock {{VERSI}} · {{TANGGAL}}</div>
+      VirmoLab {{VERSI}} · {{TANGGAL}}</div>
     <img src="../gambar/logo_horizontal.svg" alt="" style="width:62mm">
   </div>
 </section>
@@ -83,7 +83,7 @@ setelah paham alurnya, ganti protein dan ligan dengan milik penelitian Anda.</p>
 
 <h3>Daftar isi</h3>
 <div class="isi-daftar">
-  <div><span>1</span>Mengenal layar VirmoDock</div>
+  <div><span>1</span>Mengenal layar VirmoLab</div>
   <div><span>2</span>Mengimpor protein dari RCSB PDB</div>
   <div><span>3</span>Memeriksa struktur dan situs aktif</div>
   <div><span>4</span>Menyiapkan reseptor</div>
@@ -115,14 +115,14 @@ setelah paham alurnya, ganti protein dan ligan dengan milik penelitian Anda.</p>
 
 <h3>Yang Anda perlukan</h3>
 <ul>
-  <li>VirmoDock sudah terpasang dan terbuka (lihat panduan instalasi terpisah).</li>
+  <li>VirmoLab sudah terpasang dan terbuka (lihat panduan instalasi terpisah).</li>
   <li>Koneksi internet untuk mengambil struktur dari RCSB PDB dan ligan dari PubChem. Tanpa internet, buka berkas PDB/SDF yang sudah Anda unduh lewat <b class="ui">Berkas › Buka berkas struktur…</b>.</li>
   <li>Waktu ± 20–30 menit. Docking satu ligan memakan beberapa detik di GPU (AutoDock-GPU) atau ± 1 menit di CPU (Vina).</li>
 </ul>
 <div class="kotak"><b>Tentang angka di tutorial ini</b>Semua angka (energi, RMSD, waktu) berasal dari uji nyata di laptop dengan RTX 3060. Hasil Anda bisa sedikit berbeda karena docking bersifat stokastik; dengan <i>seed</i> yang sama, hasil dapat diulang.</div>
 
 <!-- ====================================================== 1 -->
-<h2><span class="no">1</span>Mengenal layar VirmoDock</h2>
+<h2><span class="no">1</span>Mengenal layar VirmoLab</h2>
 <figure><img src="../gambar/02_impor.png" alt=""><figcaption>Gambar 1. Jendela utama setelah protein dimuat.</figcaption></figure>
 <table>
 <tr><th style="width:30%">Bagian</th><th>Kegunaan</th></tr>
@@ -148,7 +148,7 @@ setelah paham alurnya, ganti protein dan ligan dengan milik penelitian Anda.</p>
 <ol class="langkah">
   <li>Saat aplikasi baru dibuka, viewport menampilkan halaman sambutan. Klik kartu <b class="ui">Ambil protein dari RCSB</b> — atau di Panel kerja langkah 1 klik <b class="ui">Ambil dari RCSB PDB…</b> (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>).</li>
   <li>Ketik <code>1HSG</code>, lalu klik <b class="ui">Impor</b>.</li>
-  <li>VirmoDock mengunduh struktur dan memecahnya menjadi beberapa objek: protein <i>1HSG</i> (rantai A dan B), ligan asli <i>MK1 902 B</i> (indinavir), dan <i>Air (127)</i>.</li>
+  <li>VirmoLab mengunduh struktur dan memecahnya menjadi beberapa objek: protein <i>1HSG</i> (rantai A dan B), ligan asli <i>MK1 902 B</i> (indinavir), dan <i>Air (127)</i>.</li>
 </ol>
 <figure class="kecil"><img src="../gambar/t01_rcsb.png" alt=""><figcaption>Gambar 2. Dialog impor dari RCSB PDB.</figcaption></figure>
 <figure class="kecil"><img src="../gambar/00_sambutan.png" alt=""><figcaption>Halaman sambutan saat belum ada struktur.</figcaption></figure>
@@ -205,7 +205,7 @@ setelah paham alurnya, ganti protein dan ligan dengan milik penelitian Anda.</p>
 <p>Validasi membuktikan bahwa kombinasi reseptor, grid box, dan parameter Anda mampu menemukan kembali pose ligan kristal. Tanpa validasi, hasil screening sulit dipertanggungjawabkan.</p>
 <ol class="langkah">
   <li>Pilih mesin dan parameter yang akan dipakai untuk screening (bagian 8), misalnya AutoDock-GPU ketelitian <i>Standar</i>.</li>
-  <li>Menu <b class="ui">Docking › Validasi redocking…</b> (juga di menu Analisis). VirmoDock menyiapkan ligan kristal <i>MK1 902 B (kristal)</i> dari konformasi kristal tanpa minimisasi, lalu men-docking-nya.</li>
+  <li>Menu <b class="ui">Docking › Validasi redocking…</b> (juga di menu Analisis). VirmoLab menyiapkan ligan kristal <i>MK1 902 B (kristal)</i> dari konformasi kristal tanpa minimisasi, lalu men-docking-nya.</li>
   <li>Setelah selesai, kotak dialog menampilkan RMSD pose terbaik terhadap kristal, dan viewport menampilkan kristal (karbon magenta) berhimpitan dengan pose (karbon biru).</li>
 </ol>
 <figure><img src="../gambar/11_validasi.png" alt=""><figcaption>Gambar 7. Hasil validasi: pose terbaik AutoDock-GPU berhimpit dengan indinavir kristal.</figcaption></figure>
@@ -251,7 +251,7 @@ setelah paham alurnya, ganti protein dan ligan dengan milik penelitian Anda.</p>
   <li>Pilih <b class="ui">Ketelitian</b>: <i>Cepat</i>, <i>Standar</i>, atau <i>Teliti</i> (langsung diterapkan). <b class="ui">Lanjutan ▸</b> membuka parameter rinci dan <i>seed</i> — biarkan 42 agar hasil bisa diulang.</li>
   <li>Klik <b class="ui">Jalankan docking (n ligan)</b> (<kbd>F5</kbd>). Semua ligan siap didocking; untuk sebagian saja, pilih ligan itu di panel Objek dulu (<kbd>Ctrl</kbd>+klik).</li>
 </ol>
-<div class="kotak"><b>Bila GPU bermasalah</b>Jika AutoDock-GPU gagal karena OpenCL/driver, VirmoDock otomatis melanjutkan job dengan Vina di CPU dan menjelaskannya di panel Pesan. Ligan yang melebihi batas AutoDock-GPU dilewati dengan alasan; jalankan ligan itu dengan Vina.</div>
+<div class="kotak"><b>Bila GPU bermasalah</b>Jika AutoDock-GPU gagal karena OpenCL/driver, VirmoLab otomatis melanjutkan job dengan Vina di CPU dan menjelaskannya di panel Pesan. Ligan yang melebihi batas AutoDock-GPU dilewati dengan alasan; jalankan ligan itu dengan Vina.</div>
 
 <!-- ====================================================== 9 -->
 <h2><span class="no">9</span>Memantau antrean job</h2>
@@ -261,7 +261,7 @@ setelah paham alurnya, ganti protein dan ligan dengan milik penelitian Anda.</p>
   <li>Job pertama AutoDock-GPU membuat peta grid (AutoGrid4) ± 10–20 detik; job berikutnya dengan kotak yang sama memakai ulang peta itu.</li>
   <li><b class="ui">Jeda</b> berhenti setelah ligan yang sedang berjalan; <b class="ui">Lanjut</b> meneruskan; <b class="ui">Batal</b> menghentikan seketika (ligan selesai tetap tersimpan). Ketiganya juga ada di menu <b class="ui">Docking</b>.</li>
   <li>Jendela boleh di-<i>minimize</i>; notifikasi Windows muncul saat job selesai atau gagal.</li>
-  <li>Bila VirmoDock ditutup saat docking, job berstatus <i>Dijeda</i>. Buka proyek lagi lalu klik <b class="ui">Lanjut</b> — ligan yang selesai tidak diulang.</li>
+  <li>Bila VirmoLab ditutup saat docking, job berstatus <i>Dijeda</i>. Buka proyek lagi lalu klik <b class="ui">Lanjut</b> — ligan yang selesai tidak diulang.</li>
   <li>Klik kanan job › <b class="ui">Lihat log ligan</b> untuk keluaran asli mesin (.dlg / log Vina).</li>
 </ul>
 
@@ -332,7 +332,7 @@ setelah paham alurnya, ganti protein dan ligan dengan milik penelitian Anda.</p>
 <figure><img src="../gambar/t04_laporan.png" alt="" style="max-height:150mm"><figcaption>Gambar 16. Halaman pertama laporan PDF.</figcaption></figure>
 <div>
 <h3 style="margin-top:0">Contoh paragraf Metode</h3>
-<p style="font-size:9.5pt">Struktur kristal HIV-1 protease (PDB 1HSG, resolusi 2,00 Å) diperoleh dari RCSB PDB. Air dan ligan dihapus; hidrogen polar, muatan Gasteiger, dan tipe atom AutoDock ditambahkan dengan Meeko melalui VirmoDock {{VERSI}}. Ligan diambil dari PubChem, diprotonasi pada pH 7,4 (Open Babel), diminimisasi dengan MMFF94 (RDKit), dan dikonversi ke PDBQT (Meeko). Grid box berukuran 24,9 × 20,2 × 20,0 Å (spasi 0,375 Å) dipusatkan pada ligan kristal. Docking dilakukan dengan AutoDock-GPU (50 run, seed 42). Metode divalidasi dengan redocking ligan kristal (RMSD 1,21 Å). Interaksi dianalisis berdasarkan kriteria geometri (ikatan hidrogen D···A ≤ 3,5 Å, sudut ≥ 110°; hidrofobik ≤ 4,0 Å).</p>
+<p style="font-size:9.5pt">Struktur kristal HIV-1 protease (PDB 1HSG, resolusi 2,00 Å) diperoleh dari RCSB PDB. Air dan ligan dihapus; hidrogen polar, muatan Gasteiger, dan tipe atom AutoDock ditambahkan dengan Meeko melalui VirmoLab {{VERSI}}. Ligan diambil dari PubChem, diprotonasi pada pH 7,4 (Open Babel), diminimisasi dengan MMFF94 (RDKit), dan dikonversi ke PDBQT (Meeko). Grid box berukuran 24,9 × 20,2 × 20,0 Å (spasi 0,375 Å) dipusatkan pada ligan kristal. Docking dilakukan dengan AutoDock-GPU (50 run, seed 42). Metode divalidasi dengan redocking ligan kristal (RMSD 1,21 Å). Interaksi dianalisis berdasarkan kriteria geometri (ikatan hidrogen D···A ≤ 3,5 Å, sudut ≥ 110°; hidrofobik ≤ 4,0 Å).</p>
 <p class="catatan-kaki">Sesuaikan angka dengan proyek Anda — semuanya tercantum di laporan PDF dan lembar Parameter pada Excel.</p>
 </div></div>
 
@@ -394,7 +394,7 @@ setelah paham alurnya, ganti protein dan ligan dengan milik penelitian Anda.</p>
 
 <h3>Bila ada masalah</h3>
 <ul>
-  <li>Jalankan <b class="ui">Alat › Uji mandiri komponen…</b>: VirmoDock memeriksa semua mesin dan pustaka, lalu menunjukkan yang gagal.</li>
+  <li>Jalankan <b class="ui">Alat › Uji mandiri komponen…</b>: VirmoLab memeriksa semua mesin dan pustaka, lalu menunjukkan yang gagal.</li>
   <li>Baca panel <b class="ui">Pesan</b> — setiap galat disertai langkah yang disarankan.</li>
   <li><b class="ui">Bantuan › Dokumentasi › Mengatasi masalah</b> untuk masalah umum (GPU, internet, preparasi, viewport hitam).</li>
   <li><b class="ui">Bantuan › Lapor masalah atau kirim saran…</b> menyusun info sistem dan log untuk Anda salin dan kirim.</li>
@@ -412,5 +412,5 @@ setelah paham alurnya, ganti protein dan ligan dengan milik penelitian Anda.</p>
   <li>Wojdyr M. GEMMI: a library for structural biology. J Open Source Softw. 2022;7(73):4200. doi:10.21105/joss.04200</li>
   <li>Rego N, Koes D. 3Dmol.js. Bioinformatics. 2015;31(8):1322–1324. doi:10.1093/bioinformatics/btu829</li>
 </ol>
-<p class="catatan-kaki">Tutorial VirmoDock {{VERSI}} · {{TANGGAL}}</p>
+<p class="catatan-kaki">Tutorial VirmoLab {{VERSI}} · {{TANGGAL}}</p>
 </body></html>

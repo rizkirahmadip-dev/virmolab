@@ -11,17 +11,17 @@ from PySide6.QtCore import QSettings, QTimer
 sys.argv = [sys.argv[0]]
 KERJA = Path("dev/uji/ketcher").resolve()
 KERJA.mkdir(parents=True, exist_ok=True)
-st = QSettings("VirmoDock", "VirmoDock")
+st = QSettings("VirmoLab", "VirmoLab")
 for k in ("sesi_terbuka", "proyek_terakhir"):
     st.remove(k)
 st.setValue("wizard_selesai", True)
 
-import virmodock.app as A
+import virmolab.app as A
 from PySide6.QtWidgets import QApplication
 
 
 def hook():
-    from virmodock.ui import mainwindow
+    from virmolab.ui import mainwindow
 
     class U(mainwindow.JendelaUtama):
         def __init__(s):
@@ -33,7 +33,7 @@ def hook():
 
         def l1(s):
             import time
-            from virmodock.ui.dialog_ketcher import DialogKetcher
+            from virmolab.ui.dialog_ketcher import DialogKetcher
             d = s.dlg = DialogKetcher(s, "COc1cc(/C=C/C(=O)CC(=O)/C=C/c2ccc(O)c(OC)c2)ccc1O", "kurkumin")
             d.show()
             s.t0 = time.time()

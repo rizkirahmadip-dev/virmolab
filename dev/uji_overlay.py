@@ -2,14 +2,14 @@ import sys
 from pathlib import Path
 from PySide6.QtCore import QSettings, QTimer
 sys.argv = [sys.argv[0]]
-QSettings("VirmoDock", "VirmoDock").remove("sesi_terbuka")
-import virmodock.app as A
+QSettings("VirmoLab", "VirmoLab").remove("sesi_terbuka")
+import virmolab.app as A
 from PySide6.QtWidgets import QApplication, QMessageBox
 Path("dev/uji/gambar").mkdir(parents=True, exist_ok=True)  # keluaran gambar uji
 QMessageBox.information = staticmethod(lambda *a, **k: None)
 P = sorted(Path("dev/uji/kerja").glob("*.vmd"))[-1].resolve()
 def hook():
-    from virmodock.ui import mainwindow
+    from virmolab.ui import mainwindow
     class U(mainwindow.JendelaUtama):
         def __init__(s):
             super().__init__(); s.resize(1600, 960)

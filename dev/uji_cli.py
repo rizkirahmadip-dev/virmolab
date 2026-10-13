@@ -16,10 +16,10 @@ gagal = []
 
 
 def cli(*arg, kode=0):
-    p = subprocess.run([sys.executable, "-m", "virmodock.cli", *map(str, arg)], capture_output=True, text=True,
+    p = subprocess.run([sys.executable, "-m", "virmolab.cli", *map(str, arg)], capture_output=True, text=True,
                        encoding="utf-8", errors="replace")
     keluaran = p.stdout + (p.stderr.replace("GALAT:", "galat (diharapkan):") if kode else p.stderr)
-    print(f"$ VirmoDock-cli {' '.join(map(str, arg))}\n{keluaran}".rstrip(), flush=True)
+    print(f"$ VirmoLab-cli {' '.join(map(str, arg))}\n{keluaran}".rstrip(), flush=True)
     if p.returncode != kode:
         gagal.append(f"kode keluar {p.returncode} (harap {kode}): {' '.join(map(str, arg))[:80]}")
     return p

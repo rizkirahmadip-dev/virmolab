@@ -5,12 +5,12 @@ from pathlib import Path
 # Pastikan import dari root proyek
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from virmodock.core import terowongan
+from virmolab.core import terowongan
 
 
 def uji_deteksi_terowongan():
     gagal = 0
-    pdb_path = Path(__file__).parent.parent / "virmodock" / "aset" / "contoh" / "1HSG.pdb"
+    pdb_path = Path(__file__).parent.parent / "virmolab" / "aset" / "contoh" / "1HSG.pdb"
     if not pdb_path.exists():
         print("FAIL 1HSG.pdb tidak ditemukan")
         return 1

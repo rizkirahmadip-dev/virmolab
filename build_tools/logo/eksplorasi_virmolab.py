@@ -2,7 +2,7 @@
 
 Konsep utama B "Heksa-Kantong": cincin heksagon (molekul) yang sisi atasnya terlipat ke dalam
 membentuk V (Virmo + kantong pengikatan). Ligan heksagon kecil masuk ke celah itu; sisi miringnya
-sejajar dinding V dengan celah seragam — warisan gagasan logo VirmoDock.
+sejajar dinding V dengan celah seragam — warisan gagasan logo VirmoLab.
 
   .venv\\Scripts\\python.exe build_tools\\logo\\eksplorasi_virmolab.py
 """
@@ -19,7 +19,7 @@ OUT.mkdir(parents=True, exist_ok=True)
 
 S3 = math.sqrt(3)
 PALET = {
-    "navy":  {"badan": "#12305a", "aksen": "#2f74e0", "teks": "#12305a", "label": "Navy & Azure (lanjutan VirmoDock)"},
+    "navy":  {"badan": "#12305a", "aksen": "#2f74e0", "teks": "#12305a", "label": "Navy & Azure (lanjutan VirmoLab)"},
     "emas":  {"badan": "#0f2240", "aksen": "#c9a24e", "teks": "#0f2240", "label": "Midnight & Emas"},
     "teal":  {"badan": "#0d3b40", "aksen": "#1fa598", "teks": "#0d3b40", "label": "Teal Farmasi"},
     "gelap": {"badan": "#ffffff", "aksen": "#6aa8ff", "teks": "#ffffff", "label": "Latar gelap"},

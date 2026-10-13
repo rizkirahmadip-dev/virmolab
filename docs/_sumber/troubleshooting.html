@@ -1,26 +1,26 @@
 <h1>Mengatasi masalah</h1>
 <p class="lead">Masalah umum dan cara mengatasinya. Galat juga selalu dijelaskan di panel <b>Pesan</b> beserta langkah yang disarankan.</p>
 
-<div class="catatan"><b>Langkah pertama:</b> jalankan <b>Alat › Uji mandiri komponen…</b>. VirmoDock memeriksa semua mesin docking, Open Babel, RDKit/Meeko, docking Vina kecil, deteksi GPU, sifat ligan, statistik, PoseBusters, dan ekspor Excel (14 uji), lalu menampilkan mana yang gagal. Dari baris perintah: <code>VirmoDock.exe --uji-mandiri hasil.json</code>.</div>
+<div class="catatan"><b>Langkah pertama:</b> jalankan <b>Alat › Uji mandiri komponen…</b>. VirmoLab memeriksa semua mesin docking, Open Babel, RDKit/Meeko, docking Vina kecil, deteksi GPU, sifat ligan, statistik, PoseBusters, dan ekspor Excel (14 uji), lalu menampilkan mana yang gagal. Dari baris perintah: <code>VirmoLab.exe --uji-mandiri hasil.json</code>.</div>
 <table>
 <tr><th style="width:32%">Gejala</th><th>Penyebab &amp; solusi</th></tr>
-<tr><td>Status bar: “OpenCL tidak tersedia — mode CPU”</td><td>Driver GPU lama atau driver bawaan Windows. Perbarui driver (<a href="gpu.html">Setup GPU</a>), restart, buka VirmoDock lagi.</td></tr>
+<tr><td>Status bar: “OpenCL tidak tersedia — mode CPU”</td><td>Driver GPU lama atau driver bawaan Windows. Perbarui driver (<a href="gpu.html">Setup GPU</a>), restart, buka VirmoLab lagi.</td></tr>
 <tr><td>Panel Pesan: “AutoDock-GPU tidak bisa memakai GPU (galat OpenCL)”</td><td>Job sudah dilanjutkan otomatis dengan Vina. Perbarui driver; bila tetap gagal, pakai Vina.</td></tr>
-<tr><td>Viewport 3D hitam/kosong</td><td>Driver grafis tidak mendukung WebGL. Perbarui driver grafis. Sementara itu, jalankan VirmoDock dengan rendering perangkat lunak: buat shortcut dengan target <code>VirmoDock.exe --disable-gpu</code>.</td></tr>
+<tr><td>Viewport 3D hitam/kosong</td><td>Driver grafis tidak mendukung WebGL. Perbarui driver grafis. Sementara itu, jalankan VirmoLab dengan rendering perangkat lunak: buat shortcut dengan target <code>VirmoLab.exe --disable-gpu</code>.</td></tr>
 <tr><td>Impor RCSB/PubChem gagal</td><td>Periksa koneksi internet; jaringan kampus/kantor dengan proxy bisa memblokir. Unduh berkas PDB/SDF lewat browser lalu buka dengan <b>Berkas › Buka berkas struktur…</b> (<kbd>Ctrl</kbd>+<kbd>O</kbd>).</td></tr>
-<tr><td>“ID … tidak ditemukan di RCSB PDB”</td><td>ID salah ketik, atau struktur hanya tersedia sebagai mmCIF (VirmoDock mencoba mmCIF otomatis).</td></tr>
+<tr><td>“ID … tidak ditemukan di RCSB PDB”</td><td>ID salah ketik, atau struktur hanya tersedia sebagai mmCIF (VirmoLab mencoba mmCIF otomatis).</td></tr>
 <tr><td>Preparasi reseptor: banyak residu dibuang</td><td>Residu dengan atom hilang (umum di loop fleksibel). Bila residu itu di dekat situs aktif, pilih struktur PDB lain dengan resolusi lebih baik, atau perbaiki struktur di software lain terlebih dahulu.</td></tr>
-<tr><td>Preparasi reseptor gagal di Meeko</td><td>VirmoDock otomatis memakai Open Babel. Bila tetap gagal, coba pilih rantai tertentu saja dan hapus ligan/aditif.</td></tr>
+<tr><td>Preparasi reseptor gagal di Meeko</td><td>VirmoLab otomatis memakai Open Babel. Bila tetap gagal, coba pilih rantai tertentu saja dan hapus ligan/aditif.</td></tr>
 <tr><td>Ligan: “&gt; 32 torsi (batas AutoDock-GPU)”</td><td>Jalankan ligan tersebut dengan mesin Vina.</td></tr>
 <tr><td>Ligan: “tipe atom tidak didukung AutoDock”</td><td>Mengandung unsur seperti B atau Si yang tidak punya parameter AutoDock4. Ganti ligan atau gunakan Vina dengan hati-hati.</td></tr>
 <tr><td>Peringatan grid “melebihi 126 titik”</td><td>Kotak terlalu besar untuk spasi 0,375 Å. Naikkan spasi (mis. 0,5–0,6 Å) atau perkecil kotak. Tombol “Seluruh protein (blind)” mengatur spasi otomatis.</td></tr>
 <tr><td>Validasi redocking RMSD &gt; 2 Å</td><td>Coba: kotak dipusatkan ke ligan asli, run lebih banyak (preset Teliti), atau mesin lain. Bila ligan asli punya ion logam/air penting di situs aktif, pertahankan saat preparasi reseptor.</td></tr>
 <tr><td>Docking berhenti saat laptop tidur (sleep)</td><td>Atur Windows agar tidak tidur saat dicolokkan. Job yang terputus berstatus <i>Dijeda</i> dan bisa dilanjutkan.</td></tr>
-<tr><td>Antivirus menghapus/memblokir <code>autodock_gpu.exe</code> atau <code>vina.exe</code></td><td>Program ilmiah tanpa tanda tangan kadang dicurigai. Tambahkan folder VirmoDock ke pengecualian antivirus, lalu pasang ulang.</td></tr>
-<tr><td>Tampilan terlalu kecil/besar</td><td>VirmoDock mengikuti skala Windows (Settings › Display › Scale). Panel bisa disembunyikan lewat <b>Tampilan › Panel</b>; ruang kerja (<kbd>Ctrl</kbd>+<kbd>1</kbd>/<kbd>2</kbd>/<kbd>3</kbd>) menampilkan hanya panel yang perlu; <b>Tampilan › Atur ulang tata letak</b> mengembalikan susunan bawaan.</td></tr>
+<tr><td>Antivirus menghapus/memblokir <code>autodock_gpu.exe</code> atau <code>vina.exe</code></td><td>Program ilmiah tanpa tanda tangan kadang dicurigai. Tambahkan folder VirmoLab ke pengecualian antivirus, lalu pasang ulang.</td></tr>
+<tr><td>Tampilan terlalu kecil/besar</td><td>VirmoLab mengikuti skala Windows (Settings › Display › Scale). Panel bisa disembunyikan lewat <b>Tampilan › Panel</b>; ruang kerja (<kbd>Ctrl</kbd>+<kbd>1</kbd>/<kbd>2</kbd>/<kbd>3</kbd>) menampilkan hanya panel yang perlu; <b>Tampilan › Atur ulang tata letak</b> mengembalikan susunan bawaan.</td></tr>
 <tr><td>Jendela tidak terlihat setelah lepas monitor kedua</td><td>Otomatis dipusatkan ke layar utama saat dibuka. Bila masih tersembunyi: <kbd>Alt</kbd>+<kbd>Space</kbd> › Move.</td></tr>
 </table>
 
 <h2>Melapor masalah</h2>
-<p><b>Bantuan › Lapor masalah atau kirim saran…</b> menyusun teks berisi uraian Anda, info sistem, dan log terakhir. Periksa isinya, klik <b>Salin</b>, lalu kirim lewat email atau halaman Issues proyek. VirmoDock tidak mengirim apa pun secara otomatis. Folder log: <b>Bantuan › Buka folder log</b>.</p>
+<p><b>Bantuan › Lapor masalah atau kirim saran…</b> menyusun teks berisi uraian Anda, info sistem, dan log terakhir. Periksa isinya, klik <b>Salin</b>, lalu kirim lewat email atau halaman Issues proyek. VirmoLab tidak mengirim apa pun secara otomatis. Folder log: <b>Bantuan › Buka folder log</b>.</p>
 <figure><img src="gambar/14_lapor.png" alt="Lapor masalah" style="max-width:720px"></figure>

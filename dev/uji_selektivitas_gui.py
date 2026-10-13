@@ -1,4 +1,4 @@
-"""Uji integrasi dialog selektivitas multi-target VirmoDock."""
+"""Uji integrasi dialog selektivitas multi-target VirmoLab."""
 import sys
 from pathlib import Path
 from PySide6.QtWidgets import QApplication
@@ -6,8 +6,8 @@ from PySide6.QtWidgets import QApplication
 AKAR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(AKAR))
 
-from virmodock.core.proyek import Proyek
-from virmodock.ui.dialog_selektivitas import DialogSelektivitas
+from virmolab.core.proyek import Proyek
+from virmolab.ui.dialog_selektivitas import DialogSelektivitas
 
 
 def main():

@@ -1,8 +1,8 @@
-# Rencana Pengembangan Fitur VirmoDock 1.2 – 1.6
+# Rencana Pengembangan Fitur VirmoLab 1.2 – 1.6
 
 Status: **draf untuk diskusi**, belum diputuskan.
 Disusun: 13 Oktober 2026, sesudah commit `585ab9f` (1.1.2).
-Lokasi sementara: di luar `VirmoDock/` selama build berjalan — pindahkan ke `VirmoDock/RENCANA_PENGEMBANGAN.md`
+Lokasi sementara: di luar `VirmoLab/` selama build berjalan — pindahkan ke `VirmoLab/RENCANA_PENGEMBANGAN.md`
 setelah disepakati.
 
 Cara membaca:
@@ -34,10 +34,10 @@ Diambil dari kode dan catatan yang sudah ada. Setiap fitur baru **harus** mengik
 
 | Lapisan | Lokasi | Isi | Contoh pola yang sudah ada |
 |---|---|---|---|
-| Logika ilmiah | `virmodock/core/<nama>.py` | fungsi murni: masukan data → keluaran dict/list. **Tanpa impor Qt.** | `core/kantong.py`, `core/terowongan.py` |
-| Dialog | `virmodock/ui/dialog_<nama>.py` | kelas `Dialog<Nama>(QDialog)` memakai `kit` | `ui/dialog_kantong.py`, `ui/dialog_terowongan.py` |
-| Pembuka | `virmodock/ui/mainwindow_dialog.py` | metode `buka_<nama>(self)` di mixin `PembukaDialog` | `buka_kantong`, `buka_md` |
-| Menu | `virmodock/ui/mainwindow.py` | `A("Label…", "ikon", self.buka_<nama>, None, …)` di submenu Analisis (±baris 947) + daftar nama di ±baris 431 (palet perintah) | `buka_kantong` |
+| Logika ilmiah | `virmolab/core/<nama>.py` | fungsi murni: masukan data → keluaran dict/list. **Tanpa impor Qt.** | `core/kantong.py`, `core/terowongan.py` |
+| Dialog | `virmolab/ui/dialog_<nama>.py` | kelas `Dialog<Nama>(QDialog)` memakai `kit` | `ui/dialog_kantong.py`, `ui/dialog_terowongan.py` |
+| Pembuka | `virmolab/ui/mainwindow_dialog.py` | metode `buka_<nama>(self)` di mixin `PembukaDialog` | `buka_kantong`, `buka_md` |
+| Menu | `virmolab/ui/mainwindow.py` | `A("Label…", "ikon", self.buka_<nama>, None, …)` di submenu Analisis (±baris 947) + daftar nama di ±baris 431 (palet perintah) | `buka_kantong` |
 | Uji inti | `dev/uji_<nama>.py` | uji tanpa GUI, pola `cek(kondisi, "pesan")` | `dev/uji_proyek.py` |
 | Uji GUI | `dev/uji_dialog_lanjut_gui.py` | tambahkan `"<nama>"` ke `DIALOG` | — |
 | Regresi | `dev/regresi.py` | tambahkan batas waktu bila > 120 s | `"uji_md_gui": 1200` |
@@ -57,7 +57,7 @@ Diambil dari kode dan catatan yang sudah ada. Setiap fitur baru **harus** mengik
 
 - Utas (I/O, internet, hitungan < 1 menit): `kerja.jalankan(fn, *arg, selesai=…, galat=…, log=…, progres=…)`.
 - Proses terpisah (CPU berat, pustaka yang bisa crash, > 1 menit): pola `md.jalankan_tugas(f_tugas)` —
-  tulis berkas tugas JSON → jalankan `python -m virmodock.<modul> tugas.json` → baca hasil.
+  tulis berkas tugas JSON → jalankan `python -m virmolab.<modul> tugas.json` → baca hasil.
   Wajib untuk: MD, FEP, xTB, generatif, pelatihan QSAR besar.
 - Setiap tugas panjang: dukung **batal** (`berhenti=` callable) dan **jeda/lanjut** bila > 10 menit.
 
@@ -81,7 +81,7 @@ Diambil dari kode dan catatan yang sudah ada. Setiap fitur baru **harus** mengik
 
 1. `core` + dialog + pembuka + menu + palet perintah.
 2. `dev/uji_<nama>.py` lulus; dialog masuk `uji_dialog_lanjut_gui.py` (terang & gelap) dan lulus.
-3. `.venv/Scripts/python.exe -m pyflakes virmodock` bersih.
+3. `.venv/Scripts/python.exe -m pyflakes virmolab` bersih.
 4. i18n: `dev/ekstrak_teks.py` → terjemahkan ke `dev/i18n_tambahan.json` → `dev/buat_kamus.py`
    → `dev/cek_mutu_i18n.py` = 0 masalah.
 5. Dokumen: bagian baru di `docs/panduan.html` (+ `docs/metode.html` untuk metode ilmiah & sitasi).
@@ -290,7 +290,7 @@ Semua grafik via `core/grafik.py` → bisa dikirim ke komposer figur.
 **Peringatan ilmiah (wajib tampil di dialog).** Telaah 2025 (Frontiers in Pharmacology; J. Advanced Research;
 pedoman BCPT DOI 10.1111/bcpt.70308) mengkritik farmakologi jaringan karena: basis data tak dicatat versinya,
 ambang tepi tak dilaporkan, blind docking disalahgunakan, dan klaim mekanisme tanpa uji basah.
-VirmoDock harus **mendorong praktik benar secara bawaan**: catat versi & tanggal (Fondasi §2.1),
+VirmoLab harus **mendorong praktik benar secara bawaan**: catat versi & tanggal (Fondasi §2.1),
 uji sensitivitas ambang, docking ke situs yang divalidasi (bukan blind), dan label "hipotesis".
 
 **Tahap 3a — Penargetan balik (M)**
@@ -301,7 +301,7 @@ Dua jalur yang saling melengkapi:
    - sidik jari Morgan2 + FCFP4; skor target = max Tanimoto & rata-rata k-tetangga;
    - basis lokal: unduhan ringkas ChEMBL aktif manusia [izin] (±1–2 GB mentah → ringkas ±100 MB sqlite);
      alternatif daring: API ChEMBL similarity (sudah ada klien `core/chembl.py`).
-2. **Berbasis struktur (lambat, pembeda VirmoDock)**: docking ke **panel target terkurasi**
+2. **Berbasis struktur (lambat, pembeda VirmoLab)**: docking ke **panel target terkurasi**
    - panel bawaan per kelas: antibakteri, antidiabetes, antiinflamasi, antikanker, antivirus, neuro;
      tiap entri: PDB ID, rantai, ligan ko-kristal, pusat & ukuran kotak, **RMSD redocking tervalidasi ≤ 2 Å**;
    - berkas `data/panel_target/<kelas>.json` disusun sekali oleh skrip `dev/susun_panel.py`

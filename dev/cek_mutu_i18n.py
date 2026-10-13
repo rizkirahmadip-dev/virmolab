@@ -1,4 +1,4 @@
-"""Skrip deteksi entri terjemahan bermasalah di virmodock/i18n/en.json.
+"""Skrip deteksi entri terjemahan bermasalah di virmolab/i18n/en.json.
 
 Kriteria:
 (a) Nilai Inggris berisi >= 2 kata Indonesia umum setelah tag HTML dan {placeholder} dibuang.
@@ -11,7 +11,7 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-EN_PATH = ROOT / "virmodock" / "i18n" / "en.json"
+EN_PATH = ROOT / "virmolab" / "i18n" / "en.json"
 OUT_PATH = ROOT / "dev" / "i18n_perbaiki.json"
 
 # Daftar kata Indonesia umum (kata tugas, verba, nomina khas)

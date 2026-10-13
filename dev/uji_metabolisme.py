@@ -5,7 +5,7 @@ from pathlib import Path
 # Pastikan import dari root proyek
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from virmodock.core import metabolisme
+from virmolab.core import metabolisme
 
 
 def uji_metabolisme():

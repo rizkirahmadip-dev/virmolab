@@ -9,7 +9,7 @@ AKAR = Path(__file__).resolve().parents[1]
 if str(AKAR) not in sys.path:
     sys.path.insert(0, str(AKAR))
 
-from virmodock.core import tolok_ukur
+from virmolab.core import tolok_ukur
 
 def main():
     print("=== Menjalankan Tolok Ukur Validasi Redocking 1HSG (Indinavir) ===")

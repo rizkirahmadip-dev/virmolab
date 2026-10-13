@@ -6,19 +6,19 @@ from pathlib import Path
 from PySide6.QtCore import QSettings, QTimer
 
 sys.argv = [sys.argv[0]]
-st = QSettings("VirmoDock", "VirmoDock")
+st = QSettings("VirmoLab", "VirmoLab")
 st.setValue("tema", os.environ.get("VD_TEMA", "gelap"))
 st.remove("layout")
 st.remove("sesi_terbuka")
 PROYEK = sorted(Path("dev/uji/kerja").glob("*.vmd"))[-1].resolve()
 
-import virmodock.app as A
+import virmolab.app as A
 from PySide6.QtWidgets import QApplication
 Path("dev/uji/gambar").mkdir(parents=True, exist_ok=True)  # keluaran gambar uji
 
 
 def hook():
-    from virmodock.ui import mainwindow
+    from virmolab.ui import mainwindow
     Asli = mainwindow.JendelaUtama
 
     class Uji(Asli):

@@ -226,7 +226,7 @@ def stills(data):
 
 
 def video(data):
-    from virmodock.ui.perekam_video import PerekamVideo
+    from virmolab.ui.perekam_video import PerekamVideo
     n = int(round(TOTAL * FPS))
     f = str(OUT / ("virmolab_promosi_30fps.mp4" if FPS == 30 else "virmolab_promosi.mp4"))
     rek = PerekamVideo(f, W, H, FPS)

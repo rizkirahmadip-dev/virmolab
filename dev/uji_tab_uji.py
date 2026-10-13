@@ -13,19 +13,19 @@ sys.argv = [sys.argv[0]]
 KERJA = Path("dev/uji/tab_uji").resolve()
 shutil.rmtree(KERJA, ignore_errors=True)
 shutil.copytree(SUMBER, KERJA / SUMBER.name)
-st = QSettings("VirmoDock", "VirmoDock")
+st = QSettings("VirmoLab", "VirmoLab")
 for k in ("sesi_terbuka", "proyek_terakhir"):
     st.remove(k)
 st.setValue("wizard_selesai", True)
 
-import virmodock.app as A
+import virmolab.app as A
 from PySide6.QtWidgets import QApplication, QMessageBox
 
 QMessageBox.information = staticmethod(lambda *a, **k: None)
 
 
 def hook():
-    from virmodock.ui import mainwindow
+    from virmolab.ui import mainwindow
 
     class U(mainwindow.JendelaUtama):
         def __init__(s):

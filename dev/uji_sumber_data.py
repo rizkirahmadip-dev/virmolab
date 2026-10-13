@@ -16,7 +16,7 @@ import time
 AKAR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(AKAR))
 
-from virmodock.core.sumber_data import Jejak, ambil_json, ambil_teks, sparql, hapus_cache, ukuran_cache
+from virmolab.core.sumber_data import Jejak, ambil_json, ambil_teks, sparql, hapus_cache, ukuran_cache
 
 gagal = []
 

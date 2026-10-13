@@ -5,7 +5,7 @@ import sys
 # Tambahkan direktori kerja ke path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from virmodock.core import selektivitas
+from virmolab.core import selektivitas
 
 
 class MockProyek:

@@ -1,14 +1,14 @@
 """Penerjemah otomatis komprehensif untuk teks baru (v0.9.7 - v1.1.1).
 
 Membaca dev/i18n_teks_baru.json, menerjemahkan seluruh 1.150 literal dan 267 pola,
-memasukkannya ke dev/i18n_tambahan.json, lalu menggabungkannya ke virmodock/i18n/en.json.
+memasukkannya ke dev/i18n_tambahan.json, lalu menggabungkannya ke virmolab/i18n/en.json.
 """
 import json
 import re
 import sys
 from pathlib import Path
 
-# Glosarium istilah sains dan UI VirmoDock
+# Glosarium istilah sains dan UI VirmoLab
 KAMUS_KATA = {
     "penapisan virtual": "virtual screening",
     "penapisan": "screening",
@@ -167,7 +167,7 @@ KAMUS_KATA = {
     "terang": "light",
 }
 
-# Pola frasa spesifik VirmoDock
+# Pola frasa spesifik VirmoLab
 FRASA_SPESIFIK = {
     "Pemeriksa Kesehatan Lingkungan Sistem": "System Environment Health Check",
     "Pemeriksa Kesiapan Komponen": "Component Readiness Checker",

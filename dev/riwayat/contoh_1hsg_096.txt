@@ -1,5 +1,5 @@
 Contoh redocking 1HSG / MK1 — 11 Oktober 2026
-VirmoDock 0.9.6, AutoDock Vina, exhaustiveness 16, 9 pose, seed 42.
+VirmoLab 0.9.6, AutoDock Vina, exhaustiveness 16, 9 pose, seed 42.
 Reseptor: PROPKA/PDB2PQR pH 7,4 lalu Meeko (1849 atom, 198 residu).
 Ligan: SMILES terprotonasi, koordinat dibuat ulang (MMFF), bukan koordinat kristal.
 Kotak: pusat ligan kristal MK1 902 B, ukuran 24,9 × 20,2 × 20,0 Å.

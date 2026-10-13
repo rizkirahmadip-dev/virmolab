@@ -1,5 +1,5 @@
 <h1>Setup GPU</h1>
-<p class="lead">AutoDock-GPU di VirmoDock memakai OpenCL, jadi berjalan di GPU NVIDIA, AMD, maupun Intel tanpa CUDA atau WSL. Tanpa GPU, VirmoDock tetap bekerja penuh dengan AutoDock Vina di CPU.</p>
+<p class="lead">AutoDock-GPU di VirmoLab memakai OpenCL, jadi berjalan di GPU NVIDIA, AMD, maupun Intel tanpa CUDA atau WSL. Tanpa GPU, VirmoLab tetap bekerja penuh dengan AutoDock Vina di CPU.</p>
 
 <h2>Membaca status bar</h2>
 <table>
@@ -14,17 +14,17 @@
 <h3>NVIDIA</h3>
 <ol><li>Buka <a href="https://www.nvidia.com/Download/index.aspx">nvidia.com/Download</a>, pilih seri dan model GPU laptop.</li>
 <li>Unduh <i>Game Ready</i> atau <i>Studio Driver</i>, jalankan, pilih instalasi <i>Express</i>.</li>
-<li>Restart laptop, buka VirmoDock lagi.</li></ol>
+<li>Restart laptop, buka VirmoLab lagi.</li></ol>
 <h3>AMD</h3>
 <ol><li>Buka <a href="https://www.amd.com/en/support/download/drivers.html">amd.com › Drivers</a>, pilih <i>Auto-Detect and Install</i>.</li>
-<li>Jalankan installer, restart, buka VirmoDock lagi.</li></ol>
+<li>Jalankan installer, restart, buka VirmoLab lagi.</li></ol>
 <h3>Intel (grafis terintegrasi)</h3>
 <ol><li>Buka <a href="https://www.intel.com/content/www/us/en/support/detect.html">Intel Driver &amp; Support Assistant</a>.</li>
-<li>Pasang pembaruan grafis yang disarankan, restart, buka VirmoDock lagi.</li></ol>
-<div class="catatan">Laptop dengan dua GPU (mis. Intel + NVIDIA): VirmoDock memilih GPU diskrit (VRAM terbesar). Pastikan laptop tersambung ke charger dan mode daya “Best performance” agar GPU diskrit aktif.</div>
+<li>Pasang pembaruan grafis yang disarankan, restart, buka VirmoLab lagi.</li></ol>
+<div class="catatan">Laptop dengan dua GPU (mis. Intel + NVIDIA): VirmoLab memilih GPU diskrit (VRAM terbesar). Pastikan laptop tersambung ke charger dan mode daya “Best performance” agar GPU diskrit aktif.</div>
 
 <h2>Bila GPU gagal saat docking</h2>
-<p>Jika AutoDock-GPU melaporkan galat OpenCL (kernel gagal dikompilasi, memori GPU penuh, driver rusak), VirmoDock <b>otomatis melanjutkan job dengan AutoDock Vina di CPU</b> dan menulis alasannya di panel <b>Pesan</b>. Hasil tetap valid; hanya lebih lambat. Perbarui driver lalu jalankan job baru untuk memakai GPU lagi.</p>
+<p>Jika AutoDock-GPU melaporkan galat OpenCL (kernel gagal dikompilasi, memori GPU penuh, driver rusak), VirmoLab <b>otomatis melanjutkan job dengan AutoDock Vina di CPU</b> dan menulis alasannya di panel <b>Pesan</b>. Hasil tetap valid; hanya lebih lambat. Perbarui driver lalu jalankan job baru untuk memakai GPU lagi.</p>
 
 <h2>Perkiraan waktu</h2>
 <table>

@@ -1,4 +1,4 @@
-name: VirmoDock CI
+name: VirmoLab CI
 
 on:
   push:
@@ -27,11 +27,11 @@ jobs:
 
       - name: Jalankan Pyflakes
         run: |
-          python -m pyflakes virmodock
+          python -m pyflakes virmolab
 
       - name: Jalankan Ruff Linter
         run: |
-          python -m ruff check virmodock
+          python -m ruff check virmolab
 
   uji-mandiri:
     name: Uji Mandiri Komponen
@@ -53,4 +53,4 @@ jobs:
 
       - name: Jalankan Uji Mandiri CLI & Sintaksis
         run: |
-          python -m virmodock --uji-mandiri
+          python -m virmolab --uji-mandiri

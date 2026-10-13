@@ -8,14 +8,14 @@ from PySide6.QtCore import QSettings, QTimer
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 sys.argv = [sys.argv[0]]
-st = QSettings("VirmoDock", "VirmoDock")
+st = QSettings("VirmoLab", "VirmoLab")
 st.remove("layout")
 st.remove("sesi_terbuka")
 PROYEK = sorted(Path("dev/uji/kerja").glob("*.vmd"))[-1].resolve()
 OUT = Path("dev/uji/dpi")
 OUT.mkdir(parents=True, exist_ok=True)
 
-import virmodock.app as A  # noqa: E402
+import virmolab.app as A  # noqa: E402
 from PySide6.QtWidgets import QApplication  # noqa: E402
 
 JS = ("(() => { window._n = 0; const asli = VM.v.render.bind(VM.v); VM.v.render = function () { window._n++; return asli(...arguments); }; "
@@ -24,7 +24,7 @@ JS2 = "JSON.stringify({render_2_detik: window._n})"
 
 
 def hook():
-    from virmodock.ui import mainwindow
+    from virmolab.ui import mainwindow
     Asli = mainwindow.JendelaUtama
 
     class D(Asli):
@@ -38,7 +38,7 @@ def hook():
             QTimer.singleShot(6000, s.l1b)
 
         def l1b(s):
-            from virmodock.core import ekspor
+            from virmolab.core import ekspor
             b = ekspor.baris_hasil(s.proyek)
             s.buka_pose(b[0]["job"], b[0]["lid"], 1)
             QTimer.singleShot(4000, s.l2)

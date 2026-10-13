@@ -5,12 +5,12 @@ PYTHONPATH=. .venv/Scripts/python.exe dev/uji_sascore.py
 import sys
 from pathlib import Path
 
-# Pastikan import virmodock bekerja
+# Pastikan import virmolab bekerja
 AKAR = Path(__file__).resolve().parents[1]
 if str(AKAR) not in sys.path:
     sys.path.insert(0, str(AKAR))
 
-from virmodock.core import sascore
+from virmolab.core import sascore
 
 SENYAWA = [
     ("Aspirin", "CC(=O)Oc1ccccc1C(=O)O", 1.0, 2.5, "Mudah"),

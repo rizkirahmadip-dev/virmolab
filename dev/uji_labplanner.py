@@ -9,7 +9,7 @@ AKAR = Path(__file__).resolve().parents[1]
 if str(AKAR) not in sys.path:
     sys.path.insert(0, str(AKAR))
 
-from virmodock.core import labplanner
+from virmolab.core import labplanner
 
 gagal = 0
 

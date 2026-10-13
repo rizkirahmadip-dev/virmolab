@@ -11,7 +11,7 @@ from pathlib import Path
 from PySide6.QtCore import QSettings, QTimer
 
 sys.argv = [sys.argv[0]]
-st = QSettings("VirmoDock", "VirmoDock")
+st = QSettings("VirmoLab", "VirmoLab")
 st.setValue("tema", "terang")
 st.setValue("wizard_selesai", True)
 for k in ("layout", "layout_v2", "sesi_terbuka", "kolom_hasil"):
@@ -25,7 +25,7 @@ shutil.rmtree(PROYEK, ignore_errors=True)
 shutil.copytree(SUMBER, PROYEK)
 akhiran = "" if UKURAN[0] >= 1600 else f"_{UKURAN[0]}"
 
-import virmodock.app as A
+import virmolab.app as A
 from PySide6.QtWidgets import QApplication, QMessageBox
 
 QMessageBox.question = staticmethod(lambda *a, **k: QMessageBox.Yes)
@@ -33,7 +33,7 @@ QMessageBox.information = staticmethod(lambda *a, **k: 0)
 
 
 def hook():
-    from virmodock.ui import mainwindow
+    from virmolab.ui import mainwindow
     Asli = mainwindow.JendelaUtama
 
     class Uji(Asli):
@@ -107,7 +107,7 @@ def hook():
                                            if not s.hasil.pohon.isColumnHidden(k)], flush=True)
             print("status langkah:", s.status_langkah(), flush=True)
             s.foto("5_hasil")
-            b = __import__("virmodock.core.ekspor", fromlist=["x"]).baris_hasil(s.proyek)
+            b = __import__("virmolab.core.ekspor", fromlist=["x"]).baris_hasil(s.proyek)
             s.buka_pose(b[0]["job"], b[0]["lid"], 1)
             s.atur_ruang("analisis")
             QTimer.singleShot(3000, s.l9)

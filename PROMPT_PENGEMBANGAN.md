@@ -1,4 +1,4 @@
-# Prompt Pengembangan VirmoDock 1.2 – 1.6 (siap salin)
+# Prompt Pengembangan VirmoLab 1.2 – 1.6 (siap salin)
 
 Pasangan berkas: `RENCANA_PENGEMBANGAN.md` (isi ilmiah & teknis rinci).
 Dibuat 13 Oktober 2026.
@@ -46,10 +46,10 @@ Ringkasan urutan:
 ## P0 — Persiapan & verifikasi
 
 ```text
-Sesi persiapan pengembangan VirmoDock 1.2. Folder: E:\Bikin Docking Simpel\VirmoDock.
+Sesi persiapan pengembangan VirmoLab 1.2. Folder: E:\Bikin Docking Simpel\VirmoLab.
 Python proyek: .venv/Scripts/python.exe (PYTHONIOENCODING=utf-8, PYTHONPATH=.).
 
-1. Pindahkan E:\Bikin Docking Simpel\RENCANA_PENGEMBANGAN.md dan PROMPT_PENGEMBANGAN.md ke folder VirmoDock\
+1. Pindahkan E:\Bikin Docking Simpel\RENCANA_PENGEMBANGAN.md dan PROMPT_PENGEMBANGAN.md ke folder VirmoLab\
    (pastikan tidak ada build yang sedang berjalan: cek proses python/pyinstaller dulu; bila ada, berhenti dan lapor).
 2. Verifikasi butir bertanda [cek] yang dipakai rilis 1.2, dengan sumber resmi (situs resmi, GitHub, Zenodo,
    dokumentasi API) — bukan ingatan:
@@ -62,7 +62,7 @@ Python proyek: .venv/Scripts/python.exe (PYTHONIOENCODING=utf-8, PYTHONPATH=.).
 3. Tulis hasil ke RENCANA_PENGEMBANGAN.md: ganti tanda [cek] yang sudah pasti menjadi [terverifikasi 2026-xx-xx,
    sumber: URL]; yang ternyata salah, koreksi isinya dan tulis catatan singkat.
 4. Laporkan ringkas (≤ 15 baris): apa yang berubah dari rencana.
-Aturan: jangan ubah kode di virmodock/. Jangan unduh paket. Jangan commit.
+Aturan: jangan ubah kode di virmolab/. Jangan unduh paket. Jangan commit.
 ```
 
 ---
@@ -70,7 +70,7 @@ Aturan: jangan ubah kode di virmodock/. Jangan unduh paket. Jangan commit.
 ## P1 — Fondasi bersama *(bergantung: P0)*
 
 ```text
-Kerjakan Fondasi bersama VirmoDock 1.2. Folder: E:\Bikin Docking Simpel\VirmoDock.
+Kerjakan Fondasi bersama VirmoLab 1.2. Folder: E:\Bikin Docking Simpel\VirmoLab.
 Python: .venv/Scripts/python.exe (PYTHONIOENCODING=utf-8, PYTHONPATH=.).
 
 Baca dulu (secukupnya): RENCANA_PENGEMBANGAN.md §0 (konvensi) dan §2 (fondasi); PROMPT_PENGEMBANGAN.md
@@ -84,7 +84,7 @@ Tugas:
    - ambil_teks(...) untuk TSV/CSV/GMT; sparql(endpoint, kueri, ...) -> (list[dict], Jejak)
    - cache berkas di paths.APPDATA/"cache_http" (kunci sha256 url+params+data; simpan isi + waktu + status).
    - mode luring: gagal jaringan + ada cache -> pakai cache, Jejak.versi = "cache <tanggal>".
-   - batas laju per domain (min. 0,5 s antar-permintaan; Wikidata 1 s); User-Agent "VirmoDock/<versi> (akademik)".
+   - batas laju per domain (min. 0,5 s antar-permintaan; Wikidata 1 s); User-Agent "VirmoLab/<versi> (akademik)".
    - pesan galat ramah dalam Bahasa Indonesia (tanpa internet / batas waktu / server sibuk 429/503).
    - fungsi hapus_cache() dan ukuran_cache().
    JANGAN mengubah chembl.py/rcsb.py sekarang — cukup sediakan modul; migrasi klien lama dicatat sebagai pekerjaan nanti.
@@ -111,7 +111,7 @@ Laporan akhir ≤ 15 baris.
 ## P3 — F1 Tanaman obat → senyawa *(bergantung: P1)*
 
 ```text
-Kerjakan fitur F1 "Senyawa dari tanaman" VirmoDock 1.2. Folder: E:\Bikin Docking Simpel\VirmoDock.
+Kerjakan fitur F1 "Senyawa dari tanaman" VirmoLab 1.2. Folder: E:\Bikin Docking Simpel\VirmoLab.
 Python: .venv/Scripts/python.exe (PYTHONIOENCODING=utf-8, PYTHONPATH=.).
 
 Baca dulu: RENCANA_PENGEMBANGAN.md §0 dan §3 F1 (termasuk hasil verifikasi P0); PROMPT_PENGEMBANGAN.md
@@ -187,7 +187,7 @@ Laporan akhir ≤ 15 baris.
 ## P4 — F2 Analisis MD lengkap
 
 ```text
-Kerjakan fitur F2 "Analisis lintasan MD lengkap" VirmoDock 1.2. Folder: E:\Bikin Docking Simpel\VirmoDock.
+Kerjakan fitur F2 "Analisis lintasan MD lengkap" VirmoLab 1.2. Folder: E:\Bikin Docking Simpel\VirmoLab.
 Python: .venv/Scripts/python.exe (PYTHONIOENCODING=utf-8, PYTHONPATH=.).
 
 Baca dulu: RENCANA_PENGEMBANGAN.md §0 dan §3 F2; PROMPT_PENGEMBANGAN.md "Lampiran UI" + "UI F2";
@@ -245,7 +245,7 @@ Bawah      — [Kirim ke komposer] [Simpan figur…] [Ekspor CSV…]            
 ## P5 — F11 Paket validasi protokol *(bergantung: P1)*
 
 ```text
-Kerjakan fitur F11 "Paket validasi protokol" VirmoDock 1.2. Folder: E:\Bikin Docking Simpel\VirmoDock.
+Kerjakan fitur F11 "Paket validasi protokol" VirmoLab 1.2. Folder: E:\Bikin Docking Simpel\VirmoLab.
 Python: .venv/Scripts/python.exe (PYTHONIOENCODING=utf-8, PYTHONPATH=.).
 
 Baca dulu: RENCANA_PENGEMBANGAN.md §0 dan §3 F11; PROMPT_PENGEMBANGAN.md "Lampiran UI" + "UI F11";
@@ -291,7 +291,7 @@ Navigasi bawah: [‹ Kembali] [Lanjut ›] (utama)                              
 ## P6 — F3a Penargetan balik *(bergantung: P1, P3)*
 
 ```text
-Kerjakan F3 tahap a "Penargetan balik" VirmoDock 1.3. Folder: E:\Bikin Docking Simpel\VirmoDock.
+Kerjakan F3 tahap a "Penargetan balik" VirmoLab 1.3. Folder: E:\Bikin Docking Simpel\VirmoLab.
 Python: .venv/Scripts/python.exe (PYTHONIOENCODING=utf-8, PYTHONPATH=.).
 
 Baca dulu: RENCANA_PENGEMBANGAN.md §0, §3 F3 (termasuk peringatan ilmiah), §5; PROMPT_PENGEMBANGAN.md
@@ -347,7 +347,7 @@ Aturan: jangan commit/build/regresi penuh. Laporan akhir ≤ 15 baris.
 ## P7 — F3b Jaringan & pengayaan *(bergantung: P6)*
 
 ```text
-Kerjakan F3 tahap b "Jaringan & pengayaan jalur" VirmoDock 1.3. Folder: E:\Bikin Docking Simpel\VirmoDock.
+Kerjakan F3 tahap b "Jaringan & pengayaan jalur" VirmoLab 1.3. Folder: E:\Bikin Docking Simpel\VirmoLab.
 Python: .venv/Scripts/python.exe (PYTHONIOENCODING=utf-8, PYTHONPATH=.).
 
 Baca dulu: RENCANA_PENGEMBANGAN.md §3 F3 + §5; PROMPT_PENGEMBANGAN.md "Lampiran UI" + "UI F3b";
@@ -394,7 +394,7 @@ Kosong : "Belum ada target. Jalankan penargetan balik di tab sebelah atau tempel
 ## P8 — F5 QSAR *(bergantung: P1)*
 
 ```text
-Kerjakan F5 "QSAR & model ML" VirmoDock 1.4. Folder: E:\Bikin Docking Simpel\VirmoDock.
+Kerjakan F5 "QSAR & model ML" VirmoLab 1.4. Folder: E:\Bikin Docking Simpel\VirmoLab.
 Python: .venv/Scripts/python.exe (PYTHONIOENCODING=utf-8, PYTHONPATH=.).
 scikit-learn 1.9.1 dan chemprop 2.3.1 SUDAH terpasang — jangan pasang paket lain.
 
@@ -443,7 +443,7 @@ Aturan: jangan commit/build/regresi penuh. Laporan akhir ≤ 15 baris.
 ## P9 — F4 Farmakofor & bentuk
 
 ```text
-Kerjakan F4 "Penapisan berbasis ligan 3D" VirmoDock 1.4. Folder: E:\Bikin Docking Simpel\VirmoDock.
+Kerjakan F4 "Penapisan berbasis ligan 3D" VirmoLab 1.4. Folder: E:\Bikin Docking Simpel\VirmoLab.
 Python: .venv/Scripts/python.exe (PYTHONIOENCODING=utf-8, PYTHONPATH=.).
 
 Baca dulu: RENCANA_PENGEMBANGAN.md §0, §3 F4; PROMPT_PENGEMBANGAN.md "Lampiran UI" + "UI F4";
@@ -487,7 +487,7 @@ Bawah      : [Ekspor SDF terselaraskan…] [Kirim 100 teratas ke docking] [Salin
 ## P10 — F12 Pelacak hipotesis *(bergantung: P8)*
 
 ```text
-Kerjakan F12 "Pelacak hipotesis → uji lab" VirmoDock 1.4. Folder: E:\Bikin Docking Simpel\VirmoDock.
+Kerjakan F12 "Pelacak hipotesis → uji lab" VirmoLab 1.4. Folder: E:\Bikin Docking Simpel\VirmoLab.
 Python: .venv/Scripts/python.exe (PYTHONIOENCODING=utf-8, PYTHONPATH=.).
 
 Baca dulu: RENCANA_PENGEMBANGAN.md §3 F12; "Lampiran UI"; core/proyek.py (eksperimen); core/labplanner.py;
@@ -510,7 +510,7 @@ Aturan: jangan commit/build/regresi penuh. Laporan akhir ≤ 10 baris.
 ## P11 — F6 Konsensus docking × co-folding
 
 ```text
-Kerjakan F6 "Konsensus docking × co-folding" VirmoDock 1.5. Folder: E:\Bikin Docking Simpel\VirmoDock.
+Kerjakan F6 "Konsensus docking × co-folding" VirmoLab 1.5. Folder: E:\Bikin Docking Simpel\VirmoLab.
 Python: .venv/Scripts/python.exe (PYTHONIOENCODING=utf-8, PYTHONPATH=.).
 
 Baca dulu: RENCANA_PENGEMBANGAN.md §3 F6 + §5; "Lampiran UI" + "UI F6"; core/lanjutan.py (Boltz lewat WSL:
@@ -550,7 +550,7 @@ Dialog Konsensus: kolom tambahan + saringan "hanya Sepakat".
 ## P12 — F10 Docking peptida *(bergantung: P11)*
 
 ```text
-Kerjakan F10 "Docking peptida" VirmoDock 1.5. Folder: E:\Bikin Docking Simpel\VirmoDock.
+Kerjakan F10 "Docking peptida" VirmoLab 1.5. Folder: E:\Bikin Docking Simpel\VirmoLab.
 Python: .venv/Scripts/python.exe (PYTHONIOENCODING=utf-8, PYTHONPATH=.).
 
 Baca dulu: RENCANA_PENGEMBANGAN.md §3 F10; "Lampiran UI"; core/kofolding.py (P11); core/md.py (minimisasi,
@@ -574,7 +574,7 @@ Aturan: jangan commit/build/regresi penuh. Laporan akhir ≤ 10 baris.
 ## P13 — F7 Sifat elektronik xTB *(butuh izin unduh)*
 
 ```text
-Kerjakan F7 "Sifat elektronik kuantum (xTB)" VirmoDock 1.5. Folder: E:\Bikin Docking Simpel\VirmoDock.
+Kerjakan F7 "Sifat elektronik kuantum (xTB)" VirmoLab 1.5. Folder: E:\Bikin Docking Simpel\VirmoLab.
 Python: .venv/Scripts/python.exe (PYTHONIOENCODING=utf-8, PYTHONPATH=.).
 
 Langkah 0 (wajib): verifikasi dari GitHub resmi grimme-lab/xtb versi rilis terbaru, lisensi (LGPL-3.0?), ukuran
@@ -611,7 +611,7 @@ Bawah : kit.catatan(peringatan) kalimat wajib · [Ekspor CSV…] [Kirim ke kompo
 ## P14 — F8 Desain generatif *(butuh izin unduh)*
 
 ```text
-Kerjakan F8 "Desain generatif terpandu docking" VirmoDock 1.6. Folder: E:\Bikin Docking Simpel\VirmoDock.
+Kerjakan F8 "Desain generatif terpandu docking" VirmoLab 1.6. Folder: E:\Bikin Docking Simpel\VirmoLab.
 Python: .venv/Scripts/python.exe (PYTHONIOENCODING=utf-8, PYTHONPATH=.).
 
 Langkah 0: verifikasi CReM (lisensi BSD-3?, versi, ukuran DB fragmen yang tersedia, cara membuat DB kecil sendiri
@@ -647,7 +647,7 @@ Bawah : [Impor terpilih ke proyek] [Ekspor SDF…] [Salin paragraf metode]      
 ## P15 — F9 RBFE eksperimental *(butuh izin unduh, butuh GPU)*
 
 ```text
-Kerjakan F9 "Energi bebas relatif (RBFE) eksperimental" VirmoDock 1.6. Folder: E:\Bikin Docking Simpel\VirmoDock.
+Kerjakan F9 "Energi bebas relatif (RBFE) eksperimental" VirmoLab 1.6. Folder: E:\Bikin Docking Simpel\VirmoLab.
 Python: .venv/Scripts/python.exe (PYTHONIOENCODING=utf-8, PYTHONPATH=.).
 
 Langkah 0: verifikasi OpenFE (versi terbaru, lisensi MIT?, dependensi: kartograf/lomap, gufe, openmmtools) dan
@@ -676,12 +676,12 @@ Aturan: jangan commit/build/regresi penuh. Laporan akhir ≤ 15 baris.
 ## P-RILIS — Rilis versi (pakai ulang untuk 1.2, 1.3, …)
 
 ```text
-Siapkan rilis VirmoDock <VERSI>. Folder: E:\Bikin Docking Simpel\VirmoDock.
+Siapkan rilis VirmoLab <VERSI>. Folder: E:\Bikin Docking Simpel\VirmoLab.
 Python: .venv/Scripts/python.exe (PYTHONIOENCODING=utf-8, PYTHONPATH=.).
 
-1. Naikkan versi di virmodock/__init__.py; rapikan CHANGELOG.md bagian [<VERSI>] (tanggal hari ini, Baru/Diperbaiki/
+1. Naikkan versi di virmolab/__init__.py; rapikan CHANGELOG.md bagian [<VERSI>] (tanggal hari ini, Baru/Diperbaiki/
    Diubah, tanpa duplikat).
-2. pyflakes virmodock bersih.
+2. pyflakes virmolab bersih.
 3. i18n: dev/ekstrak_teks.py → terjemahkan sisa → dev/buat_kamus.py → dev/cek_mutu_i18n.py = 0.
 4. Dokumen docs/*.html sesuai fitur baru; tutorial PDF hanya bila alur dasar berubah.
 5. dev/siapkan_contoh.py lalu dev/regresi.py SEKALI. Tampilkan hanya ringkasan + nama uji gagal. Bila gagal:
@@ -694,7 +694,7 @@ Python: .venv/Scripts/python.exe (PYTHONIOENCODING=utf-8, PYTHONPATH=.).
 ## P-COMMIT
 
 ```text
-Periksa git status di E:\Bikin Docking Simpel\VirmoDock. Tampilkan ringkasan berkas berubah (jumlah per folder).
+Periksa git status di E:\Bikin Docking Simpel\VirmoLab. Tampilkan ringkasan berkas berubah (jumlah per folder).
 Berkas tak terlacak yang tampak sementara (scratch/, *.tmp, keluaran uji) jangan ikut — tanyakan bila ragu.
 Commit satu commit dengan pesan Conventional Commits Bahasa Indonesia: feat(<area>): <ringkasan versi>,
 badan berupa poin per fitur. Jangan push. Laporkan hash.
@@ -703,7 +703,7 @@ badan berupa poin per fitur. Jangan push. Laporkan hash.
 ## P-BUILD
 
 ```text
-Build rilis VirmoDock dari commit terakhir. Folder: E:\Bikin Docking Simpel\VirmoDock.
+Build rilis VirmoLab dari commit terakhir. Folder: E:\Bikin Docking Simpel\VirmoLab.
 Pastikan git status bersih (kecuali berkas tak terlacak yang memang diabaikan). Jalankan di latar belakang:
 .venv/Scripts/python.exe build_tools/rilis.py > build/rilis_<versi>.log 2>&1
 Setelah selesai: laporkan ukuran Setup & Portable, hasil uji mandiri, dan SHA256SUMS. Jangan ubah berkas sumber

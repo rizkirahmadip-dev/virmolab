@@ -6,14 +6,14 @@ from pathlib import Path
 from PySide6.QtCore import QSettings, QTimer
 
 sys.argv = [sys.argv[0]]
-st = QSettings("VirmoDock", "VirmoDock")
+st = QSettings("VirmoLab", "VirmoLab")
 for k in ("layout", "layout_v2", "sesi_terbuka", "geometri"):
     st.remove(k)
 st.setValue("wizard_selesai", True)
 st.setValue("tema", "terang")
 UK = [int(x) for x in os.environ.get("VD_UKURAN", "1440x900").split("x")]
 
-import virmodock.app as A  # noqa: E402
+import virmolab.app as A  # noqa: E402
 from PySide6.QtWidgets import QApplication  # noqa: E402
 Path("dev/uji/gambar").mkdir(parents=True, exist_ok=True)  # keluaran gambar uji
 
@@ -25,7 +25,7 @@ JS = ("(()=>{const g=document.getElementById('gl').getBoundingClientRect(), c=VM
 
 
 def hook():
-    from virmodock.ui import mainwindow
+    from virmolab.ui import mainwindow
 
     class U(mainwindow.JendelaUtama):
         def __init__(s):

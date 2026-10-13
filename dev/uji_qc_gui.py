@@ -10,7 +10,7 @@ from pathlib import Path
 from PySide6.QtCore import QSettings, QTimer
 
 sys.argv = [sys.argv[0]]
-st = QSettings("VirmoDock", "VirmoDock")
+st = QSettings("VirmoLab", "VirmoLab")
 st.setValue("tema", "terang")
 st.remove("layout")
 st.remove("sesi_terbuka")
@@ -21,14 +21,14 @@ PROYEK = OUT / "proyek_uji.vmd"
 shutil.rmtree(PROYEK, ignore_errors=True)
 shutil.copytree(SUMBER, PROYEK)
 
-import virmodock.app as A
+import virmolab.app as A
 from PySide6.QtWidgets import QApplication, QMessageBox
 
 QMessageBox.information = staticmethod(lambda *a, **k: print("INFO:", a[2] if len(a) > 2 else a, flush=True))
 
 
 def hook():
-    from virmodock.ui import mainwindow
+    from virmolab.ui import mainwindow
     Asli = mainwindow.JendelaUtama
     teks_dialog = []
     QMessageBox.exec = lambda self: teks_dialog.append(self.text()) or 0
@@ -68,12 +68,12 @@ def hook():
                 QApplication.quit()
                 return
             s._muat_hasil()
-            from virmodock.ui.panel_hasil import K_QC
+            from virmolab.ui.panel_hasil import K_QC
             p = s.hasil.pohon
             print("kolom:", p.headerItem().text(K_QC), "| contoh:",
                   [(p.topLevelItem(i).text(1), p.topLevelItem(i).text(K_QC)) for i in range(4)], flush=True)
             s.grab().save(str(OUT / "gui_hasil.png"))
-            b = __import__("virmodock.core.ekspor", fromlist=["x"]).baris_hasil(s.proyek)
+            b = __import__("virmolab.core.ekspor", fromlist=["x"]).baris_hasil(s.proyek)
             gagal = next((x for x in b if x.get("qc") and not x["qc"].get("lulus")), b[0] if b else None)
             s.buka_pose(gagal["job"], gagal["lid"], 1)
             QTimer.singleShot(3000, s.l2)

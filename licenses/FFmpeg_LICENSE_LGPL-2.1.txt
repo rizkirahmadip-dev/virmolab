@@ -1,6 +1,6 @@
 FFmpeg n7.1.5 (avcodec, avformat, avutil, swresample, swscale) - dibawa PySide6/Qt Multimedia
 
-Dipakai VirmoDock untuk menulis video MP4 (Berkas > Ekspor > Video / animasi 3D).
+Dipakai VirmoLab untuk menulis video MP4 (Berkas > Ekspor > Video / animasi 3D).
 Build ini berlisensi GNU LGPL versi 2.1 atau lebih baru (dikonfigurasi tanpa --enable-gpl dan
 tanpa --enable-nonfree), ditautkan secara dinamis (DLL) sehingga dapat diganti pengguna.
 Kode sumber: https://ffmpeg.org/releases/ (versi 7.1.5). Konfigurasi build tercantum di dalam

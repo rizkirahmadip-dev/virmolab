@@ -383,7 +383,7 @@ def stills(nama):
 
 
 def video(nama):
-    from virmodock.ui.perekam_video import PerekamVideo
+    from virmolab.ui.perekam_video import PerekamVideo
     W, H, mode = TATA[nama]
     T = Tata(W, H, mode)
     bg, bay = latar(W, H), bayangan(1)

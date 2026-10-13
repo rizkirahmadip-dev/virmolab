@@ -14,7 +14,7 @@ if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 sys.argv = [sys.argv[0]]
-st = QSettings("VirmoDock", "VirmoDock")
+st = QSettings("VirmoLab", "VirmoLab")
 st.setValue("tema", "terang")
 st.remove("layout")
 st.remove("sesi_terbuka")
@@ -41,14 +41,14 @@ PROYEK = OUT / "proyek_uji.vmd"
 shutil.rmtree(PROYEK, ignore_errors=True)
 shutil.copytree(SUMBER, PROYEK)
 
-import virmodock.app as A
+import virmolab.app as A
 from PySide6.QtWidgets import QApplication, QMessageBox
 
 QMessageBox.information = staticmethod(lambda *a, **k: print("INFO:", a[2] if len(a) > 2 else a, flush=True))
 
 
 def hook():
-    from virmodock.ui import mainwindow
+    from virmolab.ui import mainwindow
     Asli = mainwindow.JendelaUtama
 
     class Uji(Asli):
@@ -76,7 +76,7 @@ def hook():
             st_ = s.statistik
             print(f"muat: {time.perf_counter() - t:.2f} s; job: {[st_.c_job.itemText(i) for i in range(st_.c_job.count())]}")
             print("data job terpilih:", len(st_.data), flush=True)
-            for i, (k, _t) in enumerate(__import__("virmodock.ui.tab_statistik", fromlist=["JENIS"]).JENIS):
+            for i, (k, _t) in enumerate(__import__("virmolab.ui.tab_statistik", fromlist=["JENIS"]).JENIS):
                 st_.c_jenis.setCurrentIndex(i)
                 svg, ukuran = st_.svg()
                 if k == "ifp" and not any(d.get("ifp") for d in st_.data):

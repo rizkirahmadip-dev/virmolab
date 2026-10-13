@@ -3,10 +3,10 @@ import time
 from pathlib import Path
 from PySide6.QtCore import QTimer
 from PySide6.QtWidgets import QApplication
-from virmodock.app import siapkan_kimia
+from virmolab.app import siapkan_kimia
 siapkan_kimia()
-from virmodock.core import antrean as A, molekul, prep_ligan as L
-from virmodock.core.proyek import Proyek
+from virmolab.core import antrean as A, molekul, prep_ligan as L
+from virmolab.core.proyek import Proyek
 
 app = QApplication([])
 pr = Proyek.buka(sorted(Path("dev/uji/kerja_docs").glob("*.vmd"))[-1])

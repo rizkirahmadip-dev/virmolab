@@ -14,14 +14,14 @@ shutil.rmtree(KERJA, ignore_errors=True)
 KERJA.mkdir(parents=True)
 OUT = Path("docs/gambar").resolve()
 OUT.mkdir(parents=True, exist_ok=True)
-st = QSettings("VirmoDock", "VirmoDock")
+st = QSettings("VirmoLab", "VirmoLab")
 for k in ("layout", "layout_v2", "sesi_terbuka", "geometri", "kolom_hasil", "proyek_terakhir"):
     st.remove(k)
 st.setValue("wizard_selesai", True)
 st.setValue("tema", "terang")
 st.setValue("folder_kerja", str(KERJA))
 
-import virmodock.app as A
+import virmolab.app as A
 from PySide6.QtWidgets import QApplication, QDialog, QMessageBox
 
 QMessageBox.information = staticmethod(lambda *a, **k: None)
@@ -36,14 +36,14 @@ def simpan(w, nama):
 
 
 def hook():
-    from virmodock.ui import mainwindow
-    from virmodock.core import prep_reseptor, prep_ligan, molekul, ekspor
-    from virmodock.ui import kerja
-    from virmodock.ui.dialog_reseptor import DialogReseptor
-    from virmodock.ui.dialog_ligan import DialogLigan
-    from virmodock.ui.dialog_ekspor import DialogEkspor
-    from virmodock.ui.dialog_bantuan import DialogLapor
-    from virmodock.ui.dialogs import Wizard
+    from virmolab.ui import mainwindow
+    from virmolab.core import prep_reseptor, prep_ligan, molekul, ekspor
+    from virmolab.ui import kerja
+    from virmolab.ui.dialog_reseptor import DialogReseptor
+    from virmolab.ui.dialog_ligan import DialogLigan
+    from virmolab.ui.dialog_ekspor import DialogEkspor
+    from virmolab.ui.dialog_bantuan import DialogLapor
+    from virmolab.ui.dialogs import Wizard
 
     class U(mainwindow.JendelaUtama):
         def __init__(s):
@@ -167,7 +167,7 @@ def hook():
                                              s.komposer.close(), s.l14d()))
 
         def l14d(s):
-            from virmodock.ui.dialog_animasi import DialogAnimasi
+            from virmolab.ui.dialog_animasi import DialogAnimasi
             d = DialogAnimasi(s, s.viewer.height() / max(1, s.viewer.width()))
             d.c_jenis.setCurrentIndex(d.c_jenis.findData("sinema"))
             d.c_fmt.setCurrentIndex(d.c_fmt.findData("mp4"))

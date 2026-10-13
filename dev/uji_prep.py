@@ -1,5 +1,5 @@
 import sys, time
-from virmodock.core import prep_reseptor as P
+from virmolab.core import prep_reseptor as P
 for k in sys.argv[1:]:
     t=time.time()
     h=P.siapkan(open(f"dev/uji/{k}.pdb").read())

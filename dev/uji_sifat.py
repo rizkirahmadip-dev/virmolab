@@ -4,7 +4,7 @@ PYTHONIOENCODING=utf-8 PYTHONPATH=. .venv/Scripts/python.exe dev/uji_sifat.py
 """
 from pathlib import Path
 
-from virmodock.core import sifat
+from virmolab.core import sifat
 
 OBAT = {  # SMILES, harapan GI, harapan BBB
     "Aspirin": ("CC(=O)Oc1ccccc1C(=O)O", True, True),

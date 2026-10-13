@@ -1,7 +1,7 @@
 import time
 from concurrent.futures import ThreadPoolExecutor
-from virmodock.app import siapkan_kimia; siapkan_kimia()
-from virmodock.core import molekul, prep_ligan as L
+from virmolab.app import siapkan_kimia; siapkan_kimia()
+from virmolab.core import molekul, prep_ligan as L
 nama = "quercetin kaempferol luteolin apigenin naringenin hesperetin curcumin resveratrol caffeine ibuprofen aspirin paracetamol oseltamivir remdesivir lopinavir ritonavir nelfinavir saquinavir indinavir darunavir".split()
 t = time.time()
 with ThreadPoolExecutor(6) as ex:

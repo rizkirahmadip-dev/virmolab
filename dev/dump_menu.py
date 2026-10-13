@@ -4,7 +4,7 @@ import sys
 from PySide6.QtCore import QTimer
 
 sys.argv = [sys.argv[0]]
-import virmodock.app as A  # noqa: E402
+import virmolab.app as A  # noqa: E402
 from PySide6.QtWidgets import QApplication, QDockWidget, QWidgetAction  # noqa: E402
 
 
@@ -24,7 +24,7 @@ def cetak_menu(m, ind=0):
 
 
 def hook():
-    from virmodock.ui import mainwindow
+    from virmolab.ui import mainwindow
 
     class U(mainwindow.JendelaUtama):
         def __init__(s):

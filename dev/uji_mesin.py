@@ -1,6 +1,6 @@
 import subprocess, time, sys
 from pathlib import Path
-from virmodock.core import mesin as M
+from virmolab.core import mesin as M
 import pathlib as _pl
 _butuh = [_pl.Path("dev/uji/1HSG_rec.pdbqt"), _pl.Path("dev/uji/MK1.pdbqt")]
 if not all(f.exists() for f in _butuh):

@@ -2,7 +2,7 @@
 tur aplikasi, mode Ahli/Pemula, paket Supplementary, paket Lapor masalah.
 
   PYTHONIOENCODING=utf-8 PYTHONPATH=. .venv/Scripts/python.exe dev/uji_095_gui.py
-Keluaran: dev/uji/v095/ (gui_*.png = grab jendela VirmoDock saja). Butuh dev/uji/md_gui/proyek_md.vmd untuk
+Keluaran: dev/uji/v095/ (gui_*.png = grab jendela VirmoLab saja). Butuh dev/uji/md_gui/proyek_md.vmd untuk
 uji Supplementary (dibuat dev/uji_md_gui.py); bila tidak ada, bagian itu dilewati.
 """
 import shutil
@@ -13,7 +13,7 @@ from pathlib import Path
 from PySide6.QtCore import QSettings, QTimer
 
 sys.argv = [sys.argv[0]]
-st = QSettings("VirmoDock", "VirmoDock")
+st = QSettings("VirmoLab", "VirmoLab")
 st.setValue("tema", "terang")
 st.remove("layout")
 st.remove("sesi_terbuka")
@@ -24,7 +24,7 @@ OUT.mkdir(parents=True)
 st.setValue("folder_kerja", str(OUT))
 SUPP = Path("dev/uji/md_gui/proyek_md.vmd").resolve()
 
-import virmodock.app as A
+import virmolab.app as A
 from PySide6.QtWidgets import QApplication, QFileDialog, QMessageBox
 
 QMessageBox.information = staticmethod(lambda *a, **k: print("INFO:", a[2] if len(a) > 2 else a, flush=True))
@@ -40,13 +40,13 @@ def cek(kondisi, pesan):
 
 
 def hook():
-    from virmodock.ui import dialog_templat, mainwindow
+    from virmolab.ui import dialog_templat, mainwindow
 
     def exec_templat(self):
         self.show()
         QApplication.processEvents()
         self.grab().save(str(OUT / "dialog_templat.png"))
-        from virmodock.core import templat as Tm
+        from virmolab.core import templat as Tm
         cek(self.daftar.count() == len(Tm.TEMPLAT), f"templat: {self.daftar.count()} pilihan")
         self.daftar.setCurrentRow(0)
         return 1
@@ -104,7 +104,7 @@ def hook():
             s.urungkan()
             cek(p.gaya.get("reps") == lama.get("reps"), f"urungkan gaya tampilan: {p.gaya.get('reps')}")
             # palet perintah
-            from virmodock.ui.palet import DialogPalet
+            from virmolab.ui.palet import DialogPalet
             d = DialogPalet(s)
             d.show()
             d.kotak.setText("siapkan reseptor")
@@ -137,10 +137,10 @@ def hook():
             QApplication.processEvents()
             cek(not t.isVisible(), f"tur {n} langkah lalu tertutup")
             # lapor masalah: paket zip
-            from virmodock.ui.dialog_bantuan import DialogLapor
+            from virmolab.ui.dialog_bantuan import DialogLapor
             dl = DialogLapor("uji", s.env, s)
             dl.simpan_zip()
-            z = sorted(OUT.glob("laporan_VirmoDock_*.zip"))
+            z = sorted(OUT.glob("laporan_VirmoLab_*.zip"))
             cek(bool(z) and "laporan.txt" in zipfile.ZipFile(z[-1]).namelist(), f"paket lapor masalah: {z[-1].name if z else '-'}")
             # Supplementary dari proyek uji MD
             if SUPP.exists():

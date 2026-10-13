@@ -1,6 +1,6 @@
 import subprocess, pathlib
-from virmodock.app import siapkan_kimia; siapkan_kimia()
-from virmodock.core import prep_ligan as L, analisis as A, mesin as M, molekul
+from virmolab.app import siapkan_kimia; siapkan_kimia()
+from virmolab.core import prep_ligan as L, analisis as A, mesin as M, molekul
 lig = [o for o in molekul.baca_teks_struktur(open("dev/uji/1HSG.pdb").read(), "1HSG") if o.jenis == "ligan"][0]
 kr = A.mol_kristal(lig.teks)
 d = pathlib.Path("dev/uji/run")

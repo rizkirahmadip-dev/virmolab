@@ -1,5 +1,5 @@
 import time
-from virmodock.core import prep_ligan as L, molekul
+from virmolab.core import prep_ligan as L, molekul
 lig=[o for o in molekul.baca_teks_struktur(open("dev/uji/1HSG.pdb").read(),"1HSG") if o.jenis=="ligan"][0]
 d=[(lig.nama,lig.teks,"pdb"),("aspirin","CC(=O)Oc1ccccc1C(=O)O","smiles"),("salah","C1CC(","smiles"),
    ("cast", open("dev/uji/cast.sdf").read() if False else "COc1cc(O)c2c(c1)oc(-c1ccc(OC)c(O)c1)c(OC)c2=O","smiles"),

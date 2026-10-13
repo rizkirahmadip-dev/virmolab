@@ -9,9 +9,9 @@ import numpy as np
 from rdkit import Chem
 from rdkit.Geometry import Point3D
 
-from virmodock.core import analisis, qc
-from virmodock.core import mesin as M
-from virmodock.core.proyek import Proyek
+from virmolab.core import analisis, qc
+from virmolab.core import mesin as M
+from virmolab.core.proyek import Proyek
 
 assert qc.tersedia()
 pr = Proyek.buka("dev/uji/statistik/gui/proyek_uji.vmd")

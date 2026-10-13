@@ -1,6 +1,6 @@
 import sys
-from virmodock.app import siapkan_kimia; siapkan_kimia()
-from virmodock.core import analisis as A, mesin as M, diagram2d
+from virmolab.app import siapkan_kimia; siapkan_kimia()
+from virmolab.core import analisis as A, mesin as M, diagram2d
 from PySide6.QtWidgets import QApplication
 from PySide6.QtSvg import QSvgRenderer
 from PySide6.QtGui import QImage, QPainter, QColor

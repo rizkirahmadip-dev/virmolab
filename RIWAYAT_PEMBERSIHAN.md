@@ -1,10 +1,10 @@
 # Riwayat pembersihan folder (10 Oktober 2026)
 
-Folder besar di dalam `VirmoDock` dihapus karena hanya hasil generate. Aplikasi pengembangan tidak membaca folder itu.
+Folder besar di dalam `VirmoLab` dihapus karena hanya hasil generate. Aplikasi pengembangan tidak membaca folder itu.
 
-Yang menjalankan aplikasi tetap `Jalankan VirmoDock (dev).bat`: kode sumber, `.venv`, dan `vendor`. Tiga itu tidak dihapus.
+Yang menjalankan aplikasi tetap `Jalankan VirmoLab (dev).bat`: kode sumber, `.venv`, dan `vendor`. Tiga itu tidak dihapus.
 
-Kode pada saat pembersihan: commit `47ca59c` (VirmoDock 0.9.5) di cabang `main`, hanya lokal.
+Kode pada saat pembersihan: commit `47ca59c` (VirmoLab 0.9.5) di cabang `main`, hanya lokal.
 
 ## Yang dihapus
 
@@ -20,10 +20,10 @@ Build installer **0.9.5 belum pernah dibuat**. Yang hilang dari `rilis` hanya pa
 Checksum paket yang dihapus (berkas `SHA256SUMS-0.9.3.txt` dan `SHA256SUMS-0.9.4.txt`):
 
 ```
-94e3742ca0a6724bba78a3f00204cd886116f61250c5d9feb92a3b52c094fc0d  VirmoDock-Setup-0.9.3.exe
-6903ec6e9f5b5501ccb5fb1dfbd28744dc50f40c17330a922e10071764c5d66b  VirmoDock-Portable-0.9.3.zip
-642830ed7bb7e85cf323e7771e1ddfa1389c23d8f170e9e75c0f1d9530dd41bb  VirmoDock-Setup-0.9.4.exe
-fc89728f5deca49c076557e6b65648d9ab8cc16c3c5898368d699c2278a5a71b  VirmoDock-Portable-0.9.4.zip
+94e3742ca0a6724bba78a3f00204cd886116f61250c5d9feb92a3b52c094fc0d  VirmoLab-Setup-0.9.3.exe
+6903ec6e9f5b5501ccb5fb1dfbd28744dc50f40c17330a922e10071764c5d66b  VirmoLab-Portable-0.9.3.zip
+642830ed7bb7e85cf323e7771e1ddfa1389c23d8f170e9e75c0f1d9530dd41bb  VirmoLab-Setup-0.9.4.exe
+fc89728f5deca49c076557e6b65648d9ab8cc16c3c5898368d699c2278a5a71b  VirmoLab-Portable-0.9.4.zip
 ```
 
 Rilis 0.9.0–0.9.2 sudah dipindah ke Recycle Bin pada 9 Oktober 2026 (sekitar 2,5 GB), sebelum pembersihan ini.
@@ -50,7 +50,7 @@ Uji 0.9.5 yang dicatat di `CATATAN_TAHAP2.md` §4m, bukan di tiga log itu: GUI `
 
 ## Kalau nanti terasa seperti bug
 
-Jendela aplikasi yang dibuka dari `Jalankan VirmoDock (dev).bat` tidak bergantung pada `rilis`, `dist`, `build`, atau keluaran `dev\uji`. Hilangnya folder itu bukan penyebab docking, viewer, atau menu rusak.
+Jendela aplikasi yang dibuka dari `Jalankan VirmoLab (dev).bat` tidak bergantung pada `rilis`, `dist`, `build`, atau keluaran `dev\uji`. Hilangnya folder itu bukan penyebab docking, viewer, atau menu rusak.
 
 Yang memang membuat aplikasi tidak jalan:
 

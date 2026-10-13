@@ -5,7 +5,7 @@ import sys
 # Tambahkan direktori kerja ke path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from virmodock.core import ppi
+from virmolab.core import ppi
 
 # Mock PDB dimer mini (Rantai A dan Rantai B berdekatan)
 PDB_DIMER_MINI = """ATOM      1  N   ASP A   1      10.000  10.000  10.000  1.00 20.00           N

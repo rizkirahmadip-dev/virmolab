@@ -13,7 +13,7 @@ from PySide6.QtCore import QSettings, QTimer
 
 PILIH = sys.argv[1:]
 sys.argv = [sys.argv[0]]
-st = QSettings("VirmoDock", "VirmoDock")
+st = QSettings("VirmoLab", "VirmoLab")
 st.setValue("tema", "terang")
 st.remove("layout")
 st.remove("sesi_terbuka")
@@ -41,7 +41,7 @@ PROYEK = OUT / SUMBER.name
 shutil.copytree(SUMBER, PROYEK)
 st.setValue("folder_kerja", str(OUT))
 
-import virmodock.app as A
+import virmolab.app as A
 from PySide6.QtWidgets import QApplication, QDialog, QFileDialog, QMessageBox
 
 QMessageBox.information = staticmethod(lambda *a, **k: print("INFO:", a[2] if len(a) > 2 else a, flush=True))
@@ -72,7 +72,7 @@ def cek(kondisi, pesan):
 
 
 def hook():
-    from virmodock.ui import mainwindow
+    from virmolab.ui import mainwindow
     Asli = mainwindow.JendelaUtama
 
     class Uji(Asli):

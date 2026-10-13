@@ -19,7 +19,7 @@ import numpy as np
 from rdkit import Chem
 from rdkit.Chem import AllChem
 
-from virmodock.core import md_analisis
+from virmolab.core import md_analisis
 
 
 class UjiMDAnalisisSintetis(unittest.TestCase):
@@ -218,7 +218,7 @@ class UjiMDAnalisisNyata(unittest.TestCase):
         memakai kode jenis yang salah sehingga selalu 0, dan okupansi dihitung per interaksi sehingga > 100 %.
         """
         import json
-        from virmodock.core import md as mdmod
+        from virmolab.core import md as mdmod
         run = Path("dev/uji/md_gui/proyek_md.vmd/md/MD20261013_092349")
         if not (run / "MK1_1" / "trajektori_terlarut.dcd").exists():
             self.skipTest("Trajektori MK1 nyata tidak ditemukan - LEWAT.")

@@ -1,4 +1,4 @@
-"""Ekstrak teks UI (literal & f-string) dari kode untuk kamus terjemahan virmodock/i18n/en.json.
+"""Ekstrak teks UI (literal & f-string) dari kode untuk kamus terjemahan virmolab/i18n/en.json.
 
   PYTHONIOENCODING=utf-8 PYTHONPATH=. .venv/Scripts/python.exe dev/ekstrak_teks.py
 Keluaran: dev/i18n_teks_baru.json {"literal": [...], "pola": [...]} — hanya teks yang BELUM ada di kamus.
@@ -11,7 +11,7 @@ import json
 import re
 from pathlib import Path
 
-BERKAS = sorted(Path("virmodock/ui").glob("*.py")) + [Path(f"virmodock/core/{n}.py") for n in (
+BERKAS = sorted(Path("virmolab/ui").glob("*.py")) + [Path(f"virmolab/core/{n}.py") for n in (
     "statistik", "analisis", "kemiripan", "admet", "protonasi", "periksa_protein", "sifat", "grafik", "grafik_uji",
     "uji", "pustaka", "chembl", "env", "qc", "konsensus", "ujimandiri", "mesin", "prep_reseptor", "prep_ligan",
     "molekul", "laporan", "ekspor", "p2rank", "pindah", "proyek", "antrean", "alphafold", "md")]
@@ -61,7 +61,7 @@ def pola_f(node):
 
 def main():
     kamus = {}
-    p_en = Path("virmodock/i18n/en.json")
+    p_en = Path("virmolab/i18n/en.json")
     if p_en.exists():
         d = json.loads(p_en.read_text(encoding="utf-8"))
         kamus = {**d.get("teks", {}), **d.get("pola", {})}

@@ -27,17 +27,17 @@ sys.argv = [sys.argv[0]]
 KERJA = Path("dev/uji/admet").resolve()
 shutil.rmtree(KERJA, ignore_errors=True)
 shutil.copytree(SUMBER, KERJA / SUMBER.name)
-st = QSettings("VirmoDock", "VirmoDock")
+st = QSettings("VirmoLab", "VirmoLab")
 for k in ("sesi_terbuka", "proyek_terakhir"):
     st.remove(k)
 st.setValue("wizard_selesai", True)
 
-import virmodock.app as A
+import virmolab.app as A
 from PySide6.QtWidgets import QApplication
 
 
 def hook():
-    from virmodock.ui import mainwindow
+    from virmolab.ui import mainwindow
 
     class U(mainwindow.JendelaUtama):
         def __init__(s):
@@ -53,7 +53,7 @@ def hook():
             QTimer.singleShot(4000, s.l2)
 
         def l2(s):
-            from virmodock.ui.dialog_admet import DialogAdmet
+            from virmolab.ui.dialog_admet import DialogAdmet
             d = s.dlg = DialogAdmet(s)
             d.resize(1300, 760)
             d.show()
@@ -89,7 +89,7 @@ def hook():
             d.grab().save(str(KERJA / "admet.png"))
             d.ekspor()
             print("cache proyek:", sum(1 for l in s.proyek.ligan if l.get("admet")), flush=True)
-            from virmodock.ui.dialog_admet import DialogAdmet
+            from virmolab.ui.dialog_admet import DialogAdmet
             d2 = DialogAdmet(s)
             print("buka ulang, belum dihitung:", sum(1 for x in d2.lig if x["hasil"] is None), flush=True)
             d2.close()

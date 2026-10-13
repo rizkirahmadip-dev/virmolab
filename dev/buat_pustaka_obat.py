@@ -1,4 +1,4 @@
-"""Buat snapshot pustaka 'Obat disetujui' dari ChEMBL (max_phase = 4, molekul kecil) -> virmodock/aset/obat_disetujui.tsv.gz
+"""Buat snapshot pustaka 'Obat disetujui' dari ChEMBL (max_phase = 4, molekul kecil) -> virmolab/aset/obat_disetujui.tsv.gz
 
   PYTHONIOENCODING=utf-8 PYTHONPATH=. .venv/Scripts/python.exe dev/buat_pustaka_obat.py
 Data ChEMBL CC BY-SA 3.0 (atribusi di LISENSI_PIHAK_KETIGA.txt). Kolom: chembl, nama, smiles, tahun_setuju, oral,
@@ -11,13 +11,13 @@ import urllib.request
 from pathlib import Path
 
 API = "https://www.ebi.ac.uk/chembl/api/data"
-KELUAR = Path("virmodock/aset/obat_disetujui.tsv.gz")
+KELUAR = Path("virmolab/aset/obat_disetujui.tsv.gz")
 
 
 def get(url):
     for coba in range(4):
         try:
-            r = urllib.request.Request(url, headers={"User-Agent": "VirmoDock/1.0", "Accept": "application/json"})
+            r = urllib.request.Request(url, headers={"User-Agent": "VirmoLab/1.0", "Accept": "application/json"})
             return json.loads(urllib.request.urlopen(r, timeout=120).read().decode("utf-8"))
         except Exception as e:
             print("ulang:", e)

@@ -11,8 +11,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import numpy as np  # noqa: E402
 from scipy import stats  # noqa: E402
 
-from virmodock.core import konsensus as K  # noqa: E402
-from virmodock.core import uji as U  # noqa: E402
+from virmolab.core import konsensus as K  # noqa: E402
+from virmolab.core import uji as U  # noqa: E402
 
 gagal = []
 

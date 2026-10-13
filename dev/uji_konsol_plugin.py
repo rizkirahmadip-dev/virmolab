@@ -10,14 +10,14 @@ from pathlib import Path
 from PySide6.QtCore import QSettings, QTimer
 
 sys.argv = [sys.argv[0]]
-st = QSettings("VirmoDock", "VirmoDock")
+st = QSettings("VirmoLab", "VirmoLab")
 st.setValue("tema", "terang")
 st.remove("layout")
 st.remove("sesi_terbuka")
 OUT = Path("dev/uji/v095/plugin").resolve()
 shutil.rmtree(OUT, ignore_errors=True)
 OUT.mkdir(parents=True)
-from virmodock.core import plugin as P
+from virmolab.core import plugin as P
 
 P.FOLDER = OUT
 (OUT / "halo.py").write_text('PLUGIN = {"nama": "Halo", "versi": "0.1", "keterangan": "uji"}\n'
@@ -26,7 +26,7 @@ P.FOLDER = OUT
                              '            ("Galat", lambda: 1 / 0)]\n', encoding="utf-8")
 (OUT / "rusak.py").write_text("def pasang(vd):\n    return [\n", encoding="utf-8")
 
-import virmodock.app as A
+import virmolab.app as A
 from PySide6.QtWidgets import QApplication
 
 gagal = []
@@ -39,7 +39,7 @@ def cek(kondisi, pesan):
 
 
 def hook():
-    from virmodock.ui import mainwindow
+    from virmolab.ui import mainwindow
     Asli = mainwindow.JendelaUtama
 
     class Uji(Asli):

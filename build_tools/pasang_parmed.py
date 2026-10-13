@@ -1,6 +1,6 @@
 """Pasang ParmEd 4.3.1 tanpa ekstensi C++ _rdparm.
 
-Sumber resmi butuh Visual C++ untuk parser prmtop cepat. VirmoDock hanya memakai
+Sumber resmi butuh Visual C++ untuk parser prmtop cepat. VirmoLab hanya memakai
 penulis topologi GROMACS, yang berjalan di Python murni. Berkas Python ParmEd tidak diubah.
 """
 import tarfile

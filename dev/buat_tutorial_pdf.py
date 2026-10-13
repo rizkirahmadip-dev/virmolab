@@ -1,4 +1,4 @@
-"""Tutorial PDF: docs/_sumber/tutorial.html -> docs/Tutorial_Docking_VirmoDock.pdf (Chromium Qt WebEngine, A4)."""
+"""Tutorial PDF: docs/_sumber/tutorial.html -> docs/Tutorial_Docking_VirmoLab.pdf (Chromium Qt WebEngine, A4)."""
 import re
 import sys
 from datetime import date
@@ -10,7 +10,7 @@ from PySide6.QtWidgets import QApplication
 from PySide6.QtWebEngineCore import QWebEnginePage
 
 AKAR = Path(__file__).resolve().parents[1]
-versi = re.search(r'__version__ = "([^"]+)"', (AKAR / "virmodock" / "__init__.py").read_text()).group(1)
+versi = re.search(r'__version__ = "([^"]+)"', (AKAR / "virmolab" / "__init__.py").read_text()).group(1)
 bulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober",
          "November", "Desember"]
 t = date.today()
@@ -18,7 +18,7 @@ html = (AKAR / "docs" / "_sumber" / "tutorial.html").read_text(encoding="utf-8")
 html = html.replace("{{VERSI}}", versi).replace("{{TANGGAL}}", f"{t.day} {bulan[t.month - 1]} {t.year}")
 cetak = AKAR / "docs" / "_sumber" / "_tutorial_cetak.html"
 cetak.write_text(html, encoding="utf-8")
-keluar = AKAR / "docs" / "Tutorial_Docking_VirmoDock.pdf"
+keluar = AKAR / "docs" / "Tutorial_Docking_VirmoLab.pdf"
 
 app = QApplication(sys.argv)
 hal = QWebEnginePage()

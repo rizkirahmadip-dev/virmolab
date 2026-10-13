@@ -16,14 +16,14 @@ sys.argv = [sys.argv[0]]
 KERJA = Path("dev/uji/bahasa").resolve()
 shutil.rmtree(KERJA, ignore_errors=True)
 shutil.copytree(SUMBER, KERJA / SUMBER.name)
-st = QSettings("VirmoDock", "VirmoDock")
+st = QSettings("VirmoLab", "VirmoLab")
 for k in ("sesi_terbuka", "proyek_terakhir", "layout_v2"):
     st.remove(k)
 st.setValue("wizard_selesai", True)
 st.setValue("bahasa", sys.argv[1] if len(sys.argv) > 1 else "en")
 
-import virmodock.app as A
-from virmodock import i18n
+import virmolab.app as A
+from virmolab import i18n
 from PySide6.QtWidgets import QApplication, QMessageBox
 
 QMessageBox.information = staticmethod(lambda *a, **k: None)
@@ -36,7 +36,7 @@ asli = i18n.pasang
 
 def pasang(app):
     asli(app)
-    from virmodock.ui import mainwindow
+    from virmolab.ui import mainwindow
 
     class U(mainwindow.JendelaUtama):
         def __init__(s):
@@ -80,7 +80,7 @@ def pasang(app):
                 QApplication.processEvents()
                 s.grab().save(str(KERJA / f"tab_{n}.png"))
                 s.periksa(w, "tab " + n)
-            from virmodock.ui.dialog_reseptor import DialogReseptor
+            from virmolab.ui.dialog_reseptor import DialogReseptor
             prot = [o for o in s.objek.values() if o.jenis == "protein"]
             d = DialogReseptor(prot, {}, s, teks_sumber=s._teks_sumber_reseptor)
             d.show()
@@ -90,7 +90,7 @@ def pasang(app):
                 d.grab().save(str(KERJA / f"reseptor_{i + 1}.png"))
                 s.periksa(d, "reseptor")
             d.reject()
-            from virmodock.ui.dialog_kemiripan import DialogKemiripan
+            from virmolab.ui.dialog_kemiripan import DialogKemiripan
             d = DialogKemiripan(s)
             d.show()
             QApplication.processEvents()
@@ -109,4 +109,4 @@ i18n.pasang = pasang
 try:
     A.main()
 finally:
-    QSettings("VirmoDock", "VirmoDock").setValue("bahasa", "id")
+    QSettings("VirmoLab", "VirmoLab").setValue("bahasa", "id")

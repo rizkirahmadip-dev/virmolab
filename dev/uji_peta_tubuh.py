@@ -11,7 +11,7 @@ AKAR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(AKAR))
 sys.argv = [sys.argv[0]]
 
-from virmodock.core import peta_tubuh as PT
+from virmolab.core import peta_tubuh as PT
 
 OUT = AKAR / "dev" / "uji" / "peta_tubuh"
 shutil.rmtree(OUT, ignore_errors=True)
@@ -69,8 +69,8 @@ cek(3.0 <= PT.waktu_alur(AMAN) <= 12.0, f"durasi animasi dari waktu paruh = {PT.
 # ---------------------------------------------------------------- widget
 from PySide6.QtWidgets import QApplication
 
-from virmodock.ui import theme
-from virmodock.ui.peta_tubuh import PetaTubuh
+from virmolab.ui import theme
+from virmolab.ui.peta_tubuh import PetaTubuh
 
 app = QApplication.instance() or QApplication(sys.argv)
 for mode in ("terang", "gelap"):

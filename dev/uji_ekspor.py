@@ -1,6 +1,6 @@
 from pathlib import Path
-from virmodock.app import siapkan_kimia; siapkan_kimia()
-from virmodock.core import analisis as A, mesin as M, ekspor as E, proyek as P, prep_reseptor
+from virmolab.app import siapkan_kimia; siapkan_kimia()
+from virmolab.core import analisis as A, mesin as M, ekspor as E, proyek as P, prep_reseptor
 pr = P.Proyek.buka(sorted(Path("dev/uji/kerja").glob("*.vmd"))[-1])
 b = E.baris_hasil(pr)
 print(len(b), "baris;", b[0]["ligan"], b[0]["energi"], b[0]["le"], b[0]["rmsd_kristal"], b[0]["hbond"])

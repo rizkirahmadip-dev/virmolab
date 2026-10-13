@@ -12,7 +12,7 @@ from PySide6.QtGui import QColor, QFont, QImage, QPainter  # noqa: E402
 from PySide6.QtMultimedia import QMediaMetaData, QMediaPlayer, QVideoSink  # noqa: E402
 from PySide6.QtWidgets import QApplication  # noqa: E402
 
-from virmodock.ui.perekam_video import RESOLUSI, PerekamVideo  # noqa: E402
+from virmolab.ui.perekam_video import RESOLUSI, PerekamVideo  # noqa: E402
 
 KUNCI = sys.argv[1] if len(sys.argv) > 1 else "uhd"
 W, H, _ = RESOLUSI[KUNCI]
@@ -40,7 +40,7 @@ def bingkai(n):
     p.setBrush(QColor("#2b6fd6"))
     p.drawEllipse(int(W * n / N), H // 3, H // 4, H // 4)
     p.setFont(QFont("Segoe UI", H // 30))
-    p.drawText(40, H - 60, f"VirmoDock uji video {W}x{H} bingkai {n + 1}/{N}")
+    p.drawText(40, H - 60, f"VirmoLab uji video {W}x{H} bingkai {n + 1}/{N}")
     p.end()
     return img
 

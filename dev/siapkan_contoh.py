@@ -41,8 +41,8 @@ def butuh_masukan(*nama):
 
 def _buat_masukan(nama):
     """1HSG.pdb dari aset bawaan; MK1/aspirin PDBQT dari ligan kristal & SMILES; 3KS3.pdb diunduh dari RCSB."""
-    from virmodock.core import molekul, prep_ligan as L
-    from virmodock.core.templat import CONTOH_PDB
+    from virmolab.core import molekul, prep_ligan as L
+    from virmolab.core.templat import CONTOH_PDB
     tujuan = UJI / nama
     if nama == "1HSG.pdb":
         asal = CONTOH_PDB
@@ -78,7 +78,7 @@ def reseptor_1hsg():
     keluar = UJI / "1HSG_rec.pdbqt"
     if not perlu(keluar) or not butuh_masukan("1HSG.pdb"):
         return
-    from virmodock.core import prep_reseptor as P
+    from virmolab.core import prep_reseptor as P
     h = P.siapkan((UJI / "1HSG.pdb").read_text(encoding="utf-8"))
     keluar.write_text(h.pdbqt, encoding="utf-8")
     print(f"OK   {keluar.relative_to(AKAR)} — {h.atom} atom, {h.residu} residu")
@@ -102,7 +102,7 @@ def zinc_3ks3():
     d = UJI / "zn"
     if not perlu(d / "asp_out.pdbqt") or not butuh_masukan("3KS3.pdb", "aspirin.pdbqt"):
         return
-    from virmodock.core import mesin as M, prep_reseptor as P
+    from virmolab.core import mesin as M, prep_reseptor as P
     d.mkdir(parents=True, exist_ok=True)
     h = P.siapkan((UJI / "3KS3.pdb").read_text(encoding="utf-8"), P.OpsiReseptor(pertahankan_logam=True))
     (d / "reseptor.pdbqt").write_text(h.pdbqt, encoding="utf-8")
@@ -164,7 +164,7 @@ def _pastikan_tiga_ligan(salinan: Path):
     if len(nama_selesai) >= 3:
         return
 
-    from virmodock.core import prep_ligan as L, mesin as M
+    from virmolab.core import prep_ligan as L, mesin as M
     # Siapkan ligan ke-3: parasetamol
     para_dir = salinan / "ligan" / "pdbqt"
     para_dir.mkdir(parents=True, exist_ok=True)
@@ -248,7 +248,7 @@ def _pastikan_tiga_ligan(salinan: Path):
 
 
 if __name__ == "__main__":
-    from virmodock.app import siapkan_kimia
+    from virmolab.app import siapkan_kimia
     siapkan_kimia()
     UJI.mkdir(parents=True, exist_ok=True)
     reseptor_1hsg()

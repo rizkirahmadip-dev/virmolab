@@ -9,17 +9,17 @@ from pathlib import Path
 
 from PySide6.QtWidgets import QApplication
 
-from virmodock.app import siapkan_kimia
+from virmolab.app import siapkan_kimia
 
 siapkan_kimia()
 app = QApplication(sys.argv)
 app.setStyle("Fusion")
-from virmodock.core import molekul, periksa_protein, prep_reseptor as R
-from virmodock.ui import theme
+from virmolab.core import molekul, periksa_protein, prep_reseptor as R
+from virmolab.ui import theme
 
 app.setPalette(theme.palet("terang"))
 app.setStyleSheet(theme.qss("terang").replace("ICON_CHECK", ""))
-from virmodock.ui.dialog_reseptor import DialogReseptor
+from virmolab.ui.dialog_reseptor import DialogReseptor
 
 OUT = Path("dev/uji/wizard_reseptor")
 OUT.mkdir(parents=True, exist_ok=True)

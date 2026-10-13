@@ -1,4 +1,4 @@
-"""Logo VirmoDock: tanda "V-kantong + heksagon-ligan" dan wordmark (huruf diubah jadi path).
+"""Logo VirmoLab: tanda "V-kantong + heksagon-ligan" dan wordmark (huruf diubah jadi path).
 
 Gagasan: huruf V adalah kantong pengikatan protein; heksagon (cincin ligan) masuk ke dalamnya.
 Sisi bawah-miring heksagon sejajar persis dengan sisi dalam V dengan celah seragam —
@@ -159,7 +159,7 @@ def qpath_ke_svg(path, dx=0.0, dy=0.0, sk=1.0):
 def lockup_svg(wm, mode="horizontal", warna_v=NAVY, warna_h=BIRU, warna_t=NAVY, latar=None, tagline=None,
                warna_tag="#7b8698", **geo):
     """wm: dict keluarga/bobot/potong/spasi."""
-    path, kotak, kap = teks_ke_path("VirmoDock", wm["keluarga"], wm.get("berat", 600), 200, wm.get("spasi", 0),
+    path, kotak, kap = teks_ke_path("VirmoLab", wm["keluarga"], wm.get("berat", 600), 200, wm.get("spasi", 0),
                                     wm.get("potong"))
     v, hexa = ambil_geo(geo)
     xs = [p[0] for p in v + hexa]

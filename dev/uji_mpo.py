@@ -9,7 +9,7 @@ AKAR = Path(__file__).resolve().parents[1]
 if str(AKAR) not in sys.path:
     sys.path.insert(0, str(AKAR))
 
-from virmodock.core import grafik, mpo, sifat
+from virmolab.core import grafik, mpo, sifat
 
 # Buat data sifat uji untuk Aspirin dan Diazepam
 s_asp = sifat.dari_teks("CC(=O)Oc1ccccc1C(=O)O", "smiles")

@@ -11,7 +11,7 @@ from pathlib import Path
 from PySide6.QtCore import QSettings, QTimer
 
 sys.argv = [sys.argv[0]]
-st = QSettings("VirmoDock", "VirmoDock")
+st = QSettings("VirmoLab", "VirmoLab")
 st.setValue("tema", os.environ.get("VD_TEMA", "terang"))
 st.remove("layout")
 st.remove("sesi_terbuka")
@@ -20,7 +20,7 @@ OUT = Path("dev/uji/ekspor").resolve()
 shutil.rmtree(OUT, ignore_errors=True)
 OUT.mkdir(parents=True)
 
-import virmodock.app as A
+import virmolab.app as A
 from PySide6.QtWidgets import QApplication, QFileDialog, QMessageBox
 
 QMessageBox.information = staticmethod(lambda *a, **k: print("INFO:", a[2] if len(a) > 2 else a, flush=True))
@@ -31,7 +31,7 @@ QDesktopServices.openUrl = staticmethod(lambda *a: True)
 
 
 def hook():
-    from virmodock.ui import mainwindow
+    from virmolab.ui import mainwindow
     Asli = mainwindow.JendelaUtama
 
     class Uji(Asli):
@@ -54,7 +54,7 @@ def hook():
             QTimer.singleShot(5000, s.l2)
 
         def l2(s):
-            from virmodock.core import ekspor
+            from virmolab.core import ekspor
             b = ekspor.baris_hasil(s.proyek)
             s.p("baris hasil:", [(x["ligan"], x["energi"], x["le"], x["hbond"], x["hidrofobik"], x["rmsd_kristal"]) for x in b])
             s.buka_pose(b[0]["job"], b[0]["lid"], 1)
@@ -101,7 +101,7 @@ def hook():
         def l6(s):
             s.p("validasi:", s.proyek.validasi)
             s.grab().save("dev/uji/gambar/t3_validasi.png")
-            from virmodock.core import ekspor
+            from virmolab.core import ekspor
             b = ekspor.baris_hasil(s.proyek)
             pilih = [(x["job"], x["lid"]) for x in b[:3]]
             s.bandingkan(pilih)

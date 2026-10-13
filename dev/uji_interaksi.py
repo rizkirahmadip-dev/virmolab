@@ -1,6 +1,6 @@
 import time
-from virmodock.app import siapkan_kimia; siapkan_kimia()
-from virmodock.core import analisis as A, molekul, mesin as M
+from virmolab.app import siapkan_kimia; siapkan_kimia()
+from virmolab.core import analisis as A, molekul, mesin as M
 rec = A.baca_reseptor(open("dev/uji/1HSG_rec.pdbqt").read())
 lig = [o for o in molekul.baca_teks_struktur(open("dev/uji/1HSG.pdb").read(), "1HSG") if o.jenis == "ligan"][0]
 kr = A.mol_kristal(lig.teks)

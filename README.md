@@ -2,7 +2,7 @@
 
 # VirmoLab
 
-> **VirmoLab** adalah nama baru VirmoDock. Nama berkas program (`VirmoDock.exe`, `VirmoDock-cli.exe`), folder data, dan format proyek `.vmd` tetap sama, jadi proyek dan pengaturan lama langsung terbaca.
+> **VirmoLab** adalah nama baru VirmoLab. Nama berkas program (`VirmoLab.exe`, `VirmoLab-cli.exe`), folder data, dan format proyek `.vmd` tetap sama, jadi proyek dan pengaturan lama langsung terbaca.
 
 Aplikasi desktop Windows untuk *molecular docking* — gratis dan open-source (GPL-3.0-or-later).
 Pengganti alur AutoDockTools: impor protein/ligan, preparasi, grid box, docking, analisis interaksi,
@@ -19,7 +19,7 @@ dan ekspor siap publikasi dalam satu jendela berbahasa Indonesia.
 - **Distribusi**: installer per-pengguna tanpa admin, versi portable, pindah laptop (`.vmdbackup`).
 - **MD & MM/GBSA**: OpenMM (ff14SB + OpenFF Sage/NAGL), pelarut implisit OBC2 atau air eksplisit, dengan
   saran tingkat sesuai kemampuan laptop, jeda/lanjut, RMSD/RMSF, interaksi persisten.
-- **Baris perintah**: `VirmoDock-cli.exe` untuk docking batch dan skrip (lihat di bawah).
+- **Baris perintah**: `VirmoLab-cli.exe` untuk docking batch dan skrip (lihat di bawah).
 
 Status: **0.9.6 pra-rilis** (lihat CHANGELOG.md) — menunggu uji relawan di GPU AMD/Intel dan komputer tanpa GPU. Installer dan zip portable 0.9.6 ada di folder `rilis/` (tidak ikut git).
 
@@ -32,20 +32,20 @@ Panduan lengkap: folder [`docs/`](docs/) (juga Help › Panduan, F1) dan tutoria
 
 ## Baris perintah
 
-`VirmoDock-cli.exe` ada di folder instalasi (dari kode sumber: `python -m virmodock.cli`). Contoh:
+`VirmoLab-cli.exe` ada di folder instalasi (dari kode sumber: `python -m virmolab.cli`). Contoh:
 
 ```bat
-VirmoDock-cli dock -r 1HSG -l kandidat.smi --acuan auto -o hasil_1hsg
-VirmoDock-cli dock -r AF-P00918 -l ligan\ --kantong 1 --mesin vina --exhaustiveness 32 -o hasil_ca2
-VirmoDock-cli reseptor 1HSG -o rec.pdbqt --protonasi propka --flex A:25,B:25
-VirmoDock-cli kantong AF-P00918
-VirmoDock-cli mmgbsa -r hasil_1hsg -o mmgbsa_1hsg --md --ns 2
+VirmoLab-cli dock -r 1HSG -l kandidat.smi --acuan auto -o hasil_1hsg
+VirmoLab-cli dock -r AF-P00918 -l ligan\ --kantong 1 --mesin vina --exhaustiveness 32 -o hasil_ca2
+VirmoLab-cli reseptor 1HSG -o rec.pdbqt --protonasi propka --flex A:25,B:25
+VirmoLab-cli kantong AF-P00918
+VirmoLab-cli mmgbsa -r hasil_1hsg -o mmgbsa_1hsg --md --ns 2
 ```
 
 `dock` menyiapkan reseptor (berkas PDB/CIF, kode PDB, `AF-<UniProt>`, atau PDBQT siap) dan ligan
 (SDF/MOL2/PDB/SMI/PDBQT, folder, atau SMILES) bila perlu, menentukan grid box (`--pusat`, `--acuan`
 berkas/`auto`, atau `--kantong N` P2Rank), lalu menulis pose, `ringkasan.csv`, `metode.txt`, dan `log.txt`.
-`VirmoDock-cli <perintah> -h` menampilkan semua opsi.
+`VirmoLab-cli <perintah> -h` menampilkan semua opsi.
 
 ## Menjalankan dari kode sumber
 
@@ -54,7 +54,7 @@ Butuh Windows 10/11 x64 dan Python 3.14.
 ```bat
 py -3.14 -m venv .venv
 .venv\Scripts\python.exe -m pip install -r requirements.txt
-.venv\Scripts\python.exe -m virmodock
+.venv\Scripts\python.exe -m virmolab
 ```
 
 Biner mesin docking ada di `vendor/bin/` (AutoDock-GPU dibangun sendiri dari `vendor/adgpu_src/`,
@@ -67,7 +67,7 @@ Deteksi kantong memakai P2Rank + Java yang **tidak ikut repo** (±262 MB). Pasan
 - `vendor/bin/jre/` — Eclipse Temurin JRE 21 (Windows x64, zip) dari https://adoptium.net, diekstrak
   sehingga ada `vendor/bin/jre/bin/java.exe`.
 
-Uji mandiri (`python -m virmodock --uji-mandiri hasil.json`) memeriksa keduanya.
+Uji mandiri (`python -m virmolab --uji-mandiri hasil.json`) memeriksa keduanya.
 
 Modul MD & MM/GBSA memakai OpenMM (PyPI, ada di `requirements.txt`) dan tumpukan OpenFF yang **tidak ada di
 PyPI** untuk Windows. Pasang dari arsip rilis GitHub tanpa dependensi (dependensi PyPI-nya sudah ada di

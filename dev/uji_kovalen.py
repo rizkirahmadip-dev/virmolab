@@ -3,7 +3,7 @@ Jalankan docking (aduk dibuat di latar) -> AD-GPU --flexres saja -> pose sotoras
 ikut, aspirin dilewati -> objek rantai samping Cys12 -> interaksi -> matikan kovalen.
 
   PYTHONIOENCODING=utf-8 PYTHONPATH=. .venv/Scripts/python.exe dev/uji_kovalen.py
-Keluaran: dev/uji/kovalen_gui/ (proyek, gui_*.png = grab jendela VirmoDock saja).
+Keluaran: dev/uji/kovalen_gui/ (proyek, gui_*.png = grab jendela VirmoLab saja).
 """
 import shutil
 import sys
@@ -12,7 +12,7 @@ from pathlib import Path
 from PySide6.QtCore import QSettings, QTimer
 
 sys.argv = [sys.argv[0]]
-st = QSettings("VirmoDock", "VirmoDock")
+st = QSettings("VirmoLab", "VirmoLab")
 st.setValue("tema", "terang")
 st.remove("layout")
 st.remove("sesi_terbuka")
@@ -23,7 +23,7 @@ PDB = Path("dev/uji/kovalen/6OIM.pdb").resolve()
 LIGAN = {"sotorasib": "C=CC(=O)N1CCN([C@@H](C)C1)C2=NC(=O)N(c3nc(c(F)cc23)c4c(O)cccc4F)c5c(C)ccnc5C(C)C",
          "kloroasetamida": "ClCC(=O)Nc1ccc(cc1)C(=O)N"}
 
-import virmodock.app as A
+import virmolab.app as A
 from PySide6.QtWidgets import QApplication, QMessageBox
 
 QMessageBox.information = staticmethod(lambda *a, **k: print("INFO:", a[2] if len(a) > 2 else a, flush=True))
@@ -38,11 +38,11 @@ def cek(kondisi, pesan):
 
 def hook():
     import numpy as np
-    from virmodock.core import mesin as M
-    from virmodock.core import prep_ligan as PL
-    from virmodock.core import prep_reseptor as R
-    from virmodock.core.proyek import Proyek
-    from virmodock.ui import dialog_kovalen, mainwindow
+    from virmolab.core import mesin as M
+    from virmolab.core import prep_ligan as PL
+    from virmolab.core import prep_reseptor as R
+    from virmolab.core.proyek import Proyek
+    from virmolab.ui import dialog_kovalen, mainwindow
 
     def exec_uji(self):
         self.resize(640, 620)

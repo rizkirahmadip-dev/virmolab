@@ -1,4 +1,4 @@
-# VirmoDock — serah terima & prompt yang tersisa
+# VirmoLab — serah terima & prompt yang tersisa
 
 Dibuat 13 Oktober 2026 untuk melanjutkan pekerjaan di sesi/akun baru. Berkas ini berdiri sendiri; dua berkas pendamping
 ada di folder yang sama dan ikut Git:
@@ -11,15 +11,15 @@ ada di folder yang sama dan ikut Git:
 
 ## 1. Status saat ini
 
-- Folder kerja: `E:\Bikin Docking Simpel\VirmoDock`. Python proyek: `.venv/Scripts/python.exe`
-  (selalu `PYTHONIOENCODING=utf-8 PYTHONPATH=.`). Versi kode di `virmodock/__init__.py`: **1.1.2**.
+- Folder kerja: `E:\Bikin Docking Simpel\VirmoLab`. Python proyek: `.venv/Scripts/python.exe`
+  (selalu `PYTHONIOENCODING=utf-8 PYTHONPATH=.`). Versi kode di `virmolab/__init__.py`: **1.1.2**.
 - Commit terakhir: `07b767c` (fondasi sumber data, F1 tanaman obat, F2 analisis MD).
   Sebelumnya `585ab9f` = rilis 1.1.2 (sudah di-build, uji mandiri 40/40).
 - **Belum di-commit:** pekerjaan F11 (paket validasi protokol): `core/decoy.py`, `core/validasi_protokol.py`,
   `ui/dialog_validasi_protokol.py`, `dev/uji_validasi_protokol.py`, perubahan `mainwindow*.py`, `tab_uji.py`,
   dokumen, terjemahan, CHANGELOG. Semua uji F11 lulus (14/14). → **jalankan P-COMMIT dulu.**
 - CHANGELOG sudah punya bagian `[1.2.0]` (Fondasi, F1, F2, F11); versi belum dinaikkan (itu tugas P-RILIS).
-- Terjemahan Inggris: `dev/i18n_tambahan.json` → `dev/buat_kamus.py` → `virmodock/i18n/en.json`;
+- Terjemahan Inggris: `dev/i18n_tambahan.json` → `dev/buat_kamus.py` → `virmolab/i18n/en.json`;
   pemeriksa mutu `dev/cek_mutu_i18n.py` (0 masalah terakhir). Laporan PDF/Word memang tetap berbahasa Indonesia.
 
 ### Sudah selesai di rilis 1.2 (belum dirilis)
@@ -27,7 +27,7 @@ ada di folder yang sama dan ikut Git:
 | Butir | Berkas utama |
 |---|---|
 | Fondasi: klien data internet bercache, Jejak sumber di proyek/laporan, graf | `core/sumber_data.py`, `core/graf.py`, `Proyek.jejak` |
-| F1 Senyawa dari tanaman obat (LOTUS/Wikidata + COCONUT, DOI lewat graf artikel ilmiah) | `core/tanaman.py`, `ui/dialog_tanaman.py`, `virmodock/data/nama_tanaman_id.csv` |
+| F1 Senyawa dari tanaman obat (LOTUS/Wikidata + COCONUT, DOI lewat graf artikel ilmiah) | `core/tanaman.py`, `ui/dialog_tanaman.py`, `virmolab/data/nama_tanaman_id.csv` |
 | F2 Analisis lintasan MD lengkap (Rg, SASA, ikatan H, barcode, PCA, FEL, klaster, replika) | `core/md_analisis.py`, `ui/dialog_md.py` |
 | F11 Paket validasi protokol (redocking, cross-docking, pengayaan, ringkasan) | `core/decoy.py`, `core/validasi_protokol.py`, `ui/dialog_validasi_protokol.py` |
 
@@ -61,10 +61,10 @@ Dua sesi sebelumnya melaporkan "selesai, uji lulus" padahal hasilnya salah. Pela
    1HSG–MK1; okupansi ≤ 100 %).
 6. **Teks hasil harus jujur.** Paragraf metode dirakit dari hasil nyata (p-nilai dari data, bukan "p < 0,0001" tetap),
    menyebut keterbatasan (mis. decoy bukan dari ZINC), dan tidak menyebut uji yang tidak dijalankan.
-7. **Data paket vs data pengguna.** Berkas bawaan aplikasi → `virmodock/data/` **dan** tambahkan ke
-   `build_tools/virmodock.spec` (`datas += ...`); jika tidak, aplikasi terpasang tidak menemukannya. `.gitignore`
+7. **Data paket vs data pengguna.** Berkas bawaan aplikasi → `virmolab/data/` **dan** tambahkan ke
+   `build_tools/virmolab.spec` (`datas += ...`); jika tidak, aplikasi terpasang tidak menemukannya. `.gitignore`
    memakai `/data/` (folder data pengguna mode portabel di akar) — jangan kembalikan ke `data/`.
-8. **Lint dan terjemahan.** `.venv/Scripts/python.exe -m pyflakes virmodock` harus bersih (CI menjalankannya).
+8. **Lint dan terjemahan.** `.venv/Scripts/python.exe -m pyflakes virmolab` harus bersih (CI menjalankannya).
    Teks UI baru: `dev/ekstrak_teks.py` → terjemahkan ke `dev/i18n_tambahan.json` → `dev/buat_kamus.py` →
    `dev/cek_mutu_i18n.py` = 0 (jangan terjemahkan SQL, path, atau teks laporan).
 9. **Windows/Git Bash.** Skrip penyunting yang panjang atau berisi tanda kutip tiga → tulis dengan alat Write ke berkas,
@@ -86,9 +86,9 @@ Bila sesi terputus, buka sesi baru dan tempel prompt yang sama + baris:
 ### P-COMMIT
 
 ```text
-Periksa git status di E:\Bikin Docking Simpel\VirmoDock. Tampilkan ringkasan berkas berubah (jumlah per folder).
+Periksa git status di E:\Bikin Docking Simpel\VirmoLab. Tampilkan ringkasan berkas berubah (jumlah per folder).
 Berkas tak terlacak yang tampak sementara (scratch/, *.tmp, keluaran uji) jangan ikut — tanyakan bila ragu.
-Pastikan data paket baru tidak terabaikan: git check-ignore -v pada berkas baru di data/ atau virmodock/data/.
+Pastikan data paket baru tidak terabaikan: git check-ignore -v pada berkas baru di data/ atau virmolab/data/.
 Commit satu commit, pesan Conventional Commits Bahasa Indonesia: feat(<area>): <ringkasan>, badan berupa poin per fitur,
 diakhiri baris Co-Authored-By sesuai instruksi sesi. Jangan push. Laporkan hash.
 ```
@@ -96,15 +96,15 @@ diakhiri baris Co-Authored-By sesuai instruksi sesi. Jangan push. Laporkan hash.
 ### P-RILIS (1.2.0)
 
 ```text
-Siapkan rilis VirmoDock 1.2.0. Folder: E:\Bikin Docking Simpel\VirmoDock.
+Siapkan rilis VirmoLab 1.2.0. Folder: E:\Bikin Docking Simpel\VirmoLab.
 Python: .venv/Scripts/python.exe (PYTHONIOENCODING=utf-8, PYTHONPATH=.).
 Baca juga bagian "Blok verifikasi wajib" di PROMPT_SISA.md dan patuhi.
 
-1. Naikkan versi di virmodock/__init__.py ke 1.2.0; rapikan CHANGELOG.md bagian [1.2.0] (tanggal hari ini, Baru/Diperbaiki/
+1. Naikkan versi di virmolab/__init__.py ke 1.2.0; rapikan CHANGELOG.md bagian [1.2.0] (tanggal hari ini, Baru/Diperbaiki/
    Diubah, tanpa duplikat; pastikan klaim sesuai kenyataan).
-2. pyflakes virmodock bersih.
+2. pyflakes virmolab bersih.
 3. i18n: dev/ekstrak_teks.py → terjemahkan sisa → dev/buat_kamus.py → dev/cek_mutu_i18n.py = 0.
-4. Pastikan build_tools/virmodock.spec menyertakan SEMUA berkas data bawaan baru (virmodock/data/nama_tanaman_id.csv, dll.).
+4. Pastikan build_tools/virmolab.spec menyertakan SEMUA berkas data bawaan baru (virmolab/data/nama_tanaman_id.csv, dll.).
 5. Dokumen: python dev/buat_docs.py; periksa docs/panduan.html memuat bagian tanaman obat, analisis MD, validasi protokol.
    Tutorial PDF hanya bila alur dasar berubah.
 6. dev/siapkan_contoh.py lalu dev/regresi.py SEKALI. Tampilkan hanya ringkasan + nama uji gagal. Bila gagal: bedakan
@@ -119,7 +119,7 @@ Baca juga bagian "Blok verifikasi wajib" di PROMPT_SISA.md dan patuhi.
 ### P-BUILD
 
 ```text
-Build rilis VirmoDock dari commit terakhir. Folder: E:\Bikin Docking Simpel\VirmoDock.
+Build rilis VirmoLab dari commit terakhir. Folder: E:\Bikin Docking Simpel\VirmoLab.
 Pastikan git status bersih (kecuali berkas tak terlacak yang memang diabaikan). Jalankan di latar belakang:
 .venv/Scripts/python.exe build_tools/rilis.py > build/rilis_<versi>.log 2>&1
 Setelah selesai: laporkan ukuran Setup & Portable, hasil uji mandiri (jumlah OK / gagal / lewat), dan SHA256SUMS.
@@ -131,7 +131,7 @@ Jangan ubah berkas sumber selama build berjalan.
 ### P6 — F3a Penargetan balik (Opus) · rilis 1.3 · setelah rilis 1.2
 
 ```text
-Kerjakan F3 tahap a "Penargetan balik" VirmoDock 1.3. Folder: E:\Bikin Docking Simpel\VirmoDock.
+Kerjakan F3 tahap a "Penargetan balik" VirmoLab 1.3. Folder: E:\Bikin Docking Simpel\VirmoLab.
 Python: .venv/Scripts/python.exe (PYTHONIOENCODING=utf-8, PYTHONPATH=.).
 Baca juga bagian "Blok verifikasi wajib" di PROMPT_SISA.md dan patuhi.
 
@@ -145,9 +145,9 @@ Sebelum mulai, TANYA pengguna (AskUserQuestion) bila belum diputuskan: 2 kelas p
 Tugas:
 1. dev/susun_panel.py (alat pengembang): daftar PDB ID per kelas (≥ 25 target/kelas, resolusi ≤ 2,5 Å, ligan ko-kristal
    mirip obat) → unduh → bersihkan (prep_reseptor) → redocking → simpan hanya RMSD ≤ 2 Å ke
-   virmodock/data/panel_target/<kelas>.json: {uniprot, gen, nama, pdb, rantai, ligan_kristal, pusat, ukuran,
+   virmolab/data/panel_target/<kelas>.json: {uniprot, gen, nama, pdb, rantai, ligan_kristal, pusat, ukuran,
    rmsd_redocking, resolusi, tanggal}, plus 50 umpan acak per target (skor docking) untuk z-skor (rata, sd).
-   PDBQT reseptor siap pakai ke virmodock/data/panel_target/<kelas>/. Daftarkan folder itu ke build_tools/virmodock.spec.
+   PDBQT reseptor siap pakai ke virmolab/data/panel_target/<kelas>/. Daftarkan folder itu ke build_tools/virmolab.spec.
 2. core/target_balik.py:
    jalur_ligan(smiles, sumber="chembl_lokal"|"chembl_api", k=5) -> [{target, skor_max, skor_knn, contoh_ligan}] ;
    jalur_struktur(lig, kelas, exhaustiveness=8) -> job di antrean (satu per target) ;
@@ -165,7 +165,7 @@ Aturan: jangan commit/build/regresi penuh. Laporan akhir ≤ 15 baris.
 ### P7 — F3b Jaringan & pengayaan jalur (Opus) · setelah P6
 
 ```text
-Kerjakan F3 tahap b "Jaringan & pengayaan jalur" VirmoDock 1.3. Folder: E:\Bikin Docking Simpel\VirmoDock.
+Kerjakan F3 tahap b "Jaringan & pengayaan jalur" VirmoLab 1.3. Folder: E:\Bikin Docking Simpel\VirmoLab.
 Python: .venv/Scripts/python.exe (PYTHONIOENCODING=utf-8, PYTHONPATH=.).
 Baca juga bagian "Blok verifikasi wajib" di PROMPT_SISA.md dan patuhi.
 
@@ -174,7 +174,7 @@ core/sumber_data.py; core/target_balik.py dan ui/dialog_target_balik.py (P6).
 
 Verifikasi dulu (sumber resmi, catat ke RENCANA, ganti tanda [cek] jadi [terverifikasi <tanggal>, sumber]): lisensi dan
 endpoint Open Targets Platform GraphQL, berkas GMT Reactome (lisensi), GO GMT manusia, API STRING (lisensi, batas laju).
-KEGG HANYA tautan luar. Unduhan GMT ke virmodock/data/gmt/: minta izin pengguna dulu (AskUserQuestion) dengan ukuran.
+KEGG HANYA tautan luar. Unduhan GMT ke virmolab/data/gmt/: minta izin pengguna dulu (AskUserQuestion) dengan ukuran.
 Catatan: Wikidata Query Service memisahkan graf artikel ilmiah ke query-scholarly.wikidata.org — endpoint layanan lain
 bisa berubah serupa; uji kueri nyata sebelum menulis kode.
 
@@ -200,7 +200,7 @@ Aturan: jangan commit/build/regresi penuh. Laporan akhir ≤ 15 baris.
 ### P8 — F5 QSAR & model ML (Opus) · rilis 1.4
 
 ```text
-Kerjakan F5 "QSAR & model ML" VirmoDock 1.4. Folder: E:\Bikin Docking Simpel\VirmoDock.
+Kerjakan F5 "QSAR & model ML" VirmoLab 1.4. Folder: E:\Bikin Docking Simpel\VirmoLab.
 Python: .venv/Scripts/python.exe (PYTHONIOENCODING=utf-8, PYTHONPATH=.).
 scikit-learn 1.9.1 dan chemprop 2.3.1 SUDAH terpasang — jangan pasang paket lain.
 Baca juga bagian "Blok verifikasi wajib" di PROMPT_SISA.md dan patuhi.
@@ -231,12 +231,12 @@ Aturan: jangan commit/build/regresi penuh. Laporan akhir ≤ 15 baris.
 ### P9 — F4 Penapisan farmakofor & bentuk (Sonnet)
 
 ```text
-Kerjakan F4 "Penapisan berbasis ligan 3D" VirmoDock 1.4. Folder: E:\Bikin Docking Simpel\VirmoDock.
+Kerjakan F4 "Penapisan berbasis ligan 3D" VirmoLab 1.4. Folder: E:\Bikin Docking Simpel\VirmoLab.
 Python: .venv/Scripts/python.exe (PYTHONIOENCODING=utf-8, PYTHONPATH=.).
 Baca juga bagian "Blok verifikasi wajib" di PROMPT_SISA.md dan patuhi.
 
 Baca dulu: RENCANA_PENGEMBANGAN.md §0, §3 F4; PROMPT_PENGEMBANGAN.md "Lampiran UI" + "UI F4"; core/kemiripan.py (fitur
-farmakofor yang sudah ditampilkan); core/uji.py (AUC/BEDROC/EF); virmodock/viewer/viewer.js (cara menambah bentuk 3D,
+farmakofor yang sudah ditampilkan); core/uji.py (AUC/BEDROC/EF); virmolab/viewer/viewer.js (cara menambah bentuk 3D,
 fungsi VM.*); core/pustaka.py. rdkit.Chem.rdShapeAlign tersedia (AlignShapes, ScoreShape, ShapeInput) — terverifikasi.
 
 Tugas:
@@ -258,7 +258,7 @@ Aturan: jangan commit/build/regresi penuh. Laporan akhir ≤ 15 baris.
 ### P10 — F12 Pelacak hipotesis → uji lab (Sonnet) · setelah P8
 
 ```text
-Kerjakan F12 "Pelacak hipotesis → uji lab" VirmoDock 1.4. Folder: E:\Bikin Docking Simpel\VirmoDock.
+Kerjakan F12 "Pelacak hipotesis → uji lab" VirmoLab 1.4. Folder: E:\Bikin Docking Simpel\VirmoLab.
 Python: .venv/Scripts/python.exe (PYTHONIOENCODING=utf-8, PYTHONPATH=.).
 Baca juga bagian "Blok verifikasi wajib" di PROMPT_SISA.md dan patuhi.
 
@@ -282,7 +282,7 @@ Aturan: jangan commit/build/regresi penuh. Laporan akhir ≤ 10 baris.
 ### P11 — F6 Konsensus docking × co-folding (Sonnet) · rilis 1.5
 
 ```text
-Kerjakan F6 "Konsensus docking × co-folding" VirmoDock 1.5. Folder: E:\Bikin Docking Simpel\VirmoDock.
+Kerjakan F6 "Konsensus docking × co-folding" VirmoLab 1.5. Folder: E:\Bikin Docking Simpel\VirmoLab.
 Python: .venv/Scripts/python.exe (PYTHONIOENCODING=utf-8, PYTHONPATH=.).
 Baca juga bagian "Blok verifikasi wajib" di PROMPT_SISA.md dan patuhi.
 
@@ -310,7 +310,7 @@ Aturan: jangan commit/build/regresi penuh. Laporan akhir ≤ 15 baris.
 ### P12 — F10 Docking peptida (Sonnet) · setelah P11
 
 ```text
-Kerjakan F10 "Docking peptida" VirmoDock 1.5. Folder: E:\Bikin Docking Simpel\VirmoDock.
+Kerjakan F10 "Docking peptida" VirmoLab 1.5. Folder: E:\Bikin Docking Simpel\VirmoLab.
 Python: .venv/Scripts/python.exe (PYTHONIOENCODING=utf-8, PYTHONPATH=.).
 Baca juga bagian "Blok verifikasi wajib" di PROMPT_SISA.md dan patuhi.
 
@@ -333,7 +333,7 @@ Aturan: jangan commit/build/regresi penuh. Laporan akhir ≤ 10 baris.
 ### P13 — F7 Sifat elektronik xTB (Sonnet) · butuh izin unduh
 
 ```text
-Kerjakan F7 "Sifat elektronik kuantum (xTB)" VirmoDock 1.5. Folder: E:\Bikin Docking Simpel\VirmoDock.
+Kerjakan F7 "Sifat elektronik kuantum (xTB)" VirmoLab 1.5. Folder: E:\Bikin Docking Simpel\VirmoLab.
 Python: .venv/Scripts/python.exe (PYTHONIOENCODING=utf-8, PYTHONPATH=.).
 Baca juga bagian "Blok verifikasi wajib" di PROMPT_SISA.md dan patuhi.
 
@@ -361,7 +361,7 @@ Aturan: jangan commit/build/regresi penuh. Laporan akhir ≤ 15 baris.
 ### P14 — F8 Desain generatif terpandu docking (Opus) · rilis 1.6 · butuh izin unduh
 
 ```text
-Kerjakan F8 "Desain generatif terpandu docking" VirmoDock 1.6. Folder: E:\Bikin Docking Simpel\VirmoDock.
+Kerjakan F8 "Desain generatif terpandu docking" VirmoLab 1.6. Folder: E:\Bikin Docking Simpel\VirmoLab.
 Python: .venv/Scripts/python.exe (PYTHONIOENCODING=utf-8, PYTHONPATH=.).
 Baca juga bagian "Blok verifikasi wajib" di PROMPT_SISA.md dan patuhi.
 
@@ -385,7 +385,7 @@ Aturan: jangan commit/build/regresi penuh. Laporan akhir ≤ 15 baris.
 ### P15 — F9 Energi bebas relatif RBFE, eksperimental (Opus) · butuh izin unduh & GPU
 
 ```text
-Kerjakan F9 "Energi bebas relatif (RBFE) eksperimental" VirmoDock 1.6. Folder: E:\Bikin Docking Simpel\VirmoDock.
+Kerjakan F9 "Energi bebas relatif (RBFE) eksperimental" VirmoLab 1.6. Folder: E:\Bikin Docking Simpel\VirmoLab.
 Python: .venv/Scripts/python.exe (PYTHONIOENCODING=utf-8, PYTHONPATH=.).
 Baca juga bagian "Blok verifikasi wajib" di PROMPT_SISA.md dan patuhi.
 
@@ -417,14 +417,14 @@ Setelah tiap prompt selesai, minta sesi baru "periksa pekerjaan terakhir" dengan
 cacat serius di F1/F2/F11:
 
 - [ ] `git status` + `git diff --stat`: hanya berkas yang masuk akal? Berkas data baru tidak terabaikan `.gitignore`?
-- [ ] `pyflakes virmodock` bersih; semua uji baru lulus; uji penjaga (lihat poin 4 Blok verifikasi) masih lulus.
+- [ ] `pyflakes virmolab` bersih; semua uji baru lulus; uji penjaga (lihat poin 4 Blok verifikasi) masih lulus.
 - [ ] Buka dialog baru (harness GUI) di tema terang dan gelap; lihat tangkapan layarnya: kosong/angka aneh/warna tetap/tombol ganda?
 - [ ] Cari di kode baru: `np.random`, `random.`, nilai literal di jalur hasil, `except Exception: pass`, `return 0.0`/`99.0`
   sebagai sentinel, `QMessageBox.information(... "Simulasi ...")`, warna `#xxxxxx` di UI.
 - [ ] Angka yang tampil masuk akal secara ilmiah? (okupansi ≤ 100 %, ikatan H > 0 bila memang ada, RMSD tidak 0,0 persis.)
 - [ ] Paragraf metode/laporan hanya memuat uji yang dijalankan, dengan angka dari hasil, dan menyebut keterbatasannya.
 - [ ] Teks UI baru sudah diterjemahkan (audit kamus 0 masalah); CHANGELOG sesuai kenyataan (bukan klaim yang belum benar).
-- [ ] Data bawaan baru masuk `build_tools/virmodock.spec`.
+- [ ] Data bawaan baru masuk `build_tools/virmolab.spec`.
 
 ---
 

@@ -1,4 +1,4 @@
-# VirmoDock — Rencana Lengkap Seluruh Tahap
+# VirmoLab — Rencana Lengkap Seluruh Tahap
 
 Dokumen ini adalah peta kerja detail dari awal sampai rilis. Baca bersama `CATATAN_TAHAP2.md` (konteks, keputusan teknis, jebakan yang sudah ditemui).
 
@@ -23,7 +23,7 @@ Dokumen ini adalah peta kerja detail dari awal sampai rilis. Baca bersama `CATAT
 
 ## Tahap 0 — Aplikasi lama & mockup (SELESAI)
 - [x] `DockingSimpel.exe` (web UI + WSL): bug "GPU tidak terbaca" diperbaiki (race condition saat WSL cold start), tombol "Periksa ulang", info VRAM/driver.
-- [x] Mockup jendela utama gaya Discovery Studio, terang & gelap → `E:\Bikin Docking Simpel\mockup\`. **Disetujui pengguna**, dengan tambahan: pemilihan warna & surface ala PyMOL, nama aplikasi **VirmoDock**, harus bisa dipasang di semua laptop.
+- [x] Mockup jendela utama gaya Discovery Studio, terang & gelap → `E:\Bikin Docking Simpel\mockup\`. **Disetujui pengguna**, dengan tambahan: pemilihan warna & surface ala PyMOL, nama aplikasi **VirmoLab**, harus bisa dipasang di semua laptop.
 
 ## Tahap 1 — Kerangka (SELESAI)
 - [x] Build AutoDock-GPU **OpenCL native Windows** (`vendor/bin/autodock_gpu.exe`) + `OpenCL.dll` + `vcomp140.dll`; teruji sama dengan versi CUDA.
@@ -122,7 +122,7 @@ File: `core/antrean.py`, UI `PanelAntrean`.
 - Pelaksana: `QProcess` per ligan (bukan thread Python) → bisa dijeda (antar ligan) dan dibatalkan (`kill`). Satu job GPU sekaligus; job CPU paralel sesuai thread.
 - Tombol di header dock Antrean: Jeda, Lanjut, Batal, Hapus selesai; klik kanan baris: buka folder hasil, jalankan ulang yang gagal, lihat log.
 - Lanjut setelah aplikasi ditutup: status disimpan di `proyek.json`; saat dibuka, job "berjalan" berubah jadi "dijeda" dengan tombol Lanjutkan (lewati ligan yang sudah punya hasil).
-- Notifikasi: `QSystemTrayIcon` (ikon VirmoDock) `showMessage("Docking selesai", "42 ligan · terbaik −9.95 kcal/mol")`; juga saat gagal. Taskbar progress opsional (`QWinTaskbarProgress` tidak ada di Qt6 → lewati atau pakai `ITaskbarList3` via ctypes).
+- Notifikasi: `QSystemTrayIcon` (ikon VirmoLab) `showMessage("Docking selesai", "42 ligan · terbaik −9.95 kcal/mol")`; juga saat gagal. Taskbar progress opsional (`QWinTaskbarProgress` tidak ada di Qt6 → lewati atau pakai `ITaskbarList3` via ctypes).
 - **Kriteria selesai (Tahap 2):** dari impor 1HSG → siapkan reseptor → 20 ligan PubChem → docking AD-GPU dan Vina → hasil masuk tabel; UI tetap responsif saat docking, minimize tidak menghentikan job, notifikasi muncul.
 
 ---
@@ -176,15 +176,15 @@ File: `ui/diagram2d.py` (render SVG; tampilkan di tab tengah "Diagram 2D" dengan
 ## Tahap 4 — Distribusi, Pindah Laptop, Dokumentasi (SELESAI — rincian di CATATAN_TAHAP2.md §4d)
 
 ### 4.1 Packaging
-- Ikon aplikasi `virmodock/aset/virmodock.ico` (heksagon + aksen biru; adaptasi `E:\Bikin Docking Simpel\app\buat_ikon.py`).
-- PyInstaller **onedir** (lebih cepat dibuka daripada onefile): `virmodock.spec` dengan data `virmodock/viewer` → `virmodock/viewer`, `vendor/bin/*` → `bin/`; hidden imports RDKit/Meeko/openbabel; sertakan `QtWebEngineProcess.exe` & resources (otomatis dari hook PySide6). `paths.BIN` sudah mencari `AKAR/bin`.
+- Ikon aplikasi `virmolab/aset/virmolab.ico` (heksagon + aksen biru; adaptasi `E:\Bikin Docking Simpel\app\buat_ikon.py`).
+- PyInstaller **onedir** (lebih cepat dibuka daripada onefile): `virmolab.spec` dengan data `virmolab/viewer` → `virmolab/viewer`, `vendor/bin/*` → `bin/`; hidden imports RDKit/Meeko/openbabel; sertakan `QtWebEngineProcess.exe` & resources (otomatis dari hook PySide6). `paths.BIN` sudah mencari `AKAR/bin`.
 - Uji: jalankan dari folder hasil build di akun Windows lain / mesin bersih (tanpa Python, tanpa MGLTools, tanpa WSL).
 - Ukuran target < 600 MB terpasang. Pertimbangkan Nuitka bila waktu buka > 4 detik.
 
 ### 4.2 Installer & portable
-- Unduh Inno Setup 6 (izin sudah diberikan). Skrip `installer/virmodock.iss`: wizard Bahasa Indonesia, pilih folder, shortcut Desktop & Start Menu, uninstaller, asosiasi berkas opsional (.vmd, .pdbqt), sertakan VC++ runtime bila dibutuhkan.
+- Unduh Inno Setup 6 (izin sudah diberikan). Skrip `installer/virmolab.iss`: wizard Bahasa Indonesia, pilih folder, shortcut Desktop & Start Menu, uninstaller, asosiasi berkas opsional (.vmd, .pdbqt), sertakan VC++ runtime bila dibutuhkan.
 - **Portable:** zip folder onedir + file `portable.flag` → bila ada, pengaturan disimpan di folder aplikasi, bukan `%LOCALAPPDATA%` (ubah `paths.APPDATA`).
-- Nama hasil: `VirmoDock-Setup-x.y.z.exe`, `VirmoDock-Portable-x.y.z.zip`.
+- Nama hasil: `VirmoLab-Setup-x.y.z.exe`, `VirmoLab-Portable-x.y.z.zip`.
 
 ### 4.3 Pindah laptop
 - Menu File › Ekspor pengaturan & proyek → satu file `.vmdbackup` (zip): QSettings (diekspor ke JSON), preset parameter, jalur software eksternal, daftar proyek terakhir, dan (opsional) folder proyek.
@@ -200,7 +200,7 @@ File: `ui/diagram2d.py` (render SVG; tampilkan di tab tengah "Diagram 2D" dengan
 Folder `docs/` → juga dibuat PDF dan dibuka dari menu Help.
 1. **Instalasi baru** — unduh, jalankan setup, first-run wizard (screenshot tiap langkah).
 2. **Pindah laptop** — ekspor/impor `.vmdbackup`, versi portable.
-3. **Setup GPU** — NVIDIA/AMD/Intel, cara cek di VirmoDock, apa arti status di status bar.
+3. **Setup GPU** — NVIDIA/AMD/Intel, cara cek di VirmoLab, apa arti status di status bar.
 4. **Troubleshooting** — GPU tidak terdeteksi, OpenCL gagal (fallback CPU), RCSB/PubChem gagal (internet/proxy), reseptor gagal Meeko, ligan > 32 torsi, viewport hitam (driver grafis / jalankan dengan `--disable-gpu`), antivirus memblokir.
 5. **Panduan pengguna** — alur lengkap: impor → siapkan reseptor → grid box → siapkan ligan → docking → antrean → hasil → interaksi → diagram 2D → validasi → ekspor & laporan. Satu screenshot per langkah (pakai `dev/uji_layar.py`).
 6. **Metode & kriteria** — definisi interaksi (§3.2), rumus Ki dan LE, parameter bawaan tiap mesin, kutipan software.
@@ -228,7 +228,7 @@ Perkiraan beban: Tahap 2 ≈ 1–2 sesi, Tahap 3 ≈ 2 sesi, Tahap 4 ≈ 1 sesi 
 
 # LAMPIRAN A — Perluasan: platform "satu aplikasi" (hasil riset web, 8 Okt 2026)
 
-Tujuan pengguna: VirmoDock jadi **satu tempat** dari preparasi → docking → analisis → visualisasi → statistik → laporan, untuk semua orang (pemula sampai peneliti). **Prinsip:** setiap fitur canggih punya nilai bawaan aman + penjelasan singkat di UI ("Apa ini? Kapan dipakai?").
+Tujuan pengguna: VirmoLab jadi **satu tempat** dari preparasi → docking → analisis → visualisasi → statistik → laporan, untuk semua orang (pemula sampai peneliti). **Prinsip:** setiap fitur canggih punya nilai bawaan aman + penjelasan singkat di UI ("Apa ini? Kapan dipakai?").
 
 Riset dasar: GNINA 1.0 (J Cheminform 2021), PoseBusters (Chem Sci 2024), ProLIF, PLIP (NAR 2015/2021), ADMET-AI (Bioinformatics 2024), P2Rank (J Cheminform 2018), Boltz-2 (bioRxiv 2025), Boltzina (arXiv 2025), benchmark 8 program docking gratis (Front Bioinform 2025).
 
@@ -335,7 +335,7 @@ Syarat pengguna: aplikasi **menyesuaikan sendiri** dan **menyarankan** apakah la
 - **Perkiraan waktu** sebelum mulai, dari ukuran sistem (jumlah atom setelah solvasi) × kecepatan terukur: "Perkiraan selesai 3 j 20 mnt di CPU — disarankan tingkat Sedang."
 - Aturan saran (awal, kalibrasi setelah benchmark nyata): perkiraan < 2 jam → Disarankan; 2–12 jam → Bisa (lama, jalankan malam hari); > 12 jam → Tidak disarankan + tawarkan tingkat lebih ringan atau ekspor.
 - **Checkpoint** tiap ~5 menit → bisa dijeda/lanjut, aman bila laptop dimatikan; peringatan bila laptop pakai baterai (sarankan colok listrik) dan cek suhu/throttling tidak perlu.
-- **Ekspor paket input** (OpenMM XML / GROMACS) untuk dijalankan di komputer lab/server bila laptop tidak sanggup; impor trajektori hasilnya kembali untuk dianalisis di VirmoDock.
+- **Ekspor paket input** (OpenMM XML / GROMACS) untuk dijalankan di komputer lab/server bila laptop tidak sanggup; impor trajektori hasilnya kembali untuk dianalisis di VirmoLab.
 - Perkiraan kasar (BELUM diukur, dari benchmark OpenMM umum; verifikasi di laptop pengguna): RTX 3060 laptop ratusan ns/hari, GPU terintegrasi puluhan ns/hari, CPU saja ~5–20 ns/hari untuk ~30–50 rb atom.
 
 ## A8. Penyempurnaan pasca-docking (Tahap 5, lanjutan)
@@ -382,7 +382,7 @@ Syarat pengguna: aplikasi **menyesuaikan sendiri** dan **menyarankan** apakah la
 # LAMPIRAN B — Prinsip "100% gratis" & fitur tambahan gratis
 
 ## B1. Aturan gratis (permintaan pengguna: "semua harus gratis, no bayar")
-- VirmoDock **gratis untuk semua orang**, tanpa akun, tanpa langganan, tanpa iklan, tanpa telemetri; bekerja offline (internet hanya untuk unduh RCSB/PubChem/ChEMBL dll.).
+- VirmoLab **gratis untuk semua orang**, tanpa akun, tanpa langganan, tanpa iklan, tanpa telemetri; bekerja offline (internet hanya untuk unduh RCSB/PubChem/ChEMBL dll.).
 - **Hanya** memakai komponen open-source / gratis. Sebelum menambah paket baru: cek lisensinya dan catat di `LISENSI_PIHAK_KETIGA.md` (dibuat di Tahap 4, ikut dibundel dan tampil di Help › Lisensi).
 - Software berbayar (Discovery Studio, PyMOL Incentive, Schrödinger, MOE) **tidak pernah dibundel**; hanya tombol "Buka di…" bila pengguna sudah memasangnya sendiri. Utamakan alternatif gratis: PyMOL open-source, ChimeraX (gratis untuk akademik/nonkomersial — cek syaratnya), Discovery Studio Visualizer (freeware).
 - Layanan web berbayar / perlu API key berbayar: dilarang.
@@ -404,7 +404,7 @@ Syarat pengguna: aplikasi **menyesuaikan sendiri** dan **menyarankan** apakah la
 
 **Catatan penting:** Open Babel (GPL-2.0) saat ini di-*import* langsung di Python (`openbabel-wheel`). Menggabungkan GPL-2.0 dalam satu proses dengan pustaka Apache-2.0 (mis. ProLIF) berisiko tidak kompatibel. Solusi yang disarankan:
 1. Panggil Open Babel sebagai **program terpisah** (`obabel.exe` lewat subprocess), bukan import — atau ganti fungsinya dengan RDKit/Meeko/gemmi bila bisa (protonasi pH: pertimbangkan Dimorphite-DL, Apache-2.0).
-2. Rilis VirmoDock sebagai open-source **GPL-3.0-or-later** (kompatibel dengan Apache-2.0 & LGPL), kode sumber di GitHub, dan sertakan teks lisensi semua komponen. Program GPL-2.0 yang dipanggil sebagai proses terpisah dianggap agregasi.
+2. Rilis VirmoLab sebagai open-source **GPL-3.0-or-later** (kompatibel dengan Apache-2.0 & LGPL), kode sumber di GitHub, dan sertakan teks lisensi semua komponen. Program GPL-2.0 yang dipanggil sebagai proses terpisah dianggap agregasi.
 3. `libomp` dari Visual Studio tidak boleh dibundel (sudah diganti `vcomp140.dll`, redistributable resmi).
 4. Data latih model (ADMET-AI/TDC) dan basis data (ChEMBL CC-BY-SA, COCONUT CC0/CC-BY, ZINC) punya syarat atribusi masing-masing → tampilkan atribusi di laporan/ekspor.
 
@@ -413,7 +413,7 @@ Syarat pengguna: aplikasi **menyesuaikan sendiri** dan **menyarankan** apakah la
 - **GitHub Actions** (gratis untuk repo publik, ada runner Windows): build otomatis installer + jalankan tes setiap rilis.
 - **Pemeriksaan pembaruan** di dalam aplikasi: baca rilis terbaru dari GitHub API (tanpa server sendiri); pengguna memilih kapan memperbarui.
 - **Tanda tangan kode** (agar Windows SmartScreen tidak memperingatkan): sertifikat komersial berbayar → hindari; cek program gratis untuk proyek open-source (mis. SignPath Foundation) — verifikasi syaratnya.
-- **DOI gratis** via Zenodo (terhubung ke GitHub Releases) → pengguna bisa mengutip VirmoDock di naskah.
+- **DOI gratis** via Zenodo (terhubung ke GitHub Releases) → pengguna bisa mengutip VirmoLab di naskah.
 - **Publikasi software gratis**: Journal of Open Source Software (JOSS) tidak memungut biaya — target setelah Tahap 4 + benchmark (B5).
 
 ## B4. Fitur tambahan, semuanya gratis (urut dari dampak terbesar)
@@ -435,7 +435,7 @@ Syarat pengguna: aplikasi **menyesuaikan sendiri** dan **menyarankan** apakah la
 - **Benchmark terbuka** dijalankan otomatis dan hasilnya dipublikasikan di dokumentasi:
   - Akurasi pose: redocking pada set publik (mis. PDBbind core/CASF-2016 atau Astex Diverse Set — cek syarat unduh), metrik: % RMSD ≤ 2 Å.
   - Screening: DUD-E/DEKOIS/LIT-PCBA subset → AUC, EF1%.
-  - Bandingkan AD-GPU vs Vina vs konsensus di dalam VirmoDock.
+  - Bandingkan AD-GPU vs Vina vs konsensus di dalam VirmoLab.
 - **Tes otomatis** (`tests/`): impor format, preparasi, parser hasil, statistik (vs nilai referensi R/SciPy), interaksi (vs PLIP/ProLIF pada kompleks contoh).
 - **Reproducibility**: hasil sama untuk seed sama; laporan mencatat versi semua komponen.
 
@@ -459,7 +459,7 @@ Syarat pengguna: aplikasi **menyesuaikan sendiri** dan **menyarankan** apakah la
 ## C2. Gambar (3D, 2D, grafik)
 - **Format**: PNG, TIFF (tanpa kompresi / LZW / ZIP; 8/16-bit; RGB atau CMYK untuk cetak), JPEG (kualitas 60–100), WebP, BMP; **vektor**: SVG, PDF, EPS (untuk diagram 2D, grafik, tata letak figur; font tertanam/dikonversi ke path).
 - **Resolusi**: 72 / 150 / 300 / 600 / 1200 dpi / kustom; ukuran dalam **px, mm, cm, inci** (dpi × ukuran fisik → piksel otomatis); kunci rasio; preset jurnal (85/120/180 mm), slide 16:9 (1920×1080, 3840×2160), poster (A3/A2/A1/A0), persegi media sosial.
-- Metadata DPI ditulis benar di berkas (PNG pHYs, TIFF XResolution) supaya Word/jurnal membaca ukuran fisik dengan tepat; metadata teks opsional (proyek, ligan, energi, versi VirmoDock).
+- Metadata DPI ditulis benar di berkas (PNG pHYs, TIFF XResolution) supaya Word/jurnal membaca ukuran fisik dengan tepat; metadata teks opsional (proyek, ligan, energi, versi VirmoLab).
 - **Latar**: putih, hitam, warna bebas, atau **transparan** (PNG/TIFF/WebP/SVG).
 - **Gambar 3D resolusi sangat tinggi**: render offscreen pada kanvas besar dengan **tile rendering** (gabungkan petak) agar bisa melewati batas tekstur GPU (target ≥ 8000 px), **supersampling 2–4×** untuk tepi halus, label/garis interaksi diskalakan proporsional (tidak mengecil di resolusi besar), kamera dikunci sama untuk semua ligan batch (perbandingan adil).
 - Opsi kualitas 3D: anti-aliasing, outline/siluet, ambient occlusion & bayangan bila didukung renderer; ekspor ke skrip PyMOL/ChimeraX untuk ray-tracing di software gratis tersebut (C3).
@@ -470,8 +470,8 @@ Syarat pengguna: aplikasi **menyesuaikan sendiri** dan **menyarankan** apakah la
 ## C3. Struktur molekul & hasil docking
 - **Kompleks** reseptor + pose: PDB (rantai ligan terpisah, HETATM, CONECT, REMARK berisi energi/mesin/parameter), **mmCIF**, PDBQT.
 - **Pose**: SDF dengan **tag properti** (ΔG, Ki, LE, klaster, RMSD, QC PoseBusters, jumlah interaksi, SMILES) — langsung terbaca di DataWarrior/KNIME/Excel; MOL2; PDBQT; satu berkas multi-pose atau satu berkas per pose; pose terbaik saja / top-N / semua.
-- **Sesi untuk software lain**: skrip PyMOL `.pml` dan ChimeraX `.cxc` yang memuat berkas + mengulang gaya/warna/label/interaksi persis seperti di VirmoDock; berkas kompatibel Discovery Studio Visualizer (PDB + SDF).
-- **Input untuk reproduksi**: `reseptor.pdbqt`, ligan PDBQT, GPF/DPF, `config.txt` Vina, peta grid (opsional, besar) → bisa dijalankan ulang di luar VirmoDock.
+- **Sesi untuk software lain**: skrip PyMOL `.pml` dan ChimeraX `.cxc` yang memuat berkas + mengulang gaya/warna/label/interaksi persis seperti di VirmoLab; berkas kompatibel Discovery Studio Visualizer (PDB + SDF).
+- **Input untuk reproduksi**: `reseptor.pdbqt`, ligan PDBQT, GPF/DPF, `config.txt` Vina, peta grid (opsional, besar) → bisa dijalankan ulang di luar VirmoLab.
 - **Interaksi**: CSV/JSON per pose (jenis, residu, atom, jarak, sudut), serta sidik jari interaksi (ProLIF) sebagai matriks.
 
 ## C4. Tabel & data
@@ -517,9 +517,9 @@ hasil/<tanggal>_<nama_job>/
 Ambil **ide alur kerjanya saja** (gratis, dibuat sendiri), tanpa menyalin nama, desain, atau kode. Sumber: Wikipedia & blog OneAngstrom (SAMSON), ulasan Nanome (vendor, anggap promosi), ChimeraX. Fitur SeeSAR ditulis dari ingatan — **verifikasi** sebelum dijadikan acuan.
 
 ## D1. Dari SAMSON (OneAngstrom): platform modular
-- **Sistem ekstensi/plugin**: folder `plugins/` + API Python sederhana (`virmodock.api`) untuk menambah mesin docking, jenis analisis, atau format ekspor tanpa mengubah inti. Pengelola ekstensi di menu Tools (aktif/nonaktif, versi).
+- **Sistem ekstensi/plugin**: folder `plugins/` + API Python sederhana (`virmolab.api`) untuk menambah mesin docking, jenis analisis, atau format ekspor tanpa mengubah inti. Pengelola ekstensi di menu Tools (aktif/nonaktif, versi).
 - **Konsol & skrip Python** di dalam aplikasi (dock "Konsol"): otomatisasi alur (mis. loop 500 ligan dengan filter khusus), rekam aksi UI menjadi skrip (macro recorder) agar bisa diulang.
-- **Asisten**: SAMSON memakai asisten AI berbasis LLM. Versi VirmoDock yang gratis & offline: asisten berbasis aturan + pencarian di dokumentasi lokal ("Kenapa energi saya positif?", "Kotak terlalu besar?"); opsi lanjutan terhubung ke LLM lokal gratis (mis. lewat Ollama) bila pengguna memasangnya sendiri — tidak dibundel, tidak wajib.
+- **Asisten**: SAMSON memakai asisten AI berbasis LLM. Versi VirmoLab yang gratis & offline: asisten berbasis aturan + pencarian di dokumentasi lokal ("Kenapa energi saya positif?", "Kotak terlalu besar?"); opsi lanjutan terhubung ke LLM lokal gratis (mis. lewat Ollama) bila pengguna memasangnya sendiri — tidak dibundel, tidak wajib.
 - **Pembangun & animasi molekul**: editor in-situ (tambah/hapus atom, ubah gugus) + animasi presentasi (lihat C6).
 
 ## D2. Dari ChimeraX: kualitas grafis & baris perintah
@@ -566,7 +566,7 @@ Disepakati pengguna (8 Okt 2026): tidak menambah fitur baru lagi; mulai membangu
 - **Pemulihan crash**: saat dibuka, jika ada sesi yang tidak ditutup normal → dialog "Pulihkan pekerjaan terakhir?".
 - Job docking terputus otomatis berstatus "dijeda" dan bisa dilanjutkan (2.7).
 - Cadangan otomatis 5 versi terakhir `proyek.json` di `proyek/.cadangan/`.
-- Log galat ke `%LOCALAPPDATA%\VirmoDock\log\` (rotasi 10 berkas) untuk dilampirkan saat lapor bug.
+- Log galat ke `%LOCALAPPDATA%\VirmoLab\log\` (rotasi 10 berkas) untuk dilampirkan saat lapor bug.
 
 ## E2. Laptop spek rendah
 - Target minimum: Windows 10 64-bit, RAM 4 GB, tanpa GPU, layar 1366×768.
@@ -596,7 +596,7 @@ Disepakati pengguna (8 Okt 2026): tidak menambah fitur baru lagi; mulai membangu
 | v1.3 | P2Rank deteksi kantong, Asisten Alur, wizard preparasi protein penuh + optimasi ikatan H, ChEMBL validasi & korelasi — **SELESAI (0.9.0–0.9.2)** |
 | v1.4 | Konsensus skor + ROC/EF/BEDROC, laporan Word & HTML interaktif, komposer figur, animasi |
 | v1.5 | ADMET-AI (paket opsional), Ketcher, kemiripan/farmakofor, pustaka ZINC/obat FDA/COCONUT, bahasa Inggris — **SELESAI 9 Okt 2026 (0.9.2)**; ZINC hanya tautan situs (anti-bot) |
-| v2.0 | MD adaptif + MM/GBSA (OpenMM, A8a), flexres/kovalen, plugin & konsol Python, baris perintah, AlphaFold DB — **flexres, baris perintah (VirmoDock-cli), AlphaFold DB SELESAI 9 Okt 2026 (0.9.3)**; **MD adaptif + MM/GBSA SELESAI 9 Okt 2026 (0.9.4)**; **kovalen, plugin & konsol Python SELESAI 10 Okt 2026 (0.9.5)** — v2.0 lengkap |
+| v2.0 | MD adaptif + MM/GBSA (OpenMM, A8a), flexres/kovalen, plugin & konsol Python, baris perintah, AlphaFold DB — **flexres, baris perintah (VirmoLab-cli), AlphaFold DB SELESAI 9 Okt 2026 (0.9.3)**; **MD adaptif + MM/GBSA SELESAI 9 Okt 2026 (0.9.4)**; **kovalen, plugin & konsol Python SELESAI 10 Okt 2026 (0.9.5)** — v2.0 lengkap |
 | v2.x | Eksperimental: GNINA (WSL), Boltz-2, edit ligan dalam kantong, asisten LLM lokal |
 
 ## E5. Uji di banyak laptop (sebelum setiap rilis)
@@ -611,7 +611,7 @@ Disepakati pengguna (8 Okt 2026): tidak menambah fitur baru lagi; mulai membangu
 ## E7. Etika ilmiah
 - Pengingat di tabel hasil & laporan: "Hasil docking adalah prediksi komputasi, bukan bukti aktivitas biologis; konfirmasi dengan uji eksperimen."
 - Ki dari ΔG diberi label "perkiraan".
-- Sitasi otomatis semua mesin & pustaka yang dipakai (AutoDock-GPU, Vina, Meeko, RDKit, Open Babel, dll.) di laporan dan di Help › Cara mengutip, termasuk sitasi VirmoDock (DOI Zenodo, B3).
+- Sitasi otomatis semua mesin & pustaka yang dipakai (AutoDock-GPU, Vina, Meeko, RDKit, Open Babel, dll.) di laporan dan di Help › Cara mengutip, termasuk sitasi VirmoLab (DOI Zenodo, B3).
 - Peringatan bila validasi redocking belum dilakukan atau gagal (RMSD > 2 Å) saat membuat laporan.
 
 ## E8. Status rencana

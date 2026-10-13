@@ -1,4 +1,4 @@
-"""Buat rilis VirmoDock: dokumentasi -> PyInstaller -> uji mandiri -> installer Inno Setup -> zip portable -> SHA-256.
+"""Buat rilis VirmoLab: dokumentasi -> PyInstaller -> uji mandiri -> installer Inno Setup -> zip portable -> SHA-256.
 
   .venv\\Scripts\\python.exe build_tools\\rilis.py            (semua)
   .venv\\Scripts\\python.exe build_tools\\rilis.py --tanpa-build   (pakai dist\\ yang ada)
@@ -16,23 +16,23 @@ from pathlib import Path
 AKAR = Path(__file__).resolve().parents[1]
 PY = AKAR / ".venv" / "Scripts" / "python.exe"
 ISCC = AKAR / "vendor" / "innosetup" / "ISCC.exe"
-VERSI = re.search(r'__version__ = "([^"]+)"', (AKAR / "virmodock" / "__init__.py").read_text()).group(1)
-DIST = AKAR / "dist" / "VirmoDock"
+VERSI = re.search(r'__version__ = "([^"]+)"', (AKAR / "virmolab" / "__init__.py").read_text()).group(1)
+DIST = AKAR / "dist" / "VirmoLab"
 RILIS = AKAR / "rilis"
 
-README_PORTABLE = f"""VirmoDock {VERSI} — versi portable
+README_PORTABLE = f"""VirmoLab {VERSI} — versi portable
 =====================================
 
-1. Ekstrak seluruh isi zip ini ke folder mana saja (mis. D:\\VirmoDock atau flashdisk).
+1. Ekstrak seluruh isi zip ini ke folder mana saja (mis. D:\\VirmoLab atau flashdisk).
    Hindari C:\\Program Files.
-2. Jalankan VirmoDock.exe.
+2. Jalankan VirmoLab.exe.
 
 Pengaturan disimpan di data\\pengaturan.ini, log di data\\log, proyek bawaan di Proyek\\ — semuanya di
 dalam folder ini (tidak menyentuh registry). Jangan hapus berkas portable.flag.
 
 Panduan: _internal\\docs\\panduan.html (juga Help › Panduan pengguna, F1).
-Uji komponen: VirmoDock.exe --uji-mandiri hasil.json  (atau: VirmoDock-cli.exe uji)
-Baris perintah (docking batch/skrip): VirmoDock-cli.exe -h
+Uji komponen: VirmoLab.exe --uji-mandiri hasil.json  (atau: VirmoLab-cli.exe uji)
+Baris perintah (docking batch/skrip): VirmoLab-cli.exe -h
 Lisensi: GPL-3.0-or-later (LICENSE); komponen pihak ketiga: _internal\\LISENSI_PIHAK_KETIGA.txt
 """
 
@@ -64,13 +64,13 @@ def main():
     if "--tanpa-build" not in sys.argv:
         langkah("PyInstaller")
         shutil.rmtree(AKAR / "dist", ignore_errors=True)
-        jalan([PY, "-m", "PyInstaller", "build_tools/virmodock.spec", "--noconfirm", "--distpath", "dist",
+        jalan([PY, "-m", "PyInstaller", "build_tools/virmolab.spec", "--noconfirm", "--distpath", "dist",
                "--workpath", "build", "--log-level", "WARN"])
     (DIST / "portable.flag").unlink(missing_ok=True)
 
     langkah("Uji mandiri hasil build")
     hasil = AKAR / "build" / "uji_mandiri.json"
-    p = subprocess.run([str(DIST / "VirmoDock.exe"), "--uji-mandiri", str(hasil)], cwd=DIST)
+    p = subprocess.run([str(DIST / "VirmoLab.exe"), "--uji-mandiri", str(hasil)], cwd=DIST)
     data = json.loads(hasil.read_text(encoding="utf-8"))
     for h in data["hasil"]:
         print(("  OK    " if h["ok"] else "  GAGAL ") + h["uji"] + " — " + h["detail"])
@@ -80,18 +80,18 @@ def main():
     print(f"  ukuran terpasang: {ukuran / 2**20:.0f} MB")
 
     langkah("Installer (Inno Setup)")
-    jalan([ISCC, f"/DVersi={VERSI}", "/Q", "installer/virmodock.iss"])
-    setup = RILIS / f"VirmoDock-Setup-{VERSI}.exe"
+    jalan([ISCC, f"/DVersi={VERSI}", "/Q", "installer/virmolab.iss"])
+    setup = RILIS / f"VirmoLab-Setup-{VERSI}.exe"
 
     langkah("Portable (zip)")
-    portable = RILIS / f"VirmoDock-Portable-{VERSI}.zip"
+    portable = RILIS / f"VirmoLab-Portable-{VERSI}.zip"
     with zipfile.ZipFile(portable, "w", zipfile.ZIP_DEFLATED, compresslevel=6) as z:
         for f in sorted(DIST.rglob("*")):
             if f.is_file():
-                z.write(f, f"VirmoDock/{f.relative_to(DIST).as_posix()}")
-        z.writestr("VirmoDock/portable.flag", "VirmoDock portable: pengaturan & data disimpan di folder ini.\n")
-        z.writestr("VirmoDock/BACA_SAYA.txt", README_PORTABLE.replace("\n", "\r\n"))
-        z.write(AKAR / "LICENSE", "VirmoDock/LICENSE.txt")
+                z.write(f, f"VirmoLab/{f.relative_to(DIST).as_posix()}")
+        z.writestr("VirmoLab/portable.flag", "VirmoLab portable: pengaturan & data disimpan di folder ini.\n")
+        z.writestr("VirmoLab/BACA_SAYA.txt", README_PORTABLE.replace("\n", "\r\n"))
+        z.write(AKAR / "LICENSE", "VirmoLab/LICENSE.txt")
 
     langkah("SHA-256")
     baris = [f"{sha256(f)}  {f.name}" for f in (setup, portable)]

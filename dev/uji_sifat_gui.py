@@ -10,7 +10,7 @@ from pathlib import Path
 from PySide6.QtCore import QSettings, QTimer
 
 sys.argv = [sys.argv[0]]
-st = QSettings("VirmoDock", "VirmoDock")
+st = QSettings("VirmoLab", "VirmoLab")
 st.setValue("tema", "terang")
 st.remove("layout")
 st.remove("sesi_terbuka")
@@ -21,14 +21,14 @@ PROYEK = OUT / "proyek_uji.vmd"
 shutil.rmtree(PROYEK, ignore_errors=True)
 shutil.copytree(SUMBER, PROYEK)
 
-import virmodock.app as A
+import virmolab.app as A
 from PySide6.QtWidgets import QApplication, QMessageBox
 
 QMessageBox.information = staticmethod(lambda *a, **k: print("INFO:", a[2] if len(a) > 2 else a, flush=True))
 
 
 def hook():
-    from virmodock.ui import mainwindow
+    from virmolab.ui import mainwindow
     Asli = mainwindow.JendelaUtama
 
     class Uji(Asli):
@@ -68,7 +68,7 @@ def hook():
                 s._ekspor_sifat(f)
             s._simpan_svg(s.sifat.svg(gelap=False), str(OUT / "egg.pdf"), "pdf", 760, 600, 140)
             s._simpan_svg(s.sifat.svg(gelap=False), str(OUT / "egg.tif"), "tif", 760, 600, 140, 300)
-            from virmodock.core import ekspor
+            from virmolab.core import ekspor
             ekspor.simpan_xlsx(str(OUT / "uji.xlsx"), s.proyek, ekspor.baris_hasil(s.proyek), {}, {},
                                [x for x in s._data_sifat() if isinstance(x[1], dict)])
             # urut kolom ΔG

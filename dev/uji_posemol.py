@@ -1,4 +1,4 @@
-from virmodock.core import mesin as M
+from virmolab.core import mesin as M
 from meeko import PDBQTMolecule, RDKitMolCreate
 from rdkit import Chem
 import pathlib as _pl

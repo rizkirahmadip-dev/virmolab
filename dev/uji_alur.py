@@ -1,6 +1,6 @@
 """Uji alur Tahap 2 di GUI: impor -> reseptor -> ligan -> docking AD-GPU & Vina -> pose -> buka ulang proyek.
 
-Dialog dilewati (fungsi intinya dipanggil langsung). Tangkapan hanya jendela VirmoDock (widget.grab()).
+Dialog dilewati (fungsi intinya dipanggil langsung). Tangkapan hanya jendela VirmoLab (widget.grab()).
   VD_SHOT=dev/uji/gambar/alur.png PYTHONPATH=. .venv/Scripts/python.exe dev/uji_alur.py
 """
 import os
@@ -14,7 +14,7 @@ sys.argv = [sys.argv[0]]
 KERJA = Path("dev/uji/kerja").resolve()
 shutil.rmtree(KERJA, ignore_errors=True)
 KERJA.mkdir(parents=True)
-st = QSettings("VirmoDock", "VirmoDock")
+st = QSettings("VirmoLab", "VirmoLab")
 st.setValue("wizard_selesai", True)
 st.setValue("tema", os.environ.get("VD_TEMA", "terang"))
 st.setValue("folder_kerja", str(KERJA))
@@ -22,15 +22,15 @@ st.remove("layout")
 st.remove("sesi_terbuka")
 out = os.environ.get("VD_SHOT", "dev/uji/gambar/alur.png")
 
-import virmodock.app as A
+import virmolab.app as A
 from PySide6.QtWidgets import QApplication
 Path("dev/uji/gambar").mkdir(parents=True, exist_ok=True)  # keluaran gambar uji
 
 
 def hook():
-    from virmodock.ui import mainwindow
-    from virmodock.core import prep_reseptor, prep_ligan, molekul
-    from virmodock.ui import kerja
+    from virmolab.ui import mainwindow
+    from virmolab.core import prep_reseptor, prep_ligan, molekul
+    from virmolab.ui import kerja
     Asli = mainwindow.JendelaUtama
 
     class Uji(Asli):

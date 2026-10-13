@@ -2,7 +2,7 @@
 info Properti -> P2Rank konfigurasi 'alphafold' -> grid box -> cek pLDDT kotak; ACE2 (Q9BYF1) ujung C dipangkas.
 
   PYTHONIOENCODING=utf-8 PYTHONPATH=. .venv/Scripts/python.exe dev/uji_alphafold.py
-Keluaran: dev/uji/alphafold/ (gui_*.png = grab jendela VirmoDock saja).
+Keluaran: dev/uji/alphafold/ (gui_*.png = grab jendela VirmoLab saja).
 """
 import shutil
 import sys
@@ -11,7 +11,7 @@ from pathlib import Path
 from PySide6.QtCore import QSettings, QTimer
 
 sys.argv = [sys.argv[0]]
-st = QSettings("VirmoDock", "VirmoDock")
+st = QSettings("VirmoLab", "VirmoLab")
 st.setValue("tema", "terang")
 st.remove("layout")
 st.remove("sesi_terbuka")
@@ -19,7 +19,7 @@ OUT = Path("dev/uji/alphafold").resolve()
 shutil.rmtree(OUT, ignore_errors=True)
 OUT.mkdir(parents=True, exist_ok=True)
 
-import virmodock.app as A
+import virmolab.app as A
 from PySide6.QtWidgets import QApplication, QMessageBox
 
 QMessageBox.information = staticmethod(lambda *a, **k: print("INFO:", a[2] if len(a) > 2 else a, flush=True))
@@ -33,10 +33,10 @@ def cek(kondisi, pesan):
 
 
 def hook():
-    from virmodock.core import alphafold
-    from virmodock.core.proyek import Proyek
-    from virmodock.ui import mainwindow
-    from virmodock.ui.dialogs import DialogAmbil
+    from virmolab.core import alphafold
+    from virmolab.core.proyek import Proyek
+    from virmolab.ui import mainwindow
+    from virmolab.ui.dialogs import DialogAmbil
 
     Asli = mainwindow.JendelaUtama
 

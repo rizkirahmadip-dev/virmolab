@@ -1,8 +1,8 @@
 import sys
 from PySide6.QtCore import QTimer
 from PySide6.QtWidgets import QApplication
-from virmodock.ui.viewer_widget import Viewer
-from virmodock.core import molekul
+from virmolab.ui.viewer_widget import Viewer
+from virmolab.core import molekul
 app = QApplication(sys.argv)
 v = Viewer(); v.resize(900, 600); v.show()
 o = molekul.baca_teks_struktur(open("dev/uji/1HSG.pdb").read(), "1HSG")[0]

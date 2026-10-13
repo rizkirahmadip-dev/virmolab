@@ -1,13 +1,13 @@
 import sys
 from PySide6.QtWidgets import QApplication
-from virmodock.app import siapkan_kimia
+from virmolab.app import siapkan_kimia
 siapkan_kimia()
 app = QApplication(sys.argv); app.setStyle("Fusion")
-from virmodock.ui import theme
-from virmodock.core import molekul
+from virmolab.ui import theme
+from virmolab.core import molekul
 app.setPalette(theme.palet("terang")); app.setStyleSheet(theme.qss("terang").replace("ICON_CHECK", ""))
-from virmodock.ui.dialog_reseptor import DialogReseptor
-from virmodock.ui.dialog_ligan import DialogLigan
+from virmolab.ui.dialog_reseptor import DialogReseptor
+from virmolab.ui.dialog_ligan import DialogLigan
 from pathlib import Path
 Path("dev/uji/gambar").mkdir(parents=True, exist_ok=True)  # keluaran gambar uji
 objs = molekul.baca_teks_struktur(open("dev/uji/1HSG.pdb").read(), "1HSG")

@@ -10,7 +10,7 @@ from PySide6.QtCore import QSettings, QTimer
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 sys.argv = [sys.argv[0]]
-st = QSettings("VirmoDock", "VirmoDock")
+st = QSettings("VirmoLab", "VirmoLab")
 st.setValue("tema", os.environ.get("VD_TEMA", "terang"))
 st.remove("layout")
 st.remove("sesi_terbuka")
@@ -21,7 +21,7 @@ ASAL = sorted(Path("dev/uji/kerja").glob("*.vmd"))[-1]
 PROYEK = OUT / ASAL.name
 shutil.copytree(ASAL, PROYEK)
 
-import virmodock.app as A  # noqa: E402
+import virmolab.app as A  # noqa: E402
 from PySide6.QtGui import QDesktopServices  # noqa: E402
 from PySide6.QtWidgets import QApplication  # noqa: E402
 
@@ -36,7 +36,7 @@ def cek(nama, kondisi, detail=""):
 
 
 def hook():
-    from virmodock.ui import mainwindow
+    from virmolab.ui import mainwindow
     Asli = mainwindow.JendelaUtama
 
     class Uji(Asli):
@@ -56,7 +56,7 @@ def hook():
             QTimer.singleShot(5000, s.l2)
 
         def l2(s):
-            from virmodock.core import ekspor
+            from virmolab.core import ekspor
             b = ekspor.baris_hasil(s.proyek)
             s.buka_pose(b[0]["job"], b[0]["lid"], 1)
             QTimer.singleShot(3500, s.l3)

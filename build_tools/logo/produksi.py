@@ -1,6 +1,6 @@
-"""ARSIP: logo lama VirmoDock -> branding/arsip_virmodock/. Logo aktif: produksi_virmolab.py.
+"""ARSIP: logo lama VirmoLab -> branding/arsip_logo_lama/. Logo aktif: produksi_virmolab.py.
 
-Produksi logo VirmoDock -> branding/arsip_virmodock/ (SVG vektor + PNG + ICO + lembar panduan merek).
+Produksi logo VirmoLab -> branding/arsip_logo_lama/ (SVG vektor + PNG + ICO + lembar panduan merek).
 
   .venv\\Scripts\\python.exe build_tools\\logo\\produksi.py
 """
@@ -14,7 +14,7 @@ from PySide6.QtCore import QRectF, Qt  # noqa: E402
 from PySide6.QtGui import QColor, QFont, QImage, QPainter  # noqa: E402
 
 AKAR = Path(__file__).resolve().parents[2]
-B = AKAR / "branding" / "arsip_virmodock"
+B = AKAR / "branding" / "arsip_logo_lama"
 B.mkdir(exist_ok=True)
 
 GEO = {"bentuk": "kantong", "g": 0.16, "t": 0.70, "atas": 1.15}
@@ -40,7 +40,7 @@ def tanda(warna_v, warna_h, geo=GEO, ukuran=512, latar=None, rx=0, pad=0.08):
     return _svg(ukuran, ukuran, isi)
 
 
-def _svg(w, h, isi, judul="VirmoDock"):
+def _svg(w, h, isi, judul="VirmoLab"):
     return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w:.1f} {h:.1f}" width="{w:.0f}" height="{h:.0f}">'
             f'<title>{judul}</title>' + "".join(isi) + "</svg>\n")
 
@@ -51,7 +51,7 @@ def horizontal(warna_v=NAVY, warna_h=BIRU, warna_t=NAVY, warna_tag="#5b6b82", ta
     x0, y0, x1, y1 = bbox(v + h)
     H = 200.0
     sx = H / (y1 - y0)
-    path, kotak, kap = teks_ke_path("VirmoDock", WM["keluarga"], WM["berat"], 200, WM["spasi"])
+    path, kotak, kap = teks_ke_path("VirmoLab", WM["keluarga"], WM["berat"], 200, WM["spasi"])
     kap_t = H * 0.50
     sk = kap_t / kap
     pad = H * 0.22
@@ -79,7 +79,7 @@ def bertumpuk(warna_v=NAVY, warna_h=BIRU, warna_t=NAVY, warna_tag="#5b6b82", lat
     x0, y0, x1, y1 = bbox(v + h)
     H = 200.0
     sx = H / (y1 - y0)
-    path, kotak, kap = teks_ke_path("VirmoDock", WM["keluarga"], WM["berat"], 200, WM["spasi"])
+    path, kotak, kap = teks_ke_path("VirmoLab", WM["keluarga"], WM["berat"], 200, WM["spasi"])
     kap_t = H * 0.30
     sk = kap_t / kap
     tp, tk, tkap = teks_ke_path(TAG, WM["keluarga"], 400, 200, 0.28)
@@ -106,18 +106,18 @@ def tulis(nama, svg, png_lebar=None, latar_png=None):
 
 
 # ---------------------------------------------------------------- berkas
-tulis("virmodock_logo_horizontal", horizontal(), 2400)
-tulis("virmodock_logo_horizontal_tanpa_tagline", horizontal(tagline=False), 2400)
-tulis("virmodock_logo_horizontal_putih", horizontal("#ffffff", BIRU_MUDA, "#ffffff", "#c9d8ee"), 2400)
-tulis("virmodock_logo_horizontal_tanpa_tagline_putih", horizontal("#ffffff", BIRU_MUDA, "#ffffff", tagline=False), 2400)
-tulis("virmodock_logo_horizontal_hitam", horizontal("#111111", "#111111", "#111111", "#111111"), 2400)
-tulis("virmodock_logo_bertumpuk", bertumpuk(), 1600)
-tulis("virmodock_logo_bertumpuk_putih", bertumpuk("#ffffff", BIRU_MUDA, "#ffffff", "#c9d8ee"), 1600)
-tulis("virmodock_tanda", tanda(NAVY, BIRU), 1024)
-tulis("virmodock_tanda_putih", tanda("#ffffff", BIRU_MUDA), 1024)
-tulis("virmodock_tanda_hitam", tanda("#111111", "#111111"), 1024)
+tulis("logo_lama_logo_horizontal", horizontal(), 2400)
+tulis("logo_lama_logo_horizontal_tanpa_tagline", horizontal(tagline=False), 2400)
+tulis("logo_lama_logo_horizontal_putih", horizontal("#ffffff", BIRU_MUDA, "#ffffff", "#c9d8ee"), 2400)
+tulis("logo_lama_logo_horizontal_tanpa_tagline_putih", horizontal("#ffffff", BIRU_MUDA, "#ffffff", tagline=False), 2400)
+tulis("logo_lama_logo_horizontal_hitam", horizontal("#111111", "#111111", "#111111", "#111111"), 2400)
+tulis("logo_lama_logo_bertumpuk", bertumpuk(), 1600)
+tulis("logo_lama_logo_bertumpuk_putih", bertumpuk("#ffffff", BIRU_MUDA, "#ffffff", "#c9d8ee"), 1600)
+tulis("logo_lama_tanda", tanda(NAVY, BIRU), 1024)
+tulis("logo_lama_tanda_putih", tanda("#ffffff", BIRU_MUDA), 1024)
+tulis("logo_lama_tanda_hitam", tanda("#111111", "#111111"), 1024)
 ikon_svg = tanda("#ffffff", BIRU_MUDA, GEO_IKON, 512, NAVY, rx=104, pad=0.17)
-tulis("virmodock_ikon", ikon_svg, 1024)
+tulis("logo_lama_ikon", ikon_svg, 1024)
 
 # ICO multi-ukuran untuk aplikasi & installer
 from PIL import Image  # noqa: E402
@@ -128,7 +128,7 @@ for n in uk:
     gambar[n] = Image.open(B / "_i.png").convert("RGBA")
     gambar[n].load()
 (B / "_i.png").unlink()
-gambar[256].save(B / "virmodock.ico", sizes=[(n, n) for n in uk], append_images=[gambar[n] for n in uk[:-1]])
+gambar[256].save(B / "logo_lama.ico", sizes=[(n, n) for n in uk], append_images=[gambar[n] for n in uk[:-1]])
 
 
 # -------------------------------------------------------- panduan merek
@@ -160,7 +160,7 @@ f.setPixelSize(30)
 f.setWeight(QFont.Weight(600))
 p.setFont(f)
 p.setPen(QColor(NAVY))
-p.drawText(QRectF(m, 70, 1800, 50), Qt.AlignLeft, "VirmoDock · Panduan logo")
+p.drawText(QRectF(m, 70, 1800, 50), Qt.AlignLeft, "VirmoLab · Panduan logo")
 f.setPixelSize(19)
 f.setWeight(QFont.Weight(400))
 p.setFont(f)
@@ -187,7 +187,7 @@ f.setWeight(QFont.Weight(600))
 p.setFont(f)
 p.setPen(QColor(NAVY))
 p.drawText(QRectF(m, y, 800, 34), Qt.AlignLeft, "Warna")
-for i, (nama, hexa, rgb) in enumerate((("Navy VirmoDock", NAVY, "23 · 59 · 108"), ("Biru ligan", BIRU, "43 · 111 · 214"),
+for i, (nama, hexa, rgb) in enumerate((("Navy VirmoLab", NAVY, "23 · 59 · 108"), ("Biru ligan", BIRU, "43 · 111 · 214"),
                                        ("Biru terang (latar gelap)", BIRU_MUDA, "91 · 154 · 240"),
                                        ("Abu tagline", "#5b6b82", "91 · 107 · 130"))):
     x = m + i * 540
@@ -230,5 +230,5 @@ aturan = ["Ruang kosong minimal di sekeliling logo = tinggi heksagon.",
 for i, t in enumerate(aturan):
     p.drawText(QRectF(m + 760, y + 60 + i * 34, 1500, 30), Qt.AlignLeft, "—  " + t)
 p.end()
-img.save(str(B / "virmodock_panduan_logo.png"))
+img.save(str(B / "logo_lama_panduan_logo.png"))
 print("selesai:", sorted(f.name for f in B.iterdir()))

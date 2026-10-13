@@ -10,9 +10,9 @@ from PySide6.QtGui import QColor, QImage, QPainter  # noqa: E402
 from PySide6.QtSvg import QSvgRenderer  # noqa: E402
 from PySide6.QtWidgets import QApplication  # noqa: E402
 
-from virmodock.core import grafik, komposer as K  # noqa: E402
-from virmodock.ui import tab_uji as T  # noqa: E402
-from virmodock.ui.dialog_komposer import DialogKomposer  # noqa: E402
+from virmolab.core import grafik, komposer as K  # noqa: E402
+from virmolab.ui import tab_uji as T  # noqa: E402
+from virmolab.ui.dialog_komposer import DialogKomposer  # noqa: E402
 
 OUT = Path(__file__).resolve().parent / "uji" / "komposer"
 OUT.mkdir(parents=True, exist_ok=True)

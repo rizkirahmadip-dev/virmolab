@@ -8,7 +8,7 @@ from PySide6.QtCore import QPointF, Qt  # noqa: E402
 from PySide6.QtGui import QMouseEvent  # noqa: E402
 from PySide6.QtWidgets import QApplication  # noqa: E402
 
-from virmodock.ui import tab_uji as T  # noqa: E402
+from virmolab.ui import tab_uji as T  # noqa: E402
 
 OUT = Path(__file__).resolve().parent / "uji" / "grafik_lanjut"
 OUT.mkdir(parents=True, exist_ok=True)

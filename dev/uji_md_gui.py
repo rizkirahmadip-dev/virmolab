@@ -11,7 +11,7 @@ from pathlib import Path
 from PySide6.QtCore import QSettings, QTimer
 
 sys.argv = [sys.argv[0]]
-st = QSettings("VirmoDock", "VirmoDock")
+st = QSettings("VirmoLab", "VirmoLab")
 st.setValue("tema", "terang")
 st.remove("layout")
 st.remove("sesi_terbuka")
@@ -23,7 +23,7 @@ OUT.mkdir(parents=True)
 PROYEK = OUT / "proyek_md.vmd"
 shutil.copytree(SUMBER, PROYEK)
 
-import virmodock.app as A
+import virmolab.app as A
 from PySide6.QtWidgets import QApplication, QMessageBox
 
 QMessageBox.information = staticmethod(lambda *a, **k: print("INFO:", a[2] if len(a) > 2 else a, flush=True))
@@ -38,7 +38,7 @@ def cek(kondisi, pesan):
 
 
 def hook():
-    from virmodock.ui import mainwindow
+    from virmolab.ui import mainwindow
 
     Asli = mainwindow.JendelaUtama
 
@@ -96,7 +96,7 @@ def hook():
             cek(len(L) == 4, f"Ringan: {len(L)}/4 ligan selesai; galat: {[x.get('galat') for x in h.get('ligan', []) if x.get('galat')]}")
             for x in L:
                 print(f"   {x['nama']} {x['job']}: dock {x['energi_docking']:.2f} -> MM/GBSA {x['mmgbsa_min']['dG']:.2f}", flush=True)
-            from virmodock.core import ekspor
+            from virmolab.core import ekspor
             b = ekspor.baris_hasil(s.proyek)
             cek(all(x.get("mmgbsa") is not None for x in b), "kolom MM/GBSA terisi di baris Hasil")
             s.tab_tengah.setCurrentWidget(s.hasil)

@@ -27,16 +27,16 @@ from PySide6.QtWidgets import QApplication  # noqa: E402
 
 sys.argv = [sys.argv[0]]
 app = QApplication(sys.argv)
-app.setApplicationName("VirmoDock")
-app.setOrganizationName("VirmoDock")
+app.setApplicationName("VirmoLab")
+app.setOrganizationName("VirmoLab")
 app.setStyle("Fusion")
-st = QSettings("VirmoDock", "VirmoDock")
+st = QSettings("VirmoLab", "VirmoLab")
 tema_lama = st.value("tema")
 st.setValue("tema", "terang")
-from virmodock import i18n  # noqa: E402
+from virmolab import i18n  # noqa: E402
 i18n.pasang(app)
-from virmodock.core import ekspor  # noqa: E402
-from virmodock.ui.mainwindow import JendelaUtama  # noqa: E402
+from virmolab.core import ekspor  # noqa: E402
+from virmolab.ui.mainwindow import JendelaUtama  # noqa: E402
 
 w = JendelaUtama()
 w.resize(1180, 820)          # viewport kecil -> label relatif lebih besar di bingkai

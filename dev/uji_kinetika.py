@@ -5,7 +5,7 @@ from pathlib import Path
 # Pastikan import dari root proyek
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from virmodock.core import kinetika
+from virmolab.core import kinetika
 
 
 def uji_kinetika():
