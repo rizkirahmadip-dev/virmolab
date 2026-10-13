@@ -203,23 +203,39 @@ class DialogPustaka(QDialog):
         a = P.coconut_ada()
         if a:
             jml = f"{a['jumlah']:,}".replace(",", ".")
-            self.l_coco.setText(f"Basis data lokal: <b>{jml}</b> senyawa (diunduh {a['waktu']}, "
-                                f"{a['ukuran'] / 1e6:.0f} MB). Data CC0. {escape(P.SITASI_COCONUT)}")
+            tipe_teks = "lengkap (dengan organisme)" if a.get("tipe") == "penuh" else "ringkas (lite)"
+            self.l_coco.setText(f"Basis data lokal: <b>{jml}</b> senyawa [{tipe_teks}] (diunduh {a['waktu']}, "
+                                f"{a['ukuran'] / 1e6:.0f} MB). Data CC0 / CC BY 4.0. {escape(P.SITASI_COCONUT)}")
             self.b_unduh.setText("Perbarui basis data…")
             self.l_info.setText("COCONUT siap (offline)")
         else:
-            self.l_coco.setText("Basis data COCONUT belum ada. Unduh sekali (±200 MB, ±700 ribu bahan alam, CC0); "
+            self.l_coco.setText("Basis data COCONUT belum ada. Unduh sekali (±200 MB, ±700 ribu bahan alam); "
                                 "setelah itu pencarian berjalan offline.")
             self.b_unduh.setText("Unduh basis data COCONUT…")
             self.l_info.setText("")
         self.b_cari.setEnabled(bool(a) or self.c_sumber.currentData() != "coconut")
 
     def unduh_coconut(self):
-        if QMessageBox.question(self, "Unduh COCONUT",
-                                "Unduh berkas COCONUT 2.0 (±200 MB) dari server Universitas Jena dan simpan indeks "
-                                "(±250 MB) di folder data VirmoDock?\n\nLisensi data: CC0. Proses ±3-10 menit "
-                                "tergantung koneksi.") != QMessageBox.Yes:
+        box = QMessageBox(self)
+        box.setWindowTitle("Unduh COCONUT 2.0")
+        box.setText("Pilih versi basis data COCONUT 2.0 untuk diunduh:")
+        box.setInformativeText(
+            "• <b>Versi Lengkap (Organisme)</b> (197,5 MB arsip, Zenodo; lisensi CC BY 4.0): "
+            "Memuat nama takson tanaman/organisme untuk integrasi fitur Senyawa dari Tanaman Obat.\n\n"
+            "• <b>Versi Ringkas (Lite)</b> (±200 MB arsip, S3 Jena; data CC0): "
+            "Hanya memuat struktur dan sifat kimia tanpa nama takson organisme.\n\n"
+            "Proses unduh dan pengindeksan SQLite memerlukan waktu ±3-10 menit tergantung koneksi."
+        )
+        b_penuh = box.addButton("Versi Lengkap (197,5 MB)", QMessageBox.ActionRole)
+        box.addButton("Versi Ringkas (200 MB)", QMessageBox.ActionRole)
+        b_batal = box.addButton("Batal", QMessageBox.RejectRole)
+        box.exec()
+        tombol = box.clickedButton()
+        if tombol == b_batal or tombol is None:
             return
+        penuh = (tombol == b_penuh)
+        url = P.URL_COCONUT_PENUH if penuh else P.URL_COCONUT_LITE
+
         self._batal = threading.Event()
         self.b_unduh.setEnabled(False)
         self.b_batal.setVisible(True)
@@ -235,7 +251,8 @@ class DialogPustaka(QDialog):
             self._akhiri_unduh()
             self.l_status.setText("Unduhan gagal/dibatalkan: " + str(g).strip().splitlines()[-1])
 
-        kerja.jalankan(P.unduh_coconut, batal=self._batal, selesai=selesai, galat=galat,
+        kerja.jalankan(lambda lapor: P.unduh_coconut(url=url, batal=self._batal, lapor=lapor),
+                       selesai=selesai, galat=galat,
                        log=self.l_status.setText, progres=self._progres)
 
     def _progres(self, a, b, t):

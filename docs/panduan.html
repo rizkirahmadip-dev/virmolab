@@ -200,8 +200,18 @@
 <ul>
 <li>Saat dialog dibuka pertama kali, VirmoDock <b>mengukur kecepatan laptop</b> pada kompleks Anda (±30 detik) lalu menampilkan perkiraan waktu dan status <i>Disarankan</i> (&lt; 2 jam), <i>Bisa (lama)</i> (2–12 jam), atau <i>Tidak disarankan</i> (&gt; 12 jam). Hasil ukur disimpan per perangkat; <b>Ukur kecepatan</b> mengulanginya.</li>
 <li><b>Jeda</b> menyimpan checkpoint; <b>Lanjutkan</b> meneruskannya kapan saja, juga setelah aplikasi dibuka ulang. Menutup VirmoDock saat MD berjalan otomatis menjeda dengan checkpoint. Colok laptop ke listrik untuk MD panjang.</li>
-<li>Hasil tampil di tab Ringkasan (ΔG docking, MM/GBSA setelah minimisasi, rerata MM/GBSA MD ± SD, komponen, RMSD ligan rerata), RMSD, RMSF, MM/GBSA per waktu, dan Interaksi persisten (persentase frame). ΔG MM/GBSA juga masuk ke kolom <b>MM/GBSA</b> tabel Hasil, Statistik, ekspor, dan laporan.</li>
-<li>Berkas di folder proyek <code>md/&lt;id&gt;/</code>: <code>hasil.json</code>, <code>kompleks_minimisasi.pdb</code>, <code>topologi.pdb</code> + <code>trajektori_terlarut.dcd</code> (buka di PyMOL/VMD/ChimeraX).</li>
+<li><b>Analisis lintasan MD lengkap (F2)</b>: VirmoDock 1.2 menyajikan 7 tab hasil komprehensif:
+  <ul>
+    <li><b>Ringkasan</b>: Kartu statistik paruh kedua (RMSD ligan, RMSD Cα, Rg, Ikatan H, ΔG MM/GBSA rata ± SD), lencana konvergensi, dan tombol <i>Hitung analisis lanjutan</i> untuk trajektori MD lama dari berkas DCD tersimpan.</li>
+    <li><b>Stabilitas</b>: Grafik interaktif RMSD ligan/protein, RMSF per residu, Radius Girasi ($R_g$), dan SASA (protein, ligan, serta luas kontak terkubur via <code>rdFreeSASA</code> / Shrake–Rupley).</li>
+    <li><b>Interaksi</b>: Tabel okupansi residu kontak dan barcode interaksi &amp; ikatan hidrogen biner per frame (terkompresi RLE hemat memori).</li>
+    <li><b>PCA &amp; FEL</b>: Proyeksi koordinat Cα pada komponen utama (PC1 &amp; PC2) serta Lanskap Energi Bebas 2D (FEL Boltzmann, $\Delta G = -k_B T \ln(P/P_{\max})$).</li>
+    <li><b>Klaster</b>: Pengelompokan hierarki konformasi ligan (ambang batas RMSD 2,0 Å) dengan penentuan struktur medoid representatif. Tersedia tombol <i>Tampilkan medoid</i> di viewport 3D serta <i>Pakai sebagai reseptor ensemble</i> untuk docking multi-konformasi berikutnya.</li>
+    <li><b>Replika</b>: Opsi simulasi multi-replika (1–5 replika mandiri dengan benih acak berbeda; rekomendasi 3 replika untuk publikasi) lengkap dengan tabel konsistensi dan kurva RMSD tumpang-tindih.</li>
+    <li><b>Aksi &amp; Publikasi</b>: Semua grafik menyediakan tombol <i>Kirim ke komposer</i> dan <i>Simpan figur…</i> (vektor SVG atau raster PNG).</li>
+  </ul>
+</li>
+<li>Berkas di folder proyek <code>md/&lt;id&gt;/</code>: <code>hasil.json</code>, <code>kompleks_minimisasi.pdb</code>, <code>topologi.pdb</code> + <code>trajektori_terlarut.dcd</code> (buka di PyMOL/VMD/ChimeraX), dan folder klaster medoid PDB.</li>
 <li><b>Tafsiran</b>: MM/GBSA tidak menghitung entropi, jadi angkanya jauh lebih negatif daripada ΔG eksperimen; gunakan untuk <i>membandingkan</i> ligan pada reseptor dan pengaturan yang sama. RMSD ligan rerata &gt; 3 Å menandakan pose tidak stabil. Reseptor dengan ion logam memakai model nonbonded (pendekatan).</li>
 </ul>
 

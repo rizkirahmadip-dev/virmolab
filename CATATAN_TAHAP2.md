@@ -60,6 +60,8 @@ E:\Bikin Docking Simpel\
         statistik.py, grafik.py  ← statistik + grafik SVG umum (v1.1)
         qc.py                    ← PoseBusters + proses pekerja (v1.1)
         catat.py, pindah.py, ujimandiri.py  ← log berkas, pindah laptop, uji mandiri
+        sumber_data.py           ← klien HTTP bersama: cache APPDATA/cache_http, mode luring, pembatas laju, Jejak (v1.2)
+        graf.py                  ← tata letak spring/kk, SVG murni bertema, ekspor GraphML/CSV (v1.2)
       ui\
         mainwindow.py            ← JendelaUtama: menu, toolbar, dock, tab tengah, semua aksi
         theme.py, icons.py, logo.py, kerja.py (QThreadPool), viewer_widget.py (QWebEngineView + QWebChannel)
@@ -68,6 +70,7 @@ E:\Bikin Docking Simpel\
         panel_docking.py, panel_antrean.py, panel_hasil.py, panel_interaksi.py (+ TabDiagram)
         tab_banding.py, tab_sifat.py, tab_statistik.py   ← tab tengah
         dialogs.py (Ambil, Wizard), dialog_reseptor.py, dialog_ligan.py, dialog_ekspor.py, dialog_bantuan.py
+        dialog_pengaturan.py     ← pengaturan umum: folder kerja, program eksternal, kelola cache (v1.2)
       viewer\viewer.html, viewer.js, 3Dmol-min.js  ← API JS "VM.*"
     vendor\bin\                  ← autodock_gpu.exe, vina.exe, autogrid4.exe, autodock4.exe, clinfo.exe, OpenCL.dll, vcomp140.dll, openbabel\
     vendor\adgpu_src\            ← source AutoDock-GPU + vcxproj yang sudah dimodifikasi
@@ -386,6 +389,15 @@ Windows 10, Ryzen 7 5800H, 16 GB RAM, RTX 3060 Laptop 6 GB (driver 610.74), Pyth
 | `ui/mainwindow_media.py` | animasi dan perekaman video (mixin `MediaAnimasi`) |
 | `ui/kit.py` | komponen bersama dialog: kartu, tabel, lencana, `kit.sibuk`, `kit.f`, `kit.hx`, data proyek |
 | `ui/bentuk_organ.py` | ikon organ peta ADMET |
+| `core/sumber_data.py` | klien HTTP bersama, dataclass `Jejak`, cache sha256 di APPDATA, pembatas laju domain |
+| `core/graf.py` | tata letak graf (spring, kk), generator SVG token tema, ekspor GraphML/CSV |
+| `core/tanaman.py` | taksonomi tanaman, kueri SPARQL LOTUS (P703), gabung COCONUT 2.0, standarisasi RDKit |
+| `data/nama_tanaman_id.csv` | basis data 62 tanaman obat Indonesia terverifikasi takson Wikidata (P225) |
+| `ui/dialog_tanaman.py` | dialog pencarian senyawa tanaman, saringan MW/Lipinski/QED/stereo, pratinjau 2D, impor ligan |
+| `ui/dialog_pengaturan.py` | dialog pengaturan direktori kerja, program visualisasi eksternal, dan cache HTTP |
+| `core/md_analisis.py` | analisis trajektori MD lengkap: Rg, SASA rdFreeSASA/NumPy, barcode RLE, PCA, FEL 2D, klaster ligan, block averaging |
+| `ui/dialog_md.py` | dialog MD 7 tab: Ringkasan, Stabilitas, Interaksi, PCA & FEL, Klaster medoid ensemble, Replika, Log |
 
 Aturan yang dipegang: jangan menamai variabel lokal sama dengan modul yang diimpor (`kerja`, `kit`, `theme`) —
 pernah menyebabkan geser ligan dan GNINA mati total tanpa pesan. Linter `pyflakes` di CI menangkapnya sekarang.
+

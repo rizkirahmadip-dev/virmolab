@@ -6,16 +6,13 @@ Semua metode memakai `self` milik JendelaUtama: `KomposerFigur` dipasang sebagai
 """
 from pathlib import Path
 
-from PySide6.QtCore import QBuffer, QByteArray, Qt, QTimer
-from PySide6.QtGui import QImage
-from PySide6.QtSvg import QSvgRenderer
+from PySide6.QtCore import QByteArray, Qt, QTimer
 from PySide6.QtWidgets import QFileDialog, QMessageBox
 
-from ..core import analisis, diagram2d, kemiripan, kontribusi
+from ..core import analisis, diagram2d
 from ..core import sifat as sifat_mod
 from ..core.proyek import nama_aman
 from . import kerja, theme
-from .dialog_komposer import DialogKomposer
 
 
 class KomposerFigur:

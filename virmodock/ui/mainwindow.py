@@ -5,14 +5,14 @@ import subprocess
 import time
 from pathlib import Path
 
-from PySide6.QtCore import QByteArray, QSize, Qt, QTimer, QUrl
+from PySide6.QtCore import QSize, Qt, QTimer, QUrl
 from PySide6.QtGui import QAction, QActionGroup, QDesktopServices, QGuiApplication, QIcon, QKeySequence
 from PySide6.QtWidgets import (QApplication, QButtonGroup, QDockWidget, QFileDialog, QHBoxLayout,
                                QInputDialog, QLabel, QMainWindow, QPushButton, QSizePolicy, QStackedWidget,
                                QMessageBox, QSystemTrayIcon, QTabWidget, QToolBar, QToolButton, QVBoxLayout,
                                QWidget)
 
-from ..core import analisis, arti, catat, diagram2d, laporan
+from ..core import analisis, arti, catat, laporan
 from ..core.laporan import id_angka
 from ..core import antrean as antreanmod
 from ..core import ekspor as eksmod
@@ -424,7 +424,7 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
             self.tab_tengah.setCurrentWidget(tab[k])
             return
         aksi_peta = {"rcsb": lambda: self.ambil(0), "alphafold": lambda: self.ambil(3), "pubchem": lambda: self.ambil(1), "smiles": lambda: self.ambil(2),
-                     "pustaka": self.buka_pustaka, "buka": self.buka_berkas, "reseptor": self.siapkan_reseptor, "ligan": self.siapkan_ligan,
+                     "pustaka": self.buka_pustaka, "tanaman": self.buka_tanaman, "buka": self.buka_berkas, "reseptor": self.siapkan_reseptor, "ligan": self.siapkan_ligan,
                      "validasi": self.validasi_redocking, "ekspor": lambda: self.buka_ekspor(3),
                      "laporan": lambda: self.buka_ekspor(4), "mpo": self.buka_mpo, "labplanner": self.buka_labplanner,
                      "md": self.buka_md, "penapisan": self.buka_penapisan, "ppi": self.buka_ppi,
@@ -649,6 +649,8 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
         self.a_pustaka = A("Pustaka ligan (obat, bahan alam, ZINC)…", "lig", self.buka_pustaka, None,
                            "3.200 obat disetujui (offline), ±700 ribu bahan alam COCONUT, ZINC22; saring sifat & "
                            "kemiripan lalu impor")
+        self.a_tanaman = A("Senyawa dari tanaman obat…", "lig", self.buka_tanaman, None,
+                           "Cari senyawa yang dilaporkan dari suatu tanaman (LOTUS/Wikidata, COCONUT), lengkap dengan rujukan, lalu impor ke proyek")
         self.a_keluar = A("Keluar", None, self.close, "Ctrl+Q", "Tutup VirmoDock (docking berjalan akan dijeda)")
         # --- ekspor
         self.a_ekspor = A("Pusat ekspor…", "dl", lambda: self.buka_ekspor(3), "Ctrl+E",
@@ -763,7 +765,7 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
         m = menu("&Berkas")
         isi(m, (self.a_baru, self.a_templat, self.a_buka_proyek, self.a_terakhir, self.a_simpan, None, self.a_buka))
         self._sub(m, "Ambil dari internet", (self.a_rcsb, self.a_alphafold, self.a_pubchem, self.a_smiles, self.a_chembl,
-                                             self.a_pustaka, self.a_ketcher))
+                                             self.a_pustaka, self.a_tanaman, self.a_ketcher))
         m.addSeparator()
         self._sub(m, "Ekspor", (self.a_ekspor, None, self.a_foto, self.a_animasi, self.a_eks_2d, self.a_eks_struk, self.a_eks_sesi,
                                 self.a_eks_tabel, self.a_lapor))
@@ -883,7 +885,7 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
         self._judul_menu(m, "Langkah 1 · Protein")
         isi(m, (self.a_rcsb, self.a_alphafold, self.a_rec))
         self._judul_menu(m, "Langkah 2 · Ligan")
-        isi(m, (self.a_pubchem, self.a_smiles, self.a_ketcher, self.a_chembl, self.a_pustaka, self.a_lig))
+        isi(m, (self.a_pubchem, self.a_smiles, self.a_ketcher, self.a_chembl, self.a_pustaka, self.a_tanaman, self.a_lig))
         self._judul_menu(m, "Langkah 3 · Area docking")
         isi(m, (self.a_kotak_asli, self.a_kotak_res, self.a_kotak_sesuai, self.a_kotak_kantong, self.a_kotak_blind,
                 self.a_box,
@@ -1004,6 +1006,9 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
 
         # ---------------------------------------------------------------- Alat
         m = menu("A&lat")
+        isi(m, (A("Pengaturan…", "sliders", self.buka_pengaturan, "Ctrl+,",
+                  "Pengaturan folder kerja, program eksternal, dan cache internet"),
+                None))
         self.m_buka_di = m.addMenu("Buka di program lain")
         self.m_buka_di.setToolTipsVisible(True)
         isi(m, (A("Atur lokasi program lain…", None, self.atur_eksternal, None,

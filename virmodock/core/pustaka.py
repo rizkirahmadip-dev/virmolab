@@ -17,11 +17,14 @@ import threading
 import time
 import urllib.request
 import zlib
+from pathlib import Path
 
 from . import catat, paths
 
 FILE_OBAT = paths.PAKET / "aset" / "obat_disetujui.tsv.gz"
-URL_COCONUT = "https://coconut.s3.uni-jena.de/prod/downloads/2026-10/coconut_csv_lite-10-2026.zip"
+URL_COCONUT_LITE = "https://coconut.s3.uni-jena.de/prod/downloads/2026-10/coconut_csv_lite-10-2026.zip"
+URL_COCONUT_PENUH = "https://zenodo.org/records/13897048/files/coconut_complete-10-2024.csv.zip?download=1"
+URL_COCONUT = URL_COCONUT_LITE
 HALAMAN_COCONUT = "https://coconut.naturalproducts.net/download"
 URL_ZINC = "https://cartblanche22.docking.org/"
 ATC = {"A": "Saluran cerna & metabolisme", "B": "Darah", "C": "Kardiovaskular", "D": "Dermatologi",
@@ -34,6 +37,33 @@ SITASI_COCONUT = ("Chandrasekhar V, Rajan K, Kanakam SRS, et al. COCONUT 2.0: a 
 
 def _db():
     return paths.APPDATA / "pustaka" / "coconut.sqlite"
+
+
+def migrasi_coconut(path=None) -> bool:
+    """Periksa apakah database COCONUT SQLite memiliki kolom 'organisme'.
+
+    Bila kolom absen, buat ulang tabel dengan skema baru (memuat kolom organisme).
+    Kembalikan True bila tabel dimigrasikan/dibuat ulang.
+    """
+    p = Path(path) if path else _db()
+    if not p.exists():
+        return False
+    try:
+        with closing(sqlite3.connect(p)) as c:
+            kol = {r[1] for r in c.execute("PRAGMA table_info(senyawa)").fetchall()}
+            if kol and "organisme" not in kol:
+                catat.log.info("Migrasi COCONUT: kolom organisme absen, membuat ulang tabel...")
+                c.execute("DROP TABLE IF EXISTS senyawa")
+                c.execute("DROP TABLE IF EXISTS meta")
+                kol_sql = ", ".join(f"{k} {'REAL' if k in ANGKA else 'TEXT'}" for _, k in KOLOM)
+                c.execute(f"CREATE TABLE senyawa ({kol_sql})")
+                c.execute("CREATE TABLE meta (kunci TEXT PRIMARY KEY, nilai TEXT)")
+                c.commit()
+                return True
+        return False
+    except Exception as e:
+        catat.log.debug(f"Gagal migrasi COCONUT: {e}")
+        return False
 
 
 # ------------------------------------------------------------------ obat disetujui
@@ -78,16 +108,22 @@ def saring_obat(nama="", atc="", rute="", bahan_alam=False):
     return out
 
 
-# ------------------------------------------------------------------ COCONUT
 def coconut_ada():
     p = _db()
     if not p.exists():
         return None
     try:
+        if migrasi_coconut(p):
+            return None
         with closing(sqlite3.connect(p)) as c:
+            kol = {r[1] for r in c.execute("PRAGMA table_info(senyawa)").fetchall()}
+            if not kol or "organisme" not in kol:
+                return None
             n = c.execute("SELECT nilai FROM meta WHERE kunci='jumlah'").fetchone()
             w = c.execute("SELECT nilai FROM meta WHERE kunci='waktu'").fetchone()
-        return {"jumlah": int(n[0]), "waktu": w[0], "ukuran": p.stat().st_size}
+            tipe_r = c.execute("SELECT nilai FROM meta WHERE kunci='tipe'").fetchone()
+        tipe = tipe_r[0] if tipe_r else "lite"
+        return {"jumlah": int(n[0]), "waktu": w[0], "ukuran": p.stat().st_size, "tipe": tipe}
     except Exception as e:
         catat.log.debug(f"Gagal membaca status SQLite COCONUT: {e}")
         return None
@@ -107,7 +143,8 @@ KOLOM = [("identifier", "id"), ("name", "nama"), ("canonical_smiles", "smiles"),
          ("hydrogen_bond_acceptors_lipinski", "hba"), ("rotatable_bond_count", "rotb"),
          ("lipinski_rule_of_five_violations", "lipinski"), ("qed_drug_likeliness", "qed"), ("np_likeness", "np"),
          ("heavy_atom_count", "atom_berat"), ("chemical_super_class", "superkelas"), ("chemical_class", "kelas"),
-         ("np_classifier_pathway", "jalur"), ("annotation_level", "anotasi")]
+         ("np_classifier_pathway", "jalur"), ("annotation_level", "anotasi"),
+         ("organisms", "organisme")]
 ANGKA = {"mw", "logp", "tpsa", "hbd", "hba", "rotb", "lipinski", "qed", "np", "atom_berat", "anotasi"}
 
 
@@ -164,12 +201,12 @@ def unduh_coconut(url=URL_COCONUT, batal=None, lapor=None, maks_byte=None):
             if not r:
                 continue
             if idx is None:
-                pos = {k: i for i, k in enumerate(r)}
-                idx = [pos.get(a) for a, _ in KOLOM]
+                pos = {k.strip().lower(): i for i, k in enumerate(r)}
+                idx = [pos.get(a.lower()) for a, _ in KOLOM]
                 continue
             v = []
             for i, (_, k) in zip(idx, KOLOM):
-                x = r[i] if i is not None and i < len(r) else ""
+                x = r[i] if (i is not None and i < len(r)) else ""
                 if k in ANGKA:
                     try:
                         x = float(x)
@@ -192,8 +229,10 @@ def unduh_coconut(url=URL_COCONUT, batal=None, lapor=None, maks_byte=None):
     log(f"COCONUT: {n} senyawa dibaca ({time.time() - t0:.0f} s); membuat indeks…")
     con.execute("CREATE INDEX i_nama ON senyawa(nama COLLATE NOCASE)")
     con.execute("CREATE INDEX i_mw ON senyawa(mw)")
+    con.execute("CREATE INDEX i_org ON senyawa(organisme COLLATE NOCASE)")
+    tipe_unduh = "penuh" if "complete" in url.lower() else "lite"
     con.executemany("INSERT INTO meta VALUES (?, ?)", [("jumlah", str(n)), ("waktu", time.strftime("%d-%m-%Y")),
-                                                      ("url", url)])
+                                                      ("url", url), ("tipe", tipe_unduh)])
     con.commit()
     con.close()
     tujuan.unlink(missing_ok=True)
@@ -203,6 +242,21 @@ def unduh_coconut(url=URL_COCONUT, batal=None, lapor=None, maks_byte=None):
 
 def hapus_coconut():
     _db().unlink(missing_ok=True)
+
+
+def cari_coconut_organisme(nama_ilmiah="", batas=500):
+    """Cari senyawa di COCONUT lokal berdasarkan nama organisme/spesies."""
+    if not coconut_ada() or not nama_ilmiah.strip():
+        return []
+    pola = f"%{nama_ilmiah.strip()}%"
+    sql = "SELECT * FROM senyawa WHERE organisme LIKE ? ORDER BY anotasi DESC, qed DESC LIMIT ?"
+    try:
+        with closing(sqlite3.connect(_db())) as c:
+            c.row_factory = sqlite3.Row
+            return [dict(r) for r in c.execute(sql, (pola, batas))]
+    except Exception as e:
+        catat.log.debug(f"Gagal cari organisme COCONUT: {e}")
+        return []
 
 
 def cari_coconut(nama="", kelas="", mw=(0, 2000), lipinski_maks=None, qed_min=0.0, atom_min=6, batas=500,

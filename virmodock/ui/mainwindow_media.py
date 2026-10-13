@@ -8,14 +8,11 @@ from pathlib import Path
 
 from PySide6.QtCore import QTimer, QUrl
 from PySide6.QtGui import QDesktopServices
-from PySide6.QtWidgets import QFileDialog, QMessageBox, QProgressDialog
+from PySide6.QtWidgets import QFileDialog, QMessageBox
 
-from ..core import animasi as animod
-from ..core import kemiripan, molekul
+from ..core import molekul
 from ..core.proyek import nama_aman
 from . import kerja, theme
-from .dialog_animasi import DialogAnimasi
-from .perekam_video import PerekamVideo
 
 
 class MediaAnimasi:

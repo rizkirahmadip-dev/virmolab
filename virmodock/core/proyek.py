@@ -52,6 +52,7 @@ def migrasi_proyek(data: dict) -> dict:
     data.setdefault("md", [])
     data.setdefault("templat", "")
     data.setdefault("catatan", "")
+    data.setdefault("jejak", [])
     return data
 
 
@@ -75,6 +76,22 @@ class Proyek:
         self.templat = ""             # kunci templat proyek (core/templat.py), bila dibuat dari templat
         self.md = []                  # riwayat MD / MM-GBSA: {id, mode, tanggal, status, folder, ligan, opsi}
         self.eksperimen = {}          # data aktivitas eksperimen (ChEMBL): target, aktivitas [{chembl, nama, smiles, inchikey, pchembl, …}]
+        self.jejak = []               # riwayat sumber data internet: [{sumber, versi, diambil, kueri, lisensi}]
+
+    def catat_jejak(self, jejak):
+        """Catat jejak sumber data internet (objek Jejak atau dict) tanpa duplikat (kunci sumber+kueri)."""
+        if hasattr(jejak, "to_dict"):
+            d = jejak.to_dict()
+        elif isinstance(jejak, dict):
+            d = dict(jejak)
+        else:
+            return
+        kunci = (d.get("sumber", ""), d.get("kueri", ""))
+        for i, entri in enumerate(self.jejak):
+            if (entri.get("sumber", ""), entri.get("kueri", "")) == kunci:
+                self.jejak[i] = d
+                return
+        self.jejak.append(d)
 
     # ------------------------------------------------------------- jalur
     def p(self, *bag):
@@ -95,7 +112,8 @@ class Proyek:
                 "komposer": self.komposer, "job": self.job,
                 "objek": self.objek, "catatan": self.catatan, "validasi": self.validasi,
                 "blast": self.blast, "syarat_jarak": self.syarat_jarak,
-                "eksperimen": self.eksperimen, "md": self.md, "templat": self.templat}
+                "eksperimen": self.eksperimen, "md": self.md, "templat": self.templat,
+                "jejak": self.jejak}
 
     def simpan(self):
         self.siapkan_folder()
@@ -139,6 +157,7 @@ class Proyek:
         pr.eksperimen = d.get("eksperimen") or {}
         pr.md = d.get("md") or []
         pr.templat = d.get("templat") or ""
+        pr.jejak = d.get("jejak") or []
         # job yang terputus (aplikasi ditutup/crash) bisa dilanjutkan
         for j in pr.job:
             if j.get("status") in ("berjalan", "menunggu"):

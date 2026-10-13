@@ -34,7 +34,8 @@ vendor/adgpu_src/*.vcxproj.user
 
 # Data lokal
 portable.flag
-data/
+/data/
+vendor/bin/openbabel/data/
 Proyek/
 *.vmdbackup
 vendor/adgpu_src/input/

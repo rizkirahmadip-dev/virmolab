@@ -21,6 +21,7 @@ from PySide6.QtWidgets import (QAbstractItemView, QButtonGroup, QComboBox, QDial
                                QTabWidget, QToolButton, QVBoxLayout, QWidget)
 
 from ..core import grafik, paths
+from ..core.analisis import NAMA_JENIS
 from ..core.laporan import id_angka
 from . import kit
 from .panel_interaksi import KanvasSvg
@@ -136,15 +137,20 @@ class DialogMD(QDialog):
         self.sp_frame = QSpinBox()
         self.sp_frame.setRange(5, 500)
         self.sp_frame.setValue(25)
+        self.sp_replika = QSpinBox()
+        self.sp_replika.setRange(1, 5)
+        self.sp_replika.setValue(1)
+        self.sp_replika.setToolTip("Jumlah replika MD independen dengan benih berbeda (1-5, bawaan 1, saran 3)")
         self.cb_plat = QComboBox()
         for t, v in (("Otomatis (GPU bila ada)", "auto"), ("CPU", "CPU")):
             self.cb_plat.addItem(t, v)
-        for w in (self.sp_ns_i, self.sp_ns_e):
+        for w in (self.sp_ns_i, self.sp_ns_e, self.sp_replika):
             w.valueChanged.connect(lambda *_: self._perkiraan())
         f.addRow("Lama MD (Sedang)", self.sp_ns_i)
         f.addRow("Lama MD (Lengkap)", self.sp_ns_e)
         f.addRow("Simpan frame tiap", self.sp_interval)
         f.addRow("Frame MM/GBSA", self.sp_frame)
+        f.addRow("Jumlah replika", self.sp_replika)
         f.addRow("Perangkat", self.cb_plat)
         self.cb_plat.currentIndexChanged.connect(lambda *_: self._muat_kecepatan(ukur=True))
         vk.addLayout(f)
@@ -163,8 +169,14 @@ class DialogMD(QDialog):
         self.l_baterai.setStyleSheet(f"color:{kit.hx('warn')};")
         vk.addWidget(self.l_baterai)
         bagi.addWidget(kiri)
-        # ---- kanan: hasil
+
+        # ---- kanan: hasil (UI F2: Ringkasan, Stabilitas, Interaksi, PCA & FEL, Klaster, Replika, Log)
         self.tab = QTabWidget()
+        self.k = {}
+
+        # 1. Tab Ringkasan
+        w_ringkas = QWidget()
+        vr = QVBoxLayout(w_ringkas)
         self.t_hasil = QTableWidget(0, 8)
         self.t_hasil.setHorizontalHeaderLabels(["Ligan", "ΔG docking", "MM/GBSA min", "MM/GBSA MD", "SD", "ΔE vdW",
                                                 "Elek + GB", "RMSD ligan"])
@@ -180,22 +192,134 @@ class DialogMD(QDialog):
         self.t_hasil.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.t_hasil.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.t_hasil.currentCellChanged.connect(lambda r, *_: self._grafik_ligan(r))
-        self.tab.addTab(self.t_hasil, "Ringkasan")
-        self.k = {}
-        for kunci, judul in (("rmsd", "RMSD"), ("rmsf", "RMSF"), ("energi", "MM/GBSA per waktu")):
-            self.k[kunci] = KanvasSvg()
-            self.tab.addTab(self.k[kunci], judul)
-        self.t_inter = QTableWidget(0, 2)
-        self.t_inter.setHorizontalHeaderLabels(["Interaksi (residu | jenis)", "Frekuensi"])
+        vr.addWidget(self.t_hasil, 1)
+
+        # Baris kartu paruh kedua
+        self.k_rmsd_lig = kit.Kartu("RMSD Ligan", "–", "paruh kedua")
+        self.k_rmsd_ca = kit.Kartu("RMSD Cα", "–", "paruh kedua")
+        self.k_rg = kit.Kartu("Radius Girasi", "–", "paruh kedua")
+        self.k_hb = kit.Kartu("Ikatan-H", "–", "blok rata-rata")
+        self.k_dg = kit.Kartu("ΔG MM/GBSA", "–", "paruh kedua")
+        vr.addLayout(kit.baris_kartu(self.k_rmsd_lig, self.k_rmsd_ca, self.k_rg, self.k_hb, self.k_dg))
+
+        # Baris lencana dan tombol analisis lanjutan
+        h_konv = QHBoxLayout()
+        self.l_lencana_konv = kit.lencana("Siap", "info")
+        self.b_analisis_lanjut = QPushButton("Hitung analisis lanjutan")
+        self.b_analisis_lanjut.setToolTip("Hitung Rg, SASA, Barcode, PCA, FEL, dan Klaster dari DCD tersimpan")
+        self.b_analisis_lanjut.clicked.connect(self._hitung_analisis_lanjut_klik)
+        self.b_analisis_lanjut.setEnabled(False)
+        h_konv.addWidget(self.l_lencana_konv)
+        h_konv.addWidget(self.b_analisis_lanjut)
+        h_konv.addStretch(1)
+        vr.addLayout(h_konv)
+        self.l_catatan_md = kit.catatan("MD singkat satu replika menunjukkan kestabilan lokal pose, bukan afinitas.", "info")
+        vr.addWidget(self.l_catatan_md)
+        self.tab.addTab(w_ringkas, "Ringkasan")
+
+        # 2. Tab Stabilitas
+        w_stab = QWidget()
+        vs = QVBoxLayout(w_stab)
+        hs_top = QHBoxLayout()
+        hs_top.addWidget(QLabel("Metrik stabilitas:"))
+        self.cb_metrik_stab = QComboBox()
+        self.cb_metrik_stab.addItem("RMSD (Ligan & Protein Cα)", "rmsd")
+        self.cb_metrik_stab.addItem("RMSF Cα per Residu", "rmsf")
+        self.cb_metrik_stab.addItem("Radius Girasi Protein (Rg)", "rg")
+        self.cb_metrik_stab.addItem("Luas Akses Pelarut (SASA)", "sasa")
+        self.cb_metrik_stab.currentIndexChanged.connect(lambda *_: self._segarkan_stabilitas())
+        hs_top.addWidget(self.cb_metrik_stab)
+        hs_top.addStretch(1)
+        vs.addLayout(hs_top)
+        self.k["stabilitas"] = KanvasSvg()
+        vs.addWidget(self.k["stabilitas"], 1)
+        self.tab.addTab(w_stab, "Stabilitas")
+
+        # 3. Tab Interaksi
+        w_inter = QWidget()
+        vi = QHBoxLayout(w_inter)
+        split_inter = QSplitter(Qt.Horizontal)
+        w_inter_tabel = QWidget()
+        vit = QVBoxLayout(w_inter_tabel)
+        vit.setContentsMargins(0, 0, 0, 0)
+        vit.addWidget(QLabel("<b>Okupansi Interaksi (≥ 10%)</b>"))
+        self.t_inter = QTableWidget(0, 3)
+        self.t_inter.setHorizontalHeaderLabels(["Residu", "Jenis", "Okupansi"])
         self.t_inter.verticalHeader().setVisible(False)
+        self.t_inter.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.t_inter.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.t_inter.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
-        self.tab.addTab(self.t_inter, "Interaksi persisten")
+        self.t_inter.itemSelectionChanged.connect(self._sorot_residu_interaksi)
+        vit.addWidget(self.t_inter, 1)
+        split_inter.addWidget(w_inter_tabel)
+        self.k["barcode"] = KanvasSvg()
+        split_inter.addWidget(self.k["barcode"])
+        split_inter.setSizes([280, 520])
+        vi.addWidget(split_inter)
+        self.tab.addTab(w_inter, "Interaksi")
+
+        # 4. Tab PCA & FEL
+        w_pca_fel = QWidget()
+        vp = QHBoxLayout(w_pca_fel)
+        split_pf = QSplitter(Qt.Horizontal)
+        self.k["pca"] = KanvasSvg()
+        self.k["fel"] = KanvasSvg()
+        split_pf.addWidget(self.k["pca"])
+        split_pf.addWidget(self.k["fel"])
+        split_pf.setSizes([400, 400])
+        vp.addWidget(split_pf)
+        self.tab.addTab(w_pca_fel, kit.amp("PCA & FEL"))
+
+        # 5. Tab Klaster
+        w_klas = QWidget()
+        vk_layout = QVBoxLayout(w_klas)
+        vk_layout.addWidget(QLabel("<b>Klaster Konformasi Ligan (Ambang 2,0 Å)</b>"))
+        self.t_klaster = QTableWidget(0, 4)
+        self.t_klaster.setHorizontalHeaderLabels(["Klaster", "Ukuran (%)", "Jumlah Frame", "Medoid (Frame)"])
+        self.t_klaster.verticalHeader().setVisible(False)
+        self.t_klaster.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.t_klaster.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.t_klaster.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        vk_layout.addWidget(self.t_klaster, 1)
+        hk_btn = QHBoxLayout()
+        self.b_lihat_medoid = QPushButton("Tampilkan medoid")
+        self.b_lihat_medoid.setToolTip("Buka struktur PDB medoid di viewer 3D")
+        self.b_lihat_medoid.clicked.connect(self._tampilkan_medoid)
+        self.b_pakai_ensemble = QPushButton("Pakai sebagai reseptor ensemble")
+        self.b_pakai_ensemble.setToolTip("Simpan dan muat medoid ini sebagai varian konformasi reseptor ke proyek")
+        self.b_pakai_ensemble.clicked.connect(self._pakai_sebagai_ensemble)
+        hk_btn.addWidget(self.b_lihat_medoid)
+        hk_btn.addWidget(self.b_pakai_ensemble)
+        hk_btn.addStretch(1)
+        vk_layout.addLayout(hk_btn)
+        self.tab.addTab(w_klas, "Klaster")
+
+        # 6. Tab Replika
+        w_rep = QWidget()
+        vr_layout = QVBoxLayout(w_rep)
+        vr_layout.addWidget(QLabel("<b>Simulasi Multi-Replika Independen</b>"))
+        self.t_replika = QTableWidget(0, 6)
+        self.t_replika.setHorizontalHeaderLabels(["Replika", "Seed", "RMSD Ligan (Å)", "RMSD Cα (Å)", "Rg (Å)", "ΔG MM/GBSA (kcal/mol)"])
+        self.t_replika.verticalHeader().setVisible(False)
+        self.t_replika.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.t_replika.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.t_replika.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        vr_layout.addWidget(self.t_replika, 1)
+        self.l_rep_agregat = QLabel()
+        self.l_rep_agregat.setWordWrap(True)
+        vr_layout.addWidget(self.l_rep_agregat)
+        self.k["replika"] = KanvasSvg()
+        vr_layout.addWidget(self.k["replika"], 1)
+        self.tab.addTab(w_rep, "Replika")
+
+        # 7. Tab Log
         self.log = QPlainTextEdit()
         self.log.setReadOnly(True)
         self.log.setObjectName("mono")
         self.tab.addTab(self.log, "Log")
+
         bagi.addWidget(self.tab)
-        bagi.setSizes([470, 710])
+        bagi.setSizes([430, 750])
         lay.addWidget(bagi, 1)
         self.prog = QProgressBar()
         self.prog.setRange(0, 1000)
@@ -213,13 +337,23 @@ class DialogMD(QDialog):
         self.b_jeda.clicked.connect(self.jeda)
         self.b_lanjut = QPushButton("Lanjutkan")
         self.b_lanjut.clicked.connect(self.lanjutkan)
-        self.b_grafik = QPushButton("Simpan grafik…")
+
+        self.b_komposer = QPushButton("Kirim ke komposer")
+        self.b_komposer.setToolTip("Kirim grafik aktif saat ini ke Komposer Figur")
+        self.b_komposer.clicked.connect(self._kirim_ke_komposer)
+
+        self.b_grafik = QPushButton("Simpan figur…")
         self.b_grafik.clicked.connect(self._simpan_grafik)
+
+        self.b_ekspor_csv = QPushButton("Ekspor CSV…")
+        self.b_ekspor_csv.setToolTip("Ekspor data numerik analisis (RMSD, Rg, SASA, MM/GBSA) ke berkas CSV")
+        self.b_ekspor_csv.clicked.connect(self._ekspor_csv)
+
         self.b_folder = QPushButton("Buka folder")
         self.b_folder.clicked.connect(self._buka_folder)
         b_tutup = QPushButton("✕ Tutup")
         b_tutup.clicked.connect(self.close)
-        for b in (self.b_jalan, self.b_jeda, self.b_lanjut, self.b_grafik, self.b_folder, b_tutup):
+        for b in (self.b_jalan, self.b_jeda, self.b_lanjut, self.b_komposer, self.b_grafik, self.b_ekspor_csv, self.b_folder, b_tutup):
             hb.addWidget(b)
         lay.addLayout(hb)
         self.hasil = None
@@ -321,6 +455,7 @@ class DialogMD(QDialog):
     def _perkiraan(self):
         from ..core.md import saran
         n = max(1, len(self.terpilih()))
+        n_rep = max(1, self.sp_replika.value())
         k = self.kecepatan
         gpu = bool(k and k.get("platform") in ("CUDA", "OpenCL"))
         est = {"ringan": (n * (25 if gpu or not k else 60)) / 3600.0}
@@ -328,8 +463,8 @@ class DialogMD(QDialog):
         if k:
             for kunci, ns, kec in (("sedang", self.sp_ns_i.value(), k["implisit"]),
                                    ("lengkap", self.sp_ns_e.value(), k["eksplisit"])):
-                s, jam = saran(kec, ns, n)
-                est[kunci] = jam + n * (40 if kunci == "lengkap" else 25) / 3600.0
+                s, jam = saran(kec, ns, n * n_rep)
+                est[kunci] = jam + (n * n_rep) * (40 if kunci == "lengkap" else 25) / 3600.0
                 st[kunci] = "disarankan" if est[kunci] < 2 else "bisa" if est[kunci] <= 12 else "tidak"
         for kunci, *_ in TINGKAT:
             t, tok = STATUS[st.get(kunci, "")]
@@ -396,7 +531,7 @@ class DialogMD(QDialog):
         pelarut = "eksplisit" if self.tingkat() == "lengkap" else "implisit"
         opsi = {"pelarut": pelarut, "ns": self.sp_ns_e.value() if pelarut == "eksplisit" else self.sp_ns_i.value(),
                 "interval_ps": self.sp_interval.value(), "frame_mmgbsa": self.sp_frame.value(),
-                "platform": self.cb_plat.currentData()}
+                "platform": self.cb_plat.currentData(), "replika": self.sp_replika.value()}
         tugas = {"mode": mode, "folder": str(folder), "ligan": ligan, "opsi": opsi,
                  "reseptor": {"pdb": str(pr.p(sumber)), "pdbqt": str(pr.p(rec["pdbqt"]))}}
         (folder / "tugas.json").write_text(json.dumps(tugas, ensure_ascii=False, indent=1), encoding="utf-8")
@@ -566,61 +701,466 @@ class DialogMD(QDialog):
         r = self.t_hasil.currentRow() if r is None else r
         return L[r] if 0 <= r < len(L) else None
 
+    def _segarkan_stabilitas(self):
+        x = self._ligan_hasil()
+        if not x:
+            return
+        g = getattr(self.jw, "mode", "terang") == "gelap"
+        kunci = self.cb_metrik_stab.currentData() or "rmsd"
+        svg = self._svg(kunci, x, g)
+        self.k["stabilitas"].latar = QColor("#14171c" if g else "#ffffff")
+        self.k["stabilitas"].set_svg(svg)
+
     def _svg(self, kunci, x, gelap=False):
         tr = x.get("trajektori") or {}
+        an = x.get("analisis") or {}
+
         dt = (self.hasil.get("opsi") or {}).get("interval_ps", 10) / 1000.0
+
         if kunci == "rmsd":
             n = len(tr.get("rmsd_ligan") or [])
             t = [(i + 1) * dt for i in range(n)]
-            return grafik.garis([("Ligan (berat)", t, tr.get("rmsd_ligan") or []), ("Protein Cα", t, tr.get("rmsd_ca") or [])],
-                                "Waktu (ns)", "RMSD (Å)", f"RMSD - {x['nama']}", gelap=gelap, y_nol=True,
+            seri = [("Ligan (berat)", t, tr.get("rmsd_ligan") or []),
+                    ("Protein Cα", t, tr.get("rmsd_ca") or [])]
+            return grafik.garis(seri, "Waktu (ns)", "RMSD (Å)", f"RMSD - {x['nama']}", gelap=gelap, y_nol=True,
                                 catatan="Superposisi pada Cα protein frame pertama produksi; RMSD > 3 Å = pose bergeser")
         if kunci == "rmsf":
             v = tr.get("rmsf") or []
             return grafik.garis([("Cα", list(range(1, len(v) + 1)), v)], "Residu (urutan)", "RMSF (Å)",
                                 f"RMSF Cα - {x['nama']}", gelap=gelap, y_nol=True,
                                 catatan=(f"Residu 1 = {tr['residu'][0]}, terakhir = {tr['residu'][-1]}" if tr.get("residu") else ""))
-        e = x.get("mmgbsa_frame") or []
-        acuan = [(x["mmgbsa"]["dG"], f"rerata {grafik.fmt(x['mmgbsa']['dG'])}")] if x.get("mmgbsa") else None
-        return grafik.garis([("ΔG MM/GBSA", [f["t_ns"] for f in e], [f["dG"] for f in e])], "Waktu (ns)",
-                            "ΔG MM/GBSA (kcal/mol)", f"MM/GBSA per frame - {x['nama']}", gelap=gelap, acuan=acuan,
-                            catatan="OBC2 (igb 5), satu-trajektori, tanpa entropi")
+        if kunci == "rg":
+            rg_list = an.get("rg") or []
+            t = [(i + 1) * dt for i in range(len(rg_list))]
+            return grafik.garis([("Radius Girasi (Rg)", t, rg_list)], "Waktu (ns)", "Rg (Å)",
+                                f"Radius Girasi Protein - {x['nama']}", gelap=gelap, y_nol=False,
+                                catatan="Ukuran kekompakan lipatan protein selama simulasi")
+        if kunci == "sasa":
+            sasa_info = an.get("sasa") or {}
+            prot = sasa_info.get("protein") or []
+            terkubur = sasa_info.get("terkubur") or []
+            n_pt = max(len(prot), len(terkubur))
+            step_stride = (len(tr.get("rmsd_ligan") or [0]) / float(n_pt)) if n_pt else 1.0
+            t = [(i + 1) * step_stride * dt for i in range(n_pt)]
+            seri = []
+            if prot:
+                seri.append(("SASA Protein", t[:len(prot)], prot))
+            if terkubur:
+                seri.append(("ΔSASA Terkubur", t[:len(terkubur)], terkubur))
+            return grafik.garis(seri, "Waktu (ns)", "SASA (Å²)", f"SASA - {x['nama']}", gelap=gelap, y_nol=False,
+                                catatan="Luas permukaan terakses pelarut (rdFreeSASA / Shrake–Rupley)")
+        if kunci == "energi":
+            e = x.get("mmgbsa_frame") or []
+            acuan = [(x["mmgbsa"]["dG"], f"rerata {grafik.fmt(x['mmgbsa']['dG'])}")] if x.get("mmgbsa") else None
+            return grafik.garis([("ΔG MM/GBSA", [f["t_ns"] for f in e], [f["dG"] for f in e])], "Waktu (ns)",
+                                "ΔG MM/GBSA (kcal/mol)", f"MM/GBSA per frame - {x['nama']}", gelap=gelap, acuan=acuan,
+                                catatan="OBC2 (igb 5), satu-trajektori, tanpa entropi")
+        return ""
 
     def _grafik_ligan(self, r):
+        import numpy as np
+        from ..core import md_analisis
         x = self._ligan_hasil(r)
         if not x:
             return
         g = getattr(self.jw, "mode", "terang") == "gelap"
-        for kunci in self.k:
-            self.k[kunci].latar = QColor("#14171c" if g else "#ffffff")
-            self.k[kunci].set_svg(self._svg(kunci, x, g) if x.get("trajektori") or kunci == "energi" else "")
+        dt = (self.hasil.get("opsi") or {}).get("interval_ps", 10) / 1000.0
+
+        tr = x.get("trajektori") or {}
+        an = x.get("analisis") or {}
+        rm_lig = tr.get("rmsd_ligan") or []
+        rm_ca = tr.get("rmsd_ca") or []
+
+        # 1. Baris Kartu & Lencana Konvergensi
+        if rm_lig:
+            rm_lig_2 = rm_lig[len(rm_lig) // 2:] if len(rm_lig) > 1 else rm_lig
+            m_lig, s_lig = float(np.mean(rm_lig_2)), float(np.std(rm_lig_2))
+            self.k_rmsd_lig.isi(f"{kit.f(m_lig)} ± {kit.f(s_lig, satuan='Å')}", "paruh kedua")
+        else:
+            self.k_rmsd_lig.isi("–", "paruh kedua")
+
+        if rm_ca:
+            rm_ca_2 = rm_ca[len(rm_ca) // 2:] if len(rm_ca) > 1 else rm_ca
+            m_ca, s_ca = float(np.mean(rm_ca_2)), float(np.std(rm_ca_2))
+            self.k_rmsd_ca.isi(f"{kit.f(m_ca)} ± {kit.f(s_ca, satuan='Å')}", "paruh kedua")
+        else:
+            self.k_rmsd_ca.isi("–", "paruh kedua")
+
+        rg_list = an.get("rg") or []
+        if rg_list:
+            rg_2 = rg_list[len(rg_list) // 2:] if len(rg_list) > 1 else rg_list
+            m_rg, s_rg = float(np.mean(rg_2)), float(np.std(rg_2))
+            self.k_rg.isi(f"{kit.f(m_rg)} ± {kit.f(s_rg, satuan='Å')}", "paruh kedua")
+        else:
+            self.k_rg.isi("–", "paruh kedua")
+
+        konv = an.get("konvergensi") or {}
+        hb_list = an.get("hb") or []
+        if hb_list:
+            m_hb = konv.get("hb_rerata", float(np.mean(hb_list)))
+            s_hb = konv.get("hb_gs", float(np.std(hb_list)))
+            self.k_hb.isi(f"{kit.f(m_hb, 1)} ± {kit.f(s_hb, 1)}", "blok rata-rata")
+        else:
+            self.k_hb.isi("–", "blok rata-rata")
+
+        mm = x.get("mmgbsa") or {}
+        if mm.get("dG") is not None:
+            self.k_dg.isi(f"{kit.f(mm['dG'])} ± {kit.f(mm.get('sd', 0.0))}", "kcal/mol")
+        else:
+            self.k_dg.isi("–", "kcal/mol")
+
+        n_rep = len(x.get("replika") or []) or 1
+        ns = (x.get("md") or {}).get("ns") or len(rm_lig) * dt
+        teks = (f"{n_rep} replika × {kit.f(ns, 1)} ns: kestabilan lokal pose, bukan afinitas."
+                + (" Saran: ≥ 3 replika untuk publikasi." if n_rep < 3 else ""))
+        for p in an.get("peringatan") or []:
+            teks += f"\n• {p}"
+        self.l_catatan_md.setText(teks)
+
+        # Lencana status stabilitas
+        if rm_lig:
+            m_total = float(np.mean(rm_lig))
+            if m_total > 3.0:
+                kit.atur_nada(self.l_lencana_konv, "bad")
+                self.l_lencana_konv.setText("Bergeser (> 3 Å)")
+            elif len(rm_lig) > 10 and float(np.std(rm_lig_2)) < 0.6:
+                kit.atur_nada(self.l_lencana_konv, "ok")
+                self.l_lencana_konv.setText("Stabil")
+            else:
+                kit.atur_nada(self.l_lencana_konv, "warn")
+                self.l_lencana_konv.setText("Belum konvergen")
+        else:
+            kit.atur_nada(self.l_lencana_konv, "info")
+            self.l_lencana_konv.setText("Siap")
+
+        # Tombol Analisis Lanjutan
+        ada_v2 = an.get("versi") == 2
+        self.b_analisis_lanjut.setEnabled(not ada_v2 and bool(x.get("trajektori")))
+        self.b_analisis_lanjut.setText("Analisis v2 lengkap" if ada_v2 else "Hitung analisis lanjutan")
+
+        # 2. Tab Stabilitas
+        self._segarkan_stabilitas()
+
+        # 3. Tab Interaksi
         self.t_inter.setRowCount(0)
         for k_, v in list((x.get("interaksi_frek") or {}).items())[:60]:
             r_ = self.t_inter.rowCount()
             self.t_inter.insertRow(r_)
-            self.t_inter.setItem(r_, 0, QTableWidgetItem(k_.replace("|", "  |  ")))
+            p_res, p_jenis = (k_.split("|", 1) + [""])[:2]
+            self.t_inter.setItem(r_, 0, QTableWidgetItem(p_res.strip()))
+            jenis_it = QTableWidgetItem(NAMA_JENIS.get(p_jenis.strip(), p_jenis.strip()))
+            jenis_it.setData(Qt.UserRole, p_jenis.strip())
+            self.t_inter.setItem(r_, 1, jenis_it)
             it = QTableWidgetItem(f"{v * 100:.0f} %")
             it.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
-            self.t_inter.setItem(r_, 1, it)
+            self.t_inter.setItem(r_, 2, it)
+
+        # Barcode interaksi
+        barcode_svg = md_analisis.svg_barcode_interaksi(an.get("barcode") or {},
+                                                        dt_ps=(self.hasil.get("opsi") or {}).get("interval_ps", 10),
+                                                        gelap=g)
+        self.k["barcode"].latar = QColor("#14171c" if g else "#ffffff")
+        self.k["barcode"].set_svg(barcode_svg)
+
+        # 4. Tab PCA & FEL
+        pca_d = an.get("pca") or {}
+        var_rasio = pca_d.get("varians_rasio", [0.0, 0.0])
+        pca_svg = md_analisis.svg_pca_sebar(pca_d,
+                                            dt_ps=(self.hasil.get("opsi") or {}).get("interval_ps", 10),
+                                            gelap=g)
+        self.k["pca"].latar = QColor("#14171c" if g else "#ffffff")
+        self.k["pca"].set_svg(pca_svg)
+
+        fel_d = an.get("fel") or {}
+        fel_svg = md_analisis.svg_fel_2d(fel_d,
+                                         var_pc1=var_rasio[0] if len(var_rasio) > 0 else None,
+                                         var_pc2=var_rasio[1] if len(var_rasio) > 1 else None,
+                                         gelap=g)
+        self.k["fel"].latar = QColor("#14171c" if g else "#ffffff")
+        self.k["fel"].set_svg(fel_svg)
+
+        # 5. Tab Klaster
+        self.t_klaster.setRowCount(0)
+        klaster_list = an.get("klaster") or []
+        for c_idx, c_info in enumerate(klaster_list):
+            r_c = self.t_klaster.rowCount()
+            self.t_klaster.insertRow(r_c)
+            self.t_klaster.setItem(r_c, 0, QTableWidgetItem(f"Klaster {c_idx + 1}"))
+            self.t_klaster.setItem(r_c, 1, QTableWidgetItem(f"{c_info.get('ukuran_persen', 0.0):.1f} %"))
+            self.t_klaster.setItem(r_c, 2, QTableWidgetItem(str(c_info.get("ukuran", 0))))
+            self.t_klaster.setItem(r_c, 3, QTableWidgetItem(f"Frame {c_info.get('medoid', 0) + 1}"))
+        if klaster_list:
+            self.t_klaster.selectRow(0)
+
+        # 6. Tab Replika
+        self.t_replika.setRowCount(0)
+        daftar_rep = x.get("replika") or (self.hasil.get("replika") if self.hasil else None) or [x]
+        seri_rep = []
+        for rep in daftar_rep:
+            r_idx_row = self.t_replika.rowCount()
+            self.t_replika.insertRow(r_idx_row)
+            rep_no = rep.get("replika", r_idx_row + 1)
+            self.t_replika.setItem(r_idx_row, 0, QTableWidgetItem(f"Replika {rep_no}"))
+            self.t_replika.setItem(r_idx_row, 1, QTableWidgetItem(str(rep.get("seed", "-"))))
+            r_tr = rep.get("trajektori") or {}
+            r_an = rep.get("analisis") or {}
+            r_rm = r_tr.get("rmsd_ligan") or []
+            r_ca = r_tr.get("rmsd_ca") or []
+            r_rg = r_an.get("rg") or []
+            r_dg = (rep.get("mmgbsa") or {}).get("dG")
+
+            self.t_replika.setItem(r_idx_row, 2, QTableWidgetItem(f"{np.mean(r_rm):.2f}" if r_rm else "-"))
+            self.t_replika.setItem(r_idx_row, 3, QTableWidgetItem(f"{np.mean(r_ca):.2f}" if r_ca else "-"))
+            self.t_replika.setItem(r_idx_row, 4, QTableWidgetItem(f"{np.mean(r_rg):.2f}" if r_rg else "-"))
+            self.t_replika.setItem(r_idx_row, 5, QTableWidgetItem(f"{r_dg:.2f}" if r_dg is not None else "-"))
+
+            if r_rm:
+                t_rep = [(j + 1) * dt for j in range(len(r_rm))]
+                seri_rep.append((f"Replika {rep_no}", t_rep, r_rm))
+
+        agregat = self.hasil.get("replika_agregat") or x.get("replika_agregat") or {}
+        if agregat:
+            m_l, s_l = agregat.get("rmsd_ligan", [0, 0])
+            m_c, s_c = agregat.get("rmsd_ca", [0, 0])
+            m_g, s_g = agregat.get("rg", [0, 0])
+            m_d, s_d = agregat.get("mmgbsa_dG", [0, 0])
+            self.l_rep_agregat.setText(f"<b>Rata-rata ± SD:</b> RMSD ligan {kit.f(m_l)} ± {kit.f(s_l)} Å · "
+                                      f"RMSD Cα {kit.f(m_c)} ± {kit.f(s_c)} Å · Rg {kit.f(m_g)} ± {kit.f(s_g)} Å · "
+                                      f"ΔG MM/GBSA {kit.f(m_d)} ± {kit.f(s_d)} kcal/mol")
+        else:
+            self.l_rep_agregat.setText("")
+
+        svg_rep = grafik.garis(seri_rep, "Waktu (ns)", "RMSD Ligan (Å)", "RMSD Multi-Replika", gelap=g, y_nol=True)
+        self.k["replika"].latar = QColor("#14171c" if g else "#ffffff")
+        self.k["replika"].set_svg(svg_rep)
+
+    def _sorot_residu_interaksi(self):
+        r = self.t_inter.currentRow()
+        if r < 0:
+            return
+        it = self.t_inter.item(r, 0)
+        if not it:
+            return
+        teks_res = it.text().strip()
+        # Sorot residu di 3D viewer jika tersedia
+        try:
+            tokens = teks_res.split()
+            if len(tokens) >= 2:
+                resi = int("".join(c for c in tokens[1] if c.isdigit()))
+                self.jw.viewer.js("pilihResidu", resi)
+        except Exception:
+            pass
+
+    def _tampilkan_medoid(self):
+        x = self._ligan_hasil()
+        if not x:
+            return
+        kl_idx = self.t_klaster.currentRow()
+        an = x.get("analisis") or {}
+        kl_list = an.get("klaster") or []
+        if kl_idx < 0 or kl_idx >= len(kl_list):
+            QMessageBox.information(self, "Klaster Medoid", "Pilih salah satu klaster dari tabel terlebih dahulu.")
+            return
+
+        kl = kl_list[kl_idx]
+        pdb_path = kl.get("pdb_medoid")
+        if not pdb_path or not Path(pdb_path).exists():
+            # Ekspor terlebih dahulu
+            sub = self.folder_hasil / f"{self._ligan_folder_nama(x)}"
+            from ..core import md_analisis
+            top_f = sub / "topologi.pdb"
+            dcd_f = sub / "trajektori_terlarut.dcd"
+            if top_f.exists() and dcd_f.exists():
+                from openmm import app
+                top = app.PDBFile(str(top_f)).topology
+                frames, _ = md_analisis.baca_dcd(dcd_f)
+                hasil_pdb = md_analisis.ekspor_pdb_medoid(top, frames, kl_list, sub)
+                pdb_path = hasil_pdb[kl_idx] if kl_idx < len(hasil_pdb) else None
+
+        if pdb_path and Path(pdb_path).exists():
+            self.jw.impor([str(pdb_path)])
+            self.l_status.setText(f"Medoid klaster {kl_idx + 1} dimuat ke viewer 3D.")
+        else:
+            QMessageBox.warning(self, "Klaster Medoid", "Berkas PDB medoid belum tersedia. Jalankan atau hitung ulang analisis.")
+
+    def _pakai_sebagai_ensemble(self):
+        x = self._ligan_hasil()
+        if not x:
+            return
+        kl_idx = self.t_klaster.currentRow()
+        an = x.get("analisis") or {}
+        kl_list = an.get("klaster") or []
+        if kl_idx < 0 or kl_idx >= len(kl_list):
+            QMessageBox.information(self, "Reseptor Ensemble", "Pilih salah satu klaster dari tabel terlebih dahulu.")
+            return
+
+        kl = kl_list[kl_idx]
+        pdb_path = kl.get("pdb_medoid")
+        if not pdb_path or not Path(pdb_path).exists():
+            self._tampilkan_medoid()
+            pdb_path = kl.get("pdb_medoid")
+
+        if pdb_path and Path(pdb_path).exists():
+            # Tambahkan sebagai reseptor ensemble di proyek
+            pr = self.jw.proyek
+            if pr:
+                if not hasattr(pr, "ensemble_reseptor"):
+                    pr.ensemble_reseptor = []
+                entri = {
+                    "nama": f"Ensemble_{x['nama']}_Klaster_{kl_idx + 1}",
+                    "pdb": str(pr.rel(Path(pdb_path))),
+                    "ligan_sumber": x["nama"],
+                    "klaster": kl_idx + 1,
+                    "ukuran_persen": kl.get("ukuran_persen", 0.0),
+                }
+                pr.ensemble_reseptor.append(entri)
+                self.jw.impor([str(pdb_path)])
+                self.jw.minta_simpan()
+                QMessageBox.information(self, "Reseptor Ensemble",
+                                        f"Struktur medoid klaster {kl_idx + 1} ({Path(pdb_path).name}) "
+                                        f"berhasil didaftarkan sebagai reseptor ensemble dalam proyek.")
+        else:
+            QMessageBox.warning(self, "Reseptor Ensemble", "Gagal memuat berkas PDB medoid.")
+
+    def _ligan_folder_nama(self, x):
+        from ..core.md import _aman
+        return f"{_aman(x['nama'])}_{x.get('peringkat', 1)}"
+
+
+    def _mol_ligan_md(self, x):
+        """Pose ligan ber-ikatan untuk analisis ulang: dibangun dari tugas.json persis seperti saat MD berjalan.
+
+        Tanpa molekul ini ligan hanya berupa atom lepas tanpa ikatan, sehingga donor/akseptor ikatan hidrogen
+        tidak dikenali dan yang terdeteksi tinggal kontak hidrofobik.
+        """
+        from ..core import md as mdmod
+        try:
+            tugas = json.loads((self.folder_hasil / "tugas.json").read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return None
+        it = next((i for i in tugas.get("ligan", []) if i.get("lid") == x.get("lid") and i.get("job") == x.get("job")
+                   and i.get("peringkat", 1) == x.get("peringkat", 1)), None)
+        if not it:
+            return None
+        it = dict(it)
+        asal = Path(it.get("pdbqt_masukan") or "")
+        pr = self.jw.proyek
+        if asal.name and not asal.exists() and pr:  # proyek dipindah: cari ulang relatif terhadap folder proyek
+            calon = pr.p(f"ligan/pdbqt/{asal.name}")
+            if calon.exists():
+                it["pdbqt_masukan"] = str(calon)
+        try:
+            return mdmod._mol_pose(it)
+        except Exception:  # berkas pose hilang/rusak: analisis tetap jalan, ikatan H ditandai tidak dinilai
+            return None
+
+    def _hitung_analisis_lanjut_klik(self):
+        x = self._ligan_hasil()
+        if not x:
+            return
+        sub = self.folder_hasil / f"{x['nama']}_{x.get('peringkat', 1)}"
+        if not sub.exists():
+            QMessageBox.warning(self, "Analisis Lanjutan", f"Folder simulasi tidak ditemukan: {sub}")
+            return
+
+        try:
+            from ..core import md_analisis
+            self.l_status.setText(f"Menghitung analisis lanjutan untuk {x['nama']}…")
+            dt_ps = (self.hasil.get("opsi") or {}).get("interval_ps", 10.0)
+            mol = self._mol_ligan_md(x)
+            hasil_v2 = md_analisis.hitung_analisis_lanjutan(sub, dt_ps=dt_ps, mol_rdkit=mol)
+            if mol is None:
+                hasil_v2.setdefault("peringatan", []).append(
+                    "Struktur ligan dari tugas MD tidak ditemukan: ikatan hidrogen dan interaksi polar tidak dinilai; "
+                    "hanya kontak hidrofobik yang dapat dihitung.")
+            x["analisis"] = hasil_v2
+            x["interaksi_frek"] = hasil_v2.get("interaksi_frek", x.get("interaksi_frek", {}))
+
+            # Simpan perubahan ke hasil.json & proyek.md
+            f_hasil = self.folder_hasil / "hasil.json"
+            f_hasil.write_text(json.dumps(self.hasil, indent=1, ensure_ascii=False), encoding="utf-8")
+            self._simpan_run()
+            self._grafik_ligan(self.t_hasil.currentRow())
+            self.l_status.setText(f"Analisis lanjutan selesai untuk {x['nama']}.")
+        except Exception as e:
+            QMessageBox.warning(self, "Analisis Lanjutan Gagal", f"Gagal menghitung: {e}")
+
+    def _svg_aktif(self):
+        """Ambil teks SVG dari tab grafik yang sedang aktif."""
+        w_tab = self.tab.currentWidget()
+        x = self._ligan_hasil()
+        if not x:
+            return "", "Grafik"
+        g = getattr(self.jw, "mode", "terang") == "gelap"
+
+        if w_tab == self.tab.widget(1):  # Stabilitas
+            kunci = self.cb_metrik_stab.currentData() or "rmsd"
+            return self._svg(kunci, x, g), f"{kunci.upper()}_{x['nama']}"
+        elif w_tab == self.tab.widget(2):  # Interaksi
+            an = x.get("analisis") or {}
+            from ..core import md_analisis
+            return md_analisis.svg_barcode_interaksi(an.get("barcode") or {}, gelap=g), f"Barcode_{x['nama']}"
+        elif w_tab == self.tab.widget(3):  # PCA & FEL
+            an = x.get("analisis") or {}
+            from ..core import md_analisis
+            return md_analisis.svg_fel_2d(an.get("fel") or {}, gelap=g), f"FEL_{x['nama']}"
+        elif w_tab == self.tab.widget(5):  # Replika
+            return self.k["replika"]._svg if hasattr(self.k["replika"], "_svg") else "", f"Replika_{x['nama']}"
+        else:
+            return self._svg("rmsd", x, g), f"RMSD_{x['nama']}"
+
+    def _kirim_ke_komposer(self):
+        svg_teks, judul = self._svg_aktif()
+        if not svg_teks:
+            self.l_status.setText("Tidak ada grafik aktif untuk dikirim ke komposer.")
+            return
+        if not getattr(self.jw, "komposer", None):
+            self.jw.buka_komposer()
+        self.jw.komposer.tambah({"nama": judul, "jenis": "svg", "isi": svg_teks, "w": 760, "h": 480})
+        self.l_status.setText(f"“{judul}” ditambahkan ke Komposer Figur.")
 
     def _simpan_grafik(self):
-        x = self._ligan_hasil()
-        w = self.tab.currentWidget()
-        kunci = next((k for k, v in self.k.items() if v is w), None)
-        if not x or not kunci:
-            self.l_status.setText("Pilih ligan di Ringkasan lalu buka tab RMSD, RMSF, atau MM/GBSA per waktu.")
+        svg_teks, judul = self._svg_aktif()
+        if not svg_teks:
+            self.l_status.setText("Pilih grafik di tab Stabilitas, Interaksi, PCA & FEL, atau Replika.")
             return
-        s = self._svg(kunci, x)
-        f = self.jw._path("Simpan grafik", f"{kunci}_{x['nama']}.svg", "SVG (*.svg);;PDF (*.pdf);;PNG (*.png);;TIFF (*.tif)")
+        f = self.jw._path("Simpan grafik", f"{judul}.svg", "SVG (*.svg);;PDF (*.pdf);;PNG (*.png);;TIFF (*.tif)")
         if f:
             ext = f.lower().rsplit(".", 1)[-1]
-            self.jw._simpan_svg(s, f, {"pdf": "pdf", "png": "png", "tif": "tif", "tiff": "tif"}.get(ext, "svg"),
+            self.jw._simpan_svg(svg_teks, f, {"pdf": "pdf", "png": "png", "tif": "tif", "tiff": "tif"}.get(ext, "svg"),
                                 760, 480, mm=160, dpi=600)
+
+    def _ekspor_csv(self):
+        x = self._ligan_hasil()
+        if not x:
+            return
+        f = self.jw._path("Ekspor CSV", f"md_{x['nama']}_data.csv", "CSV (*.csv)")
+        if not f:
+            return
+        tr = x.get("trajektori") or {}
+        an = x.get("analisis") or {}
+        dt = (self.hasil.get("opsi") or {}).get("interval_ps", 10) / 1000.0
+        rm_l = tr.get("rmsd_ligan") or []
+        rm_c = tr.get("rmsd_ca") or []
+        rg = an.get("rg") or []
+        hb = an.get("hb") or []
+        n = max(len(rm_l), len(rm_c), len(rg), len(hb))
+
+        lines = ["frame,waktu_ns,rmsd_ligan_A,rmsd_ca_A,rg_A,ikatan_h"]
+        for i in range(n):
+            t_ns = (i + 1) * dt
+            v_rl = f"{rm_l[i]:.3f}" if i < len(rm_l) else ""
+            v_rc = f"{rm_c[i]:.3f}" if i < len(rm_c) else ""
+            v_rg = f"{rg[i]:.3f}" if i < len(rg) else ""
+            v_hb = f"{hb[i]}" if i < len(hb) else ""
+            lines.append(f"{i + 1},{t_ns:.3f},{v_rl},{v_rc},{v_rg},{v_hb}")
+        Path(f).write_text("\n".join(lines), encoding="utf-8")
+        self.l_status.setText(f"Data diekspor ke {Path(f).name}.")
 
     def _buka_folder(self):
         if self.run:
             os.startfile(str(self.jw.proyek.p(self.run["folder"])))
 
     def closeEvent(self, e):
-        # proses tetap berjalan di latar; dialog dibuka lagi lewat menu yang sama
         e.accept()
+

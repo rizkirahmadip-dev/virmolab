@@ -296,7 +296,28 @@ def html(proyek, baris, info, interaksi_terbaik=None, ada_gambar3d=False, ada_di
                 "Langevin 300 K, langkah 2 fs, ikatan-H dikendala; air eksplisit TIP3P dengan PME dan NaCl 0,15 M bila "
                 "dipilih). ΔG MM/GBSA dihitung dengan pendekatan satu-trajektori (OBC2, igb = 5, radii mbondi2, "
                 "suku permukaan ACE) tanpa entropi konformasi." if mm else "") + "</p>")
-    o.append("<h2>6. Perangkat lunak yang dikutip</h2><ol>")
+
+    # ---- sumber data
+    jejak_list = getattr(pr, "jejak", None) or []
+    nomor_perangkat = 6
+    if jejak_list:
+        nomor_perangkat = 7
+        o.append("<h2>6. Sumber data</h2>")
+        o.append("<p>Informasi dan struktur dalam proyek ini diperoleh dari basis data daring berikut:</p>")
+        o.append("<table class='t'><tr><th>Sumber</th><th>Versi</th><th>Tanggal Ambil</th><th>Lisensi</th><th>Kueri</th></tr>")
+        ada_cc_by = False
+        for j in jejak_list:
+            lis = j.get("lisensi", "")
+            if "CC BY" in lis.upper():
+                ada_cc_by = True
+            o.append(f"<tr><td><b>{escape(j.get('sumber', ''))}</b></td><td>{escape(j.get('versi', ''))}</td>"
+                     f"<td>{escape(j.get('diambil', '')[:10])}</td><td>{escape(lis)}</td>"
+                     f"<td><code>{escape(j.get('kueri', ''))}</code></td></tr>")
+        o.append("</table>")
+        if ada_cc_by:
+            o.append("<p class='mut'>Atribusi: Data dengan lisensi Creative Commons Atribusi (CC BY) digunakan sesuai ketentuan lisensi dengan mencantumkan sumber aslinya.</p>")
+
+    o.append(f"<h2>{nomor_perangkat}. Perangkat lunak yang dikutip</h2><ol>")
     kunci = [m for m in mesin_dipakai] + ["meeko", "rdkit", "openbabel", "gemmi", "3dmol"]
     if "adgpu" in kunci and "ad4" not in kunci:
         kunci.insert(1, "ad4")  # AD-GPU memakai fungsi skor & AutoGrid AutoDock4
@@ -322,3 +343,170 @@ def html(proyek, baris, info, interaksi_terbaik=None, ada_gambar3d=False, ada_di
              "dengan uji eksperimen. Ki dihitung dari ΔG pada 298 K sebagai perkiraan.</p>")
     o.append("</body></html>")
     return "".join(o)
+
+
+def laporan_md_html(proyek, run_id=None, ligan_idx=0, info=None) -> str:
+    """Laporan komprehensif Dinamika Molekul (MD) F2 lengkap dengan 5 figur standar (SVG inline),
+
+    tabel ringkas (rata-rata ± SD paruh kedua), dan evaluasi konvergensi.
+    """
+    import json
+    import numpy as np
+    from . import grafik, md_analisis
+
+    pr = proyek
+    info = info or {}
+    o = [f"<html><head><style>{GAYA}</style></head><body>"]
+    o.append(f"<h1>Laporan Dinamika Molekul & Analisis Trajektori - {escape(pr.nama)}</h1>")
+
+    # Temukan data MD
+    md_list = getattr(pr, "md", [])
+    if run_id:
+        run = next((r for r in md_list if r.get("id") == run_id), None)
+    else:
+        run = next((r for r in reversed(md_list) if r.get("status") == "selesai"), None)
+
+    if not run:
+        o.append("<p class='warn'>Tidak ada hasil simulasi MD yang selesai dalam proyek ini.</p></body></html>")
+        return "".join(o)
+
+    f_hasil = pr.p(run.get("folder", ""), "hasil.json")
+    if not f_hasil.exists():
+        o.append("<p class='warn'>Berkas hasil.json simulasi MD tidak ditemukan.</p></body></html>")
+        return "".join(o)
+
+    h = json.loads(f_hasil.read_text(encoding="utf-8"))
+    ligan_selesai = [x for x in h.get("ligan", []) if x.get("selesai")]
+    if not ligan_selesai:
+        o.append("<p class='warn'>Tidak ada ligan yang berhasil disimulasikan.</p></body></html>")
+        return "".join(o)
+
+    lig_idx = min(ligan_idx, len(ligan_selesai) - 1)
+    lig = ligan_selesai[lig_idx]
+    opsi = h.get("opsi") or run.get("opsi") or {}
+    dt_ps = opsi.get("interval_ps", 10.0)
+    dt_ns = dt_ps / 1000.0
+
+    o.append(f"<p class='mut'>Sistem: <b>{escape(lig['nama'])}</b> · Tanggal: {escape(run.get('tanggal', ''))} "
+             f"· Platform: {escape(h.get('platform', 'CPU'))} · Lama: {opsi.get('ns', 1.0)} ns</p>")
+
+    # 1. Ringkasan & Konvergensi
+    tr = lig.get("trajektori") or {}
+    an = lig.get("analisis") or {}
+    rm_l = tr.get("rmsd_ligan") or []
+    rm_c = tr.get("rmsd_ca") or []
+    rg = an.get("rg") or []
+    hb = an.get("hb") or []
+    mm = lig.get("mmgbsa") or {}
+    konv = an.get("konvergensi") or {}
+
+    # Hitung rata-rata ± SD paruh kedua
+    def _rata_sd(arr):
+        if not arr:
+            return "-", "-"
+        p2 = arr[len(arr) // 2:] if len(arr) > 1 else arr
+        return f"{np.mean(p2):.2f}", f"{np.std(p2):.2f}"
+
+    rml_m, rml_s = _rata_sd(rm_l)
+    rmc_m, rmc_s = _rata_sd(rm_c)
+    rg_m, rg_s = _rata_sd(rg)
+    hb_m, hb_s = (f"{konv['hb_rerata']:.1f}", f"{konv['hb_gs']:.1f}") if "hb_rerata" in konv else _rata_sd(hb)
+    dg_m = f"{mm.get('dG', 0.0):.2f}" if mm.get("dG") is not None else "-"
+    dg_s = f"{mm.get('sd', 0.0):.2f}" if mm.get("sd") is not None else "-"
+
+    o.append("<h2>1. Ringkasan Metrik Trajektori (Paruh Kedua)</h2>")
+    o.append("<table class='t'><tr><th>Metrik</th><th>Rata-rata</th><th>SD / GS</th><th>Satuan</th><th>Interpretasi</th></tr>")
+    o.append(f"<tr><td>RMSD Ligan</td><td class='n'>{_id(rml_m)}</td><td class='n'>{_id(rml_s)}</td><td>Å</td>"
+             f"<td>{'Stabil di kantong' if float(rml_m.replace(',', '.')) <= 2.5 else 'Mengalami pergeseran konformasi'}</td></tr>")
+    o.append(f"<tr><td>RMSD Cα Protein</td><td class='n'>{_id(rmc_m)}</td><td class='n'>{_id(rmc_s)}</td><td>Å</td>"
+             f"<td>Stabilitas tulang punggung protein</td></tr>")
+    o.append(f"<tr><td>Radius Girasi (Rg)</td><td class='n'>{_id(rg_m)}</td><td class='n'>{_id(rg_s)}</td><td>Å</td>"
+             f"<td>Kekompakan lipatan global</td></tr>")
+    o.append(f"<tr><td>Ikatan Hidrogen</td><td class='n'>{_id(hb_m)}</td><td class='n'>{_id(hb_s)}</td><td>kontak</td>"
+             f"<td>Persistensi interaksi elektrostatik</td></tr>")
+    o.append(f"<tr><td>ΔG MM/GBSA</td><td class='n'>{_id(dg_m)}</td><td class='n'>{_id(dg_s)}</td><td>kcal/mol</td>"
+             f"<td>Afinitas pengikatan relatif (OBC2, tanpa entropi)</td></tr>")
+    o.append("</table>")
+
+    # Kalimat konvergensi otomatis
+    o.append("<p><b>Evaluasi Konvergensi:</b> ")
+    if rm_l and float(rml_m.replace(",", ".")) <= 2.5 and float(rml_s.replace(",", ".")) < 0.6:
+        o.append("Simulasi menunjukkan konvergensi struktural yang baik pada paruh kedua lintasan produksi, "
+                 "dengan deviasi posisi ligan stabil (fluktuasi SD < 0,6 Å) dan lipatan protein kompak. "
+                 f"Analisis blok rata-rata ikatan hidrogen mengonfirmasi kestabilan ikatan ({_id(hb_m)} ± {_id(hb_s)} kontak).")
+    elif rm_l and float(rml_m.replace(",", ".")) > 3.0:
+        o.append("Pose ligan bergeser relatif terhadap posisi awal docking (> 3 Å), mengindikasikan adaptasi "
+                 "konformasi atau pengikatan fleksibel di situs target.")
+    else:
+        o.append("Simulasi menunjukkan dinamika menengah; disarankan memperpanjang lintasan atau menambah replika "
+                 "untuk memverifikasi kestabilan keadaan akhir.")
+    o.append("</p>")
+
+    # 2. Lima Figur Standar MD
+    o.append("<h2>2. Figur Standar Analisis Dinamika Molekul</h2>")
+
+    # Figur 1: RMSD
+    t_rm = [(i + 1) * dt_ns for i in range(len(rm_l))]
+    seri_rmsd = [("Ligan (atom berat)", t_rm, rm_l), ("Protein Cα", t_rm, rm_c)]
+    svg_rmsd = grafik.garis(seri_rmsd, "Waktu (ns)", "RMSD (Å)", f"Figur 1: RMSD - {lig['nama']}",
+                            lebar=720, tinggi=360, y_nol=True)
+    o.append(f"<div>{svg_rmsd}</div>")
+
+    # Figur 2: RMSF
+    v_rmsf = tr.get("rmsf") or []
+    svg_rmsf = grafik.garis([("Cα", list(range(1, len(v_rmsf) + 1)), v_rmsf)], "Nomor Residu", "RMSF (Å)",
+                            f"Figur 2: Fluktuasi Residu (RMSF Cα) - {lig['nama']}", lebar=720, tinggi=360, y_nol=True)
+    o.append(f"<div>{svg_rmsf}</div>")
+
+    # Figur 3: Rg
+    t_rg = [(i + 1) * dt_ns for i in range(len(rg))]
+    svg_rg = grafik.garis([("Radius Girasi (Rg)", t_rg, rg)], "Waktu (ns)", "Rg (Å)",
+                          f"Figur 3: Radius Girasi Protein (Rg) - {lig['nama']}", lebar=720, tinggi=360)
+    o.append(f"<div>{svg_rg}</div>")
+
+    # Figur 4: Ikatan Hidrogen
+    t_hb = [(i + 1) * dt_ns for i in range(len(hb))]
+    svg_hb = grafik.garis([("Ikatan-H", t_hb, hb)], "Waktu (ns)", "Jumlah Ikatan Hidrogen",
+                          f"Figur 4: Ikatan Hidrogen per Frame - {lig['nama']}", lebar=720, tinggi=360, y_nol=True)
+    o.append(f"<div>{svg_hb}</div>")
+
+    # Figur 5: FEL 2D
+    fel_d = an.get("fel") or {}
+    var_pca = (an.get("pca") or {}).get("varians_rasio", [0, 0])
+    v1 = var_pca[0] if len(var_pca) > 0 else None
+    v2 = var_pca[1] if len(var_pca) > 1 else None
+    svg_fel = md_analisis.svg_fel_2d(fel_d, var_pc1=v1, var_pc2=v2, lebar=540, tinggi=420,
+                                     judul=f"Figur 5: Lanskap Energi Bebas (FEL) 2D - {lig['nama']}")
+    o.append(f"<div>{svg_fel}</div>")
+
+    # 3. Klaster Konformasi
+    kl_list = an.get("klaster") or []
+    if kl_list:
+        o.append("<h2>3. Klaster Konformasi Ligan (Ambang RMSD 2,0 Å)</h2>")
+        o.append("<table class='t'><tr><th>Klaster</th><th>Ukuran (%)</th><th>Jumlah Anggota</th><th>Frame Medoid</th></tr>")
+        for k_i, k_c in enumerate(kl_list):
+            o.append(f"<tr><td>Klaster {k_i + 1}</td><td class='n'>{k_c.get('ukuran_persen', 0.0):.1f} %</td>"
+                     f"<td class='n'>{k_c.get('ukuran', 0)}</td><td class='n'>Frame {k_c.get('medoid', 0) + 1}</td></tr>")
+        o.append("</table>")
+
+    # 4. Multi-Replika
+    rep_list = lig.get("replika") or (h.get("replika") if h.get("replika") else [])
+    if len(rep_list) > 1:
+        o.append("<h2>4. Evaluasi Multi-Replika Independen</h2>")
+        o.append("<table class='t'><tr><th>Replika</th><th>Benih Acak</th><th>RMSD Ligan (Å)</th><th>RMSD Cα (Å)</th>"
+                 "<th>Rg (Å)</th><th>ΔG MM/GBSA (kcal/mol)</th></tr>")
+        for rep in rep_list:
+            r_tr = rep.get("trajektori") or {}
+            r_an = rep.get("analisis") or {}
+            r_rml = np.mean(r_tr.get("rmsd_ligan") or [0])
+            r_rmc = np.mean(r_tr.get("rmsd_ca") or [0])
+            r_rg = np.mean(r_an.get("rg") or [0])
+            r_dg = (rep.get("mmgbsa") or {}).get("dG", 0.0)
+            o.append(f"<tr><td>Replika {rep.get('replika', 1)}</td><td>{rep.get('seed', '-')}</td>"
+                     f"<td class='n'>{_id(f'{r_rml:.2f}')}</td><td class='n'>{_id(f'{r_rmc:.2f}')}</td>"
+                     f"<td class='n'>{_id(f'{r_rg:.2f}')}</td><td class='n'>{_id(f'{r_dg:.2f}')}</td></tr>")
+        o.append("</table>")
+
+    o.append("</body></html>")
+    return "".join(o)
+

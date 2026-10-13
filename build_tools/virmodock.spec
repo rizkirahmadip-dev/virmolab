@@ -31,6 +31,7 @@ datas += collect_data_files("pdb2pqr") + collect_data_files("propka")   # topolo
 datas += collect_data_files("admet_ai") + collect_data_files("chemprop") + collect_data_files("descriptastorus")
 datas += collect_data_files("lightning") + collect_data_files("lightning_fabric")
 datas += [(str(AKAR / "virmodock" / "i18n" / "en.json"), "virmodock/i18n")]
+datas += [(str(AKAR / "virmodock" / "data" / "nama_tanaman_id.csv"), "virmodock/data")]   # nama lokal tanaman obat (F1)
 # cuik_molmaker (chemprop; Apache-2.0) memuat .pyd lewat os.listdir di folder paketnya -> salin apa adanya
 _cuik = Path(__import__("cuik_molmaker").__file__).parent
 binaries = [(str(f), "cuik_molmaker") for f in _cuik.iterdir() if f.suffix in (".pyd", ".dll")]

@@ -78,8 +78,36 @@ def bibtex(tambahan=()):
     return "\n\n".join(blok) + "\n"
 
 
+def paragraf_sumber_data(proyek) -> str:
+    """Teks metode Bahasa Indonesia yang merangkum sumber data daring pada proyek.
+
+    Menyertakan nama basis data, versi, tanggal pengambilan, dan kalimat atribusi
+    untuk sumber berlisensi CC BY.
+    """
+    jejak_list = getattr(proyek, "jejak", None) or []
+    if not jejak_list:
+        return ""
+
+    kalimat = []
+    ada_cc_by = False
+    for j in jejak_list:
+        sumber = j.get("sumber", "Basis data")
+        versi = j.get("versi", "daring")
+        tgl = j.get("diambil", "")[:10]
+        lisensi = j.get("lisensi", "")
+        if "CC BY" in lisensi.upper():
+            ada_cc_by = True
+        ket = f"{sumber} (status: {versi}, diakses {tgl}" + (f", lisensi {lisensi}" if lisensi else "") + ")"
+        kalimat.append(ket)
+
+    teks = "Data dalam penelitian ini diperoleh dari basis data daring: " + "; ".join(kalimat) + ". "
+    if ada_cc_by:
+        teks += "Data berlisensi Creative Commons Attribution (CC BY) diatribusikan kepada masing-masing penyedia basis data sesuai ketentuan lisensi. "
+    return teks
+
+
 def draf_skripsi(info):
-    """info: nama, reseptor, mesin, parameter, validasi, baris=[(ligan, energi, ki)], catatan."""
+    """info: nama, reseptor, mesin, parameter, validasi, baris=[(ligan, energi, ki)], catatan, proyek (opsional)."""
     baris = info.get("baris") or []
     tabel = ["| Ligan | Skor (kkal/mol) | Ki perkiraan |", "|---|---:|---|"]
     for nama, energi, ki in baris[:20]:
@@ -87,17 +115,28 @@ def draf_skripsi(info):
     if not baris:
         tabel.append("| - | - | belum ada hasil |")
     val = info.get("validasi") or "Validasi redocking belum dicatat."
-    return "\n".join([
-        f"# {info.get('nama') or 'Proyek docking'}",
-        "",
-        "## Bab III - Metode (draf)",
-        "",
+    teks_sumber = ""
+    pr = info.get("proyek")
+    if pr:
+        teks_sumber = paragraf_sumber_data(pr)
+
+    metode_paragraf = [
         f"Reseptor yang digunakan adalah {info.get('reseptor') or 'struktur yang disiapkan di VirmoDock'}. "
         f"Docking dijalankan dengan {info.get('mesin') or 'mesin yang dipilih di aplikasi'}"
         + (f" ({info.get('parameter')})" if info.get("parameter") else "") + ". "
         "Preparasi reseptor memakai gemmi dan Meeko; ligan diprotonasi lalu diubah ke PDBQT. "
         "Interaksi dikenali dengan kriteria jarak dan sudut yang tercantum di laporan metode VirmoDock. "
-        "Skor docking adalah prediksi komputasi, bukan bukti aktivitas biologis.",
+        "Skor docking adalah prediksi komputasi, bukan bukti aktivitas biologis."
+    ]
+    if teks_sumber:
+        metode_paragraf.append(teks_sumber)
+
+    return "\n".join([
+        f"# {info.get('nama') or 'Proyek docking'}",
+        "",
+        "## Bab III - Metode (draf)",
+        "",
+        *metode_paragraf,
         "",
         val,
         "",

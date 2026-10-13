@@ -131,12 +131,25 @@ _pabrik = None
 
 def _fitur(mol):
     global _pabrik
-    from rdkit import RDConfig
+    from rdkit import Chem, RDConfig
     from rdkit.Chem import ChemicalFeatures
     if _pabrik is None:
         _pabrik = ChemicalFeatures.BuildFeatureFactory(os.path.join(RDConfig.RDDataDir, "BaseFeatures.fdef"))
     hasil = {}
-    for f in _pabrik.GetFeaturesForMol(mol):
+    if mol is None:
+        return hasil
+    try:
+        fitur = _pabrik.GetFeaturesForMol(mol)
+    except Exception:
+        # Molekul dari frame MD (koordinat ditimpa, cache valensi/cincin belum dihitung) ditolak pabrik fitur.
+        # Perbaiki SALINANNYA saja: molekul pemanggil tidak boleh berubah, dan jalur docking biasa tidak lewat sini.
+        m = Chem.Mol(mol)
+        for at in m.GetAtoms():
+            at.SetNoImplicit(True)
+        m.UpdatePropertyCache(strict=False)
+        Chem.FastFindRings(m)
+        fitur = _pabrik.GetFeaturesForMol(m)
+    for f in fitur:
         hasil.setdefault(f.GetFamily(), []).append(tuple(f.GetAtomIds()))
     return hasil
 

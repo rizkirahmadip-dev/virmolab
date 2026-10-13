@@ -1,0 +1,5471 @@
+[
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q424577"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "myrcene"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC(=CCCC(=C)C=C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "UAHWPYUMFXYFJY-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104374687|http://www.wikidata.org/entity/Q44940538|http://www.wikidata.org/entity/Q36775584|http://www.wikidata.org/entity/Q109724922"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q425004"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "stigmasterol"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC[C@H](/C=C/[C@@H](C)[C@H]1CC[C@@H]2[C@@]1(CC[C@H]3[C@H]2CC=C4[C@@]3(CC[C@@H](C4)O)C)C)C(C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "HCXVJBMSMIARIN-PHZDYDNGSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q33576073"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q780165"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "bornyl acetate"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC(=O)OC1CC2CCC1(C)C2(C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "KGEKLUUHTZCSIP-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q36775584"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q1953888"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "4-hydroxybenzaldehyde"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "C1=CC(=CC=C1C=O)O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "RGHHSNMVTDWUBI-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104388336"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q2405051"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "terpinolene"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC1=CCC(=C(C)C)CC1"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "MOYAFQVGZZPNRA-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104374687"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q4039091"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(Z)-γ-bisabolene"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC1=CC/C(=C(/C)\\CCC=C(C)C)/CC1"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "XBGUIVFBMBVUEG-CCEZHUSRSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q115784524|http://www.wikidata.org/entity/Q104249587"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q4117486"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "zingiberene"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "C[C@@H](CCC=C(C)C)[C@H]1CC=C(C)C=C1"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "KKOXKGNSUHTUBV-LSDHHAIUSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104383812|http://www.wikidata.org/entity/Q44221953|http://www.wikidata.org/entity/Q104374919|http://www.wikidata.org/entity/Q104388325|http://www.wikidata.org/entity/Q104249587|http://www.wikidata.org/entity/Q67989319"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q4403492"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(+)-cis-sabinol"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC(C)[C@@]12C[C@@H]1C(=C)[C@@H](C2)O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "MDFQXBNVOAKNAY-BBBLOLIVSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104374687"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q4463035"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "tricosanoic acid"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CCCCCCCCCCCCCCCCCCCCCCC(=O)O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "XEZVDURJDFGERA-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q33576073"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q4917168"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "bisdemethoxycurcumin"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "C1=CC(=CC=C1/C=C/C(=O)CC(=O)/C=C/C2=CC=C(C=C2)O)O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "PREBVFJICNPEKM-YDWXAUTNSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104383812|http://www.wikidata.org/entity/Q73215891|http://www.wikidata.org/entity/Q44949850|http://www.wikidata.org/entity/Q93612427|http://www.wikidata.org/entity/Q44518269|http://www.wikidata.org/entity/Q104388329|http://www.wikidata.org/entity/Q43571794|http://www.wikidata.org/entity/Q74256041|http://www.wikidata.org/entity/Q104250705|http://www.wikidata.org/entity/Q105029449|http://www.wikidata.org/entity/Q85443531|http://www.wikidata.org/entity/Q44828416|http://www.wikidata.org/entity/Q104388331|http://www.wikidata.org/entity/Q34151965|http://www.wikidata.org/entity/Q44023968|http://www.wikidata.org/entity/Q43824129|http://www.wikidata.org/entity/Q104388339|http://www.wikidata.org/entity/Q104388325|http://www.wikidata.org/entity/Q104388327|http://www.wikidata.org/entity/Q42987965|http://www.wikidata.org/entity/Q104992345|http://www.wikidata.org/entity/Q104388336|http://www.wikidata.org/entity/Q105213627|http://www.wikidata.org/entity/Q67989319|http://www.wikidata.org/entity/Q43522706|http://www.wikidata.org/entity/Q73920949"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q5264607"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "desmethoxycurcumin"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "COc1cc(/C=C/C(=O)CC(=O)/C=C/c2ccc(O)cc2)ccc1O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "HJTVQHVGMGKONQ-LUZURFALSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104383812|http://www.wikidata.org/entity/Q73215891|http://www.wikidata.org/entity/Q44949850|http://www.wikidata.org/entity/Q93612427|http://www.wikidata.org/entity/Q34593827|http://www.wikidata.org/entity/Q73207293|http://www.wikidata.org/entity/Q104250705|http://www.wikidata.org/entity/Q105029449|http://www.wikidata.org/entity/Q36871828|http://www.wikidata.org/entity/Q44828416|http://www.wikidata.org/entity/Q104388331|http://www.wikidata.org/entity/Q34151965|http://www.wikidata.org/entity/Q44023968|http://www.wikidata.org/entity/Q104388339|http://www.wikidata.org/entity/Q104388325|http://www.wikidata.org/entity/Q104388327|http://www.wikidata.org/entity/Q105285387|http://www.wikidata.org/entity/Q104992345|http://www.wikidata.org/entity/Q104388336|http://www.wikidata.org/entity/Q73920949"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q10395564"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "dihydroferulic acid"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "COC1=C(C=CC(=C1)CCC(=O)O)O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "BOLQJTPHPSDZHR-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q33428639"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q11595687"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "β-bisabolene"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC1=CC[C@H](CC1)C(=C)CCC=C(C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "XZRVRYFILCSYSP-OAHLLOKOSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104383812|http://www.wikidata.org/entity/Q44221953|http://www.wikidata.org/entity/Q104374919|http://www.wikidata.org/entity/Q67989319"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q15222645"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(-)-car-3-ene"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC1=CC[C@H]2[C@@H](C1)C2(C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "BQOFWKZOCNGFEC-DTWKUNHWSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q115784523"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q15410912"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "curzerene"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC1=COC2=C1CC([C@](C2)(C)C=C)C(=C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "HICAMHOOTMOHPA-AWKYBWMHSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q82213225"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q15410959"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "germacrone"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "C/C/1=C\\CC(=C(C)C)C(=O)C/C(=C/CC1)/C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "CAULGCQHVOVVRN-SWZPTJTJSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q115785168|http://www.wikidata.org/entity/Q67989319"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q19606345"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "α-phellandrene"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC1=CCC(C=C1)C(C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "OGLDWXZKYODSOB-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q36775584|http://www.wikidata.org/entity/Q109724922|http://www.wikidata.org/entity/Q104374687"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q20054515"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "2-decanone"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CCCCCCCCC(=O)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "ZAJNGDIORYACQU-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q44940538"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q25312872"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "bisacurone"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC(C)=CC(=O)C[C@H](C)[C@@H]1C=C[C@](C)(O)[C@@H](O)C1"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "QJOWFYQIUZMPRY-NEBZKDRISA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104990528"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q25933668"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(+)-α-phellandrene"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC1=CC[C@H](C=C1)C(C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "OGLDWXZKYODSOB-JTQLQIEISA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104249587"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q27089415"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(R)-camphor"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC1(C)[C@@H]2CC[C@@]1(C)C(=O)C2"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "DSSYKIVIOFKYAU-XCBNKYQSSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104988006|http://www.wikidata.org/entity/Q104988007"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q27103499"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "borneol"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC1(C)[C@H]2CC[C@]1(C)[C@H](O)C2"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "DTGKSKDOIYIVQL-IUNFSSIHNA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q44940538|http://www.wikidata.org/entity/Q36775584"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q27104329"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "4-coumaric acid"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "C1=CC(=CC=C1C=CC(=O)O)O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "NGSWKAQJJWESNS-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q33428639"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q27104380"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "alpha-pinene"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC1=CCC2CC1C2(C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "GRWFGVWFFZKLTI-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q73976197|http://www.wikidata.org/entity/Q44940538|http://www.wikidata.org/entity/Q36775584|http://www.wikidata.org/entity/Q109724922|http://www.wikidata.org/entity/Q104374687"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q27104437"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "Congo red free acid"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "C1=CC=C2C(=C1)C(=CC(=C2N)N=NC3=CC=C(C=C3)C4=CC=C(C=C4)N=NC5=C(C6=CC=CC=C6C(=C5)S(=O)(=O)O)N)S(=O)(=O)O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "HFHIDKQMGIGARX-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q34151965"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q27107323"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(+)-menthofuran"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "C[C@@H]1CCC2=C(C1)OC=C2C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "YGWKXXYGDYYFJU-SSDOTTSWSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q73976197"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q27108606"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(-)-alpha-curcumene"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC1=CC=C(C=C1)[C@H](C)CCC=C(C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "VMYXUZSZMNBRCN-CQSZACIVSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q73976197|http://www.wikidata.org/entity/Q104374919|http://www.wikidata.org/entity/Q67989319"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q27108631"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(6E)-β-farnesene"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC(=CCC/C(=C/CCC(=C)C=C)/C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "JSNRRGGBADWTMC-NTCAYCPXSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q115784523"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q27109033"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(-)-cis-sabinol"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC(C)[C@]12C[C@H]1C(=C)[C@@H](C2)O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "MDFQXBNVOAKNAY-IVZWLZJFSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104374687"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q27109437"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "alpha-terpineol"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC1=CCC(CC1)C(C)(C)O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "WUOACPNHFRMFPN-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q73976197|http://www.wikidata.org/entity/Q44940538|http://www.wikidata.org/entity/Q36775584|http://www.wikidata.org/entity/Q109724922"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q27116855"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "caryophyllane"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC1CCCC(C2CC(C2CC1)(C)C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "SITKOPDZOGHVLY-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q73976197"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q27119784"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "beta-farnesene"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC(=CCCC(=CCCC(=C)C=C)C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "JSNRRGGBADWTMC-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q33428639|http://www.wikidata.org/entity/Q109724922"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q99374"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(E)-p-coumaric acid"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "C1=CC(=CC=C1/C=C/C(=O)O)O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "NGSWKAQJJWESNS-ZZXKWVIFSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q61700410"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q111812"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "coumarin"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "C1=CC=C2C(=C1)C=CC(=O)O2"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "ZYGHJZDHTFUPRJ-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104383812"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q161572"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "eucalyptol"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC1(C2CCC(O1)(CC2)C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "WEEGYLXZBRQIMU-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q44344605"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q181559"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "camphor"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC1(C2CCC1(C(=O)C2)C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "DSSYKIVIOFKYAU-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q109724922|http://www.wikidata.org/entity/Q115785168"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q209685"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "stearic acid"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CCCCCCCCCCCCCCCCCC(=O)O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "QIQXTHQIDYTFRH-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104374919|http://www.wikidata.org/entity/Q33576073"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q209727"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "palmitic acid"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CCCCCCCCCCCCCCCC(=O)O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "IPCSVZSSVZVIGE-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104374919"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q213050"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "succinic acid"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "C(CC(=O)O)C(=O)O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "KDYFGRWQOYBRFD-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q33428639"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q229970"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "4-hydroxybenzoic acid"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "C1=CC(=CC=C1C(=O)O)O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "FJKROLUGYXJWQN-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q33428639"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q278809"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(±)-limonene"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC1=CCC(CC1)C(=C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "XMGQYMWWDOXHJM-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q44940538|http://www.wikidata.org/entity/Q36775584|http://www.wikidata.org/entity/Q104374687"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q284072"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "p-cymene"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC1=CC=C(C=C1)C(C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "HFPZCAJZSCWRBC-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q73976197|http://www.wikidata.org/entity/Q104374687"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q300928"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "beta-pinene"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC1(C2CCC(=C)C1C2)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "WTARULDDTDQWMU-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104374687"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q310919"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "β-alanine"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "C(CN)C(=O)O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "UCMIRNVEIXFBKS-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q33428639"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q312266"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "curcumin"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "COC1=C(C=CC(=C1)/C=C/C(=O)CC(=O)/C=C/C2=CC(=C(C=C2)O)OC)O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "VFLDPWHFBUODDF-FCXRPNKRSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104383812|http://www.wikidata.org/entity/Q34301331|http://www.wikidata.org/entity/Q104250704|http://www.wikidata.org/entity/Q33783283|http://www.wikidata.org/entity/Q105285375|http://www.wikidata.org/entity/Q73215891|http://www.wikidata.org/entity/Q104667009|http://www.wikidata.org/entity/Q39876186|http://www.wikidata.org/entity/Q44949850|http://www.wikidata.org/entity/Q28303097|http://www.wikidata.org/entity/Q34399025|http://www.wikidata.org/entity/Q93612427|http://www.wikidata.org/entity/Q53618447|http://www.wikidata.org/entity/Q44593465|http://www.wikidata.org/entity/Q44344605|http://www.wikidata.org/entity/Q77396928|http://www.wikidata.org/entity/Q34593827|http://www.wikidata.org/entity/Q105285372|http://www.wikidata.org/entity/Q44518269|http://www.wikidata.org/entity/Q36916903|http://www.wikidata.org/entity/Q93659925|http://www.wikidata.org/entity/Q104388329|http://www.wikidata.org/entity/Q40407447|http://www.wikidata.org/entity/Q43571794|http://www.wikidata.org/entity/Q74256041|http://www.wikidata.org/entity/Q34334317|http://www.wikidata.org/entity/Q104250705|http://www.wikidata.org/entity/Q105029449|http://www.wikidata.org/entity/Q105285398|http://www.wikidata.org/entity/Q36871828|http://www.wikidata.org/entity/Q44828416|http://www.wikidata.org/entity/Q104388331|http://www.wikidata.org/entity/Q34151965|http://www.wikidata.org/entity/Q44023968|http://www.wikidata.org/entity/Q67595416|http://www.wikidata.org/entity/Q105285371|http://www.wikidata.org/entity/Q38097895|http://www.wikidata.org/entity/Q104388334|http://www.wikidata.org/entity/Q34574212|http://www.wikidata.org/entity/Q43824129|http://www.wikidata.org/entity/Q104250706|http://www.wikidata.org/entity/Q104388339|http://www.wikidata.org/entity/Q104388325|http://www.wikidata.org/entity/Q104249587|http://www.wikidata.org/entity/Q104388327|http://www.wikidata.org/entity/Q42987965|http://www.wikidata.org/entity/Q105285387|http://www.wikidata.org/entity/Q104992345|http://www.wikidata.org/entity/Q104388336|http://www.wikidata.org/entity/Q105213627|http://www.wikidata.org/entity/Q28328461|http://www.wikidata.org/entity/Q67989319|http://www.wikidata.org/entity/Q43522706|http://www.wikidata.org/entity/Q42229848|http://www.wikidata.org/entity/Q73920949"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q407997"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "inositol"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "C1(C(C(C(C(C1O)O)O)O)O)O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "CDAISMWEOUEBRE-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q33428639"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q410572"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "silane"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "[SiH4]"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "BLRPTPMANUNPDV-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q35365269"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q410932"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "linalool"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC(=CCCC(C)(C=C)O)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "CDOSHBSSFJOMGT-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q73976197|http://www.wikidata.org/entity/Q44940538|http://www.wikidata.org/entity/Q36775584"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q415359"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "nerol"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC(=CCC/C(=C\\CO)/C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "GLZPCOQZEFWAFX-YFHOEESVSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q73976197"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q416114"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(+/-)-4-terpineol"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC1=CCC(CC1)(C(C)C)O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "WRYLYDPHFGVWKC-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q44940538|http://www.wikidata.org/entity/Q36775584|http://www.wikidata.org/entity/Q109724922"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q416775"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "camphene"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC1(C2CCC(C2)C1=C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "CRPUJAZIXJMDBK-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q73976197|http://www.wikidata.org/entity/Q44940538|http://www.wikidata.org/entity/Q36775584|http://www.wikidata.org/entity/Q109724922"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q416800"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(±)-carvone"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC1=CCC(CC1=O)C(=C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "ULDHMXUKGWMISQ-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q109724922"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q417362"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "ferulic acid"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "COC1=C(C=CC(=C1)/C=C/C(=O)O)O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "KSEBMYQBYZTDHS-HWKANZROSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104388336|http://www.wikidata.org/entity/Q61700410"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q418320"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "chlorothalonil"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "C(#N)C1=C(C(=C(C(=C1Cl)Cl)Cl)C#N)Cl"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "CRQQGFGUEAVUIL-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q44344605"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q419672"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "vanillic acid"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "COC1=C(C=CC(=C1)C(=O)O)O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "WKOLLVMJNQIZCI-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q33428639|http://www.wikidata.org/entity/Q104388336"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q421278"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "sabinene"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC(C)C12CCC(=C)C1C2"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "NDVASEGYNIMXJL-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q44344605"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q421444"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "dichlofluanid"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CN(C)S(=O)(=O)N(C1=CC=CC=C1)SC(F)(Cl)Cl"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "WURGXGVFSMYFCG-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q44344605"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q421614"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "caryophyllene"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "C/C/1=C\\CCC(=C)[C@H]2CC([C@@H]2CC1)(C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "NPNUFJAVOOONJE-GFUGXAQUSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q44221953"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q422658"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "myristic acid"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CCCCCCCCCCCCCC(=O)O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "TUNFSRHWOTWDNC-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q36775584|http://www.wikidata.org/entity/Q104374919"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q423975"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "γ‑terpinene"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC1=CCC(=CC1)C(C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "YKFLAYDHMOASIY-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104374687"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q115971623"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "Terpecurcumin C"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "COc1cc(/C=C/C(=O)/C=C(O)/C=C/c2ccc(O[C@H]3C[C@H]([C@@H](C)CCC=C(C)C)C=C[C@@]3(C)O)c(OC)c2)ccc1O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "BLSJJGBHGVBYHF-XYHBIZDZSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q85443531"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q115971624"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "Terpecurcumin B"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "COc1cc(/C=C/C(=O)/C=C(O)/C=C/c2ccc(O[C@H]3C[C@H]([C@@H](C)CCC=C(C)C)[C@@H](O)C=C3C)c(OC)c2)ccc1O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "WLFPRMQOFUMWBP-WXJREWSDSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q85443531"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q115971801"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(6S)-6-[(1R,4R,5S)-5-hydroxy-4-[4-[(1E,3Z,6E)-3-hydroxy-7-(4-hydroxy-3-methoxyphenyl)-5-oxohepta-1,3,6-trienyl]-2-methoxyphenoxy]-4-methylcyclohex-2-en-1-yl]-2-methylhept-2-en-4-one"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "COc1cc(/C=C/C(=O)/C=C(O)/C=C/c2ccc(O[C@]3(C)C=C[C@@H]([C@@H](C)CC(=O)C=C(C)C)C[C@@H]3O)c(OC)c2)ccc1O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "FTHMLKSJOOGJQB-SYUFGHMDSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q85443531"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q115971907"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "Demethoxybisabolocurcumin Ether"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "COc1cc(/C=C/C(O)=C/C(=O)/C=C/c2ccc(O)cc2)ccc1O[C@H]1C=C(C)[C@@H](O)C[C@@H]1[C@@H](C)CC(=O)C=C(C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "VLOIRNGZNJWJHV-LXQVCSRVSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q85443531"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q115971911"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(1E,4Z,6E)-5-hydroxy-1-(4-hydroxy-3-methoxyphenyl)-7-[4-[(1R,4R,6S)-6-hydroxy-1-methyl-4-[(2S)-6-methylhept-5-en-2-yl]cyclohex-2-en-1-yl]oxy-3-methoxyphenyl]hepta-1,4,6-trien-3-one"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "COc1cc(/C=C/C(=O)/C=C(O)/C=C/c2ccc(O[C@]3(C)C=C[C@@H]([C@@H](C)CCC=C(C)C)C[C@@H]3O)c(OC)c2)ccc1O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "GDCIFFCZWAMXLE-XYHBIZDZSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q85443531"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q115972124"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "Didemethoxybisabolocurcumin Ether"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC(C)=CC(=O)C[C@H](C)[C@H]1C[C@H](O)C(C)=C[C@@H]1Oc1ccc(/C=C/C(O)=C/C(=O)/C=C/c2ccc(O)cc2)cc1"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "HUGHWNMFBYLCIP-KHJKUTEWSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q85443531"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q115972402"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "COc1cc(/C=C/C(=O)/C=C(O)/C=C/c2ccc(O[C@]3(C)C=C[C@@H]([C@@H](C)CC(=O)C=C(C)C)C[C@@H]3O)cc2)ccc1O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "GZXCSJUAXCKPKE-PQDYMIOBSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q85443531"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q115972406"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "Terpecurcumin A"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "COc1cc(/C=C/C(=O)/C=C(O)/C=C/c2ccc(O[C@H]3C=C(C)[C@@H](O)C[C@@H]3[C@@H](C)CCC=C(C)C)c(OC)c2)ccc1O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "KSKMJXRSPAQZMX-WXJREWSDSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q85443531"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q115972558"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(6S)-6-[(1R,2R)-2-[2-hydroxy-5-[(1E,3Z,6E)-3-hydroxy-7-(4-hydroxy-3-methoxyphenyl)-5-oxohepta-1,3,6-trienyl]-3-methoxyphenyl]-4-methylcyclohex-3-en-1-yl]-2-methylhept-2-en-4-one"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "COc1cc(/C=C/C(=O)/C=C(O)/C=C/c2cc(OC)c(O)c([C@H]3C=C(C)CC[C@@H]3[C@@H](C)CC(=O)C=C(C)C)c2)ccc1O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "AYLFWCSLEMSJJA-ZXRBFCLPSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q85443531"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q125606226"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "alpha-Humulen"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "C/C1=C/CC/C(C)=C/CC(C)(C)/C=C\\C1"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "FAMPSKZZVDUYOS-HYXCZMNISA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q44940538"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q19414"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(±)-3-carene"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC1=CCC2C(C1)C2(C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "BQOFWKZOCNGFEC-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q44940538|http://www.wikidata.org/entity/Q104374687"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q33495"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "vanillin"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "COC1=C(C=CC(=C1)C=O)O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "MWOOGOJBHIARFG-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104383812|http://www.wikidata.org/entity/Q104388336"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q27121450"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(-)-germacrene D"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "C/C/1=C\\CCC(=C)/C=C/[C@@H](CC1)C(C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "GAIBLDCXCZKKJE-RXJOXMPGSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q73976197"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q27121553"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "gamma-bisabolene"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC1=CCC(=C(C)CCC=C(C)C)CC1"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "XBGUIVFBMBVUEG-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q36775584"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q27121561"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "beta-bisabolene"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC1=CCC(CC1)C(=C)CCC=C(C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "XZRVRYFILCSYSP-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q44940538|http://www.wikidata.org/entity/Q109724922"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q27121577"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(R)-beta-bisabolene"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC1=CC[C@@H](CC1)C(=C)CCC=C(C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "XZRVRYFILCSYSP-HNNXBMFYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104383812|http://www.wikidata.org/entity/Q44221953|http://www.wikidata.org/entity/Q104374919|http://www.wikidata.org/entity/Q67989319"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q27121615"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "alpha-humulene"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "C/C/1=C\\CC(/C=C\\C/C(=C\\CC1)/C)(C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "FAMPSKZZVDUYOS-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q44940538"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q27121788"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(+)-sabinene"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC(C)[C@]12CCC(=C)[C@H]1C2"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "NDVASEGYNIMXJL-NXEZZACHSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104249587"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q27121796"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "alpha-thujene"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC1=CCC2(C1C2)C(C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "KQAZVFVOEIRWHN-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q109724922"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q27132146"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "alpha-bergamotene"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC1=CCC2CC1C2(C)CCC=C(C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "YMBFCQPIMVLNIU-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q73976197|http://www.wikidata.org/entity/Q44940538|http://www.wikidata.org/entity/Q36775584|http://www.wikidata.org/entity/Q109724922"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q27132148"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "curcumene"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC1=CC=C(C=C1)C(C)CCC=C(C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "VMYXUZSZMNBRCN-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104383812|http://www.wikidata.org/entity/Q44221953"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q27132149"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "beta-curcumene"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC1=CCC(=CC1)C(C)CCC=C(C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "JXZQZARENYGJMK-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q36775584"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q27132237"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(1S,2S,4R)-β-elemene"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC(=C)[C@@H]1CC[C@@]([C@@H](C1)C(=C)C)(C)C=C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "OPFTUNCRGUEPRZ-QLFBSQMISA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q115785168"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q27132897"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "zerumbone"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "C/C/1=C\\CC(/C=C/C(=O)/C(=C/CC1)/C)(C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "GIHNTRQPEMKFKO-SKTNYSRSSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104374919|http://www.wikidata.org/entity/Q33576073"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q27133173"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "tricyclene"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC1(C2CC3C1(C3C2)C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "RRBYUSWBLVXTQN-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q109724922"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q27133237"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "beta-sesquiphellandrene"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "C[C@@H](CCC=C(C)C)[C@H]1CCC(=C)C=C1"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "PHWISBHSBNDZDX-LSDHHAIUSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q73976197|http://www.wikidata.org/entity/Q104374919|http://www.wikidata.org/entity/Q67989319"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q27135730"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "tetrahydrodiferuloylmethane"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "COC1=C(C=CC(=C1)CCC(=O)CC(=O)CCC2=CC(=C(C=C2)O)OC)O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "LBTVHXHERHESKG-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q44828416"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q27135729"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "dihydrocurcumin"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "COC1=C(C=CC(=C1)CCC(=O)CC(=O)/C=C/C2=CC(=C(C=C2)O)OC)O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "MUYJSOCNDLUHPJ-XVNBXDOJSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104388325"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q27136294"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "β-caryophyllene oxide"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "C[C@@]12CC[C@@H]3[C@H](CC3(C)C)C(=C)CC[C@H]1O2"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "NVEQFIOZRFFVFW-RGCMKSIDSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q105135291"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q27136296"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "2,3-Dihydroxybisabola-4,10-diene"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "C[C@@H](CCC=C(C)C)[C@H]1C[C@@H]([C@@](C=C1)(C)O)O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "YRFJMOGROZTYPC-XGUBFFRZSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104990528"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q27138500"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(+)-(S)-ar-turmerone"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC1=CC=C(C=C1)[C@@H](C)CC(=O)C=C(C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "NAAJVHHFAXWBOK-ZDUSSCGKSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104383812|http://www.wikidata.org/entity/Q44545877|http://www.wikidata.org/entity/Q73976197|http://www.wikidata.org/entity/Q67585310|http://www.wikidata.org/entity/Q44221953|http://www.wikidata.org/entity/Q105176139|http://www.wikidata.org/entity/Q104388325|http://www.wikidata.org/entity/Q104249587|http://www.wikidata.org/entity/Q42987965|http://www.wikidata.org/entity/Q67989319"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q27139858"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "hexadec-9-enoic acid"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CCCCCCC=CCCCCCCCC(=O)O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "SECPZKHBENQXJG-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104374919"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q27149853"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "Curcumenol"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC1CCC2C13CC(=C(C)C)C(O3)(C=C2C)O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "ISFMXVMWEWLJGJ-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q46233082"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q27155085"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(4S,5S)-(+)-Germacrone 4,5-epoxide"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "C/C/1=C/CC[C@]2([C@@H](O2)CC(=C(C)C)C(=O)C1)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "DWGVRYKQVZGSIB-ZRDDCUNGSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104990528"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q27155090"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(S)-turmerone"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC1=CCC(=CC1)[C@@H](C)CC(=O)C=C(C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "FZPYMZUVXJUAQA-ZDUSSCGKSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104383812|http://www.wikidata.org/entity/Q73976197|http://www.wikidata.org/entity/Q44344605|http://www.wikidata.org/entity/Q44221953|http://www.wikidata.org/entity/Q104249587"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q27155088"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "Curcumenone"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC(=C1C[C@@H]2[C@H]([C@@]2(CC1=O)C)CCC(=O)C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "HUZJLWLCLJEXEL-NFAWXSAZSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104990528|http://www.wikidata.org/entity/Q104388325|http://www.wikidata.org/entity/Q67989319"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q27155299"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "vanillylidene acetone"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC(=O)/C=C/C1=CC(=C(C=C1)O)OC"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "AFWKBSMFXWNGRE-ONEGZZNKSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104383812"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q27160459"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "3,7-dimethyl-2,6-octadien-1-yl acetate"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC(=CCCC(=CCOC(=O)C)C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "HIGQPQRQIQDZMP-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q109724922"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q27161428"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "p-mentha-1,3,8-triene"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC1=CC=C(CC1)C(=C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "XNMPFDIYAMOYRM-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q37034704"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q27251292"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "2-hydroxy-5-methylacetophenone"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC1=CC(=C(C=C1)O)C(=O)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "YNPDFBFVMJNGKZ-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104383812"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q27255489"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(-)-1-p-tolylethanol"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC1=CC=C(C=C1)[C@H](C)O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "JESIHYIJKKUWIS-QMMMGPOBSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104988006"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q27258483"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "monodemethylcurcumin"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "COC1=C(C=CC(=C1)/C=C/C(=O)CC(=O)/C=C/C2=CC(=C(C=C2)O)O)O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "FFRFJIZJLZXEJX-YPCIICBESA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104994625"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q27258668"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "citronellyl valerate"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CCCCC(=O)OCCC(C)CCC=C(C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "PFOJEJPZUVQHEH-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q73976197"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q27263468"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "ar-(+/-)-turmerone"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC1=CC=C(C=C1)C(C)CC(=O)C=C(C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "NAAJVHHFAXWBOK-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q105135291"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q27265496"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "p-cymen-8-ol"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC1=CC=C(C=C1)C(C)(C)O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "XLPDVYGDNRIQFV-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q36775584|http://www.wikidata.org/entity/Q104374687"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q27888066"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "palmitelaidic acid"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CCCCCC/C=C/CCCCCCCC(=O)O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "SECPZKHBENQXJG-BQYQJAHWSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104374919"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q27889969"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(+)-carvone"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC1=CC[C@@H](CC1=O)C(=C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "ULDHMXUKGWMISQ-VIFPVBQESA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q73976197"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q36502089"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(S,1Z,6Z)-8-Isopropyl-1-methyl-5-methylenecyclodeca-1,6-diene"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "C/C/1=C/CCC(=C)/C=C\\[C@@H](CC1)C(C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "GAIBLDCXCZKKJE-ACWLMNNXSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q73976197"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q51617501"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(E/Z)-ferulic acid"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "COC1=C(C=CC(=C1)C=CC(=O)O)O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "KSEBMYQBYZTDHS-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q33428639"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q53858035"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(E)-4-hydroxy-3-methoxycinnamaldehyde"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "COC1=C(C=CC(=C1)/C=C/C=O)O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "DKZBBWMURDFHNE-NSCUHMNNSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104388336"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105302939"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "1,8-cineole"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC1(C)O[C@]2(C)CC[C@H]1CC2"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "WEEGYLXZBRQIMU-WAAGHKOSSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q44344605|http://www.wikidata.org/entity/Q115784523|http://www.wikidata.org/entity/Q115784524"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105322231"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(6S)-2-Methyl-6-(2-hydroxy-4-methylphenyl)-2-hepten-4-one"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC(C)=CC(=O)C[C@H](C)c1ccc(C)cc1O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "WYIJOOQDLOBLCP-LBPRGKRZSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q80412818"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105330038"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "5-Hydroxy-1,7-bis(4-hydroxyphenyl)hepta-4,6-dien-3-one"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "O=C(C=C(O)C=CC1=CC=C(O)C=C1)CCC2=CC=C(O)C=C2"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "XLKHKZCPVAHTFN-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q46023019|http://www.wikidata.org/entity/Q45944713"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105330042"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "1,7-Bis(4-hydroxyphenyl)-3-hydroxy-1,3-heptadien-5-one"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "O=C(/C=C(O)/C=C/c1ccc(O)cc1)CCc1ccc(O)cc1"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "XLKHKZCPVAHTFN-YLMKKNOUSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q46023019"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105337678"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(+)-alpha-Turmerone"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC(C)=CC(=O)C[C@H](C)[C@@H]1C=CC(C)=CC1"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "XOCANRBEOZQNAQ-UONOGXRCSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q44545877|http://www.wikidata.org/entity/Q104990528"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105343030"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "furanodienone"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "O=C1C=C(C)CCC=C(C)CC=2OC=C(C12)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "XVOHELPNOXGRBQ-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q33576073|http://www.wikidata.org/entity/Q103793239"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105343029"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(5E,9E)-furanodienone"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "C/C1=C\\C(=O)c2c(C)coc2C/C(C)=C/CC1"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "XVOHELPNOXGRBQ-NXAIOARDSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q33576073"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105349179"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "[4-(4-Hydroxyphenyl)-2-oxobut-3-enyl] 3-(4-hydroxy-3-methoxyphenyl)prop-2-enoate"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "O=C(OCC(=O)C=CC1=CC=C(O)C=C1)C=CC2=CC=C(O)C(OC)=C2"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "YJCNIIKXRAQFAR-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q80412818"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105349181"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "3-Methoxy-4-hydroxybenzeneacrylic acid 2-oxo-4-(4-hydroxyphenyl)-3-butenyl ester"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "COc1cc(/C=C/C(=O)OCC(=O)/C=C/c2ccc(O)cc2)ccc1O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "YJCNIIKXRAQFAR-WOARVNPXSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q80412818"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105380246"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "5-Hydroxy-7-(4-hydroxy-3-methoxyphenyl)-1-(4-hydroxyphenyl)hepta-4,6-dien-3-one"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "O=C(C=C(O)C=CC1=CC=C(O)C(OC)=C1)CCC2=CC=C(O)C=C2"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "ZNVIPQYJPLZSBC-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q46023019"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105380247"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "Dihydrodesmethoxycurcumine a"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "COc1cc(/C=C/C(O)=C/C(=O)CCc2ccc(O)cc2)ccc1O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "ZNVIPQYJPLZSBC-UHYMEYRHSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q46023019"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105386334"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(6E,10S)-6,10-dimethyl-3-propan-2-ylidenecyclodec-6-ene-1,4-dione"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC(C)=C1CC(=O)[C@@H](C)CC/C=C(\\C)CC1=O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "ZYPUZCWWTYIGFV-BCMYLCSRSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104990528"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q106040195"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "ent-zingiberene"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC(C)=CCC[C@@H](C)[C@H]1C=CC(C)=CC1"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "KKOXKGNSUHTUBV-CABCVRRESA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q44221953|http://www.wikidata.org/entity/Q104374919"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q110076584"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(5S,6R,9S)-3-Isopropylidene-6-hydroxy-6-methyl-9-isopropenyl-1-oxaspiro[4.4]nonane-2-one"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "C=C(C)[C@@H]1CC[C@@](C)(O)[C@]12CC(=C(C)C)C(=O)O2"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "FCDAPTJTJOXPOR-CFVMTHIKSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104374476"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q110184249"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(1R,3R,5R)-1-Isopropyl-4-methylenebicyclo[3.1.0]hexan-3-ol"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "C=C1[C@@H](O)C[C@]2(C(C)C)C[C@H]12"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "MDFQXBNVOAKNAY-UTLUCORTSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104374687"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q110190072"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "1,5-Dihydroxy-1,7-bis(4-hydroxyphenyl)hepta-4,6-dien-3-one"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "O=C(C=C(O)C=CC1=CC=C(O)C=C1)CC(O)C2=CC=C(O)C=C2"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "KCCQFTTZQGVDFQ-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q45944713"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q110193290"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "3-Hydroxy-1,7-bis-(4-hydroxyphenyl)-6-heptene-1,5-dione"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "O=C(C=CC1=CC=C(O)C=C1)CC(O)CC(=O)C2=CC=C(O)C=C2"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "NEZCLOILSKYYSV-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q45944713"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q110193722"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(1S)-1,5-dihydroxy-7-(4-hydroxy-3-methoxyphenyl)-1-(4-hydroxyphenyl)hepta-4,6-dien-3-one"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "COc1cc(C=CC(O)=CC(=O)C[C@H](O)c2ccc(O)cc2)ccc1O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "VWXOCQKDEKTFRM-IBGZPJMESA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q45944713"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q110193721"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "1-(4-Hydroxyphenyl)-7-(3,4-dihydroxyphenyl)-1,6-heptadiene-3,5-dione"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "O=C(C=CC1=CC=C(O)C=C1)CC(=O)C=CC2=CC=C(O)C(O)=C2"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "YZCBFQDXCIWDOS-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q45944713"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q110194084"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "1,9-Bis(4-hydroxyphenyl)nona-1,6,8-triene-3,5-dione"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "O=C(C=CC=CC1=CC=C(O)C=C1)CC(=O)C=CC2=CC=C(O)C=C2"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "ZQDQEBVNOAJJEA-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q110069138"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q110194155"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "1,5-Dihydroxy-1,7-bis(4-hydroxy-3-methoxyphenyl)hepta-4,6-dien-3-one"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "O=C(C=C(O)C=CC1=CC=C(O)C(OC)=C1)CC(O)C2=CC=C(O)C(OC)=C2"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "HBIQXNIGKLGXTQ-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q45944713"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q110194466"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "1,5-Dihydroxy-1-(4-hydroxy-3-methoxyphenyl)-7-(4-hydroxyphenyl)hepta-4,6-dien-3-one"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "O=C(C=C(O)C=CC1=CC=C(O)C=C1)CC(O)C2=CC=C(O)C(OC)=C2"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "LCGIDMGXEYDCFN-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q45944713"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q110195004"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "1-(4-Hydroxy-3-methoxyphenyl)-5-(4-hydroxyphenyl)penta-1,4-dien-3-one"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "O=C(C=CC1=CC=C(O)C=C1)C=CC2=CC=C(O)C(OC)=C2"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "QVRYUUYYIWAQHV-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q45944713|http://www.wikidata.org/entity/Q104388339"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q115946783"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "6-(5-Hydroxy-4-methoxy-4-methylcyclohex-2-en-1-yl)-2-methylhept-2-en-4-one"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "O=C(C=C(C)C)CC(C)C1C=CC(OC)(C)C(O)C1"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "XQXANAYBQDKOBU-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104990528"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q115946784"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "5-(6-Methylhept-5-en-2-yl)cyclohex-2-ene-1,4-diol"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "OC1C=CC(O)C(C1)C(C)CCC=C(C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "SUVNWYDXCRSEDC-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104990528"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q115970896"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "Bisabolocurcumin Ether"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "COc1cc(/C=C/C(=O)/C=C(O)/C=C/c2ccc(O[C@H]3C=C(C)[C@@H](O)C[C@@H]3[C@@H](C)CC(=O)C=C(C)C)c(OC)c2)ccc1O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "HTVBTQQABFDJOC-GJBMVETDSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q85443531"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q115971527"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "Terpecurcumin D"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "COc1cc(/C=C/C(=O)/C=C(O)/C=C/c2ccc(O[C@H]3C[C@H]([C@@H](C)CC(=O)C=C(C)C)C=C[C@@]3(C)O)c(OC)c2)ccc1O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "XGDDFXUHYBAVSO-SYUFGHMDSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q85443531"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q115971548"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(1E,4Z,6E)-5-hydroxy-7-[4-hydroxy-3-[(1R,4S,6R)-4-hydroxy-3-methyl-6-[(2S)-6-methylhept-5-en-2-yl]cyclohex-2-en-1-yl]-5-methoxyphenyl]-1-(4-hydroxy-3-methoxyphenyl)hepta-1,4,6-trien-3-one"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "COc1cc(/C=C/C(=O)/C=C(O)/C=C/c2cc(OC)c(O)c([C@H]3C=C(C)[C@@H](O)C[C@@H]3[C@@H](C)CCC=C(C)C)c2)ccc1O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "CKMRYCCFNVCXEC-UDKFSTSTSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q85443531"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q60176530"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "citral"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC(=CCCC(=CC=O)C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "WTEVQBCEXWBHNA-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q36775584|http://www.wikidata.org/entity/Q109724922"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q61651085"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(RS)-citronellal"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC(CCC=C(C)C)CC=O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "NEHNMFOYXAPHSD-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q73976197|http://www.wikidata.org/entity/Q36775584"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q63399836"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(1E,4Z,6E)-1-(4-Hydroxyphenyl)-5-hydroxy-7-(3-methoxy-4-hydroxyphenyl)-1,4,6-heptatriene-3-one"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "COC1=C(C=CC(=C1)/C=C/C(=C/C(=O)/C=C/C2=CC=C(C=C2)O)/O)O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "UEPVWRDHSPMIAZ-IZTHOABVSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q85443531|http://www.wikidata.org/entity/Q34151965|http://www.wikidata.org/entity/Q42987965|http://www.wikidata.org/entity/Q73920949"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q63409374"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "17-(5-ethyl-6-methylheptan-2-yl)-10,13-dimethyl-2,3,4,7,8,9,11,12,14,15,16,17-dodecahydro-1H-cyclopenta[a]phenanthren-3-ol"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "OC1CC2=CCC3C(CCC4(C)C(CCC34)C(C)CCC(CC)C(C)C)C2(C)CC1"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "KZJWDPNRJALLNS-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q82770835"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q67879686"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "alpha-turmerone"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC1=CCC(C=C1)C(C)CC(=O)C=C(C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "XOCANRBEOZQNAQ-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104388325|http://www.wikidata.org/entity/Q105135291|http://www.wikidata.org/entity/Q67989319"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q67879693"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "ar-tumerol"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC1=CC=C(C=C1)C(C)CC(C=C(C)C)O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "NRBFEAZFHRHFFQ-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104383812"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q67879736"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "beta-turmerone"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC(CC(=O)C=C(C)C)C1CCC(=C)C=C1"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "JIJQKFPGBBEJNF-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104383812|http://www.wikidata.org/entity/Q44221953|http://www.wikidata.org/entity/Q104388325|http://www.wikidata.org/entity/Q67989319"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q67879768"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "caryophylene oxide"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC1(CC2C1CCC3(C(O3)CCC2=C)C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "NVEQFIOZRFFVFW-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q44940538|http://www.wikidata.org/entity/Q36775584|http://www.wikidata.org/entity/Q82770835"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q72457789"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "Curcumenol"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "C[C@H]1CC[C@@H]2[C@]13CC(=C(C)C)[C@](O3)(C=C2C)O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "ISFMXVMWEWLJGJ-NZBPQXDJSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104990528|http://www.wikidata.org/entity/Q104388325|http://www.wikidata.org/entity/Q67989319"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q72470562"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(R)-5-(1,5-Dimethyl-4-hexenyl)-o-cresol"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC(C)=CCC[C@@H](C)c1ccc(C)c(O)c1"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "FKWGCEDRLNNZOZ-GFCCVEGCSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q73976197"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q76285983"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(1E,4Z,6E)-5-hydroxy-1,7-bis(4-hydroxy-3-methoxyphenyl)hepta-1,4,6-trien-3-one"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "COC1=C(C=CC(=C1)/C=C/C(=C/C(=O)/C=C/C2=CC(=C(C=C2)O)OC)/O)O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "ZIUSSTSXXLLKKK-KOBPDPAPSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q44545877|http://www.wikidata.org/entity/Q44344605|http://www.wikidata.org/entity/Q85443531|http://www.wikidata.org/entity/Q34151965|http://www.wikidata.org/entity/Q43824129|http://www.wikidata.org/entity/Q42987965|http://www.wikidata.org/entity/Q73920949"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q76303632"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(1E,4Z,6E)-5-hydroxy-1,7-bis(4-hydroxyphenyl)hepta-1,4,6-trien-3-one"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "C1=CC(=CC=C1/C=C/C(=C/C(=O)/C=C/C2=CC=C(C=C2)O)/O)O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "YXAKCQIIROBKOP-HSSGTREWSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q43824129|http://www.wikidata.org/entity/Q42987965|http://www.wikidata.org/entity/Q73920949"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q76305633"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(4Z,6E)-5-Hydroxy-1,7-bis(4-hydroxy-3-methoxyphenyl)-4,6-heptadie n-3-one"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "COC1=C(C=CC(=C1)CCC(=O)/C=C(/C=C/C2=CC(=C(C=C2)O)OC)\\O)O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "BWHPKBOLJFNCPW-YJNULWIISA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q46023019|http://www.wikidata.org/entity/Q104947244"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q76411451"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(E)-1,7-bis(4-hydroxyphenyl)hept-1-ene-3,5-dione"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "C1=CC(=CC=C1CCC(=O)CC(=O)/C=C/C2=CC=C(C=C2)O)O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "AWUBJLRYWHOLFW-VZUCSPMQSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q34151965"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q76415336"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "5'-Methoxycurcumin"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "COC1=CC(=CC(=C1O)OC)/C=C/C(=O)CC(=O)/C=C/C2=CC(=C(C=C2)O)OC"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "MQJGAHXKAZGEGI-NSLJXJERSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104388339"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q82006251"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "1.Xi.,6.xi.,7.xi.-cadina-4,9-diene"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "C1=C(C)C2CCC(=CC2C(C1)C(C)C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "QMAYBMKBYCGXDH-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q109724922"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q82096682"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "1,4,6-Heptatrien-3-one, 5-hydroxy-1,7-bis(4-hydroxy-3-methoxyphenyl)-"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "O=C(C=CC1=CC=C(O)C(OC)=C1)C=C(O)C=CC2=CC=C(O)C(OC)=C2"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "ZIUSSTSXXLLKKK-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q44545877|http://www.wikidata.org/entity/Q44940538|http://www.wikidata.org/entity/Q46614160|http://www.wikidata.org/entity/Q74225687|http://www.wikidata.org/entity/Q43824129|http://www.wikidata.org/entity/Q42987965|http://www.wikidata.org/entity/Q33282268|http://www.wikidata.org/entity/Q73920949"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q82097680"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "1,4,6-Heptatrien-3-one, 5-hydroxy-1,7-bis(4-hydroxyphenyl)-"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "O=C(C=CC1=CC=C(O)C=C1)C=C(O)C=CC2=CC=C(O)C=C2"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "YXAKCQIIROBKOP-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q43824129|http://www.wikidata.org/entity/Q42987965|http://www.wikidata.org/entity/Q73920949"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q82112410"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "1-Ethyl-4-isobutylbenzene"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CCC1=CC=C(C=C1)CC(C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "FMHWAAZOTFVMKR-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q35365269"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q82269232"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "2-Hepten-4-one, 6-(2-hydroxy-4-methylphenyl)-2-methyl-"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "O=C(C=C(C)C)CC(C1=CC=C(C=C1O)C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "WYIJOOQDLOBLCP-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q105198923"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q82299855"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(-)-(R)-ar-turmerone"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC(C)=CC(=O)C[C@@H](C)c1ccc(C)cc1"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "NAAJVHHFAXWBOK-CYBMUJFWSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q42987965"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q82921522"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "Procurcumenol"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC1=CC(=O)C(=C(C)C)C[C@H]2[C@H]1CC[C@]2(C)O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "RHBOHEXDGUVIIY-WHOFXGATSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104990528|http://www.wikidata.org/entity/Q104388325"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q82933272"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "1-Methyl-4-(1-methylethylidene)-2-(1-methylvinyl)-1-vinylcyclohexane"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "C=CC1(C)CCC(=C(C)C)CC1C(=C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "BQSLMQNYHVFRDT-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q36775584|http://www.wikidata.org/entity/Q109724922|http://www.wikidata.org/entity/Q46537339"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q100145864"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(6Z)-6,10-dimethyl-3-(propan-2-ylidene)cyclodec-6-ene-1,4-dione"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC(C)=C1CC(=O)C(C)CC/C=C(/C)CC1=O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "ZYPUZCWWTYIGFV-WDZFZDKYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q67989319"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q103815938"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "Bicyclo[7.2.0]undec-4-ene, 4,11,11-trimethyl-8-methylene-, (1S,4E,9R)-"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "C=C1CCC=C(C)CCC2C1CC2(C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "NPNUFJAVOOONJE-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q44940538|http://www.wikidata.org/entity/Q36775584|http://www.wikidata.org/entity/Q109724922"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q103819092"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "2-methyl-5-(6-methylhept-5-en-2-yl)phenol"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "OC1=CC(=CC=C1C)C(C)CCC=C(C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "FKWGCEDRLNNZOZ-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q44940538|http://www.wikidata.org/entity/Q104996849"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q104166712"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "spathulenol"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "OC1(C)CCC2C(=C)CCC3C(C21)C3(C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "FRMCCTDTYSRUBE-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q36775584|http://www.wikidata.org/entity/Q109724922"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q104166947"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "1,6-Cyclodecadiene, 1-methyl-5-methylene-8-(1-methylethyl)-"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "C=C1C=CC(CCC(=CCC1)C)C(C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "GAIBLDCXCZKKJE-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q44940538|http://www.wikidata.org/entity/Q36775584"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q104167115"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "2-(4-Ethenyl-4-methyl-3-prop-1-en-2-ylcyclohexyl)propan-2-ol"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "OC(C)(C)C1CCC(C=C)(C)C(C(=C)C)C1"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "GFJIQNADMLPFOW-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q109724922"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q104170958"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "delta-cadinol"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "OC1(C)CCC(C(C)C)C2C=C(C)CCC21"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "LHYHMMRYTDARSZ-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q44940538|http://www.wikidata.org/entity/Q109724922"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q104172140"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "Cyclohexene, 4-ethenyl-4-methyl-3-(1-methylethenyl)-1-(1-methylethyl)-, (3R-trans)-"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "C=CC1(C)CCC(=CC1C(=C)C)C(C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "MXDMETWAEGIFOE-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q34357079"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q104194086"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "selinene"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "C=C(C)C1CCC2(C)CCC=C(C)C2C1"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "OZQAPQSEYFAMCY-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q36775584|http://www.wikidata.org/entity/Q109724922"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q104247111"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(6E)-2,6-dimethyl-10-methylidenedodeca-2,6-diene"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "C=C(CC)CC/C=C(\\C)CCC=C(C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "APAPGJJZPJQKJJ-NTCAYCPXSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q44221953"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q104249589"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(2S,4R)-1,7,7-trimethylbicyclo[2.2.1]heptan-2-ol"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC12CC[C@H](C[C@@H]1O)C2(C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "DTGKSKDOIYIVQL-HHCGNCNQSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q73976197|http://www.wikidata.org/entity/Q104249587"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q104249746"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(Z)-alpha-Atlantone"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC(C)=CC(=O)/C=C(/C)[C@H]1CC=C(C)CC1"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "OJEFBZMKKJTKKK-ZVHGMHCTSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104249587"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q104253232"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "Cubebene"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC1=CCC23C1[C@@H]2[C@@H](C(C)C)CC[C@@H]3C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "XUEHVOLRMXNRKQ-HKGGGCDWSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q73976197"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q104253613"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "beta-Sesquiphellandrene"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "C=C1C=CC(CC1)C(C)CCC=C(C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "PHWISBHSBNDZDX-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q44940538"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q104375412"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "[6]-Dehydrogingerdione"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CCCCCC(=O)CC(=O)/C=C/c1ccc(O)c(OC)c1"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "JUKHKHMSQCQHEN-VQHVLOKHSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q105135291"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q104375801"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "turmerone"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "O=C(C=C(C)C)CC(C1=CCC(=CC1)C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "FZPYMZUVXJUAQA-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q36775584"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q104390927"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(3R,3aR,8aS)-3-hydroxy-3,8-dimethyl-5-propan-2-ylidene-2,3a,4,8a-tetrahydro-1H-azulen-6-one"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC1=CC(=O)C(=C(C)C)C[C@@H]2[C@@H]1CC[C@@]2(C)O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "RHBOHEXDGUVIIY-UXIGCNINSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104990528|http://www.wikidata.org/entity/Q104388325"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q104390928"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(2E)-2-[(3Z,7Z)-4,8-dimethyl-10-oxocyclodeca-3,7-dien-1-ylidene]propanal"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "C/C1=C/C/C(=C(/C)C=O)C(=O)C/C(C)=C\\CC1"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "QYFIJPMUVNMVMC-UQIMPMPUSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104388325"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q104667262"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(5E,9E)-3,6,10-trimethyl-4,7,8,11-tetrahydrocyclodeca[b]furan"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "C/C1=C\\Cc2c(C)coc2C/C(C)=C/CC1"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "VMDXHYHOJPKFEK-IAVOFVOCSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q34357079"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q104920275"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "1,7-bis(4-hydroxyphenyl)hept-1-ene-3,5-dione"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "O=C(C=CC1=CC=C(O)C=C1)CC(=O)CCC2=CC=C(O)C=C2"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "AWUBJLRYWHOLFW-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q34151965"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q104937448"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "[4-(4-Hydroxy-3-methoxyphenyl)-2-oxobut-3-enyl] 3-(4-hydroxyphenyl)prop-2-enoate"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "O=C(OCC(=O)C=CC1=CC=C(O)C(OC)=C1)C=CC2=CC=C(O)C=C2"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "BJZHFDWMVXWBJF-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q80412818"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q104937449"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "4-Hydroxy-trans-cinnamic acid (E)-2-oxo-4-(3-methoxy-4-hydroxyphenyl)-3-butenyl ester"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "COc1cc(/C=C/C(=O)COC(=O)/C=C/c2ccc(O)cc2)ccc1O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "BJZHFDWMVXWBJF-WOARVNPXSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q80412818"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q104944046"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(2S,5S)-5-methyl-2-(4-methylphenyl)heptan-4-one"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC[C@H](C)C(=O)C[C@H](C)c1ccc(C)cc1"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "BPUHZTMIPYLURP-STQMWFEESA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q115784524"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q104947245"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "5-Hydroxy-1,7-bis(4-hydroxy-3-methoxyphenyl)hepta-4,6-dien-3-one"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "O=C(C=C(O)C=CC1=CC=C(O)C(OC)=C1)CCC2=CC=C(O)C(OC)=C2"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "BWHPKBOLJFNCPW-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q46023019|http://www.wikidata.org/entity/Q104947244"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q104962397"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "2-methyl-3H-furan-2-ol"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "OC1(OC=CC1)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "CKISTVZVBFBSQM-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q38464437"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q104970782"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "CID 71694446"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "C/C1=C\\CC[C@]2(C)O[C@H]2C(=O)c2c(C)coc2C1"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "CVIVANCKIBYAOP-WSQYCBKMSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q33576073"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q104990529"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(1S,6E,10S)-6,10-dimethyl-3-propan-2-ylidene-11-oxabicyclo[8.1.0]undec-6-en-4-one"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC(C)=C1C[C@@H]2O[C@@]2(C)CC/C=C(\\C)CC1=O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "DWGVRYKQVZGSIB-NCKTXVJMSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104990528"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q104993661"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(1E,6E)-1-(4-hydroxy-5-methoxycyclohexa-1,3-dien-1-yl)-7-(4-hydroxy-3-methoxyphenyl)hepta-1,6-diene-3,5-dione"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "COc1cc(/C=C/C(=O)CC(=O)/C=C/C2=CC=C(O)C(OC)C2)ccc1O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "FDMZUCNOJRFICO-FCXRPNKRSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104388325"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q104994626"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "1-(3,4-Dihydroxyphenyl)-7-(4-hydroxy-3-methoxyphenyl)hepta-1,6-diene-3,5-dione"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "O=C(C=CC1=CC=C(O)C(O)=C1)CC(=O)C=CC2=CC=C(O)C(OC)=C2"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "FFRFJIZJLZXEJX-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104994625|http://www.wikidata.org/entity/Q45944713"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q104994749"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "2-Methyl-6-(4-methylcyclohex-3-en-1-yl)heptan-3-one"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "O=C(CCC(C)C1CC=C(C)CC1)C(C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "FFZCGQYOMOOQNB-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q38464437|http://www.wikidata.org/entity/Q104374919"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q104999360"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(1R,4S,5S)-2-methyl-5-[(2S)-6-methylhept-5-en-2-yl]cyclohex-2-ene-1,4-diol"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC(C)=CCC[C@H](C)[C@@H]1C[C@@H](O)C(C)=C[C@H]1O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "FPSDOHYYKFXKFR-SPWCGHHHSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104990528"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105007420"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "8-Hydroxy-ar-turmerone"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC(C)=CC(=O)[C@H](O)[C@H](C)c1ccc(C)cc1"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "GEYUWGLUFTZZAX-IUODEOHRSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q80412818"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105008991"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "2,6,9,9-tetramethylcycloundeca-2,6,10-trien-1-one"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "O=C1C=CC(C)(C)CC=C(C)CCC=C1C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "GIHNTRQPEMKFKO-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q33576073"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105009472"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(S)-3-Methyl-6-((S)-6-methyl-4-oxohept-5-en-2-yl)cyclohex-2-enone"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC(C)=CC(=O)C[C@H](C)[C@@H]1CCC(C)=CC1=O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "GJMJFKHIALXTFH-JSGCOSHPSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q80412818"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105027333"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "4-amino-3-[(1E)-2-{4'-[(1E)-2-(1-amino-4-sulfonaphthalen-2-yl)diazen-1-yl]-[1,1'-biphenyl]-4-yl}diazen-1-yl]naphthalene-1-sulfonic acid"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "Nc1c(/N=N/c2ccc(-c3ccc(/N=N/c4cc(S(=O)(=O)O)c5ccccc5c4N)cc3)cc2)cc(S(=O)(=O)O)c2ccccc12"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "HFHIDKQMGIGARX-ATXIYDNESA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q34151965"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105029451"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "p-Cumaroylferuloylmethan"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "COc1cc(/C=C/C(=O)CC(=O)C=Cc2ccc(O)cc2)ccc1O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "HJTVQHVGMGKONQ-PBOGUKDESA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q93612427|http://www.wikidata.org/entity/Q28328461"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105029452"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "desmethoxycurcumin"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "O=C(C=CC1=CC=C(O)C=C1)CC(=O)C=CC2=CC=C(O)C(OC)=C2"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "HJTVQHVGMGKONQ-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q44940538|http://www.wikidata.org/entity/Q109725645|http://www.wikidata.org/entity/Q93612427|http://www.wikidata.org/entity/Q34593827|http://www.wikidata.org/entity/Q73207293|http://www.wikidata.org/entity/Q46614160|http://www.wikidata.org/entity/Q74225687|http://www.wikidata.org/entity/Q44828416|http://www.wikidata.org/entity/Q34151965|http://www.wikidata.org/entity/Q45944713|http://www.wikidata.org/entity/Q104992345"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105036533"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "6-(4-Hydroxy-3-methylphenyl)-2-methylhept-2-EN-4-one"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC(C)=CC(=O)C[C@H](C)c1ccc(O)c(C)c1"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "IBJADFSTHKILPU-NSHDSACASA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q80412818"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105119479"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(1R,2S,5R,8S)-2,6-Dimethyl-9-propan-2-ylidene-11-oxatricyclo[6.2.1.01,5]undec-6-en-8-ol"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC1=C[C@]2(O)O[C@]3(CC2=C(C)C)[C@@H](C)CC[C@H]13"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "ISFMXVMWEWLJGJ-MXYBEHONSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104990528"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105119552"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(1E,4E)-1,5-bis(4-hydroxy-3-methoxyphenyl)penta-1,4-dien-3-one"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "COc1cc(/C=C/C(=O)/C=C/c2ccc(O)c(OC)c2)ccc1O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "ISIMGBQRFXXNON-FCXRPNKRSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q34151965|http://www.wikidata.org/entity/Q104388339"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105119553"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "Divanillalaceton"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "O=C(C=CC1=CC=C(O)C(OC)=C1)C=CC2=CC=C(O)C(OC)=C2"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "ISIMGBQRFXXNON-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q34151965|http://www.wikidata.org/entity/Q104388339"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105120069"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(3S,3aS,8aR)-3-hydroxy-3-methyl-8-methylidene-5-propan-2-ylidene-2,3a,4,8a-tetrahydro-1H-azulen-6-one"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "C=C1CC(=O)C(=C(C)C)C[C@H]2[C@H]1CC[C@]2(C)O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "ITIGZFMSPAFZAE-WHOFXGATSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104990528"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105129135"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(+)-beta-turmerone"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "C=C1C=C[C@@H]([C@@H](C)CC(=O)C=C(C)C)CC1"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "JIJQKFPGBBEJNF-UONOGXRCSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q44545877|http://www.wikidata.org/entity/Q105129131"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105134906"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "4-[(2S)-6-methyl-4-oxohept-5-en-2-yl]benzaldehyde"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC(C)=CC(=O)C[C@H](C)c1ccc(C=O)cc1"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "JTOZFRBWEGDOGE-LBPRGKRZSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q80412818"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105135163"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "1,7-Bis(4-hydroxy-3-methoxyphenyl)-1,4,6-heptatrien-3-one"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "COc1cc(/C=C/C=C/C(=O)/C=C/c2ccc(O)c(OC)c2)ccc1O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "JUDCTVXWYFNGQQ-FQXJPFFWSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q34151965"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105135164"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "1,7-bis(4-Hydroxy-3-methoxyphenyl)hepta-1,4,6-trien-3-one"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "O=C(C=CC=CC1=CC=C(O)C(OC)=C1)C=CC2=CC=C(O)C(OC)=C2"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "JUDCTVXWYFNGQQ-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q34151965"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105139298"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "3-isopropyl-6,10-dimethylcyclodec-6-ene-1,4-dione"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "O=C1CC(=CCCC(C(=O)CC1C(C)C)C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "KDPFMRXIVDLQKX-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q105139295"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105142300"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(-)-Zingiberene"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "C1=CC(CC=C1C)C(C)CCC=C(C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "KKOXKGNSUHTUBV-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q36775584"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105143498"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(6R)-3-Methyl-6-[(2S)-6-methylhept-5-en-2-yl]cyclohex-2-en-1-one"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC(C)=CCC[C@H](C)[C@H]1CCC(C)=CC1=O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "KNOUERLLBMJGLF-UONOGXRCSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104990528"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105143497"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "2-Cyclohexen-1-one, 6-[(1R)-1,5-dimethyl-4-hexenyl]-3-methyl-, (6R)-"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC(C)=CCC[C@H](C)[C@@H]1CCC(C)=CC1=O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "KNOUERLLBMJGLF-KBPBESRZSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q80412818"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105160970"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "6(1H)-Azulenone, 2,3,3a,7,8,8a-hexahydro-1,8a-dihydroxy-1,4-dimethyl-7-(1-methylethylidene)-, (1S,3aS,8aR)-"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC1=CC(=O)C(=C(C)C)C[C@@]2(O)[C@H]1CC[C@]2(C)O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "MBUWIGIPGMJVMN-AEGPPILISA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104990528"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105180534"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "1-Hydroxy-1,7-bis(4-hydroxy-3-methoxyphenyl)-6-heptene-3,5-dione"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "O=C(C=CC1=CC=C(O)C(OC)=C1)CC(=O)CC(O)C2=CC=C(O)C(OC)=C2"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "NKDVMZOMVJQUDC-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q34151965"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105180533"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(E,7S)-7-hydroxy-1,7-bis(4-hydroxy-3-methoxyphenyl)hept-1-ene-3,5-dione"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "COc1cc(/C=C/C(=O)CC(=O)C[C@H](O)c2ccc(O)c(OC)c2)ccc1O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "NKDVMZOMVJQUDC-NAASZUNDSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q34151965"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105181938"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "5-hydroxy-1-(4-hydroxy-3-methoxyphenyl)-7-(4-hydroxyphenyl)hepta-1,4,6-trien-3-one"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "O=C(C=CC1=CC=C(O)C(OC)=C1)C=C(O)C=CC2=CC=C(O)C=C2"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "NMRUIRRIQNAQEB-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q43824129"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105181939"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(1E,4Z,6E)-5-hydroxy-1-(4-hydroxy-3-methoxyphenyl)-7-(4-hydroxyphenyl)hepta-1,4,6-trien-3-one"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "COc1cc(/C=C/C(=O)/C=C(O)/C=C/c2ccc(O)cc2)ccc1O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "NMRUIRRIQNAQEB-VEAXOGKZSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q43824129"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105184308"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(4R,6S)-2-methyl-6-(4-methylphenyl)hept-2-en-4-ol"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC(C)=C[C@H](O)C[C@H](C)c1ccc(C)cc1"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "NRBFEAZFHRHFFQ-ZFWWWQNUSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104990528"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105198921"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "Turmeronol A"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC(C)=CC(=O)C[C@H](C)c1ccc(C)c(O)c1"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "OSIFVLKZUWRNBN-LBPRGKRZSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q105198923|http://www.wikidata.org/entity/Q80412818"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105203705"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "3-Hydroxybisabola-1,10-dien-9-one"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC(C)=CC(=O)C[C@H](C)[C@@H]1C=C[C@](C)(O)CC1"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "OZDOAMOSJAOPRV-GUTXKFCHSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104990528"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105204599"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(1E,4E,6E)-1,7-bis(4-hydroxyphenyl)hepta-1,4,6-trien-3-one"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "O=C(/C=C/C=C/c1ccc(O)cc1)/C=C/c1ccc(O)cc1"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "PALMCMYYFAHUGA-BPTNNVFMSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104994625|http://www.wikidata.org/entity/Q34151965"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105204600"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "1,7-bis(4-hydroxyphenyl)hepta-1,4,6-trien-3-one"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "O=C(C=CC=CC1=CC=C(O)C=C1)C=CC2=CC=C(O)C=C2"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "PALMCMYYFAHUGA-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104994625|http://www.wikidata.org/entity/Q34151965|http://www.wikidata.org/entity/Q45944713"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105213623"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "bisdemethoxycurcumin"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "O=C(C=CC1=CC=C(O)C=C1)CC(=O)C=CC2=CC=C(O)C=C2"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "PREBVFJICNPEKM-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q93612427|http://www.wikidata.org/entity/Q77733960|http://www.wikidata.org/entity/Q46614160|http://www.wikidata.org/entity/Q74225687|http://www.wikidata.org/entity/Q44828416|http://www.wikidata.org/entity/Q34151965|http://www.wikidata.org/entity/Q45944713|http://www.wikidata.org/entity/Q104992345|http://www.wikidata.org/entity/Q110069138"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105229928"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "3-[(1E)-2-[(1S,4aS,8aS)-5,5,8a-trimethyl-2-methylidene-hexahydro-1H-naphthalen-1-yl]ethenyl]furan"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "C=C1CC[C@H]2C(C)(C)CCC[C@]2(C)[C@H]1/C=C/c1ccoc1"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "QXVXYNOIXUIXBI-NDLVVHCESA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q105229929"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105230090"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "Germacrone-13-al"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "C/C1=C\\C/C(=C(/C)C=O)C(=O)C/C(C)=C/CC1"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "QYFIJPMUVNMVMC-UPXYLJBOSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104990528|http://www.wikidata.org/entity/Q104388325"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105230089"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "2-(4,8-Dimethyl-10-oxocyclodeca-3,7-dien-1-ylidene)propanal"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "O=CC(=C1C(=O)CC(=CCCC(=CC1)C)C)C"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "QYFIJPMUVNMVMC-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104990528"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105236254"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "Epiprocurcumenol"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC1=CC(=O)C(=C(C)C)C[C@H]2[C@@H]1CC[C@]2(C)O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "RHBOHEXDGUVIIY-ZLDLUXBVSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104990528"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105245834"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "b-Sitostenone"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "O=C1C=C2CCC3C(CCC4(C)C(CCC34)C(C)CCC(CC)C(C)C)C2(C)CC1"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "RUVUHIUYGJBLGI-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q109725645"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105248628"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "(6S)-6-(4-hydroxyphenyl)-2-methylhept-2-en-4-one"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC(C)=CC(=O)C[C@H](C)c1ccc(O)cc1"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "RZVCQJQLFCDMIQ-NSHDSACASA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q80412818"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105266767"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "4,10-Epizedoarondiol"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC(C)=C1C[C@H]2[C@@H](CC[C@@]2(C)O)[C@@](C)(O)CC1=O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "TXIKNNOOLCGADE-OSRDXIQISA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104990528"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105266764"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "ent-Isozedoaronediol"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC(C)=C1C[C@@H]2[C@H](CC[C@@]2(C)O)[C@@](C)(O)CC1=O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "TXIKNNOOLCGADE-MXYBEHONSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104990528"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105266768"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "Isozedoarondiol"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "CC(C)=C1C[C@H]2[C@@H](CC[C@]2(C)O)[C@](C)(O)CC1=O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "TXIKNNOOLCGADE-PAPYEOQZSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104990528"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105266769"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "Zedoarondiol"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "O=C1C(=C(C)C)CC2C(CCC2(O)C)C(O)(C)C1"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "TXIKNNOOLCGADE-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q46233082|http://www.wikidata.org/entity/Q104951942|http://www.wikidata.org/entity/Q105266763"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105267993"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "8(20),12-Labdadiene-15,16-dial"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "C=C1CC[C@H]2C(C)(C)CCC[C@]2(C)[C@H]1C/C=C(\\C=O)CC=O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "TZCSIFOYBLPUIF-BNYLVOSESA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q42987965"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105268009"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "2-[2-(5,5,8a-trimethyl-2-methylidene-3,4,4a,6,7,8-hexahydro-1H-naphthalen-1-yl)ethylidene]butanedial"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "O=CC(=CCC1C(=C)CCC2C(C)(C)CCCC12C)CC=O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "TZCSIFOYBLPUIF-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q104253103"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105271062"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "CID 641645"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "O=C(C=CC1=CC=C(O)C=C1)C=C(O)C=CC2=CC=C(O)C(OC)=C2"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "UEPVWRDHSPMIAZ-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q42987965|http://www.wikidata.org/entity/Q73920949"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105281365"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "Calebin A"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "COc1cc(/C=C/C(=O)COC(=O)/C=C/c2ccc(O)c(OC)c2)ccc1O"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "UYEWRTKHKAVRDI-ASVGJQBISA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q34151965"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105281368"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "[4-(4-Hydroxy-3-methoxyphenyl)-2-oxobut-3-enyl] 3-(4-hydroxy-3-methoxyphenyl)prop-2-enoate"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "O=C(OCC(=O)C=CC1=CC=C(O)C(OC)=C1)C=CC2=CC=C(O)C(OC)=C2"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "UYEWRTKHKAVRDI-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q34151965"
+  }
+ },
+ {
+  "senyawa": {
+   "type": "uri",
+   "value": "http://www.wikidata.org/entity/Q105285406"
+  },
+  "nama": {
+   "xml:lang": "en",
+   "type": "literal",
+   "value": "turmeric"
+  },
+  "smiles": {
+   "type": "literal",
+   "value": "O=C(C=CC1=CC=C(O)C(OC)=C1)CC(=O)C=CC2=CC=C(O)C(OC)=C2"
+  },
+  "inchikey": {
+   "type": "literal",
+   "value": "VFLDPWHFBUODDF-UHFFFAOYSA-N"
+  },
+  "artikels": {
+   "type": "literal",
+   "value": "http://www.wikidata.org/entity/Q34301331|http://www.wikidata.org/entity/Q39876186|http://www.wikidata.org/entity/Q28303097|http://www.wikidata.org/entity/Q93612427|http://www.wikidata.org/entity/Q44593465|http://www.wikidata.org/entity/Q44344605|http://www.wikidata.org/entity/Q34593827|http://www.wikidata.org/entity/Q36916903|http://www.wikidata.org/entity/Q40407447|http://www.wikidata.org/entity/Q105285398|http://www.wikidata.org/entity/Q44828416|http://www.wikidata.org/entity/Q34151965|http://www.wikidata.org/entity/Q38097895|http://www.wikidata.org/entity/Q45944713|http://www.wikidata.org/entity/Q104388339|http://www.wikidata.org/entity/Q104992345|http://www.wikidata.org/entity/Q86521201"
+  }
+ }
+]

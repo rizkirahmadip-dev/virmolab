@@ -106,5 +106,20 @@ cek(bool(smi) and "+" not in smi, f"SMILES dibaca dari REMARK PDBQT dan dinetral
 cek(pr4.smiles_ligan({"id": "x"}) == "" and pr4.smiles_ligan(None) == "",
     "ligan tanpa sumber struktur mengembalikan SMILES kosong, bukan galat")
 
+# ------------------------------------------------------------------ Jejak sumber data internet
+pr5 = Proyek.baru(OUT, "Jejak")
+pr5.catat_jejak({"sumber": "Wikidata", "versi": "langsung", "diambil": "2026-10-13", "kueri": "Q1551608", "lisensi": "CC0 1.0"})
+# Catat duplikat dengan kunci sumber+kueri sama tapi versi beda (harus menimpa, bukan menambah panjang)
+pr5.catat_jejak({"sumber": "Wikidata", "versi": "cache 2026-10-13", "diambil": "2026-10-13", "kueri": "Q1551608", "lisensi": "CC0 1.0"})
+pr5.catat_jejak({"sumber": "COCONUT", "versi": "2.0", "diambil": "2026-10-13", "kueri": "andrografolida", "lisensi": "CC BY 4.0"})
+cek(len(pr5.jejak) == 2, f"catat_jejak mencegah duplikat kunci sumber+kueri (panjang: {len(pr5.jejak)})")
+cek(pr5.jejak[0]["versi"] == "cache 2026-10-13", "catat_jejak memperbarui entri yang sama")
+
+pr5.simpan()
+pr5_buka = Proyek.buka(pr5.folder)
+cek(len(pr5_buka.jejak) == 2, f"jejak dipulihkan utuh setelah buka proyek: {len(pr5_buka.jejak)} entri")
+cek(pr5_buka.jejak[1]["lisensi"] == "CC BY 4.0", "atribut lisensi jejak pulih utuh")
+cek(pr3.jejak == [], "proyek lawas tanpa kunci jejak otomatis memiliki list jejak kosong")
+
 print("GAGAL" if gagal else "LULUS", len(gagal), flush=True)
 sys.exit(1 if gagal else 0)

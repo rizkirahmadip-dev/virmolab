@@ -64,6 +64,7 @@ class OpsiMD:
     frame_mmgbsa: int = 25           # jumlah frame (merata) untuk MM/GBSA rata-rata
     kekang: float = 5.0              # kkal/mol/Å², atom berat protein saat minimisasi MM/GBSA
     seed: int = 42
+    replika: int = 1                 # jumlah replika independen (1-5, bawaan 1, saran 3)
 
 
 # ------------------------------------------------------------------ alat dasar
@@ -697,38 +698,96 @@ def jalankan_tugas(f_tugas):
             tulis_pdb(m.topology, pos, sub / "kompleks_minimisasi.pdb")
             log(f"{it['nama']}: MM/GBSA (minimisasi) ΔG {d['mmgbsa_min']['dG']:.2f} kkal/mol")
             if t["mode"] == "md":
-                def pg_md(p, s, dasar=dasar, rentang=rentang, nm=it["nama"]):
-                    pg(dasar + rentang * (0.15 + 0.6 * p / 100.0), f"{nm}: {s}")
-                try:
-                    frames, meta, akhir = jalankan_md(ff, m, info, opsi, sub, platform, log, pg_md,
-                                                      berhenti=f_stop.exists, pos_awal=pos)
-                except _Batal:
-                    d["dijeda"] = True
-                    hasil["ligan"].append(d)
-                    hasil["dijeda"] = True
-                    f_hasil.write_text(json.dumps(hasil, indent=1, ensure_ascii=False), encoding="utf-8")
-                    log("Dijeda - checkpoint tersimpan; jalankan lagi untuk melanjutkan.")
-                    return 3
-                top_t = _sub_topologi(m, set(range(meta["n_terlarut"])))
-                tulis_pdb(top_t, frames[0] if len(frames) else pos, sub / "topologi.pdb")
-                tulis_dcd(top_t, frames, sub / "trajektori_terlarut.dcd", opsi.interval_ps)
-                pg(dasar + rentang * 0.8, f"{it['nama']}: analisis trajektori…")
-                d["trajektori"] = analisis_trajektori(m, info, frames)
-                pilih = np.unique(np.linspace(0, len(frames) - 1, min(opsi.frame_mmgbsa, len(frames))).astype(int)) \
-                    if len(frames) else []
-                seri = [nilai.frame(frames[j]) for j in pilih]
-                d["mmgbsa_frame"] = [dict(x, t_ns=float((j + 1) * opsi.interval_ps / 1000.0)) for x, j in zip(seri, pilih)]
-                if seri:
-                    v = np.array([x["dG"] for x in seri])
-                    d["mmgbsa"] = {k: float(np.mean([x[k] for x in seri])) for k in ("vdw", "elek", "gb", "sa", "dG")}
-                    d["mmgbsa"]["sd"] = float(v.std(ddof=1)) if len(v) > 1 else 0.0
-                    d["mmgbsa"]["sem"] = d["mmgbsa"]["sd"] / math.sqrt(len(v)) if len(v) > 1 else 0.0
-                    d["mmgbsa"]["n"] = len(v)
-                pg(dasar + rentang * 0.9, f"{it['nama']}: interaksi sepanjang trajektori…")
-                d["interaksi_frek"] = _interaksi_frame(m, info, frames, mol, stride=max(1, len(frames) // 50))
-                d["md"] = {k: meta[k] for k in ("pelarut", "ns", "atom", "suhu", "seed")}
-                for f in ("checkpoint.chk",):
-                    (sub / f).unlink(missing_ok=True)
+                from . import md_analisis
+                n_rep = max(1, getattr(opsi, "replika", 1))
+                daftar_rep = []
+
+                for r_idx in range(n_rep):
+                    seed_rep = opsi.seed + r_idx * 100
+                    o_rep = OpsiMD(**dict(asdict(opsi), seed=seed_rep))
+                    sub_target = (sub / f"replika_{r_idx + 1}") if n_rep > 1 else sub
+                    sub_target.mkdir(exist_ok=True)
+                    f_rep = sub_target / "replika_selesai.json"
+                    if f_rep.exists():  # dilanjutkan setelah jeda: replika yang sudah tuntas tidak disimulasikan ulang
+                        try:
+                            daftar_rep.append(json.loads(f_rep.read_text(encoding="utf-8")))
+                            log(f"{it['nama']}: replika {r_idx + 1} sudah selesai sebelumnya, dilewati.")
+                            continue
+                        except ValueError:
+                            f_rep.unlink(missing_ok=True)
+
+                    def pg_md(p, s, dasar=dasar, rentang=rentang, nm=it["nama"], r=r_idx + 1, n_tot=n_rep):
+                        prefix_rep = f" [Rep {r}/{n_tot}]" if n_tot > 1 else ""
+                        pg(dasar + rentang * (0.15 + 0.6 * (r_idx + p / 100.0) / n_tot), f"{nm}{prefix_rep}: {s}")
+
+                    try:
+                        frames, meta, akhir = jalankan_md(ff, m, info, o_rep, sub_target, platform, log, pg_md,
+                                                          berhenti=f_stop.exists, pos_awal=pos)
+                    except _Batal:
+                        d["dijeda"] = True
+                        hasil["ligan"].append(d)
+                        hasil["dijeda"] = True
+                        f_hasil.write_text(json.dumps(hasil, indent=1, ensure_ascii=False), encoding="utf-8")
+                        log("Dijeda - checkpoint tersimpan; jalankan lagi untuk melanjutkan.")
+                        return 3
+
+                    top_t = _sub_topologi(m, set(range(meta["n_terlarut"])))
+                    tulis_pdb(top_t, frames[0] if len(frames) else pos, sub_target / "topologi.pdb")
+                    tulis_dcd(top_t, frames, sub_target / "trajektori_terlarut.dcd", opsi.interval_ps)
+
+                    traj = analisis_trajektori(m, info, frames)
+                    pilih = np.unique(np.linspace(0, len(frames) - 1, min(opsi.frame_mmgbsa, len(frames))).astype(int)) \
+                        if len(frames) else []
+                    seri = [nilai.frame(frames[j]) for j in pilih]
+                    mmgbsa_fr = [dict(x, t_ns=float((j + 1) * opsi.interval_ps / 1000.0)) for x, j in zip(seri, pilih)]
+                    mmgbsa_res = {}
+                    if seri:
+                        v = np.array([x["dG"] for x in seri])
+                        mmgbsa_res = {k: float(np.mean([x[k] for x in seri])) for k in ("vdw", "elek", "gb", "sa", "dG")}
+                        mmgbsa_res["sd"] = float(v.std(ddof=1)) if len(v) > 1 else 0.0
+                        mmgbsa_res["sem"] = mmgbsa_res["sd"] / math.sqrt(len(v)) if len(v) > 1 else 0.0
+                        mmgbsa_res["n"] = len(v)
+
+                    # Analisis MD lanjutan lengkap versi 2 (F2)
+                    analisis_v2 = md_analisis.analisis_lengkap(m, info, frames, mol, dt_ps=opsi.interval_ps)
+
+                    rep_item = {
+                        "replika": r_idx + 1,
+                        "seed": seed_rep,
+                        "folder": sub_target.name,
+                        "trajektori": traj,
+                        "mmgbsa": mmgbsa_res,
+                        "mmgbsa_frame": mmgbsa_fr,
+                        "analisis": analisis_v2,
+                        "interaksi_frek": analisis_v2.get("interaksi_frek", {}),
+                        "md": {k: meta[k] for k in ("pelarut", "ns", "atom", "suhu", "seed")},
+                    }
+                    daftar_rep.append(rep_item)
+                    f_rep.write_text(json.dumps(rep_item, ensure_ascii=False), encoding="utf-8")
+                    (sub_target / "checkpoint.chk").unlink(missing_ok=True)
+
+                # Replika pertama sebagai hasil utama
+                rep_utama = daftar_rep[0]
+                d["trajektori"] = rep_utama["trajektori"]
+                d["mmgbsa"] = rep_utama["mmgbsa"]
+                d["mmgbsa_frame"] = rep_utama["mmgbsa_frame"]
+                d["interaksi_frek"] = rep_utama["interaksi_frek"]
+                d["analisis"] = rep_utama["analisis"]
+                d["md"] = rep_utama["md"]
+                d["replika"] = daftar_rep
+
+                if len(daftar_rep) > 1:
+                    d_rm_lig = [float(np.mean(r["trajektori"].get("rmsd_ligan") or [0.0])) for r in daftar_rep]
+                    d_rm_ca = [float(np.mean(r["trajektori"].get("rmsd_ca") or [0.0])) for r in daftar_rep]
+                    d_rg = [float(np.mean(r["analisis"].get("rg") or [0.0])) for r in daftar_rep]
+                    d_dg = [float(r["mmgbsa"].get("dG", 0.0)) for r in daftar_rep if r.get("mmgbsa")]
+
+                    d["replika_agregat"] = {
+                        "rmsd_ligan": [float(np.mean(d_rm_lig)), float(np.std(d_rm_lig, ddof=1)) if len(d_rm_lig) > 1 else 0.0],
+                        "rmsd_ca": [float(np.mean(d_rm_ca)), float(np.std(d_rm_ca, ddof=1)) if len(d_rm_ca) > 1 else 0.0],
+                        "rg": [float(np.mean(d_rg)), float(np.std(d_rg, ddof=1)) if len(d_rg) > 1 else 0.0],
+                        "mmgbsa_dG": [float(np.mean(d_dg)), float(np.std(d_dg, ddof=1)) if len(d_dg) > 1 else 0.0] if d_dg else [0.0, 0.0],
+                    }
             d["selesai"] = True
             d["folder"] = sub.name
         except Exception as e:

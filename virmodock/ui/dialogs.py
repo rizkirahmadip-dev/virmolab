@@ -111,7 +111,7 @@ class DialogAmbil(QDialog):
 
     def _rc_cari(self):
         from ..core import rcsb
-        from . import kerja, kit
+        from . import kerja
         q = self.rc_kueri.text().strip()
         if not q:
             return

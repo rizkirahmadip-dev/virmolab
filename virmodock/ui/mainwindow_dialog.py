@@ -268,3 +268,14 @@ class PembukaDialog:
         d = DialogRescoreML(self)
         d.setAttribute(Qt.WA_DeleteOnClose)
         d.show()
+
+    def buka_pengaturan(self):
+        from .dialog_pengaturan import DialogPengaturan
+        d = DialogPengaturan(self)
+        d.exec()
+
+    def buka_tanaman(self):
+        from .dialog_tanaman import DialogTanaman
+        d = DialogTanaman(self)
+        d.setAttribute(Qt.WA_DeleteOnClose)
+        d.show()
