@@ -260,11 +260,100 @@ def analisis_antarmuka(pdb_kompleks: str, rantai_peptida: str) -> Dict[str, Any]
     return ppi.skor_antarmuka(pdb_kompleks, rantai_a=lawan, rantai_b=rantai_peptida)
 
 
+def _ca_rantai(pdb_teks: str, rantai: str) -> Tuple[List[str], np.ndarray]:
+    """(kode residu satu huruf, koordinat Cα) satu rantai, berurut seperti di berkas."""
+    from .konservasi import TIGA_KE_SATU
+
+    huruf, titik = [], []
+    for b in pdb_teks.splitlines():
+        if b.startswith("ATOM") and b[12:16].strip() == "CA" and b[21] == rantai:
+            huruf.append(TIGA_KE_SATU.get(b[17:20].strip(), "X"))
+            titik.append([float(b[30:38]), float(b[38:46]), float(b[46:54])])
+    return huruf, np.asarray(titik) if titik else np.zeros((0, 3))
+
+
+def _pasangan_ca_berurut(pdb_a: str, pdb_b: str) -> Tuple[np.ndarray, np.ndarray, int]:
+    """Pasangkan Cα dua struktur berdasarkan urutan sekuens, bukan nomor residu.
+
+    Dipakai ketika penomoran residu berbeda: struktur kristal memakai penomoran aslinya (MDM2 pada
+    1YCR mulai dari 25) sedangkan keluaran model menomori ulang dari 1. Pasangan dicari dengan
+    menggeser sekuens prediksi di sepanjang sekuens acuan sampai sepenuhnya cocok.
+    """
+    pasangan_a, pasangan_b = [], []
+    rantai_a = [c for c, _ in sekuens_dari_pdb(pdb_a)]
+    rantai_b = [c for c, _ in sekuens_dari_pdb(pdb_b)]
+    for ra, rb in zip(rantai_a, rantai_b):
+        ha, xa = _ca_rantai(pdb_a, ra)
+        hb, xb = _ca_rantai(pdb_b, rb)
+        if len(ha) < 5 or len(hb) < 5:
+            continue
+        sa, sb = "".join(ha), "".join(hb)
+        if len(sb) <= len(sa):
+            i = sa.find(sb)
+            if i >= 0:
+                pasangan_a.append(xa[i:i + len(sb)])
+                pasangan_b.append(xb)
+        else:
+            i = sb.find(sa)
+            if i >= 0:
+                pasangan_a.append(xa)
+                pasangan_b.append(xb[i:i + len(sa)])
+    if not pasangan_a:
+        return np.zeros((0, 3)), np.zeros((0, 3)), 0
+    A = np.vstack(pasangan_a)
+    B = np.vstack(pasangan_b)
+    return A, B, len(A)
+
+
+def sejajarkan_ke_acuan(pdb_kompleks: str, pdb_acuan: str) -> Dict[str, Any]:
+    """Sejajarkan kompleks prediksi ke kerangka koordinat struktur acuan lewat Cα reseptor.
+
+    Boltz memprediksi di kerangka koordinatnya sendiri, sehingga RMSD terhadap struktur kristal
+    tidak bermakna sebelum kedua struktur disuperposisikan: tanpa langkah ini angkanya puluhan
+    angstrom. Jalur utama memakai `core/kofolding.sejajarkan_ke_reseptor`, yang memasangkan Cα
+    menurut nomor residu. Bila penomorannya berbeda, pasangan dicari menurut urutan sekuens.
+
+    Kembalikan {"pdb", "rmsd_ca_reseptor", "n_ca", "cara", "pesan"}; kegagalan memberi pdb kosong
+    beserta sebabnya, bukan angka.
+    """
+    from .md import kabsch
+
+    try:
+        kompleks, _ligan, rmsd_rec, n_ca = kofolding.sejajarkan_ke_reseptor(pdb_kompleks, pdb_acuan)
+        return {"pdb": kompleks, "rmsd_ca_reseptor": round(float(rmsd_rec), 2), "n_ca": int(n_ca),
+                "cara": "nomor residu", "pesan": ""}
+    except Exception as e:
+        sebab = str(e)
+
+    # Cadangan: penomoran residu tidak sepadan, pasangkan menurut urutan sekuens
+    A, B, n = _pasangan_ca_berurut(pdb_acuan, pdb_kompleks)
+    if n < 15:
+        return {"pdb": "", "rmsd_ca_reseptor": None, "n_ca": n, "cara": "",
+                "pesan": f"{sebab} Pencocokan berdasarkan urutan sekuens juga gagal ({n} Cα berpadanan)."}
+
+    R, cp, cq = kabsch(B, A)        # pindahkan prediksi (B) ke kerangka acuan (A)
+    sisa = (B - cp) @ R + cq
+    rmsd_rec = float(np.sqrt(((sisa - A) ** 2).sum(1).mean()))
+
+    keluar = []
+    for b in pdb_kompleks.splitlines():
+        if b.startswith(("ATOM", "HETATM")):
+            xyz = np.array([float(b[30:38]), float(b[38:46]), float(b[46:54])])
+            xyz = (xyz - cp) @ R + cq
+            b = f"{b[:30]}{xyz[0]:8.3f}{xyz[1]:8.3f}{xyz[2]:8.3f}{b[54:]}"
+        keluar.append(b)
+    pdb_baru = chr(10).join(keluar) + chr(10)
+    return {"pdb": pdb_baru, "rmsd_ca_reseptor": round(rmsd_rec, 2), "n_ca": n,
+            "cara": "urutan sekuens", "pesan": ""}
+
+
 def rmsd_ca(pdb_acuan: str, pdb_uji: str, rantai_acuan: str, rantai_uji: str) -> Optional[float]:
     """RMSD Cα dua rantai peptida sepanjang residu yang berpadanan, tanpa superposisi ulang.
 
-    Dipakai menilai prediksi terhadap struktur kristal; kedua struktur harus sudah sekerangka.
-    Kembalikan None bila jumlah Cα tidak sama atau salah satu kosong, bukan 0,0.
+    Kedua struktur HARUS sudah berada di kerangka koordinat yang sama; pakai `sejajarkan_ke_acuan`
+    lebih dulu untuk keluaran Boltz, yang berada di kerangkanya sendiri. Tanpa itu angkanya puluhan
+    angstrom dan tidak bermakna. Kembalikan None bila jumlah Cα tidak sama atau salah satu kosong,
+    bukan 0,0.
     """
     def _ca(teks, rantai):
         keluar = []

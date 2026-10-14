@@ -145,12 +145,21 @@ class UjiBoltzDaring(unittest.TestCase):
             self.skipTest(f"Boltz belum terpasang: {st.get('pesan', '')}")
         rantai = [(c, s) for c, s in peptida.sekuens_dari_pdb(PDB_KRISTAL.read_text(encoding="utf-8"))
                   if c == "A"]
+        kristal = PDB_KRISTAL.read_text(encoding="utf-8")
         with tempfile.TemporaryDirectory() as d:
             peptida.cofold_peptida(rantai, SEKUENS_P53, d)
             h = peptida.analisis_peptida(d, SEKUENS_P53, murni=False)
             self.assertTrue(h.tersedia, h.pesan)
-            rmsd = peptida.rmsd_ca(PDB_KRISTAL.read_text(encoding="utf-8"), h.pdb_kompleks, "B",
-                                   h.rantai_peptida)
+
+            # Boltz memprediksi di kerangka koordinatnya sendiri; superposisi Ca reseptor wajib
+            # sebelum RMSD peptida bermakna.
+            sj = peptida.sejajarkan_ke_acuan(h.pdb_kompleks, kristal)
+            self.assertTrue(sj["pdb"], sj["pesan"])
+            print("  superposisi reseptor: RMSD Ca", sj["rmsd_ca_reseptor"], "A atas", sj["n_ca"], "atom")
+
+            rantai_pep = peptida.tebak_rantai_peptida(sj["pdb"], len(SEKUENS_P53))
+            rmsd = peptida.rmsd_ca(kristal, sj["pdb"], "B", rantai_pep)
+            print(f"  RMSD Ca peptida p53 terhadap kristal 1YCR: {rmsd} A")
             self.assertIsNotNone(rmsd, "RMSD Ca tidak terhitung terhadap kristal 1YCR")
             self.assertLess(rmsd, AMBANG_RMSD)
 

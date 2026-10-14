@@ -45,6 +45,7 @@ Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x 
 
 ### Diperbaiki
 - **Afinitas Boltz-2 tidak pernah dihitung.** YAML yang dikirim ke Boltz tidak memuat blok `properties: - affinity: binder: L`, dan tanpa itu Boltz melewati perhitungan afinitas sepenuhnya serta tidak menulis `affinity_*.json`, berapa pun nilai `--diffusion_samples_affinity` yang diberikan. Akibatnya kolom "Boltz-2 afinitas" di dialog Konsensus selalu kosong. Ditemukan saat menjalankan Boltz-2 2.2.1 sungguhan pada 1HSG, dikonfirmasi di `boltz/data/parse/schema.py`, dan kini dikunci uji.
+- Perbandingan peptida hasil prediksi terhadap struktur kristal dilakukan tanpa superposisi, padahal Boltz memprediksi di kerangka koordinatnya sendiri; RMSD-nya puluhan angstrom dan tidak bermakna. `peptida.sejajarkan_ke_acuan` menyuperposisikan Cα reseptor lebih dulu, dengan jalur cadangan berbasis urutan sekuens ketika penomoran residu berbeda antara struktur kristal dan keluaran model.
 - Metrik keyakinan Boltz-2 berskala 0 sampai 1, bukan 0 sampai 100 seperti pLDDT AlphaFold. Kartu pLDDT di dialog peptida menampilkannya sebagai persen, dan fixture uji diselaraskan dengan keluaran sungguhan.
 - Sisa ruang di kanan kepala tabel tampil putih pada tema gelap karena QSS hanya mengatur tiap seksi kepala, bukan `QHeaderView` itu sendiri.
 - `ui/mainwindow.py` memanggil `analisis.TIGA_KE_SATU` yang tidak pernah ada, sehingga menjalankan co-folding gagal seketika dengan `AttributeError`. Tabel kode residu kini satu-satunya, di `core/konservasi.py`.
