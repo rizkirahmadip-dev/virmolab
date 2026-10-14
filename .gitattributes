@@ -1,0 +1,6 @@
+# Skrip yang dijalankan di WSL harus berakhir baris LF. Dengan CRLF, bash menolak
+# baris pertamanya: "set: pipefail: invalid option name" (ditemui saat memasang Boltz).
+build_tools/*.sh text eol=lf
+
+# Berkas vendor disimpan apa adanya supaya tetap sama persis dengan sumber aslinya.
+vendor/** -text
