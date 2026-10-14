@@ -11,6 +11,7 @@ Qt / PySide6         6.11.2      LGPL-3.0 (pustaka dinamis)      licenses/LGPL-3
   (Qt WebEngine berisi Chromium; daftar lisensinya: https://doc.qt.io/qt-6/qtwebengine-licensing.html)
 RDKit                2026.03.6   BSD-3-Clause                    licenses/RDKit_LICENSE.txt
 CReM                 0.3.2       BSD-3-Clause                    licenses/CReM_LICENSE.txt
+pymbar               4.0.3       MIT                             licenses/pymbar_LICENSE.txt
 Meeko                0.8.0       LGPL-2.1                        licenses/Meeko_LICENSE_LGPL-2.1.txt
 gemmi                0.7.5       MPL-2.0                         licenses/gemmi_LICENSE.txt
 NumPy                2.5.3       BSD-3-Clause (+ komponen)       licenses/NumPy_LICENSE.txt

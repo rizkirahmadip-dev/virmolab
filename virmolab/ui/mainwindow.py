@@ -426,7 +426,7 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
             self.tab_tengah.setCurrentWidget(tab[k])
             return
         aksi_peta = {"rcsb": lambda: self.ambil(0), "alphafold": lambda: self.ambil(3), "pubchem": lambda: self.ambil(1), "smiles": lambda: self.ambil(2),
-                     "pustaka": self.buka_pustaka, "tanaman": self.buka_tanaman, "peptida": self.buka_peptida, "xtb": self.buka_xtb, "generatif": self.buka_generatif, "buka": self.buka_berkas, "reseptor": self.siapkan_reseptor, "ligan": self.siapkan_ligan,
+                     "pustaka": self.buka_pustaka, "tanaman": self.buka_tanaman, "peptida": self.buka_peptida, "xtb": self.buka_xtb, "generatif": self.buka_generatif, "rbfe": self.buka_rbfe, "buka": self.buka_berkas, "reseptor": self.siapkan_reseptor, "ligan": self.siapkan_ligan,
                      "validasi": self.validasi_redocking, "validasi_protokol": self.buka_validasi_protokol,
                      "ekspor": lambda: self.buka_ekspor(3),
                      "laporan": lambda: self.buka_ekspor(4), "mpo": self.buka_mpo, "labplanner": self.buka_labplanner,
@@ -992,6 +992,11 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
               "HOMO, LUMO, celah, elektrofilisitas, dipol, muatan, dan indeks Fukui dengan GFN2-xTB semi-empiris"),
             A("Desain generatif…", "lig", self.buka_generatif, None,
               "Bangun analog yang masuk akal untuk disintesis dari satu senyawa induk dengan CReM")))
+        # RBFE eksperimental: hanya muncul di mode ahli (lihat atur_mode_pengguna)
+        self.a_rbfe = A("Energi bebas relatif (eksperimental)…", "clock", self.buka_rbfe, None,
+                        "Susun jaringan perturbasi untuk seri senyawa kongenerik; simulasinya menuntut "
+                        "GPU dan sistem Linux")
+        m.addAction(self.a_rbfe)
 
         self._sub(m, "Penapisan banyak ligan", (
             A("Dasbor penapisan virtual…", "table", self.buka_penapisan, None,
@@ -2479,6 +2484,8 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
             self.st.setValue("mode_pengguna", mode)
         ahli = mode == "ahli"
         self.d_langkah.setVisible(not ahli)
+        if hasattr(self, "a_rbfe"):
+            self.a_rbfe.setVisible(ahli)
         self.param.b_lanjutan.setChecked(ahli)
         if simpan:
             self.statusBar().showMessage("Mode Ahli: panel Langkah disembunyikan (Tampilan › Panel untuk menampilkan), "

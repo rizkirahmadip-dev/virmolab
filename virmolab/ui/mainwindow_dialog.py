@@ -286,6 +286,13 @@ class PembukaDialog:
         d.setAttribute(Qt.WA_DeleteOnClose)
         d.show()
 
+    def buka_rbfe(self):
+        from .dialog_rbfe import DialogRbfe
+        d = DialogRbfe(self)
+        d.setAttribute(Qt.WA_DeleteOnClose)
+        d.show()
+        return d
+
     def buka_generatif(self):
         from .dialog_generatif import DialogGeneratif
         d = DialogGeneratif(self)

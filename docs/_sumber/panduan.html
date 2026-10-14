@@ -357,6 +357,17 @@
 <li><b>Latih ulang QSAR dengan data baru</b> membuka wizard QSAR dengan aktivitas uji lab proyek sudah termuat, sehingga model dapat dilatih ulang memakai data pengukuran Anda sendiri.</li>
 </ul>
 
+<h3 id="rbfe">Energi bebas relatif (eksperimental)</h3>
+<p><b>Analisis › Sifat ligan dan desain › Energi bebas relatif (eksperimental)…</b> (hanya tampil di mode ahli) menyusun jaringan perturbasi untuk seri senyawa kongenerik. Metode ini jauh lebih teliti daripada skor docking, tetapi juga jauh lebih mahal.</p>
+<ul>
+<li><b>Yang bisa dilakukan di Windows:</b> memilih pasangan senyawa, memetakan atomnya, menyusun jaringan perturbasi, melihat perkiraan beban perhitungan, lalu menganalisis hasil yang dihitung di tempat lain.</li>
+<li><b>Yang tidak bisa:</b> menjalankan simulasinya. OpenFE, mesin RBFE sumber terbuka yang matang, hanya mendukung Linux dan macOS menurut dokumentasi resminya. VirmoLab menyatakan ini terus terang alih-alih menyediakan tombol yang tidak akan berfungsi. Jaringan yang Anda susun dapat diekspor, dijalankan di mesin Linux berGPU, lalu hasilnya dianalisis kembali di sini.</li>
+<li><b>Pemilihan pasangan:</b> hanya pasangan dengan perubahan sampai 10 atom berat yang dipakai. Perturbasi yang lebih besar bukan sekadar lambat, tetapi juga tidak dapat dipercaya.</li>
+<li><b>Jaringan:</b> pohon rentang minimum memilih perturbasi termudah dan menambahkan tepi yang menutup siklus, sehingga konsistensinya dapat diperiksa. Jumlah ΔΔG mengelilingi siklus tertutup seharusnya nol; penyimpangan besar menandakan sampling yang belum memadai.</li>
+<li><b>Beban:</b> jumlah tepi dikalikan jendela lambda, replika, dan lama tiap jendela. Angkanya besar: belasan tepi dengan protokol baku sudah ratusan nanodetik simulasi, yang berarti berhari-hari di GPU.</li>
+<li>Seluruh fitur ini berlabel eksperimental dan hanya bermakna untuk seri senyawa kongenerik.</li>
+</ul>
+
 <h3 id="generatif">Desain generatif</h3>
 <p><b>Analisis › Sifat ligan dan desain › Desain generatif…</b> membangun analog baru dari satu senyawa induk. Fragmen penggantinya diambil dari senyawa nyata, sehingga usulannya cenderung masih dapat disintesis, berbeda dengan pembangkit struktur acak.</p>
 <ul>

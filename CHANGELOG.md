@@ -36,6 +36,12 @@ Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x 
   - Ambang QED dan SAScore dapat mengikuti induk bila induknya sendiri di luar ambang. Tanpa ini, senyawa seperti indinavir (QED sekitar 0,24) membuat seluruh turunannya tertolak, sehingga fiturnya tidak terpakai justru pada kasus yang membutuhkannya.
   - Peringkat multi-objektif front Pareto atas ΔG, QED, dan SAScore; kandidat tanpa ΔG tidak diperingkat dan kandidat yang gagal di-docking dihitung terpisah.
   - Silsilah induk ke anak, ekspor CSV beserta asal fragmen, dan impor kandidat terpilih sebagai ligan proyek.
+- **Energi bebas relatif alkimia (F9, eksperimental)** (Analisis › Sifat ligan dan desain › Energi bebas relatif (eksperimental)…, hanya di mode ahli; `core/rbfe.py`, `ui/dialog_rbfe.py`):
+  - Pasangan perturbasi dipilih dari MMP dengan batas 10 atom berat berubah; pemetaan atom memakai substruktur bersama maksimum RDKit dengan pencocokan unsur, orde ikatan, dan cincin utuh.
+  - Jaringan perturbasi bintang atau pohon rentang minimum atas skor kemudahan, ditambah tepi penutup siklus untuk memeriksa konsistensi.
+  - Analisis MBAR dengan pymbar atas energi tereduksi tiap jendela lambda, menghasilkan ΔG beserta galat bakunya; pemeriksaan penutupan siklus menandai jaringan yang tidak konsisten.
+  - Perkiraan beban perhitungan ditampilkan sebelum apa pun dijalankan, dan lama perhitungan dibiarkan kosong bila kecepatan mesin belum diukur, bukan ditebak.
+  - **Simulasinya tidak dapat dijalankan di Windows.** OpenFE, mesin RBFE sumber terbuka yang matang, hanya mendukung Linux dan macOS menurut dokumentasi resminya. Dialog menyatakan hal ini terus terang dan tidak menyediakan tombol jalankan yang tidak akan berfungsi; perencanaan jaringan dan analisis hasil dari mesin Linux tetap tersedia.
 
 ### Diperbaiki
 - Sisa ruang di kanan kepala tabel tampil putih pada tema gelap karena QSS hanya mengatur tiap seksi kepala, bukan `QHeaderView` itu sendiri.

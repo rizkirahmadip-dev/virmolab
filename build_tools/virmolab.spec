@@ -53,6 +53,8 @@ hidden += collect_submodules("sklearn") + ["joblib", "scipy.stats", "scipy.speci
 hidden += ["rdkit.Chem.rdShapeAlign", "scipy.optimize", "concurrent.futures.process"]
 # F8: CReM memuat basis data fragmen lewat sqlite3
 hidden += collect_submodules("crem") + ["sqlite3"]
+# F9: pymbar untuk analisis MBAR (perencanaan dan analisis RBFE)
+hidden += collect_submodules("pymbar") + ["numexpr"]
 
 # ---- MD & MM/GBSA (core/md.py): OpenMM + PDBFixer + openmmforcefields + OpenFF (toolkit, Interchange, NAGL)
 import openmm as _omm  # noqa: E402

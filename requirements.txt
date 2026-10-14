@@ -35,5 +35,8 @@ platformdirs
 # F8 desain generatif: basis data fragmen dibangun sendiri dengan dev/buat_db_fragmen.py
 crem==0.3.2
 
+# F9 RBFE: analisis MBAR (perencanaan dan analisis; simulasinya butuh Linux)
+pymbar==4.0.3
+
 # build
 pyinstaller==6.22.3
