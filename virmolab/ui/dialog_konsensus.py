@@ -6,7 +6,7 @@ from pathlib import Path
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor, QGuiApplication
-from PySide6.QtWidgets import (QComboBox, QDialog, QDoubleSpinBox, QFileDialog, QFormLayout, QHBoxLayout, QLabel,
+from PySide6.QtWidgets import (QCheckBox, QComboBox, QDialog, QDoubleSpinBox, QFileDialog, QFormLayout, QHBoxLayout, QLabel,
                                QListWidget, QListWidgetItem, QPushButton, QSplitter, QTableWidget, QTableWidgetItem,
                                QTextBrowser, QVBoxLayout, QWidget)
 
@@ -46,8 +46,12 @@ class DialogKonsensus(QDialog):
         self.s_atas.setSuffix(" % teratas")
         self.s_atas.setValue(20)
         self.s_atas.setToolTip("Ligan 'konsisten' = masuk persentil ini di semua kolom skor")
+        self.c_filter_sepakat = QCheckBox("Hanya pose yang Sepakat")
+        self.c_filter_sepakat.setToolTip("Tampilkan hanya ligan yang pose dockingnya sepakat dengan Boltz-2")
+        self.c_filter_sepakat.toggled.connect(lambda: self._tampil())
         f.addRow("Pose rescoring", self.c_pose)
         f.addRow("Konsisten bila", self.s_atas)
+        f.addRow("", self.c_filter_sepakat)
         kl.addLayout(f)
         b = QPushButton("Hitung konsensus")
         b.setObjectName("primary")
@@ -179,34 +183,76 @@ class DialogKonsensus(QDialog):
                         nama[lid] = l.get("nama", lid)
                 kolom[K.FUNGSI_RESCORE[k]] = d
         self.hasil = K.hitung(kolom, nama, self.s_atas.value())
+        peta_kofold = {}
+        if j_pose:
+            for l in j_pose.get("ligan", []):
+                lid = l["id"]
+                kf = l.get("kofolding") or {}
+                peta_kofold[lid] = {
+                    "afinitas": kf.get("afinitas_pred_value"),
+                    "prob": kf.get("afinitas_probabilitas"),
+                    "kesepakatan": kf.get("kesepakatan", "–"),
+                }
+        self.hasil["peta_kofold"] = peta_kofold
         self._tampil()
 
     def _tampil(self):
         h = self.hasil
+        if not h:
+            return
         t = theme.TOKEN[getattr(self.jw, "mode", "terang")]
         if h.get("galat"):
             self.tabel.setRowCount(0)
             self.info.setHtml(f"<p style='color:{t['warn']}'>{escape(h['galat'])}</p>")
             return
         kol = h["kolom"]
-        judul = ["#", "Ligan"] + [f"{k}\nΔG (peringkat)" for k in kol] + ["Rata-rata\nperingkat", "z rata-rata",
-                                                                           "Konsisten"]
+        peta_kofold = h.get("peta_kofold") or {}
+        judul = ["#", "Ligan"] + [f"{k}\nΔG (peringkat)" for k in kol] + [
+            "Rata-rata\nperingkat", "z rata-rata", "Konsisten", "Boltz-2 afinitas", "Kesepakatan"
+        ]
         self.tabel.clear()
         self.tabel.setColumnCount(len(judul))
         self.tabel.setHorizontalHeaderLabels(judul)
-        self.tabel.setRowCount(len(h["baris"]))
-        for r, b in enumerate(h["baris"]):
+
+        baris_sumber = h["baris"]
+        if self.c_filter_sepakat.isChecked():
+            baris_sumber = [b for b in baris_sumber if peta_kofold.get(b["kunci"], {}).get("kesepakatan") == "Sepakat"]
+
+        self.tabel.setRowCount(len(baris_sumber))
+        for r, b in enumerate(baris_sumber):
             sel = [str(b["peringkat"]), b["ligan"]]
             sel += [f"{id_angka(f'{s:.2f}')}  ({id_angka(f'{k:g}')})" for s, k in zip(b["skor"], b["rank"])]
             sel += [id_angka(f"{b['rata_rank']:.2f}"), id_angka(f"{b['rata_z']:.2f}"), "✓" if b["konsisten"] else ""]
+
+            # Info Boltz-2
+            info_kf = peta_kofold.get(b["kunci"]) or {}
+            aff = info_kf.get("afinitas")
+            prob = info_kf.get("prob")
+            if aff is not None:
+                persen = f" ({id_angka(f'{prob * 100:.0f}')} %)" if prob is not None else ""
+                t_aff = f"{id_angka(f'{aff:.2f}')}{persen}"
+            else:
+                t_aff = "–"
+            kes = info_kf.get("kesepakatan", "–")
+            sel += [t_aff, kes]
+
             for c, v in enumerate(sel):
                 it = QTableWidgetItem(v)
-                if c != 1:
-                    it.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter if c < len(sel) - 1 else Qt.AlignCenter)
+                if c != 1 and c != len(sel) - 1:
+                    it.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter if c < len(sel) - 3 else Qt.AlignCenter)
+                else:
+                    it.setTextAlignment(Qt.AlignCenter if c == len(sel) - 1 else Qt.AlignLeft | Qt.AlignVCenter)
                 if b["konsisten"]:
                     it.setBackground(QColor(t["accs"]))
-                    if c == len(sel) - 1:
+                    if c == len(sel) - 3:
                         it.setForeground(QColor(t["ok"]))
+                if c == len(sel) - 1:
+                    if kes == "Sepakat":
+                        it.setForeground(QColor(t["ok"]))
+                    elif kes == "Sebagian":
+                        it.setForeground(QColor(t["warn"]))
+                    elif kes == "Bertentangan":
+                        it.setForeground(QColor(t["bad"]))
                 self.tabel.setItem(r, c, it)
         self.tabel.resizeColumnsToContents()
         w = h.get("W")
@@ -245,10 +291,14 @@ class DialogKonsensus(QDialog):
         with open(f, "w", newline="", encoding="utf-8-sig") as fh:
             w = csv.writer(fh, delimiter=";")
             w.writerow(["Peringkat", "Ligan"] + [f"{k} dG" for k in h["kolom"]] + [f"{k} peringkat" for k in h["kolom"]]
-                       + ["Rata-rata peringkat", "z rata-rata", "Konsisten"])
+                       + ["Rata-rata peringkat", "z rata-rata", "Konsisten", "Boltz-2 afinitas", "Kesepakatan"])
+            peta_kofold = h.get("peta_kofold") or {}
             for b in h["baris"]:
+                info_kf = peta_kofold.get(b["kunci"]) or {}
+                aff = info_kf.get("afinitas")
+                t_aff = id_angka(f"{aff:.3f}") if aff is not None else ""
                 w.writerow([b["peringkat"], b["ligan"]] + [id_angka(f"{s:.3f}") for s in b["skor"]]
                            + [id_angka(f"{r:g}") for r in b["rank"]]
                            + [id_angka(f"{b['rata_rank']:.3f}"), id_angka(f"{b['rata_z']:.3f}"),
-                              "ya" if b["konsisten"] else "tidak"])
+                              "ya" if b["konsisten"] else "tidak", t_aff, info_kf.get("kesepakatan", "–")])
         self.jw.log.tulis(f"Konsensus skor diekspor: {f}")

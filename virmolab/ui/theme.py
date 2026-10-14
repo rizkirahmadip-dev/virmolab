@@ -94,6 +94,7 @@ QTreeView::item:selected, QTableView::item:selected {{ background: {t['accs']}; 
 QTableWidget, QTableView {{ background: {t['surf']}; gridline-color: {t['line2']}; }}
 QHeaderView::section {{ background: {t['tb2']}; color: {t['ink2']}; border: 0; border-right: 1px solid {t['line2']};
                         border-bottom: 1px solid {t['line']}; padding: 4px 8px; font-weight: 600; }}
+QHeaderView {{ background: {t['tb2']}; border: 0; }}   /* sisa ruang kanan header, bukan hanya tiap seksi */
 QTableCornerButton::section {{ background: {t['tb2']}; border: 0; }}
 
 QLineEdit, QSpinBox, QDoubleSpinBox, QComboBox, QPlainTextEdit, QTextEdit {{

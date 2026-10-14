@@ -1,9 +1,9 @@
 """Panel samping: hierarki molekul, properti, tampilan (gaya ala PyMOL), log, antrean."""
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QColor
-from PySide6.QtWidgets import (QAbstractItemView, QColorDialog, QComboBox, QFormLayout, QGridLayout,
+from PySide6.QtWidgets import (QAbstractItemView, QCheckBox, QColorDialog, QComboBox, QFormLayout, QGridLayout,
                                QHBoxLayout, QHeaderView, QLabel, QLineEdit, QMenu, QPlainTextEdit, QPushButton,
-                               QScrollArea, QSizePolicy, QSlider, QToolButton, QTreeWidget,
+                               QScrollArea, QSizePolicy, QSlider, QTabWidget, QToolButton, QTreeWidget,
                                QTreeWidgetItem, QVBoxLayout, QWidget)
 
 from ..core.laporan import id_angka
@@ -299,6 +299,10 @@ class PanelHierarki(QWidget):
 
 # ------------------------------------------------------------------- properti
 class PanelProperti(QWidget):
+    mintaKofolding = Signal(dict)
+    togglePoseDocking = Signal(bool)
+    togglePoseBoltz = Signal(bool)
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.lay = QVBoxLayout(self)
@@ -306,14 +310,90 @@ class PanelProperti(QWidget):
         self.lay.setSpacing(0)
         self.judul = judul_seksi("Properti")
         self.lay.addWidget(self.judul)
+
+        self.tab = QTabWidget()
+        self.tab.setObjectName("tabProperti")
+
+        # Tab 1: Umum (Form properti bawaan)
+        self.w_umum = QWidget()
+        lay_u = QVBoxLayout(self.w_umum)
+        lay_u.setContentsMargins(0, 0, 0, 0)
+        lay_u.setSpacing(0)
         self.isi = QWidget()
         self.form = QFormLayout(self.isi)
         self.form.setContentsMargins(10, 8, 10, 8)
         self.form.setHorizontalSpacing(12)
         self.form.setVerticalSpacing(5)
-        self.lay.addWidget(self.isi)
-        self.lay.addStretch(1)
+        lay_u.addWidget(self.isi)
+        lay_u.addStretch(1)
+        self.tab.addTab(self.w_umum, "Umum")
+
+        # Tab 2: Co-folding (Boltz-2)
+        self.w_kofold = QWidget()
+        self._susun_tab_kofold()
+        self.tab.addTab(self.w_kofold, "Co-folding")
+
+        self.lay.addWidget(self.tab, 1)
+        self._pose_aktif = None
         self.kosong()
+
+    def _susun_tab_kofold(self):
+        kl = QVBoxLayout(self.w_kofold)
+        kl.setContentsMargins(10, 8, 10, 8)
+        kl.setSpacing(8)
+
+        # Status & Tombol Aksi
+        self.l_status_boltz = kit.catatan("Boltz-2 belum diperiksa.", "muted")
+        kl.addWidget(self.l_status_boltz)
+
+        self.b_jalankan = QPushButton("Jalankan co-folding untuk ligan ini")
+        self.b_jalankan.setObjectName("primary")
+        self.b_jalankan.setToolTip("Prediksi struktur kompleks protein dan ligan dengan Boltz-2 di WSL")
+        self.b_jalankan.clicked.connect(self._jalankan_kofold)
+        kl.addWidget(self.b_jalankan)
+
+        # Lencana Kesepakatan
+        hl = QHBoxLayout()
+        hl.addWidget(QLabel("Kesepakatan:"))
+        self.l_lencana = kit.lencana("–", "info")
+        hl.addWidget(self.l_lencana)
+        hl.addStretch(1)
+        kl.addLayout(hl)
+
+        # Baris Kartu Metrik
+        self.k_rmsd = kit.Kartu("RMSD LIGAN", "–", "Jarak pose docking ke Boltz-2")
+        self.k_ifp = kit.Kartu("IFP TANIMOTO", "–", "Kesamaan pola kontak residu")
+        kl.addLayout(kit.baris_kartu(self.k_rmsd, self.k_ifp))
+
+        self.k_qc = kit.Kartu("POSEBUSTERS", "–", "Pose docking / pose Boltz-2")
+        self.k_aff = kit.Kartu("AFINITAS BOLTZ-2", "–", "log(IC50) dan peluang mengikat")
+        kl.addLayout(kit.baris_kartu(self.k_qc, self.k_aff))
+
+        # Peringatan kebaruan
+        self.l_peringatan_kebaruan = kit.catatan("", "peringatan")
+        self.l_peringatan_kebaruan.setVisible(False)
+        kl.addWidget(self.l_peringatan_kebaruan)
+
+        # Sakelar Viewer 3D
+        l_tampil = QLabel("Tampilan 3D")
+        l_tampil.setObjectName("sech")
+        kl.addWidget(l_tampil)
+        self.c_view_docking = QCheckBox("Tampilkan pose docking")
+        self.c_view_docking.setChecked(True)
+        self.c_view_docking.toggled.connect(self.togglePoseDocking)
+        kl.addWidget(self.c_view_docking)
+
+        self.c_view_boltz = QCheckBox("Tampilkan pose Boltz-2")
+        self.c_view_boltz.setChecked(False)
+        self.c_view_boltz.setEnabled(False)
+        self.c_view_boltz.toggled.connect(self.togglePoseBoltz)
+        kl.addWidget(self.c_view_boltz)
+
+        kl.addStretch(1)
+
+    def _jalankan_kofold(self):
+        if self._pose_aktif:
+            self.mintaKofolding.emit(self._pose_aktif)
 
     def _bersih(self):
         while self.form.rowCount():
@@ -326,6 +406,7 @@ class PanelProperti(QWidget):
         l.setObjectName("muted")
         l.setWordWrap(True)
         self.form.addRow(l)
+        self.muat_kofolding(None)
 
     def tampil(self, judul, baris):
         self._bersih()
@@ -338,6 +419,69 @@ class PanelProperti(QWidget):
             vv.setTextInteractionFlags(Qt.TextSelectableByMouse)
             vv.setWordWrap(True)
             self.form.addRow(kk, vv)
+
+    def muat_kofolding(self, data_kofold=None, status_boltz_info=None, info_pose=None):
+        self._pose_aktif = info_pose
+        if status_boltz_info:
+            pesan = status_boltz_info.get("pesan", "")
+            self.l_status_boltz.setText(pesan)
+            self.b_jalankan.setEnabled(bool(info_pose and status_boltz_info.get("ada")))
+        else:
+            self.b_jalankan.setEnabled(bool(info_pose))
+
+        if not info_pose:
+            self.b_jalankan.setEnabled(False)
+            self.l_status_boltz.setText("Pilih satu pose docking di penampil untuk membandingkannya dengan co-folding.")
+
+        if data_kofold and isinstance(data_kofold, dict):
+            rmsd = data_kofold.get("rmsd")
+            self.k_rmsd.isi(kit.f(rmsd, 2, "Å") if rmsd is not None else "–")
+
+            ifp = data_kofold.get("ifp_tanimoto")
+            self.k_ifp.isi(kit.f(ifp, 3) if ifp is not None else "–")
+
+            pb_d = data_kofold.get("posebusters_docking")
+            pb_c = data_kofold.get("posebusters_cofold")
+            if pb_d is not None and pb_c is not None:
+                t_qc = ("Lolos" if pb_d.get("lulus") else "Gagal") + " / " + ("Lolos" if pb_c.get("lulus") else "Gagal")
+            else:
+                t_qc = "–"
+            self.k_qc.isi(t_qc)
+
+            aff = data_kofold.get("afinitas_pred_value")
+            prob = data_kofold.get("afinitas_probabilitas")
+            if aff is not None:
+                nilai = id_angka(f"{aff:.2f}")
+                if prob is not None:
+                    nilai += f" ({id_angka(f'{prob * 100:.1f}')} %)"
+                self.k_aff.isi(nilai)
+            else:
+                self.k_aff.isi("–")
+
+            kes = data_kofold.get("kesepakatan", "–")
+            self.l_lencana.setText(kes)
+            nada = "ok" if kes == "Sepakat" else "warn" if kes == "Sebagian" else "bad" if kes == "Bertentangan" else "info"
+            kit.atur_nada(self.l_lencana, nada)
+
+            per = data_kofold.get("peringatan_kebaruan", "")
+            if per:
+                self.l_peringatan_kebaruan.setText(per)
+                self.l_peringatan_kebaruan.setVisible(True)
+            else:
+                self.l_peringatan_kebaruan.setVisible(False)
+
+            self.c_view_boltz.setEnabled(True)
+            self.c_view_boltz.setChecked(True)
+        else:
+            self.k_rmsd.isi("–")
+            self.k_ifp.isi("–")
+            self.k_qc.isi("–")
+            self.k_aff.isi("–")
+            self.l_lencana.setText("–")
+            kit.atur_nada(self.l_lencana, "info")
+            self.l_peringatan_kebaruan.setVisible(False)
+            self.c_view_boltz.setEnabled(False)
+            self.c_view_boltz.setChecked(False)
 
 
 # ------------------------------------------------------------------- tampilan

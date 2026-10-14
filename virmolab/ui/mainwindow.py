@@ -219,8 +219,10 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
         self.p_langkah.berikutnya.connect(lambda i: self.ke_langkah(min(i, 4)))
         self.d_kerja = self._dock("Panel kerja", self.p_langkah, Qt.RightDockWidgetArea, "dock_kerja")
         self.d_kerja.setMinimumWidth(self._lebar_huruf(34))
-        self.d_param = self.d_kerja          # nama lama (kompatibel)
         self.prop = PanelProperti()
+        self.prop.mintaKofolding.connect(self.jalankan_kofolding_pose)
+        self.prop.togglePoseDocking.connect(self._toggle_pose_docking)
+        self.prop.togglePoseBoltz.connect(self._toggle_pose_boltz)
         self.d_prop = self._dock("Properti", self.prop, Qt.RightDockWidgetArea, "dock_properti")
         self.splitDockWidget(self.d_kerja, self.d_prop, Qt.Vertical)   # dulu, sebelum ditab
         self.tampilan = PanelTampilan()
@@ -1578,6 +1580,11 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
             baris = [("Jenis", o.jenis.capitalize()), ("Jumlah", i.get("jumlah", "-"))]
         self.prop.tampil(f"{o.nama}", baris)
         if o.jenis == "pose":
+            from ..core import kofolding
+            st_b = kofolding.status_boltz()
+            j = self.pelaksana.cari(i.get("job"))
+            lj = next((x for x in (j or {}).get("ligan", []) if x["id"] == i.get("lid")), None)
+            self.prop.muat_kofolding((lj or {}).get("kofolding"), st_b, i)
             if not o.tampil:
                 self.set_tampil(o.id, True)
                 self.hier.set_centang(o.id, True)
@@ -3414,6 +3421,138 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
         self.tab_tengah.setCurrentWidget(self.w_view)
         self.minta_simpan()
         return sasaran
+
+    def _toggle_pose_docking(self, on):
+        info = getattr(self.prop, "_pose_aktif", None)
+        if not info:
+            return
+        grup = f"Hasil · {info.get('ligan')} · {info.get('job', '')[-6:]}"
+        k = info.get("peringkat", 1)
+        sasaran = next((o for o in self.objek.values() if o.grup == grup and o.info.get("peringkat") == k and not o.info.get("boltz")), None)
+        if sasaran and sasaran.tampil != on:
+            self.set_tampil(sasaran.id, on)
+            self.hier.set_centang(sasaran.id, on)
+
+    def _toggle_pose_boltz(self, on):
+        info = getattr(self.prop, "_pose_aktif", None)
+        if not info:
+            return
+        grup = f"Hasil · {info.get('ligan')} · {info.get('job', '')[-6:]}"
+        sasaran = next((o for o in self.objek.values() if o.grup == grup and o.info.get("boltz")), None)
+        if sasaran and sasaran.tampil != on:
+            self.set_tampil(sasaran.id, on)
+            self.hier.set_centang(sasaran.id, on)
+
+    def jalankan_kofolding_pose(self, info_pose):
+        """Jalankan inferensi & analisis konsensus Boltz-2 untuk pose yang dipilih."""
+        from ..core import kofolding, molekul, mesin as mesinmod
+        pr = self.proyek
+        if not pr:
+            return
+        st = kofolding.status_boltz()
+        if not st.get("ada"):
+            self._galat("Boltz-2 belum terpasang di WSL.\n\n" + st.get("pesan", ""))
+            return
+
+        j = self.pelaksana.cari(info_pose.get("job"))
+        l = next((x for x in (j or {}).get("ligan", []) if x["id"] == info_pose.get("lid")), None) if j else None
+        if not l:
+            self._galat("Data ligan tidak ditemukan.")
+            return
+
+        rec_obj = self._reseptor_objek()
+        if not rec_obj or not rec_obj.teks:
+            self._galat("Reseptor proyek tidak memiliki koordinat PDB.")
+            return
+
+        # Ekstraksi sekuens rantai dari reseptor
+        sekuens_rantai = []
+        for c, res_list in sorted(rec_obj.rantai.items()):
+            huruf = [analisis.TIGA_KE_SATU.get(r[0], "X") for r in res_list]
+            if huruf:
+                sekuens_rantai.append((c, "".join(huruf)))
+
+        smiles = pr.smiles_ligan(l) if hasattr(pr, "smiles_ligan") else l.get("smiles", "")
+        if not smiles:
+            self._galat("SMILES ligan tidak ditemukan.")
+            return
+
+        folder_keluar = pr.p("kofolding", l["id"])
+        folder_keluar.mkdir(parents=True, exist_ok=True)
+        nama_lig = l.get("nama", "Ligan")
+
+        def kerjakan(lapor):
+            lapor.log.emit(f"Menjalankan Boltz-2 co-folding untuk {nama_lig}…")
+            kofolding.jalankan_boltz(sekuens_rantai, smiles, folder_keluar, gpu=True)
+            lapor.log.emit("Inferensi selesai. Menganalisis superposisi dan kesepakatan pose…")
+
+            # Pose docking RDKit mol
+            k = info_pose.get("peringkat", 1)
+            poses = mesinmod.baca_hasil(j["mesin"], pr.p(l["keluaran"]))
+            pose_pilih = poses[k - 1] if len(poses) >= k else poses[0]
+            mol_dock = analisis.pose_mol(l["pdbqt"], pose_pilih.pdbqt)
+
+            p_rec_pdb = pr.p("reseptor", "reseptor_bersih.pdb")
+            if not p_rec_pdb.exists() and pr.reseptor and pr.reseptor.get("pdb"):
+                p_rec_pdb = pr.p(pr.reseptor["pdb"])
+
+            hasil = kofolding.analisis_kofolding(
+                folder_atau_berkas_boltz=folder_keluar,
+                reseptor_pdb=rec_obj.teks,
+                mol_docking=mol_dock,
+                smiles=smiles,
+                path_reseptor_pdb=p_rec_pdb if p_rec_pdb.exists() else None,
+            )
+            return hasil
+
+        def selesai(hasil):
+            if not hasil.tersedia:
+                self._galat(f"Co-folding gagal: {hasil.pesan}")
+                return
+            l["kofolding"] = hasil.to_dict()
+            self.minta_simpan()
+            self.prop.muat_kofolding(l["kofolding"], st, info_pose)
+
+            # Tambahkan pose Boltz-2 ke viewport jika ada struktur terselaraskan
+            if hasil.pdb_ligan_terselaraskan:
+                grup = f"Hasil · {l['nama']} · {j['id'][-6:]}"
+                lama_boltz = [o.id for o in self.objek.values() if o.grup == grup and o.info.get("boltz")]
+                for oid in lama_boltz:
+                    self.hapus_objek(oid)
+
+                o_b = molekul.Objek(
+                    nama=f"Pose Boltz-2 · {l['nama']}",
+                    jenis="pose",
+                    teks=hasil.pdb_ligan_terselaraskan,
+                    grup=grup,
+                    sumber=f"{j['id']}/{l['id']}/boltz"
+                )
+                o_b.tampil = True
+                o_b.gaya = {
+                    "reps": ["sticks"],
+                    "warna": {"mode": "solid", "val": "#20c997"},
+                    "opacity": 0.65,
+                    "permukaan": None,
+                    "khusus": []
+                }
+                o_b.info = {
+                    "boltz": True,
+                    "ligan": l["nama"],
+                    "job": j["id"],
+                    "lid": l["id"],
+                    "kesepakatan": hasil.kesepakatan,
+                    "rmsd": hasil.rmsd,
+                    "afinitas": hasil.afinitas_pred_value
+                }
+                self.tambah_objek([o_b], fokus=False)
+
+            self.statusBar().showMessage(
+                f"Co-folding selesai: RMSD {kit.f(hasil.rmsd, 2, 'Å')} · Kesepakatan: {hasil.kesepakatan}",
+                6000
+            )
+
+        self.statusBar().showMessage(f"Menjalankan Boltz-2 untuk {nama_lig} di latar belakang…")
+        kerja.jalankan(kerjakan, selesai=selesai, galat=self._galat, log=self.log.tulis)
 
     # ------------------------------------------------------------ analisis
     def _muat_hasil(self):

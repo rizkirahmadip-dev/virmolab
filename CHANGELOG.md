@@ -2,6 +2,20 @@
 
 Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x adalah pra-rilis.
 
+## [Belum dirilis] (1.5, dalam pengerjaan)
+
+### Baru
+- **Konsensus docking dengan co-folding Boltz-2 (F6)** (tab "Co-folding" di panel Properti; kolom baru di dialog Konsensus; `core/kofolding.py`, `ui/panels.py`, `ui/dialog_konsensus.py`):
+  - Menjalankan Boltz-2 lewat WSL untuk satu pose docking terpilih, lalu membaca struktur kompleks, nilai afinitas, dan metrik keyakinan dari folder keluarannya.
+  - Struktur Boltz-2 disuperposisikan ke reseptor proyek dengan Kabsch pada Cα sebelum RMSD ligan dihitung, sehingga perbandingannya memakai kerangka koordinat yang sama.
+  - Label kesepakatan Sepakat, Sebagian, atau Bertentangan disusun dari RMSD ligan, kemiripan Tanimoto sidik jari interaksi, dan hasil PoseBusters kedua pose.
+  - Kolom "Boltz-2 afinitas" dan "Kesepakatan" di dialog Konsensus, beserta saringan untuk menampilkan hanya ligan yang sepakat.
+  - Kebaruan ligan diperiksa terhadap ligan yang sudah ada di PDB; kemiripan tinggi diberi peringatan karena struktur tersebut kemungkinan ikut dalam data latih model.
+  - Kegagalan Boltz-2 atau WSL dilaporkan apa adanya sebagai nilai kosong, bukan angka bawaan.
+
+### Diperbaiki
+- Sisa ruang di kanan kepala tabel tampil putih pada tema gelap karena QSS hanya mengatur tiap seksi kepala, bukan `QHeaderView` itu sendiri.
+
 ## [1.4.0] - 14 Oktober 2026
 
 Menggabungkan rencana 1.3 (penargetan balik, jaringan farmakologi) dan 1.4 (QSAR, penapisan farmakofor, pelacak hipotesis).
