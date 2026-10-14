@@ -336,6 +336,27 @@
 <li>Senyawa di luar domain tetap diberi angka, tetapi ditandai dan tidak boleh ditafsirkan sebagai nilai kuantitatif.</li>
 </ul>
 
+<h3 id="farmakofor">Penapisan farmakofor &amp; bentuk 3D</h3>
+<p><b>Analisis › Penapisan banyak ligan › Penapisan farmakofor &amp; bentuk 3D…</b> menyaring pustaka senyawa berdasarkan kemiripan 3D terhadap satu ligan acuan, sebelum docking yang lebih mahal.</p>
+<ul>
+<li><b>Sumber kueri:</b> pose yang sedang dibuka di panel Interaksi, atau ligan ko-kristal proyek. Ligan proyek lain tidak ditawarkan karena koordinatnya hanya konformer hasil pembangkitan, bukan pose terikat. Bila proyek memiliki reseptor, atom berat protein dalam radius 4&nbsp;Å dari ligan acuan menjadi bola eksklusi.</li>
+<li><b>Fitur:</b> donor dan akseptor ikatan hidrogen, cincin aromatik, dan hidrofobik dari pose acuan. Tiap fitur dapat dinonaktifkan dan toleransi jaraknya diubah; koordinat pusatnya tampil pada tooltip nama fitur.</li>
+<li><b>Skor:</b> tiap konformer senyawa diselaraskan rigid ke ligan acuan (bentuk dan warna farmakoforik), lalu fitur kueri yang cocok dihitung pada konformer yang telah diselaraskan itu. Penggeser mengatur bobot skor farmakofor terhadap skor bentuk-warna.</li>
+<li><b>Validasi kueri:</b> muat senyawa aktif target dari ChEMBL atau CSV; decoy sepadan dibangkitkan otomatis dari pustaka lokal, lalu ROC-AUC, BEDROC, dan EF 1% dihitung untuk kueri yang sedang aktif. EF 1% hanya ditampilkan bila himpunan memuat sedikitnya 100 senyawa. Mengubah fitur atau toleransi mengosongkan angka validasi lama karena angka itu tidak berlaku lagi.</li>
+<li><b>Kirim teratas ke docking</b> menambahkan senyawa terpilih sebagai ligan di jendela utama lalu membuka <b>Siapkan ligan</b>, sehingga protonasi dan PDBQT dibuat lewat jalur biasa sebelum docking.</li>
+<li>Penapisan berbasis ligan adalah saringan kasar: pada uji internal (kueri dari ligan 1HSG terhadap 8 inhibitor protease HIV dan 520 obat sepadan) ROC-AUC hanya 0,66. Pakai untuk mempersempit pustaka, bukan sebagai bukti aktivitas.</li>
+</ul>
+
+<h3 id="hipotesis">Pelacak hipotesis → uji laboratorium</h3>
+<p>Tab <b>Hipotesis</b> pada dialog <b>Rencana uji lab basah</b> membandingkan prediksi in silico dengan hasil uji yang sudah Anda ukur.</p>
+<ul>
+<li><b>Prediksi pembanding:</b> ΔG docking, MM/GBSA dari simulasi MD yang selesai (rerata replika bila ada), atau pIC50 estimasi dari ΔG. Pilihan yang belum punya data di proyek dinonaktifkan.</li>
+<li><b>Mengisi hasil uji:</b> ketik nilai terukur dan satuannya pada tabel (pIC50 dihitung otomatis), atau tekan <b>+ Tambah entri</b> untuk senyawa yang belum ada di proyek — tulis namanya persis seperti nama ligan agar terpasang dengan prediksinya.</li>
+<li><b>Impor CSV plate reader:</b> tabel IC50 per ligan, atau matriks bacaan pelat 96 sumur. Matriks adalah sinyal mentah, bukan IC50: VirmoLab menormalisasinya dengan sumur blanko dan kendali pelarut sesuai denah pelat yang sedang terbuka, lalu mencocokkan kurva dosis-respons 4 parameter per senyawa. Susun denah pelat terlebih dahulu di tab <b>Denah Pelat Mikro</b>. IC50 di luar rentang konsentrasi yang diuji ditandai tersensor (misalnya "IC50 &gt; 100 µM") dan tidak ikut dikorelasikan. Nilai Z&prime; dari kendali pelarut terhadap kontrol positif ikut dilaporkan; Z&prime; &lt; 0,5 berarti jendela uji terlalu sempit.</li>
+<li><b>Korelasi:</b> Spearman ρ dan Kendall τ beserta selang kepercayaan 95&nbsp;% bootstrap, disertai peringatan bila sampel berpasangan kurang dari 8. Energi dibalik tandanya sehingga korelasi positif berarti peringkat prediksi sejalan dengan pIC50 terukur.</li>
+<li><b>Latih ulang QSAR dengan data baru</b> membuka wizard QSAR dengan aktivitas uji lab proyek sudah termuat, sehingga model dapat dilatih ulang memakai data pengukuran Anda sendiri.</li>
+</ul>
+
 <h2 id="cli">Baris perintah (VirmoLab-cli)</h2>
 <p><code>VirmoLab-cli.exe</code> ada di folder instalasi VirmoLab. Buka Command Prompt di folder itu (atau tulis jalur lengkapnya), lalu misalnya:</p>
 <pre>VirmoLab-cli dock -r 1HSG -l kandidat.smi --acuan auto -o hasil_1hsg

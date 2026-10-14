@@ -4,8 +4,8 @@ title: "VirmoLab: Perangkat Lunak Penambatan Molekuler Terpadu (AutoDock-GPU, Vi
 authors:
   - family-names: "VirmoLab Contributors"
     given-names: "Tim Pengembang"
-version: 1.1.1
-date-released: "2026-10-13"
+version: 1.4.0
+date-released: "2026-10-14"
 license: "GPL-3.0-or-later"
 repository-code: "https://github.com/virmolab/virmolab"
 url: "https://virmolab.org"

@@ -1,9 +1,11 @@
 # Rencana Pengembangan Fitur VirmoLab 1.2 – 1.6
 
-Status: **draf untuk diskusi**, belum diputuskan.
+Status: **1.2 – 1.4 selesai** (rilis 1.4.0, 14 Oktober 2026); 1.5 – 1.6 masih rencana.
 Disusun: 13 Oktober 2026, sesudah commit `585ab9f` (1.1.2).
-Lokasi sementara: di luar `VirmoLab/` selama build berjalan — pindahkan ke `VirmoLab/RENCANA_PENGEMBANGAN.md`
-setelah disepakati.
+
+Selesai dan terpasang: **F1** tanaman obat, **F2** analisis MD lengkap, **F11** validasi protokol (1.2.0) ·
+**F3a** penargetan balik, **F3b** jaringan & pengayaan jalur, **F4** penapisan farmakofor & bentuk 3D,
+**F5** QSAR, **F12** pelacak hipotesis (1.4.0). Prompt pelaksanaan ada di `PROMPT_SISA.md`.
 
 Cara membaca:
 - **[ada]** = sudah ada di kode 1.1.2 (dicek dengan grep, bukan ingatan).
@@ -283,7 +285,7 @@ Semua grafik via `core/grafik.py` → bisa dikirim ke komposer figur.
 
 ---
 
-### F3. Penargetan balik & farmakologi jaringan  ★★★  (L, dua tahap)
+### F3. Penargetan balik & farmakologi jaringan  ★★★  (L, dua tahap)  — **selesai di 1.4.0**
 
 **Tujuan.** Satu atau beberapa senyawa (mis. dari F1) → target protein yang mungkin → jalur/penyakit → graf.
 
@@ -340,7 +342,7 @@ dengan versi basis data dalam < 30 menit di laptop (jalur struktur, panel 50 tar
 
 ---
 
-### F4. Penapisan berbasis ligan 3D (farmakofor + bentuk)  ★★  (M)
+### F4. Penapisan berbasis ligan 3D (farmakofor + bentuk)  ★★  (M)  — **selesai di 1.4.0**
 
 **Tujuan.** Menyaring pustaka besar **sebelum** docking memakai ligan aktif yang diketahui.
 
@@ -365,7 +367,7 @@ fungsi JS baru `VM.tampilFarmakofor(fitur)` di `viewer.js`).
 
 ---
 
-### F5. QSAR & model ML dari data sendiri  ★★  (M)
+### F5. QSAR & model ML dari data sendiri  ★★  (M)  — **selesai di 1.4.0**
 
 **Tujuan.** Data aktivitas pengguna (CSV atau ChEMBL yang sudah diambil) → model prediksi tervalidasi →
 prediksi untuk ligan proyek, mengikuti **5 prinsip OECD** (titik akhir jelas, algoritma jelas, domain aplikabilitas,
@@ -524,7 +526,7 @@ Opsional: AutoDock CrankPep (ADCP) bila lisensinya cocok [cek].
 
 ---
 
-### F12. Pelacak hipotesis → uji laboratorium  ★  (S)
+### F12. Pelacak hipotesis → uji laboratorium  ★  (S)  — **selesai di 1.4.0**
 
 **Tujuan.** Menutup siklus komputasi ↔ eksperimen. Rencana lab [ada] menghasilkan protokol; hasil IC₅₀
 yang kembali dimasukkan ke proyek → dibandingkan dengan prediksi → (opsional) melatih ulang QSAR F5.
@@ -540,6 +542,9 @@ yang kembali dimasukkan ke proyek → dibandingkan dengan prediksi → (opsional
 | **1.2** | Fondasi §2, **F1** tanaman, **F2** MD lengkap, **F11** validasi protokol | nilai tertinggi; F2 & F11 tanpa paket baru | daftar tanaman (dibuat sendiri), COCONUT penuh (opsional) |
 | **1.3** | **F3** penargetan balik + jaringan | memakai F1 dan Fondasi | GMT Reactome/GO, ChEMBL ringkas, PDB panel target |
 | **1.4** | **F5** QSAR, **F4** farmakofor & bentuk, **F12** | paket sudah ada | decoy DUD-E untuk uji (opsional) |
+
+1.3 dan 1.4 digabung menjadi satu rilis **1.4.0** (14 Oktober 2026): 1.3 tidak pernah dirilis tersendiri.
+Decoy DUD-E tidak jadi diunduh — decoy dibangkitkan dari pustaka obat disetujui yang sudah ada di paket.
 | **1.5** | **F6** konsensus co-folding, **F10** peptida, **F7** xTB | memakai Boltz (WSL) yang sudah ada | xtb |
 | **1.6** | **F8** generatif, **F9** RBFE (eksperimental) | paling berat | DB fragmen CReM, OpenFE |
 

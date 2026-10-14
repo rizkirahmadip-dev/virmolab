@@ -542,6 +542,46 @@ def uji(lapor=None):
         return f"cakupan {c:.3f} pada taraf nominal 0,90 (q = {k.q:.3f})"
     cek("Prediksi konformal", konformal_uji)
 
+    def farmakofor_uji():
+        """Kueri farmakofor ke dirinya sendiri skor maksimum (serial), lalu 250 senyawa lewat ProcessPoolExecutor.
+
+        Bagian paralel membuktikan multiprocessing.freeze_support() di titik masuk bekerja di build beku:
+        tanpanya pekerja menjalankan ulang aplikasi dan kelompok senyawa hilang."""
+        from rdkit import Chem
+        from rdkit.Chem import AllChem
+        from . import farmakofor
+        acuan = Chem.AddHs(Chem.MolFromSmiles("CC(C)(C)NC(=O)C1CCCCN1CC(O)Cc1ccccc1"))
+        if AllChem.EmbedMolecule(acuan, randomSeed=7) != 0:
+            raise RuntimeError("konformer acuan gagal dibangkitkan")
+        kueri = farmakofor.kueri_dari_pose(acuan, eksklusi=False)
+        diri = farmakofor.cocokkan(kueri, acuan)["skor_akhir"]
+        if diri < 0.95:
+            raise RuntimeError(f"skor kueri ke dirinya {diri:.3f} < 0,95")
+        daftar = [{"nama": f"s{i}", "smiles": f"{'C' * (1 + i % 10)}c1ccc({'O' if i % 2 else 'N'})cc1{'C' * (1 + i // 10 % 5)}O"}
+                  for i in range(250)]
+        t0 = time.time()
+        h = farmakofor.saring_pustaka(kueri, daftar, n_proses=2, konf_per_mol=2)
+        if len(h) != 250:
+            raise RuntimeError(f"penapisan paralel hanya mengembalikan {len(h)}/250 senyawa")
+        if any(a["skor_akhir"] < b["skor_akhir"] for a, b in zip(h, h[1:])):
+            raise RuntimeError("hasil penapisan tidak terurut")
+        return f"skor diri {diri:.3f}; 250 senyawa paralel dalam {time.time() - t0:.1f} s"
+    cek("Penapisan farmakofor (serial & paralel)", farmakofor_uji)
+
+    def hipotesis_uji():
+        """Fit 4PL memulihkan IC50 sintetis 2 µM dan menyensor senyawa yang tak mencapai 50 % inhibisi."""
+        from . import hipotesis
+        kons = [100 / 3 ** k for k in range(8)] * 3
+        inhib = [100.0 / (1 + 2.0 / x) for x in kons]
+        f = hipotesis.fit_dosis_respons(kons, inhib)
+        if f["ic50_uM"] is None or f["sensor"] or abs(f["ic50_uM"] - 2.0) / 2.0 > 0.15:
+            raise RuntimeError(f"IC50 4PL {f['ic50_uM']} (sensor {f['sensor']}), seharusnya 2 µM")
+        lemah = hipotesis.fit_dosis_respons(kons, [20.0 * x / (x + 10.0) for x in kons])
+        if lemah["sensor"] != ">":
+            raise RuntimeError("senyawa < 50 % inhibisi tidak ditandai tersensor")
+        return f"IC50 {f['ic50_uM']:.2f} µM (Hill {f['hill']:.2f}); senyawa lemah tersensor"
+    cek("Pelacak hipotesis (fit dosis-respons 4PL)", hipotesis_uji)
+
     return hasil
 
 

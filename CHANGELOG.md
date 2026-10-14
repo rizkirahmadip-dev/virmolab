@@ -2,13 +2,20 @@
 
 Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x adalah pra-rilis.
 
-## [Belum dirilis] (1.3, dalam pengerjaan)
+## [1.4.0] - 14 Oktober 2026
+
+Menggabungkan rencana 1.3 (penargetan balik, jaringan farmakologi) dan 1.4 (QSAR, penapisan farmakofor, pelacak hipotesis).
 
 ### Baru
 - **Penargetan balik** (Analisis › Penapisan banyak ligan › Penargetan balik & jaringan…; `core/target_balik.py`, `ui/dialog_target_balik.py`):
   - Jalur ligan memakai ChEMBL REST (daring, cache 7 hari): senyawa mirip, aktivitas pChEMBL >= 6 pada target protein tunggal, kemiripan Tanimoto Morgan2 dihitung lokal; target disatukan per UniProt.
   - Jalur struktur: docking Vina (CPU) ke panel struktur kristal lewat antrean; z-skor terhadap 49-50 umpan obat disetujui per target. Panel bawaan: antiinflamasi 8 target, antibakteri 9 target, semuanya lolos redocking RMSD <= 2 Å (disusun `dev/susun_panel.py` dari RCSB; log per langkah di `dev/panel_kandidat/log_*.jsonl`). Kofaktor (NAD, heme) tidak disertakan sehingga target yang bergantung padanya ditolak apa adanya.
   - Peringkat Borda (N+1 untuk target yang absen di satu jalur), label keyakinan, ekspor CSV, paragraf metode dirakit dari hasil nyata. Hasil adalah hipotesis komputasi.
+- **Jaringan farmakologi & pengayaan jalur** (tab "Jaringan & jalur"; `core/pengayaan.py`, `core/jaringan.py`):
+  - Pengayaan jalur hipergeometrik + Benjamini-Hochberg atas set gen bawaan Reactome v97 (2190 set) dan GO proses biologis (5552 set), dirakit `dev/buat_gmt.py` dari sumber resmi; latar dilaporkan apa adanya.
+  - Tepi target-target STRING v12.5 (ambang 0,4/0,7/0,9) dan target-penyakit Open Targets (API v4, data 2026.09), keduanya lewat `core/sumber_data.py` sehingga versi dan lisensi tercatat sebagai jejak proyek.
+  - Metrik graf (derajat, betweenness, closeness) dan uji sensitivitas lintas ambang yang melaporkan simpul inti stabil (muncul pada >= 80 % kombinasi).
+  - Kanvas graf SVG dengan zoom dan geser, tabel Jalur/Simpul/Sensitivitas, ekspor GraphML dan CSV tepi, kirim ke Komposer Figur, serta paragraf metode berisi basis data, versi, ambang, dan latar.
 - **QSAR & model prediksi** (Analisis › Penapisan banyak ligan › QSAR & model prediksi…; `core/qsar.py`, `core/konformal.py`, `ui/dialog_qsar.py`):
   - Wizard lima langkah: impor CSV atau tabel ChEMBL proyek, kurasi (pembakuan struktur, penggabungan duplikat sebagai median, penandaan rentang > 1 log dan activity cliff), pemilihan fitur dan algoritma, validasi, lalu prediksi.
   - Fitur Morgan2/MACCS/deskriptor RDKit tersaring; model Random Forest, SVR, kNN, Gaussian Process, dan Ridge dengan penyetelan validasi silang 5 lipatan di dalam set latih saja.
@@ -16,11 +23,11 @@ Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x 
   - Pembagian acak dan kerangka Bemis-Murcko dilaporkan berdampingan; selisih R² yang besar ditandai sebagai peringatan bahwa model hanya mengenali kerangka yang sudah dilihat.
   - Prediksi konformal split 90 % (`core/konformal.py`) dan domain aplikabilitas (leverage h* serta kemiripan Tanimoto kNN); senyawa di luar domain ditandai di dialog dan di kolom baru "pIC50 prediksi" panel Hasil.
   - Model disimpan sebagai joblib beserta kartu model JSON (sidik data, metrik, hiperparameter, versi paket, tanggal).
-- **Jaringan farmakologi & pengayaan jalur** (tab "Jaringan & jalur"; `core/pengayaan.py`, `core/jaringan.py`):
-  - Pengayaan jalur hipergeometrik + Benjamini-Hochberg atas set gen bawaan Reactome v97 (2190 set) dan GO proses biologis (5552 set), dirakit `dev/buat_gmt.py` dari sumber resmi; latar dilaporkan apa adanya.
-  - Tepi target-target STRING v12.5 (ambang 0,4/0,7/0,9) dan target-penyakit Open Targets (API v4, data 2026.09), keduanya lewat `core/sumber_data.py` sehingga versi dan lisensi tercatat sebagai jejak proyek.
-  - Metrik graf (derajat, betweenness, closeness) dan uji sensitivitas lintas ambang yang melaporkan simpul inti stabil (muncul pada >= 80 % kombinasi).
-  - Kanvas graf SVG dengan zoom dan geser, tabel Jalur/Simpul/Sensitivitas, ekspor GraphML dan CSV tepi, kirim ke Komposer Figur, serta paragraf metode berisi basis data, versi, ambang, dan latar.
+- **Penapisan berbasis ligan 3D (F4)** (Analisis › Penapisan banyak ligan › Penapisan farmakofor & bentuk 3D…; `core/farmakofor.py`, `core/bentuk.py`, `ui/dialog_farmakofor.py`):
+  - Kueri farmakofor 3D dari pose aktif di penampil atau ligan ko-kristal proyek, dengan bola eksklusi dari atom berat reseptor proyek (4 Å); pembangkitan konformer ETKDGv3, pencocokan fitur per konformer terselaraskan (RMSD fitur dan penalti eksklusi), serta penapisan paralel ProcessPoolExecutor (kelompok ≤ 500 senyawa, dibagi rata ke semua proses).
+  - Keselarasan bentuk dan warna farmakofor via `rdkit.Chem.rdShapeAlign` dengan skor gabungan berbobot dapat diatur.
+  - Visualisasi ligan acuan, bola farmakofor, dan bola eksklusi di penampil 3D mengikuti tema; kandidat teratas dikirim sebagai ligan ke jendela utama lalu dialog Siapkan ligan dibuka (protonasi dan PDBQT sebelum docking).
+  - Validasi kueri: aktif dari ChEMBL (pChEMBL ≥ 7, beragam kerangka) atau CSV, decoy sepadan gaya DUD-E dibangkitkan otomatis, lalu ROC-AUC, BEDROC, dan EF1% (EF1% hanya untuk himpunan ≥ 100 senyawa). Tolok ukur uji: kueri MK1 (1HSG) membedakan 8 inhibitor protease HIV dari 520 decoy obat sepadan dengan AUC 0,66 (0,71 tanpa bola eksklusi); pengayaan awal lemah, sehingga hasil penapisan diperlakukan sebagai saringan kasar sebelum docking.
 - **Pelacak hipotesis → uji laboratorium (F12)** (tab "Hipotesis" di dialog Rencana uji lab; `core/hipotesis.py`, `ui/dialog_labplanner.py`):
   - Perluasan model data `proyek.eksperimen` menyimpan entri hasil uji `{id, ligan_id, assay, nilai, satuan, pIC50, tanggal, catatan, status_hipotesis}` (status: diajukan, diuji, didukung, ditolak) dengan migrasi round-trip utuh bagi data lama (ChEMBL dll).
   - Evaluasi korelasi prediksi in silico vs hasil lab nyata: Spearman ρ dan Kendall τ disertai 95% Confidence Interval bootstrap 1000×, peringatan sampel kecil n < 8, dan penanganan transparan bagi ligan tanpa pasangan.
@@ -28,11 +35,12 @@ Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x 
   - Prediksi pembanding: ΔG docking, MM/GBSA (dibaca dari run MD selesai, rerata replika), dan pIC50 estimasi dari ΔG; pilihan tanpa data di proyek dinonaktifkan.
   - Visualisasi grafik sebar Prediksi vs Terukur (SVG) dengan garis regresi dan pita kepercayaan 95%.
   - Tombol "Latih ulang QSAR dengan data baru" membuka wizard QSAR dengan aktivitas uji lab proyek sudah dimuat (SMILES ligan proyek dibaca lewat `Proyek.smiles_ligan`).
-- **Penapisan berbasis ligan 3D (F4)** (Analisis › Penapisan banyak ligan › Penapisan farmakofor & bentuk 3D…; `core/farmakofor.py`, `core/bentuk.py`, `ui/dialog_farmakofor.py`):
-  - Kueri farmakofor 3D dari pose aktif di penampil atau ligan ko-kristal proyek, dengan bola eksklusi dari atom berat reseptor proyek (4 Å); pembangkitan konformer ETKDGv3, pencocokan fitur per konformer terselaraskan (RMSD fitur dan penalti eksklusi), serta penapisan paralel ProcessPoolExecutor (kelompok ≤ 500 senyawa, dibagi rata ke semua proses). `VirmoLab.pyw` dan `VirmoLab_cli.py` kini memanggil `multiprocessing.freeze_support()` agar proses pekerja di build PyInstaller tidak membuka ulang aplikasi.
-  - Keselarasan bentuk dan warna farmakofor via `rdkit.Chem.rdShapeAlign` dengan skor gabungan berbobot dapat diatur.
-  - Visualisasi ligan acuan, bola farmakofor, dan bola eksklusi di penampil 3D mengikuti tema; kandidat teratas dikirim sebagai ligan ke jendela utama lalu dialog Siapkan ligan dibuka (protonasi dan PDBQT sebelum docking).
-  - Validasi kueri: aktif dari ChEMBL (pChEMBL ≥ 7, beragam kerangka) atau CSV, decoy sepadan gaya DUD-E dibangkitkan otomatis, lalu ROC-AUC, BEDROC, dan EF1% (EF1% hanya untuk himpunan ≥ 100 senyawa). Tolok ukur uji: kueri MK1 (1HSG) membedakan 8 inhibitor protease HIV dari 520 decoy obat sepadan dengan AUC 0,66 (0,71 tanpa bola eksklusi); pengayaan awal lemah, sehingga hasil penapisan diperlakukan sebagai saringan kasar sebelum docking.
+
+### Diperbaiki
+- User-Agent permintaan daring (`core/sumber_data.py`) selalu tertulis versi 1.2.0 karena mengimpor nama `VERSI` yang tidak ada; kini memakai `__version__`. Kartu model QSAR kini mencatat versi aplikasi (sebelumnya kosong karena sebab yang sama).
+
+### Diubah
+- `VirmoLab.pyw` dan `VirmoLab_cli.py` kini memanggil `multiprocessing.freeze_support()` agar proses pekerja di build PyInstaller tidak membuka ulang aplikasi.
 
 ## [1.2.0] - 13 Oktober 2026
 

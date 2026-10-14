@@ -652,11 +652,8 @@ def kartu_model(hasil: Dict[str, Any], data: Sequence[Dict[str, Any]], sumber_da
 
 
 def _versi_aplikasi() -> str:
-    try:
-        from .. import VERSI
-        return VERSI
-    except Exception:
-        return ""
+    from .. import __version__
+    return __version__
 
 
 def simpan(hasil: Dict[str, Any], data: Sequence[Dict[str, Any]], folder, nama: str = "model_qsar",

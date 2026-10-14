@@ -230,13 +230,10 @@ def t_baru():
     assert pr.job[0]["ligan"][0]["energi"] == -11.0
     assert baris[0]["pose"][0]["syarat_lolos"] is False and baris[0]["pose"][1]["syarat_jarak"] == 2.8
     from virmolab.core.proyek import Proyek
-    pr = Proyek.__new__(Proyek)
-    pr.nama, pr.dibuat = "uji", "2026-01-01"
-    pr.reseptor = pr.kotak = None
-    pr.ligan, pr.job, pr.objek, pr.md = [], [], [], []
-    pr.parameter = pr.uji_grafik = pr.komposer = pr.eksperimen = {}
-    pr.catatan = pr.templat = ""
-    pr.validasi, pr.jejak = {}, []
+    # Konstruktor sungguhan (tanpa sentuh disk) supaya uji tidak patah tiap ada field proyek baru;
+    # stub Proyek.__new__ dulu melewatkan atribut baru dan menggagalkan ke_dict().
+    pr = Proyek("uji")
+    pr.dibuat = "2026-01-01"
     pr.blast = {"rid": "CNV570T8014", "rantai": "A"}
     pr.syarat_jarak = {"rantai": "A", "resi": "25", "jarak": 3.5}
     d = pr.ke_dict()

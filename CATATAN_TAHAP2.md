@@ -3,6 +3,11 @@
 Untuk sesi baru: baca seluruh file ini dulu. Pengguna berbahasa Indonesia; UI dan pesan aplikasi berbahasa Indonesia.
 (Nama file historis — isinya mencakup semua tahap. Jangan diganti namanya: dirujuk dari `CLAUDE.md`.)
 
+**Versi kode 1.4.0** (14 Okt 2026) — rilis 1.4.0 menggabungkan rencana 1.3 dan 1.4: penargetan balik (F3a),
+jaringan & pengayaan jalur (F3b), QSAR (F5), penapisan farmakofor & bentuk 3D (F4), pelacak hipotesis uji lab (F12).
+Rinciannya di `CHANGELOG.md` [1.4.0]; rencana fitur selanjutnya (1.5–1.6) di `RENCANA_PENGEMBANGAN.md` dan
+prompt siap salin di `PROMPT_SISA.md`.
+
 **Status singkat:** Tahap 1–4 (MVP v1.0, Lampiran E3) **selesai** + **v1.1 selesai** (§4e) + UI/UX & menu dirombak (§4f) + Kelompok A, Dimorphite, P2Rank (§4g) + **sisa fitur v1.x selesai** (§4h: Format grafik, patah sumbu, ROC, kontingensi, komposer figur, gaya tersimpan, laporan Word/HTML interaktif, animasi). Versi kode 0.9.0 (pra-rilis).
 Versi kode **0.9.6** (§4n: penelitian lanjutan — konservasi offline, energi per residu, umpan, enumerasi, mutasi, naskah). Belum ada build installer sejak 0.9.4 (folder `rilis/` dibersihkan 10 Okt 2026).
 Versi kode **0.9.5** (§4m: docking kovalen, plugin & konsol Python, RCSB, templat, UX — rencana v2.0 LENGKAP). Commit `47ca59c`. Belum di-push (sengaja lokal).
@@ -398,8 +403,22 @@ Windows 10, Ryzen 7 5800H, 16 GB RAM, RTX 3060 Laptop 6 GB (driver 610.74), Pyth
 | `ui/dialog_md.py` | dialog MD 7 tab: Ringkasan, Stabilitas, Interaksi, PCA & FEL, Klaster medoid ensemble, Replika, Log |
 | `core/decoy.py` | generator decoy DUD-E lokal: saringan fisikokimia, Tanimoto Morgan2, dan uji 2-sampel Kolmogorov-Smirnov tanpa bias |
 | `core/validasi_protokol.py` | orkestrasi validasi: redocking RMSD simetri, cross-docking, penapisan aktif vs decoy (ROC/BEDROC/EF/logAUC), PoseBusters, SVG heatmap, laporan HTML/Word |
+| `core/target_balik.py` | penargetan balik: jalur ligan ChEMBL REST, jalur struktur panel kristal + z-skor umpan, peringkat Borda |
+| `data/panel_target/` | panel struktur kristal tervalidasi redocking (antiinflamasi 8, antibakteri 9 target) + statistik umpan |
+| `core/pengayaan.py`, `core/jaringan.py` | uji hipergeometrik + BH atas GMT bawaan; graf berlapis target/jalur/penyakit (STRING, Open Targets) |
+| `data/gmt/` | set gen bawaan: Reactome v97 (2190 set) dan GO proses biologis (5552 set), dirakit `dev/buat_gmt.py` |
+| `core/qsar.py`, `core/konformal.py` | pipeline QSAR: kurasi, fitur, 5 algoritma sklearn, Q²/Golbraikh-Tropsha/Y-randomization, domain aplikabilitas, konformal split |
+| `core/farmakofor.py`, `core/bentuk.py` | kueri farmakofor 3D + bola eksklusi, konformer ETKDGv3, rdShapeAlign, penapisan ProcessPoolExecutor, validasi ROC/BEDROC/EF |
+| `core/hipotesis.py` | entri uji lab, normalisasi pelat mikro + fit dosis-respons 4PL (Z′, nilai tersensor), korelasi Spearman/Kendall bootstrap |
 | `ui/dialog_validasi_protokol.py` | wizard 4 langkah validasi: redocking kristal, cross-docking, pengayaan decoy, kartu metrik, draf metode, ekspor HTML, dan komposer figur |
 
 Aturan yang dipegang: jangan menamai variabel lokal sama dengan modul yang diimpor (`kerja`, `kit`, `theme`) —
 pernah menyebabkan geser ligan dan GNINA mati total tanpa pesan. Linter `pyflakes` di CI menangkapnya sekarang.
+
+Dua jebakan yang berulang (ditemukan saat meninjau F4/F12, 14 Okt 2026):
+
+- **SMILES ligan proyek** tidak selalu ada pada kunci `smiles`; pakai `Proyek.smiles_ligan(l)` yang membaca cache
+  sifat lalu SDF sumber. Tiga modul sempat selalu mendapat string kosong karena membaca `lig.get("smiles")`.
+- **Nama `VERSI` tidak ada di `virmolab/__init__.py`** (yang ada `__version__`). `from .. import VERSI` di dalam
+  `try/except` membuat versi aplikasi diam-diam salah atau kosong, bukan gagal nyaring.
 

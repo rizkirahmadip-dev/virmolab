@@ -21,10 +21,7 @@ import urllib.request
 
 from . import paths
 
-try:
-    from .. import VERSI
-except ImportError:
-    VERSI = "1.2.0"
+from .. import __version__ as VERSI
 
 USER_AGENT = f"VirmoLab/{VERSI} (akademik; https://github.com/virmolab)"
 
