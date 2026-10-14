@@ -585,9 +585,24 @@ def uji(lapor=None):
     return hasil
 
 
+class _LaporCetak:
+    """Pelapor yang mencetak tiap uji begitu selesai (meniru antarmuka sinyal Qt `lapor.log.emit`).
+
+    Tanpa ini `--uji-mandiri` diam sampai seluruh uji selesai, sehingga uji yang menggantung tidak
+    ketahuan namanya: log rilis berhenti tanpa petunjuk. Keluaran di-flush agar urut di berkas log.
+    """
+
+    class _Sinyal:
+        @staticmethod
+        def emit(teks):
+            print(teks, flush=True)
+
+    log = _Sinyal()
+
+
 def tulis(path):
     from .. import __version__
-    h = uji()
+    h = uji(lapor=_LaporCetak())
     data = {"versi": __version__, "portable": paths.PORTABLE, "bin": str(paths.BIN), "hasil": h,
             "semua_ok": all(x["ok"] for x in h)}
     Path(path).write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")

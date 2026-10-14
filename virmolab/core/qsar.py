@@ -6,10 +6,12 @@ ketahanan, serta prediktivitas (Q2 CV, R2 set uji, Y-randomization), dan tafsir 
 
 Semua metrik dihitung dari data; tidak ada nilai bawaan. Prediksi tanpa model terlatih menimbulkan galat, bukan angka.
 """
+import functools
 import hashlib
 import json
 import math
 import platform
+import sys
 from datetime import date
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
@@ -363,6 +365,27 @@ def golbraikh_tropsha(y_uji: Sequence[float], y_pred: Sequence[float]) -> Dict[s
             "r0_2_aksen": r0_2_aksen, "syarat": syarat}
 
 
+def _paralel_aman(fn):
+    """Paksa joblib memakai thread di build beku; dipasang pada fungsi yang memanggil scikit-learn paralel.
+
+    Backend bawaan joblib (loky) membuat proses anak dengan menjalankan ulang program. Di aplikasi beku
+    PyInstaller yang dijalankan ulang adalah VirmoLab.exe, bukan fungsi pekerjanya, sehingga pelatihan
+    menggantung: belasan proses menganggur, tanpa kemajuan dan tanpa pesan galat. Backend thread tetap
+    memakai banyak inti karena fit scikit-learn melepas GIL. Random Forest sendiri sudah memakai thread
+    (`prefer="threads"`), jadi `n_jobs` di dalamnya aman. Bandingkan `core/qc.py`, yang memakai
+    PoseBusters `max_workers=0` karena sebab yang sama.
+    """
+    @functools.wraps(fn)
+    def bungkus(*a, **kw):
+        if not getattr(sys, "frozen", False):
+            return fn(*a, **kw)
+        import joblib
+        with joblib.parallel_config(backend="threading"):
+            return fn(*a, **kw)
+    return bungkus
+
+
+@_paralel_aman
 def latih(data: Sequence[Dict[str, Any]], algoritma: str = "rf", jenis_fitur: str = "morgan",
           metode_bagi: str = "acak", klasifikasi: bool = False, ambang_aktif: float = AMBANG_AKTIF,
           benih: int = 42, bagian_uji: float = 0.2, konformal: bool = True,
@@ -451,6 +474,7 @@ def latih(data: Sequence[Dict[str, Any]], algoritma: str = "rf", jenis_fitur: st
     return hasil
 
 
+@_paralel_aman
 def y_acak(data: Sequence[Dict[str, Any]], algoritma: str = "rf", jenis_fitur: str = "morgan",
            n: int = 50, benih: int = 42, klasifikasi: bool = False,
            ambang_aktif: float = AMBANG_AKTIF, lapor=None) -> Dict[str, Any]:
@@ -523,6 +547,7 @@ def domain(X_latih: np.ndarray, X_baru: np.ndarray, smiles_latih: Sequence[str],
             "n_luar": int(sum(1 for d in dalam if not d))}
 
 
+@_paralel_aman
 def kepentingan_permutasi(hasil: Dict[str, Any], data: Sequence[Dict[str, Any]], n_ulang: int = 10,
                           n_teratas: int = 20) -> List[Dict[str, Any]]:
     """Kepentingan fitur permutasi pada set uji (tafsir model, prinsip OECD ke-5)."""

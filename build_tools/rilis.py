@@ -70,8 +70,15 @@ def main():
 
     langkah("Uji mandiri hasil build")
     hasil = AKAR / "build" / "uji_mandiri.json"
+    # Hasil build sebelumnya harus dibuang: pernah terbaca sebagai hasil build ini ketika uji
+    # mandiri menggantung dan tidak sempat menulis berkas, sehingga log rilis memuat angka lama.
+    hasil.unlink(missing_ok=True)
     p = subprocess.run([str(DIST / "VirmoLab.exe"), "--uji-mandiri", str(hasil)], cwd=DIST)
+    if not hasil.exists():
+        sys.exit(f"Uji mandiri tidak menulis {hasil.name} (kode {p.returncode}); rilis dihentikan.")
     data = json.loads(hasil.read_text(encoding="utf-8"))
+    if data.get("versi") != VERSI:
+        sys.exit(f"Hasil uji mandiri bukan dari versi {VERSI} (tertulis {data.get('versi')}); rilis dihentikan.")
     for h in data["hasil"]:
         print(("  OK    " if h["ok"] else "  GAGAL ") + h["uji"] + " — " + h["detail"])
     if p.returncode != 0:

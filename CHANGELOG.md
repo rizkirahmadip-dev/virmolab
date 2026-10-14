@@ -37,9 +37,19 @@ Menggabungkan rencana 1.3 (penargetan balik, jaringan farmakologi) dan 1.4 (QSAR
   - Tombol "Latih ulang QSAR dengan data baru" membuka wizard QSAR dengan aktivitas uji lab proyek sudah dimuat (SMILES ligan proyek dibaca lewat `Proyek.smiles_ligan`).
 
 ### Diperbaiki
+- **QSAR menggantung di aplikasi terpasang.** `core/qsar.py` memakai `n_jobs=-1` pada GridSearchCV,
+  `cross_val_predict`, dan `permutation_importance`; backend bawaan joblib (loky) membuat proses anak
+  dengan menjalankan ulang program, sehingga di aplikasi beku PyInstaller yang dijalankan ulang adalah
+  `VirmoLab.exe` dan bukan fungsi pekerjanya — pelatihan berhenti tanpa kemajuan dengan belasan proses
+  menganggur dan tanpa pesan galat. Pelatihan, Y-randomization, dan kepentingan permutasi kini memakai
+  backend thread saat berjalan beku (Random Forest sendiri sudah memakai thread sehingga tidak berubah).
 - User-Agent permintaan daring (`core/sumber_data.py`) selalu tertulis versi 1.2.0 karena mengimpor nama `VERSI` yang tidak ada; kini memakai `__version__`. Kartu model QSAR kini mencatat versi aplikasi (sebelumnya kosong karena sebab yang sama).
 
 ### Diubah
+- `--uji-mandiri` mencetak tiap uji begitu selesai; sebelumnya diam sampai seluruh uji tuntas sehingga
+  uji yang menggantung tidak ketahuan namanya. `build_tools/rilis.py` membuang `build/uji_mandiri.json`
+  lama sebelum menjalankan uji dan menolak hasil yang versinya tidak cocok, supaya hasil build terdahulu
+  tidak terbaca sebagai hasil build sekarang.
 - `VirmoLab.pyw` dan `VirmoLab_cli.py` kini memanggil `multiprocessing.freeze_support()` agar proses pekerja di build PyInstaller tidak membuka ulang aplikasi.
 
 ## [1.2.0] - 13 Oktober 2026
