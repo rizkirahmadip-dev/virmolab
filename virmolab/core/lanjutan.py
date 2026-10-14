@@ -180,7 +180,14 @@ def _yaml_boltz(sekuens_rantai, smiles, msa_kosong=True, peptida=None):
         urut.append({"ligand": {"id": "L", "smiles": smiles}})
     else:
         raise ValueError("Ligan tidak punya SMILES.")
-    return yaml.safe_dump({"version": 1, "sequences": urut}, sort_keys=False, allow_unicode=True)
+    d = {"version": 1, "sequences": urut}
+    if smiles and not peptida:
+        # Tanpa blok properties ini Boltz TIDAK menghitung afinitas sama sekali dan tidak menulis
+        # affinity_*.json, berapa pun nilai --diffusion_samples_affinity yang diberikan. Diverifikasi
+        # pada run nyata 1HSG dan pada boltz/data/parse/schema.py. Afinitas hanya untuk ligan
+        # bermolekul kecil; untuk peptida blok ini tidak dipakai.
+        d["properties"] = [{"affinity": {"binder": "L"}}]
+    return yaml.safe_dump(d, sort_keys=False, allow_unicode=True)
 
 
 def _langkah_boltz(penuh):

@@ -3,9 +3,10 @@
 PENTING: berkas ini BUKAN hasil menjalankan Boltz-2. Angka afinitas dan keyakinan di bawah
 ditulis tangan; yang diuji dengan fixture ini hanyalah pembacaan berkas, penyelarasan Kabsch,
 dan pelabelan kesepakatan, BUKAN ketepatan prediksi Boltz-2. Nama kunci JSON mengikuti skema
-yang terdokumentasi dan belum dicocokkan dengan keluaran nyata (Boltz belum terpasang di WSL
-pada mesin ini). Setelah Boltz terpasang, jalankan sekali dengan data sungguhan dan bandingkan
-nama kuncinya; `baca_keluaran_boltz` mencatat peringatan bila kuncinya tidak cocok.
+yang SUDAH dicocokkan dengan keluaran Boltz-2 2.2.1 sungguhan pada 15 Oktober 2026 (run 1HSG):
+kunci afinitas `affinity_pred_value` dan `affinity_probability_binary` terbukti benar, dan metrik
+keyakinan berskala 0-1. `baca_keluaran_boltz` tetap mencatat peringatan bila kuncinya tidak cocok,
+untuk berjaga bila rilis Boltz berikutnya mengubahnya.
 
 Struktur folder dan skema JSON yang ditiru:
   - dev/data/boltz_1hsg/predictions/boltz_1hsg/boltz_1hsg_model_0.pdb
@@ -39,12 +40,18 @@ def main():
     (FOLDER_KELUAR / "affinity_boltz_1hsg.json").write_text(json.dumps(afinitas, indent=2), encoding="utf-8")
 
     # 2. Tulis confidence_boltz_1hsg_model_0.json
+    # Skala 0-1, sesuai keluaran Boltz-2 sungguhan (diperiksa pada run 1HSG 15 Okt 2026);
+    # bukan skala 0-100 seperti pLDDT AlphaFold.
     keyakinan = {
-        "confidence_score": 0.892,
-        "ptm": 0.924,
-        "iptm": 0.865,
-        "ligand_iptm": 0.851,
-        "complex_plddt": 88.42
+        "confidence_score": 0.8921,
+        "ptm": 0.9241,
+        "iptm": 0.8653,
+        "ligand_iptm": 0.8512,
+        "protein_iptm": 0.9104,
+        "complex_plddt": 0.8842,
+        "complex_iplddt": 0.8615,
+        "complex_pde": 0.5213,
+        "complex_ipde": 0.6104,
     }
     (FOLDER_KELUAR / "confidence_boltz_1hsg_model_0.json").write_text(json.dumps(keyakinan, indent=2), encoding="utf-8")
 

@@ -50,8 +50,12 @@ class UjiKofolding(unittest.TestCase):
         self.assertAlmostEqual(data["afinitas_pred_value"], -2.145, places=2)
         self.assertIsNotNone(data["afinitas_probabilitas"])
         self.assertAlmostEqual(data["afinitas_probabilitas"], 0.985, places=2)
+        # Boltz melaporkan keyakinan sebagai pecahan 0-1 (diperiksa pada keluaran sungguhan),
+        # bukan skala 0-100 seperti pLDDT AlphaFold. Uji ini mengunci skalanya.
         self.assertIsNotNone(data["complex_plddt"])
-        self.assertGreater(data["complex_plddt"], 80.0)
+        self.assertGreater(data["complex_plddt"], 0.5)
+        self.assertLessEqual(data["complex_plddt"], 1.0,
+                             "metrik keyakinan Boltz harus berskala 0-1, bukan 0-100")
 
     def test_02_superposisi_kabsch_ca(self):
         """Memastikan transformasi koordinat Kabsch memulihkan koordinat ke sistem reseptor."""
@@ -157,6 +161,33 @@ class UjiKofolding(unittest.TestCase):
         self.assertIn("Gagal membaca", hasil.pesan)
         self.assertIsNone(hasil.rmsd, "RMSD harus None bila gagal, bukan 0.0 atau 99")
         self.assertEqual(hasil.kesepakatan, "–")
+
+
+class UjiYamlBoltz(unittest.TestCase):
+    """YAML yang dikirim ke Boltz menentukan apakah afinitas dihitung sama sekali."""
+
+    def test_blok_affinity_wajib_ada_untuk_ligan_kecil(self):
+        """Tanpa properties.affinity, Boltz TIDAK menulis affinity_*.json.
+
+        Ditemukan pada run sungguhan 1HSG: berkas afinitas tidak pernah dibuat meski
+        --diffusion_samples_affinity diberikan, dan dikonfirmasi di boltz/data/parse/schema.py.
+        """
+        import yaml as y
+
+        from virmolab.core.lanjutan import _yaml_boltz
+        d = y.safe_load(_yaml_boltz([("A", "MKV")], "CCO"))
+        self.assertIn("properties", d, "blok properties hilang; afinitas tidak akan dihitung")
+        self.assertEqual(d["properties"], [{"affinity": {"binder": "L"}}])
+        self.assertEqual(d["sequences"][-1]["ligand"]["id"], "L",
+                         "binder harus menunjuk id ligan yang benar-benar ada di sequences")
+
+    def test_peptida_tidak_memakai_blok_affinity(self):
+        """Afinitas Boltz hanya untuk ligan bermolekul kecil, bukan rantai peptida."""
+        import yaml as y
+
+        from virmolab.core.lanjutan import _yaml_boltz
+        d = y.safe_load(_yaml_boltz([("A", "MKV")], None, peptida="ETFSDLWKLLP"))
+        self.assertNotIn("properties", d)
 
 
 class UjiParagrafMetode(unittest.TestCase):

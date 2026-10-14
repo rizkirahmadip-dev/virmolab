@@ -44,6 +44,8 @@ Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x 
   - **Simulasinya tidak dapat dijalankan di Windows.** OpenFE, mesin RBFE sumber terbuka yang matang, hanya mendukung Linux dan macOS menurut dokumentasi resminya. Dialog menyatakan hal ini terus terang dan tidak menyediakan tombol jalankan yang tidak akan berfungsi; perencanaan jaringan dan analisis hasil dari mesin Linux tetap tersedia.
 
 ### Diperbaiki
+- **Afinitas Boltz-2 tidak pernah dihitung.** YAML yang dikirim ke Boltz tidak memuat blok `properties: - affinity: binder: L`, dan tanpa itu Boltz melewati perhitungan afinitas sepenuhnya serta tidak menulis `affinity_*.json`, berapa pun nilai `--diffusion_samples_affinity` yang diberikan. Akibatnya kolom "Boltz-2 afinitas" di dialog Konsensus selalu kosong. Ditemukan saat menjalankan Boltz-2 2.2.1 sungguhan pada 1HSG, dikonfirmasi di `boltz/data/parse/schema.py`, dan kini dikunci uji.
+- Metrik keyakinan Boltz-2 berskala 0 sampai 1, bukan 0 sampai 100 seperti pLDDT AlphaFold. Kartu pLDDT di dialog peptida menampilkannya sebagai persen, dan fixture uji diselaraskan dengan keluaran sungguhan.
 - Sisa ruang di kanan kepala tabel tampil putih pada tema gelap karena QSS hanya mengatur tiap seksi kepala, bukan `QHeaderView` itu sendiri.
 - `ui/mainwindow.py` memanggil `analisis.TIGA_KE_SATU` yang tidak pernah ada, sehingga menjalankan co-folding gagal seketika dengan `AttributeError`. Tabel kode residu kini satu-satunya, di `core/konservasi.py`.
 - `kit.pesan_peringatan` dipanggil tiga tempat tetapi belum pernah didefinisikan, sehingga impor CSV plate reader yang gagal justru melempar `AttributeError`, bukan menampilkan peringatan.

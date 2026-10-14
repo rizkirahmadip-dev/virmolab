@@ -107,7 +107,7 @@ class DialogPeptida(QDialog):
         vn.setContentsMargins(0, 0, 0, 0)
         vn.setSpacing(8)
 
-        self.k_plddt = kit.Kartu("PLDDT KOMPLEKS", "–", "Keyakinan model")
+        self.k_plddt = kit.Kartu("PLDDT KOMPLEKS", "–", "Keyakinan model Boltz-2")
         self.k_rmsd = kit.Kartu("GESERAN MINIMISASI", "–", "Perpindahan peptida")
         vn.addLayout(kit.baris_kartu(self.k_plddt, self.k_rmsd))
         self.k_mmgbsa = kit.Kartu("MM/GBSA", "–", "Perkiraan kkal/mol")
@@ -234,7 +234,8 @@ class DialogPeptida(QDialog):
             self.l_status.setText(hasil.pesan or "Prediksi tidak menghasilkan kompleks.")
             return
 
-        self.k_plddt.isi(kit.f(hasil.plddt, 1) if hasil.plddt is not None else "–")
+        # Boltz melaporkan keyakinan sebagai pecahan 0-1, bukan skala 0-100 seperti AlphaFold
+        self.k_plddt.isi(f"{kit.f(hasil.plddt * 100, 1)} %" if hasil.plddt is not None else "–")
         self.k_rmsd.isi(kit.f(hasil.rmsd_minimisasi, 2, "Å") if hasil.rmsd_minimisasi is not None else "–")
         if hasil.mmgbsa and hasil.mmgbsa.get("dG") is not None:
             self.k_mmgbsa.isi(kit.f(hasil.mmgbsa["dG"], 1))

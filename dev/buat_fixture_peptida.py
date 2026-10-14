@@ -56,8 +56,10 @@ def main():
 
     # Metrik keyakinan: angka ini DITULIS TANGAN, bukan keluaran model
     (KELUAR / "confidence_boltz_1ycr_model_0.json").write_text(
-        json.dumps({"confidence_score": 0.83, "ptm": 0.87, "iptm": 0.79,
-                    "ligand_iptm": 0.0, "complex_plddt": 84.1}, indent=1), encoding="utf-8")
+        json.dumps({"confidence_score": 0.8302, "ptm": 0.8713, "iptm": 0.7904,
+                    "ligand_iptm": 0.0, "protein_iptm": 0.8688,
+                    "complex_plddt": 0.8410, "complex_iplddt": 0.8122,
+                    "complex_pde": 0.5908, "complex_ipde": 0.6731}, indent=1), encoding="utf-8")
 
     sisi = np.linalg.norm(pep - pep.mean(axis=0), axis=1).max()
     print(f"Fixture ditulis ke {KELUAR}")
