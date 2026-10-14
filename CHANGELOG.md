@@ -2,7 +2,11 @@
 
 Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x adalah pra-rilis.
 
-## [Belum dirilis] (1.5, dalam pengerjaan)
+## [1.5.0] - 15 Oktober 2026
+
+Rilis fitur lanjutan: co-folding Boltz-2, docking peptida, sifat elektronik kuantum, desain
+generatif, dan perencanaan energi bebas relatif. Dengan ini seluruh fitur F1 sampai F12 pada
+`RENCANA_PENGEMBANGAN.md` sudah dikerjakan.
 
 ### Baru
 - **Konsensus docking dengan co-folding Boltz-2 (F6)** (tab "Co-folding" di panel Properti; kolom baru di dialog Konsensus; `core/kofolding.py`, `ui/panels.py`, `ui/dialog_konsensus.py`):

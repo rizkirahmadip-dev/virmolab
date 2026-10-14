@@ -3723,7 +3723,20 @@
 "Belum ada tepi jaringan untuk ditulis di paragraf metode.": "There is no network edge yet to write in the methods paragraph.",
 "Dari": "From",
 "Ke": "To",
-"Atom berubah": "Atoms changed"
+"Atom berubah": "Atoms changed",
+"Co-folding (aturan kesepakatan)": "Co-folding (agreement rules)",
+"Desain generatif (basis data fragmen)": "Generative design (fragment database)",
+"Docking peptida (validasi sekuens)": "Peptide docking (sequence validation)",
+"Energi bebas relatif (pemetaan & MBAR)": "Relative free energy (mapping & MBAR)",
+"batas panjang peptida tidak ditegakkan": "the peptide length limit is not enforced",
+"huruf bukan asam amino tidak ditandai pada posisinya": "a non-amino-acid letter is not flagged at its position",
+"analog memuat InChIKey ganda": "the analogues contain duplicate InChIKeys",
+"RMSD kecil dengan kedua QC lolos seharusnya Sepakat": "a small RMSD with both QC checks passing should be Agree",
+"QC gagal seharusnya menurunkan label menjadi Sebagian": "a failed QC check should lower the label to Partial",
+"RMSD besar dengan kontak berbeda seharusnya Bertentangan": "a large RMSD with different contacts should be Conflicting",
+"RMSD yang tidak terhitung tidak boleh diberi label": "an RMSD that could not be computed must not be given a label",
+"aturan label benar; Boltz: siap": "label rules correct; Boltz: ready",
+"pemetaan atom benar": "atom mapping correct"
 },
 "pola": {
 "ADMET-AI: memprediksi {0} senyawa (memuat model ±10–20 s)…": "ADMET-AI: predicting {0} compounds (loading models ±10–20 s)…",
@@ -4579,6 +4592,14 @@
 "Tidak ada pasangan yang layak diperturbasi dari {0} pasangan MMP. RBFE hanya cocok untuk seri kongenerik dengan perubahan kecil.": "No pair from the {0} MMP pairs is suitable for perturbation. RBFE only suits a congeneric series with small changes.",
 "{0} dari {1} siklus konsisten.": "{0} of {1} cycles are consistent.",
 "{0} tepi × {1} jendela λ × {2} replika × {3} ns = {4} ns simulasi.": "{0} edges × {1} λ windows × {2} replicas × {3} ns = {4} ns of simulation.",
-"{0} tepi tersusun atas {1} senyawa.": "{0} edges built over {1} compounds."
+"{0} tepi tersusun atas {1} senyawa.": "{0} edges built over {1} compounds.",
+"MBAR memberi {0}, seharusnya {1}": "MBAR returned {0}, expected {1}",
+"hanya {0} analog dari basis data fragmen": "only {0} analogues from the fragment database",
+"pemetaan atom benar; MBAR memulihkan {0} dari {1}; mesin simulasi: {2}": "atom mapping correct; MBAR recovered {0} of {1}; simulation engine: {2}",
+"pemetaan benzena ke toluena salah: {0}/{1}": "benzene to toluene mapping is wrong: {0}/{1}",
+"{0} analog unik dari aspirin; {1}": "{0} unique analogues from aspirin; {1}",
+"batas {0} residu ditegakkan; posisi huruf salah ditandai": "the {0}-residue limit is enforced; wrong letters are flagged at their position",
+"sekuens p53 ditolak: {0}": "the p53 sequence was rejected: {0}",
+"hanya {0} analog dari basis data fragmen ": "only {0} analogues from the fragment database "
 }
 }

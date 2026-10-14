@@ -31,7 +31,7 @@ def hook():
 
         def l1(s):
             s.buka_proyek(str(PROYEK))
-            s.d_param.raise_()
+            s.d_kerja.raise_()   # dulu d_param; aliasnya dibuang saat F6
             QTimer.singleShot(3000, s.l2)
 
         def l2(s):

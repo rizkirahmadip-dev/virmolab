@@ -3,6 +3,24 @@
 Untuk sesi baru: baca seluruh file ini dulu. Pengguna berbahasa Indonesia; UI dan pesan aplikasi berbahasa Indonesia.
 (Nama file historis — isinya mencakup semua tahap. Jangan diganti namanya: dirujuk dari `CLAUDE.md`.)
 
+**Versi kode 1.5.0** (15 Okt 2026) — rilis fitur lanjutan: co-folding Boltz-2 (F6), docking peptida (F10),
+sifat elektronik kuantum xTB (F7), desain generatif CReM (F8), dan perencanaan energi bebas relatif (F9).
+Dengan ini seluruh F1 sampai F12 pada `RENCANA_PENGEMBANGAN.md` sudah dikerjakan.
+
+Alat luar yang kini ikut atau diperlukan:
+
+| Alat | Tempat | Catatan |
+|---|---|---|
+| xtb 6.7.1pre | `bin/xtb` (ikut installer, 59 MB) | LGPL-3.0, GFN2-xTB, jalan di CPU |
+| basis data fragmen CReM | `virmolab/data/crem` (ikut installer, 42 MB) | dibangun sendiri dari 2316 obat lokal, bukan unduhan ChEMBL penuh |
+| Boltz-2 2.2.1 + GNINA 1.3.3 | WSL `~/virmolab-alat` (TIDAK ikut installer) | dipasang pengguna lewat `build_tools/pasang_gnina_boltz_wsl.sh`, perlu GPU |
+| OpenFE | tidak dipakai | hanya mendukung Linux dan macOS; F9 di Windows terbatas pada perencanaan dan analisis |
+
+Tiga bug yang hanya ketahuan setelah Boltz benar-benar dijalankan (15 Okt): afinitas tidak pernah dihitung
+karena YAML kurang blok `properties.affinity`; metrik keyakinan berskala 0 sampai 1, bukan 0 sampai 100; dan
+RMSD terhadap struktur kristal memerlukan superposisi lebih dulu. Pelajarannya: fixture yang dibuat dengan
+asumsi yang sama dengan kodenya tidak dapat menangkap kesalahan asumsi itu.
+
 **Versi kode 1.4.0** (14 Okt 2026) — rilis 1.4.0 menggabungkan rencana 1.3 dan 1.4: penargetan balik (F3a),
 jaringan & pengayaan jalur (F3b), QSAR (F5), penapisan farmakofor & bentuk 3D (F4), pelacak hipotesis uji lab (F12).
 Rinciannya di `CHANGELOG.md` [1.4.0]; rencana fitur selanjutnya (1.5–1.6) di `RENCANA_PENGEMBANGAN.md` dan
@@ -410,6 +428,11 @@ Windows 10, Ryzen 7 5800H, 16 GB RAM, RTX 3060 Laptop 6 GB (driver 610.74), Pyth
 | `core/qsar.py`, `core/konformal.py` | pipeline QSAR: kurasi, fitur, 5 algoritma sklearn, Q²/Golbraikh-Tropsha/Y-randomization, domain aplikabilitas, konformal split |
 | `core/farmakofor.py`, `core/bentuk.py` | kueri farmakofor 3D + bola eksklusi, konformer ETKDGv3, rdShapeAlign, penapisan ProcessPoolExecutor, validasi ROC/BEDROC/EF |
 | `core/hipotesis.py` | entri uji lab, normalisasi pelat mikro + fit dosis-respons 4PL (Z′, nilai tersensor), korelasi Spearman/Kendall bootstrap |
+| `core/kofolding.py` | co-folding Boltz-2: baca keluaran, superposisi Kabsch Cα, RMSD, IFP, label kesepakatan, kebaruan ligan PDB |
+| `core/peptida.py` | docking peptida: validasi sekuens, co-folding, minimisasi OpenMM + MM/GBSA, antarmuka ppi, superposisi ke acuan |
+| `core/xtb.py` | GFN2-xTB: HOMO/LUMO/celah/η/μ/ω, dipol, muatan, Fukui, ESP; paralel per inti, pemetaan situs metabolisme |
+| `core/generatif.py` | CReM: generasi analog, saringan PAINS/Brenk/SA/QED/kebaruan, front Pareto, silsilah |
+| `core/rbfe.py` | RBFE: pasangan MMP, pemetaan atom MCS, jaringan bintang/MST, MBAR, penutupan siklus, estimasi beban |
 | `ui/dialog_validasi_protokol.py` | wizard 4 langkah validasi: redocking kristal, cross-docking, pengayaan decoy, kartu metrik, draf metode, ekspor HTML, dan komposer figur |
 
 Aturan yang dipegang: jangan menamai variabel lokal sama dengan modul yang diimpor (`kerja`, `kit`, `theme`) —

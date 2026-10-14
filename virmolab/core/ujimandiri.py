@@ -610,6 +610,71 @@ def uji(lapor=None):
                 f"{len(b.fukui)} indeks Fukui")
     cek("Sifat elektronik xTB (GFN2)", xtb_uji)
 
+    def generatif_uji():
+        """Basis data fragmen CReM ikut terpasang dan menghasilkan analog yang sah."""
+        from . import generatif
+        info = generatif.tersedia()
+        if not info["ada"]:
+            raise RuntimeError(info["pesan"])
+        anak = generatif.generasi("CC(=O)Oc1ccccc1C(=O)O", "mutate", radius=2, maks=40)
+        if len(anak) < 5:
+            raise RuntimeError(f"hanya {len(anak)} analog dari basis data fragmen")
+        kunci = [k.inchikey for k in anak]
+        if len(kunci) != len(set(kunci)):
+            raise RuntimeError("analog memuat InChIKey ganda")
+        return f"{len(anak)} analog unik dari aspirin; {generatif.catatan_basis_data()[:70]}"
+    cek("Desain generatif (basis data fragmen)", generatif_uji)
+
+    def rbfe_uji():
+        """Pemetaan atom dan MBAR berjalan; MBAR diuji pada jawaban yang diketahui analitis."""
+        import numpy as np
+        from . import rbfe
+        pm = rbfe.peta_atom("c1ccccc1", "Cc1ccccc1")
+        if pm["n_bersama"] != 6 or pm["n_berubah"] != 1:
+            raise RuntimeError(f"pemetaan benzena ke toluena salah: {pm['n_bersama']}/{pm['n_berubah']}")
+        rng = np.random.default_rng(0)
+        x = rng.normal(0.0, 1.0, 600)
+        u0 = 0.5 * x ** 2
+        geser = 1.25
+        h = rbfe.analisis_mbar(np.vstack([u0, u0 + geser]), [300, 300],
+                               suhu=1.0 / rbfe.K_BOLTZMANN_KKAL)
+        if h["dg"] is None or abs(h["dg"] - geser) > 1e-4:
+            raise RuntimeError(f"MBAR memberi {h['dg']}, seharusnya {geser}")
+        st = rbfe.status_mesin()
+        return (f"pemetaan atom benar; MBAR memulihkan {h['dg']:.3f} dari {geser}; "
+                f"mesin simulasi: {'ada' if st['ada'] else 'tidak di platform ini'}")
+    cek("Energi bebas relatif (pemetaan & MBAR)", rbfe_uji)
+
+    def peptida_uji():
+        """Validasi sekuens peptida menegakkan batas dan menandai huruf yang bukan asam amino."""
+        from . import peptida
+        sah = peptida.validasi_sekuens("ETFSDLWKLLPEN")
+        if not sah["sah"] or sah["panjang"] != 13:
+            raise RuntimeError(f"sekuens p53 ditolak: {sah['pesan']}")
+        salah = peptida.validasi_sekuens("ETJSDLWK")
+        if salah["sah"] or salah["posisi_galat"] != [2]:
+            raise RuntimeError("huruf bukan asam amino tidak ditandai pada posisinya")
+        panjang = peptida.validasi_sekuens("A" * (peptida.PANJANG_MAKS + 1))
+        if panjang["sah"]:
+            raise RuntimeError("batas panjang peptida tidak ditegakkan")
+        return f"batas {peptida.PANJANG_MAKS} residu ditegakkan; posisi huruf salah ditandai"
+    cek("Docking peptida (validasi sekuens)", peptida_uji)
+
+    def kofolding_uji():
+        """Label kesepakatan co-folding mengikuti aturan tertulis, termasuk saat RMSD tidak ada."""
+        from . import kofolding
+        if kofolding.label_kesepakatan(1.0, True, True) != "Sepakat":
+            raise RuntimeError("RMSD kecil dengan kedua QC lolos seharusnya Sepakat")
+        if kofolding.label_kesepakatan(1.0, True, False) != "Sebagian":
+            raise RuntimeError("QC gagal seharusnya menurunkan label menjadi Sebagian")
+        if kofolding.label_kesepakatan(5.0, True, True, ifp_tanimoto=0.1) != "Bertentangan":
+            raise RuntimeError("RMSD besar dengan kontak berbeda seharusnya Bertentangan")
+        if kofolding.label_kesepakatan(None) != "–":
+            raise RuntimeError("RMSD yang tidak terhitung tidak boleh diberi label")
+        st = kofolding.status_boltz()
+        return f"aturan label benar; Boltz: {'siap' if st.get('ada') else 'belum terpasang'}"
+    cek("Co-folding (aturan kesepakatan)", kofolding_uji)
+
     return hasil
 
 
