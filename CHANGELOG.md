@@ -21,6 +21,14 @@ Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x 
   - Analisis antarmuka lewat `core/ppi.py`: kontak, ikatan hidrogen, jembatan garam, luas terkubur, dan daftar residu antarmuka kedua rantai.
   - Kompleks dapat dimuat ke penampil dengan peptida ditandai warna tersendiri; hasilnya tersimpan di proyek.
   - AutoDock CrankPep (ADCP) tidak dipakai karena status lisensinya belum diverifikasi sebagai sumber terbuka.
+- **Sifat elektronik kuantum (F7)** (Analisis › Sifat ligan dan desain › Sifat elektronik (xTB)…; `core/xtb.py`, `ui/dialog_xtb.py`):
+  - xtb 6.7.1pre (GFN2-xTB, LGPL-3.0) ikut dibundel di `bin/xtb`; biner resmi grimme-lab, SHA-256 dicocokkan saat pemasangan.
+  - Deskriptor per ligan: HOMO, LUMO, celah, kekerasan kimia, potensial kimia, elektrofilisitas, dan momen dipol, dengan pelarut implisit ALPB atau fase gas.
+  - Indeks Fukui f(+), f(-), f(0) dan muatan parsial Mulliken per atom, ditampilkan sebagai pewarnaan atom divergen di penampil 3D beserta skalanya.
+  - Potensial elektrostatik dari xtb dipetakan ke atom terdekat untuk pewarnaan; nilai yang dilaporkan di tabel tetap berasal langsung dari xtb.
+  - Indeks Fukui f(-) dibandingkan dengan prediksi situs metabolisme CYP, dengan penomoran atom dipetakan lewat pencocokan substruktur supaya tidak salah menunjuk atom.
+  - Perhitungan berjalan di proses terpisah dan paralel per inti CPU; kegagalan, batas waktu, dan SCF yang tidak konvergen dilaporkan sebagai nilai kosong beserta sebabnya.
+  - Peringatan metode ikut di dialog, paragraf metode, dan ekspor CSV: GFN2-xTB semi-empiris, celahnya cenderung lebih kecil dari DFT, dipakai untuk tren antar-ligan, bukan nilai absolut.
 
 ### Diperbaiki
 - Sisa ruang di kanan kepala tabel tampil putih pada tema gelap karena QSS hanya mengatur tiap seksi kepala, bukan `QHeaderView` itu sendiri.

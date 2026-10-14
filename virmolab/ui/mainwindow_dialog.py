@@ -286,6 +286,13 @@ class PembukaDialog:
         d.setAttribute(Qt.WA_DeleteOnClose)
         d.show()
 
+    def buka_xtb(self):
+        from .dialog_xtb import DialogXtb
+        d = DialogXtb(self)
+        d.setAttribute(Qt.WA_DeleteOnClose)
+        d.show()
+        return d
+
     def buka_peptida(self):
         from .dialog_peptida import DialogPeptida
         d = DialogPeptida(self)

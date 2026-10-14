@@ -62,6 +62,7 @@ def migrasi_proyek(data: dict) -> dict:
     data.setdefault("jejak", [])
     data.setdefault("target_balik", [])
     data.setdefault("peptida", [])
+    data.setdefault("xtb", {})
     return data
 
 
@@ -88,6 +89,7 @@ class Proyek:
         self.jejak = []               # riwayat sumber data internet: [{sumber, versi, diambil, kueri, lisensi}]
         self.target_balik = []        # penargetan balik: [{ligan_id, kelas, hasil, parameter, jejak}]
         self.peptida = []             # docking peptida: [{sekuens, rantai_peptida, plddt, mmgbsa, antarmuka}]
+        self.xtb = {}                 # sifat elektronik GFN2-xTB per ligan: {nama: {homo_ev, celah_ev, fukui, ...}}
 
     def catat_jejak(self, jejak):
         """Catat jejak sumber data internet (objek Jejak atau dict) tanpa duplikat (kunci sumber+kueri)."""
@@ -124,7 +126,8 @@ class Proyek:
                 "objek": self.objek, "catatan": self.catatan, "validasi": self.validasi,
                 "blast": self.blast, "syarat_jarak": self.syarat_jarak,
                 "eksperimen": self.eksperimen, "md": self.md, "templat": self.templat,
-                "jejak": self.jejak, "target_balik": self.target_balik, "peptida": self.peptida}
+                "jejak": self.jejak, "target_balik": self.target_balik, "peptida": self.peptida,
+                "xtb": self.xtb}
 
     def simpan(self):
         self.siapkan_folder()
@@ -177,6 +180,7 @@ class Proyek:
         pr.jejak = d.get("jejak") or []
         pr.target_balik = d.get("target_balik") or []
         pr.peptida = d.get("peptida") or []
+        pr.xtb = d.get("xtb") or {}
         # job yang terputus (aplikasi ditutup/crash) bisa dilanjutkan
         for j in pr.job:
             if j.get("status") in ("berjalan", "menunggu"):

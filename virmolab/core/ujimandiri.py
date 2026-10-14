@@ -582,6 +582,34 @@ def uji(lapor=None):
         return f"IC50 {f['ic50_uM']:.2f} µM (Hill {f['hill']:.2f}); senyawa lemah tersensor"
     cek("Pelacak hipotesis (fit dosis-respons 4PL)", hipotesis_uji)
 
+    def xtb_uji():
+        """xtb ikut terpasang dan memberi urutan celah HOMO-LUMO yang benar secara kimia.
+
+        Benzena harus bercelah lebih lebar daripada anilin: gugus amino mendonorkan elektron dan
+        menaikkan HOMO. Bila xtb tidak ikut dibundel, uji ini melaporkan apa adanya, bukan gagal."""
+        from rdkit import Chem
+        from rdkit.Chem import AllChem
+        from . import xtb as xtb_mod
+        info = xtb_mod.tersedia()
+        if not info["ada"]:
+            return f"dilewati: {info['pesan'][:90]}"
+
+        def siap(smi):
+            m = Chem.AddHs(Chem.MolFromSmiles(smi))
+            AllChem.EmbedMolecule(m, randomSeed=42)
+            AllChem.MMFFOptimizeMolecule(m)
+            return m
+
+        b = xtb_mod.hitung(siap("c1ccccc1"), esp=False, nama="benzena")
+        a = xtb_mod.hitung(siap("Nc1ccccc1"), esp=False, nama="anilin")
+        if not b.tersedia or not a.tersedia:
+            raise RuntimeError(b.pesan or a.pesan)
+        if not b.celah_ev > a.celah_ev:
+            raise RuntimeError(f"celah benzena {b.celah_ev:.2f} eV tidak lebih besar dari anilin {a.celah_ev:.2f} eV")
+        return (f"xtb {info['versi']}: celah benzena {b.celah_ev:.2f} eV > anilin {a.celah_ev:.2f} eV; "
+                f"{len(b.fukui)} indeks Fukui")
+    cek("Sifat elektronik xTB (GFN2)", xtb_uji)
+
     return hasil
 
 

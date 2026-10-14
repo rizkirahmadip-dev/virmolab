@@ -357,6 +357,16 @@
 <li><b>Latih ulang QSAR dengan data baru</b> membuka wizard QSAR dengan aktivitas uji lab proyek sudah termuat, sehingga model dapat dilatih ulang memakai data pengukuran Anda sendiri.</li>
 </ul>
 
+<h3 id="xtb">Sifat elektronik (xTB)</h3>
+<p><b>Analisis › Sifat ligan dan desain › Sifat elektronik (xTB)…</b> menghitung sifat elektronik ligan dengan GFN2-xTB. Docking menilai bentuk dan interaksi; bagian ini menjelaskan sisi elektroniknya, misalnya atom mana yang rawan diserang dan seberapa mudah molekul melepas atau menerima elektron.</p>
+<ul>
+<li><b>Deskriptor:</b> HOMO, LUMO, celah, kekerasan kimia (&eta;), potensial kimia (&mu;), elektrofilisitas (&omega;), dan momen dipol. Pelarut dapat dipilih (air, metanol, DMSO, dan lainnya) atau dihitung di fase gas.</li>
+<li><b>Indeks Fukui:</b> f(-) menandai atom yang rentan diserang elektrofil, f(+) yang rentan diserang nukleofil. Nilainya diwarnakan langsung pada atom di penampil 3D dengan skala divergen beserta batas angkanya.</li>
+<li><b>Potensial elektrostatik:</b> titik ESP dari xtb dipetakan ke atom terdekat untuk pewarnaan. Angka yang ditampilkan di tabel tetap berasal langsung dari xtb, bukan hasil pemetaan.</li>
+<li><b>Hubungan dengan metabolisme:</b> aplikasi membandingkan peringkat f(-) dengan prediksi situs metabolisme CYP. Bila keduanya menunjuk atom yang sama, dugaan titik oksidasi menjadi lebih kuat.</li>
+<li><b>Batasan yang wajib disebut:</b> GFN2-xTB adalah metode semi-empiris, bukan DFT. Celah HOMO-LUMO-nya cenderung lebih kecil daripada DFT, jadi pakailah untuk membandingkan tren antarligan, bukan sebagai nilai mutlak yang dapat dikutip setara hasil DFT. Kalimat ini ikut tercetak di paragraf metode dan ekspor CSV.</li>
+</ul>
+
 <h3 id="peptida">Docking peptida</h3>
 <p><b>Siapkan › Langkah 2 · Ligan › Peptida dari sekuens…</b> membangun kompleks peptida dan reseptor. Fungsi skor docking seperti Vina dirancang untuk molekul kecil dan menjadi tidak dapat diandalkan ketika ligannya punya puluhan ikatan berputar, jadi alur ini tidak memakai docking sama sekali.</p>
 <ul>

@@ -107,6 +107,17 @@ const VM = {
     if (mode === 'plddt') return {colorfunc: a => a.b > 90 ? '#0053D6' : a.b > 70 ? '#65CBF3' : a.b > 50 ? '#FFDB13' : '#FF7D45'};
     if (mode === 'hydro') return {colorfunc: a => this.gradien(((KD[a.resn] ?? 0) + 4.5) / 9, ['#3a6fc2', '#f4f4f4', '#d07b1c'])};
     if (mode === 'muatan') return {colorfunc: a => { const q = MUATAN[a.resn] || 0; return q < 0 ? '#d64545' : q > 0.5 ? '#3a6fd6' : q > 0 ? '#8fb0e6' : '#e9e9e9'; }};
+    /* nilai per atom dari Python (Fukui, muatan parsial, ESP): c.nilai sejajar indeks atom.
+       Atom tanpa nilai memakai c.kosong supaya tampak berbeda dari nilai nol. */
+    if (mode === 'nilai') {
+      const v = c.nilai || [], lo = c.min ?? 0, hi = c.max ?? 1, kosong = c.kosong || '#9aa3ae';
+      const skala = c.skala || ['#2f6fd6', '#f2f2f2', '#d64545'];
+      return {colorfunc: a => {
+        const x = v[a.index ?? a.serial];
+        if (x === undefined || x === null) return kosong;
+        return this.gradien(hi > lo ? (x - lo) / (hi - lo) : 0.5, skala);
+      }};
+    }
     return {};
   },
   pelangi(t) {

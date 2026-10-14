@@ -44,6 +44,8 @@ P2Rank (bin/p2rank)  2.5.1       MIT                             licenses/P2Rank
 Eclipse Temurin JRE  21.0.12.1   GPL-2.0 + Classpath Exception   licenses/Eclipse-Temurin-JRE_LICENSE.txt
   (dipakai hanya untuk menjalankan P2Rank; komponen lain di bin/jre/legal)
 Open Babel (obabel)  3.1.1       GPL-2.0                         licenses/GPL-2.0.txt
+xtb (bin/xtb)        6.7.1pre    LGPL-3.0                        licenses/xtb_LICENSE_LGPL-3.0.txt
+  (GFN2-xTB; biner Windows resmi grimme-lab/xtb; pustaka sertaannya di bin/xtb/share/licenses)
 OpenCL ICD Loader, clinfo (Khronos OpenCL SDK 2026.05.29)
                                  Apache-2.0                      licenses/Apache-2.0.txt
 Microsoft Visual C++ runtime (vcomp140.dll, msvcp140.dll)

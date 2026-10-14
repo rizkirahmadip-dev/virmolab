@@ -426,7 +426,7 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
             self.tab_tengah.setCurrentWidget(tab[k])
             return
         aksi_peta = {"rcsb": lambda: self.ambil(0), "alphafold": lambda: self.ambil(3), "pubchem": lambda: self.ambil(1), "smiles": lambda: self.ambil(2),
-                     "pustaka": self.buka_pustaka, "tanaman": self.buka_tanaman, "peptida": self.buka_peptida, "buka": self.buka_berkas, "reseptor": self.siapkan_reseptor, "ligan": self.siapkan_ligan,
+                     "pustaka": self.buka_pustaka, "tanaman": self.buka_tanaman, "peptida": self.buka_peptida, "xtb": self.buka_xtb, "buka": self.buka_berkas, "reseptor": self.siapkan_reseptor, "ligan": self.siapkan_ligan,
                      "validasi": self.validasi_redocking, "validasi_protokol": self.buka_validasi_protokol,
                      "ekspor": lambda: self.buka_ekspor(3),
                      "laporan": lambda: self.buka_ekspor(4), "mpo": self.buka_mpo, "labplanner": self.buka_labplanner,
@@ -987,7 +987,9 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
             A("Titik metabolisme CYP450…", "target", self.buka_metabolisme, None,
               "Gugus yang lazim dioksidasi CYP450 fase I dan saran penggantinya (berbasis pola SMARTS)"),
             A("Kinetika dan waktu tinggal…", "clock", self.buka_kinetika, None,
-              "Perkiraan kasar k_off, waktu tinggal τ, dan waktu paruh kompleks dari ΔG dan pola kontak")))
+              "Perkiraan kasar k_off, waktu tinggal τ, dan waktu paruh kompleks dari ΔG dan pola kontak"),
+            A("Sifat elektronik (xTB)…", "lig", self.buka_xtb, None,
+              "HOMO, LUMO, celah, elektrofilisitas, dipol, muatan, dan indeks Fukui dengan GFN2-xTB semi-empiris")))
 
         self._sub(m, "Penapisan banyak ligan", (
             A("Dasbor penapisan virtual…", "table", self.buka_penapisan, None,
