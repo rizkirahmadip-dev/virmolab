@@ -33,7 +33,7 @@ datas += collect_data_files("lightning") + collect_data_files("lightning_fabric"
 datas += [(str(AKAR / "virmolab" / "i18n" / "en.json"), "virmolab/i18n")]
 datas += [(str(AKAR / "virmolab" / "data" / "nama_tanaman_id.csv"), "virmolab/data")]   # nama lokal tanaman obat (F1)
 # Wajib ada: tanpa ini fitur terpasang rusak diam-diam, jadi build harus gagal bila folder hilang
-for _d in ("panel_target", "gmt"):   # panel target penargetan balik (F3), set gen Reactome/GO (F3b)
+for _d in ("panel_target", "gmt", "crem"):   # panel target (F3), set gen Reactome/GO (F3b), fragmen CReM (F8)
     assert (AKAR / "virmolab" / "data" / _d).is_dir(), f"virmolab/data/{_d} tidak ada"
     datas += [(str(AKAR / "virmolab" / "data" / _d), f"virmolab/data/{_d}")]
 # cuik_molmaker (chemprop; Apache-2.0) memuat .pyd lewat os.listdir di folder paketnya -> salin apa adanya
@@ -51,6 +51,8 @@ hidden += collect_submodules("chemprop") + ["rdkit.Chem.Pharm2D.Gobbi_Pharm2D", 
 hidden += collect_submodules("sklearn") + ["joblib", "scipy.stats", "scipy.special.cython_special"]
 # F4 (rdShapeAlign, pekerja ProcessPoolExecutor) dan F12 (fit 4PL scipy.optimize.curve_fit)
 hidden += ["rdkit.Chem.rdShapeAlign", "scipy.optimize", "concurrent.futures.process"]
+# F8: CReM memuat basis data fragmen lewat sqlite3
+hidden += collect_submodules("crem") + ["sqlite3"]
 
 # ---- MD & MM/GBSA (core/md.py): OpenMM + PDBFixer + openmmforcefields + OpenFF (toolkit, Interchange, NAGL)
 import openmm as _omm  # noqa: E402

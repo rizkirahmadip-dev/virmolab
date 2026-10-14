@@ -357,6 +357,18 @@
 <li><b>Latih ulang QSAR dengan data baru</b> membuka wizard QSAR dengan aktivitas uji lab proyek sudah termuat, sehingga model dapat dilatih ulang memakai data pengukuran Anda sendiri.</li>
 </ul>
 
+<h3 id="generatif">Desain generatif</h3>
+<p><b>Analisis › Sifat ligan dan desain › Desain generatif…</b> membangun analog baru dari satu senyawa induk. Fragmen penggantinya diambil dari senyawa nyata, sehingga usulannya cenderung masih dapat disintesis, berbeda dengan pembangkit struktur acak.</p>
+<ul>
+<li><b>Operasi:</b> <i>ganti fragmen</i> menukar potongan molekul dengan potongan lain yang pernah muncul pada lingkungan kimia serupa; <i>tambah fragmen</i> menumbuhkan gugus baru. Radius konteks menentukan seberapa luas lingkungan yang harus cocok: makin besar makin konservatif dan makin sedikit hasilnya.</li>
+<li><b>Sumber fragmen:</b> basis data dibangun dari pustaka senyawa yang sudah ada di VirmoLab, yaitu obat disetujui. Karena jumlah senyawanya jauh lebih sedikit daripada ChEMBL penuh, keragaman fragmennya lebih sempit. Asal basis data ini ikut tercetak di paragraf metode dan ekspor CSV.</li>
+<li><b>Saringan:</b> substruktur pengganggu (PAINS dan Brenk), kemudahan sintesis (SAScore), kemiripan obat (QED), dan kebaruan terhadap induk. Jumlah yang ditolak beserta sebabnya selalu ditampilkan, jadi Anda tahu kapan saringannya terlalu ketat.</li>
+<li><b>Ambang mengikuti induk:</b> bila senyawa induk Anda sendiri sudah di luar ambang, misalnya inhibitor peptidomimetik yang QED-nya rendah, ambang diturunkan sampai setara induk. Tanpa itu seluruh turunannya akan tertolak dan fitur ini tidak berguna justru pada seri senyawa yang paling perlu dioptimasi. Pilihan ini dapat dimatikan.</li>
+<li><b>Peringkat:</b> setelah kandidat di-docking, peringkatnya memakai front Pareto atas energi bebas pengikatan, QED, dan SAScore sekaligus, bukan satu angka gabungan. Kandidat yang gagal di-docking dikeluarkan dari peringkat dan dihitung terpisah, tidak diberi skor pengganti.</li>
+<li><b>Alur kerja:</b> pilih kandidat di tabel, tekan <b>Impor terpilih sebagai ligan</b>, lalu lanjutkan lewat Siapkan ligan dan antrean docking seperti ligan biasa.</li>
+<li>Seluruh analog adalah usulan komputasi. Kelayakan sintesisnya tetap perlu dinilai ahli kimia sebelum dikerjakan di laboratorium.</li>
+</ul>
+
 <h3 id="xtb">Sifat elektronik (xTB)</h3>
 <p><b>Analisis › Sifat ligan dan desain › Sifat elektronik (xTB)…</b> menghitung sifat elektronik ligan dengan GFN2-xTB. Docking menilai bentuk dan interaksi; bagian ini menjelaskan sisi elektroniknya, misalnya atom mana yang rawan diserang dan seberapa mudah molekul melepas atau menerima elektron.</p>
 <ul>

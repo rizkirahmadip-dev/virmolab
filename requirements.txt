@@ -32,5 +32,8 @@ click
 platformdirs
 # v0.9.6: ParmEd 4.3.1 (LGPL) untuk kompleks.top. Jangan dipasang lewat baris ini:
 # sumbernya butuh kompiler C++ untuk _rdparm. Pakai build_tools/pasang_parmed.py
+# F8 desain generatif: basis data fragmen dibangun sendiri dengan dev/buat_db_fragmen.py
+crem==0.3.2
+
 # build
 pyinstaller==6.22.3

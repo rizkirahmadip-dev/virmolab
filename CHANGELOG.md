@@ -29,6 +29,13 @@ Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x 
   - Indeks Fukui f(-) dibandingkan dengan prediksi situs metabolisme CYP, dengan penomoran atom dipetakan lewat pencocokan substruktur supaya tidak salah menunjuk atom.
   - Perhitungan berjalan di proses terpisah dan paralel per inti CPU; kegagalan, batas waktu, dan SCF yang tidak konvergen dilaporkan sebagai nilai kosong beserta sebabnya.
   - Peringatan metode ikut di dialog, paragraf metode, dan ekspor CSV: GFN2-xTB semi-empiris, celahnya cenderung lebih kecil dari DFT, dipakai untuk tren antar-ligan, bukan nilai absolut.
+- **Desain generatif terpandu docking (F8)** (Analisis › Sifat ligan dan desain › Desain generatif…; `core/generatif.py`, `ui/dialog_generatif.py`):
+  - Analog dibangun dengan CReM (BSD-3-Clause) memakai basis data fragmen yang dibangun sendiri dari 2316 obat disetujui di pustaka lokal (`dev/buat_db_fragmen.py`, 42 MB), bukan mengunduh basis data ChEMBL penuh yang berukuran gigabyte.
+  - Operasi ganti fragmen dan tambah fragmen dengan radius konteks yang dapat diatur; duplikat disaring berdasarkan InChIKey dan induk tidak ikut sebagai anak.
+  - Saringan PAINS, Brenk, SAScore, QED, dan kebaruan terhadap induk; setiap penolakan menyimpan alasannya dan ditampilkan sebagai ringkasan supaya ambang yang terlalu ketat terlihat.
+  - Ambang QED dan SAScore dapat mengikuti induk bila induknya sendiri di luar ambang. Tanpa ini, senyawa seperti indinavir (QED sekitar 0,24) membuat seluruh turunannya tertolak, sehingga fiturnya tidak terpakai justru pada kasus yang membutuhkannya.
+  - Peringkat multi-objektif front Pareto atas ΔG, QED, dan SAScore; kandidat tanpa ΔG tidak diperingkat dan kandidat yang gagal di-docking dihitung terpisah.
+  - Silsilah induk ke anak, ekspor CSV beserta asal fragmen, dan impor kandidat terpilih sebagai ligan proyek.
 
 ### Diperbaiki
 - Sisa ruang di kanan kepala tabel tampil putih pada tema gelap karena QSS hanya mengatur tiap seksi kepala, bukan `QHeaderView` itu sendiri.
