@@ -1,11 +1,24 @@
 # Rencana Pengembangan Fitur VirmoLab 1.2 – 1.6
 
-Status: **1.2 – 1.4 selesai** (rilis 1.4.0, 14 Oktober 2026); 1.5 – 1.6 masih rencana.
+Status: **seluruh F1 – F12 sudah dikerjakan.** 1.2 – 1.4 dirilis (1.4.0, 14 Oktober 2026);
+F6, F10, F7, F8, dan F9 sudah di-commit dan menunggu rilis 1.5/1.6.
 Disusun: 13 Oktober 2026, sesudah commit `585ab9f` (1.1.2).
 
-Selesai dan terpasang: **F1** tanaman obat, **F2** analisis MD lengkap, **F11** validasi protokol (1.2.0) ·
+Selesai dan dirilis: **F1** tanaman obat, **F2** analisis MD lengkap, **F11** validasi protokol (1.2.0) ·
 **F3a** penargetan balik, **F3b** jaringan & pengayaan jalur, **F4** penapisan farmakofor & bentuk 3D,
-**F5** QSAR, **F12** pelacak hipotesis (1.4.0). Prompt pelaksanaan ada di `PROMPT_SISA.md`.
+**F5** QSAR, **F12** pelacak hipotesis (1.4.0).
+
+Selesai, belum dirilis: **F6** co-folding Boltz-2, **F10** docking peptida, **F7** sifat elektronik xTB,
+**F8** desain generatif CReM, **F9** RBFE (perencanaan dan analisis saja).
+
+Dua batasan yang ditemukan saat implementasi dan tidak dapat dihindari di mesin Windows ini:
+
+- **F6 dan F10** memerlukan Boltz-2 di WSL, yang belum terpasang. Jalur nyatanya ada di belakang
+  `--daring` dan belum pernah dijalankan; yang teruji baru pembacaan, penyelarasan, dan pelabelan.
+- **F9** tidak dapat menjalankan simulasinya sama sekali: OpenFE hanya mendukung Linux dan macOS.
+  Yang tersedia adalah perencanaan jaringan dan analisis MBAR atas hasil dari mesin Linux.
+
+Prompt pelaksanaan ada di `PROMPT_SISA.md`.
 
 Cara membaca:
 - **[ada]** = sudah ada di kode 1.1.2 (dicek dengan grep, bukan ingatan).
@@ -404,7 +417,7 @@ R² < 0,2; konformal cakupan 88–92 % pada set uji.
 
 ---
 
-### F6. Konsensus docking × co-folding + validitas fisik  ★★  (M)
+### F6. Konsensus docking × co-folding + validitas fisik  ★★  (M)  — **selesai, menunggu rilis**
 
 **Konteks 2026.**
 - Co-folding (AlphaFold 3, Boltz-2, Chai-1, Protenix) mencapai ± 77 % RMSD < 2 Å di PoseBusters (AF3),
@@ -434,7 +447,7 @@ harus dijelaskan di dokumen).
 
 ---
 
-### F7. Sifat elektronik kuantum (xTB)  ★★  (M) [izin]
+### F7. Sifat elektronik kuantum (xTB)  ★★  (M) [izin]  — **selesai, menunggu rilis**
 
 **Tujuan.** HOMO, LUMO, celah, kekerasan kimia η = (E_LUMO − E_HOMO)/2, potensial kimia μ, elektrofilisitas
 ω = μ²/2η, momen dipol, muatan parsial, **indeks Fukui** (f⁺, f⁻, f⁰) untuk reaktivitas, peta ESP.
@@ -460,7 +473,7 @@ orto/para.
 
 ---
 
-### F8. Desain generatif terpandu docking  ★★  (L) [izin]
+### F8. Desain generatif terpandu docking  ★★  (L) [izin]  — **selesai, menunggu rilis**
 
 **Tujuan.** Dari hit terbaik → analog baru yang dapat disintesis → saring → docking → iterasi.
 
@@ -481,7 +494,7 @@ valid, semua lolos sanitasi RDKit, tidak ada duplikat InChIKey.
 
 ---
 
-### F9. Energi bebas relatif alkimia (RBFE)  ★  (L, eksperimental) [izin]
+### F9. Energi bebas relatif alkimia (RBFE)  ★  (L, eksperimental) [izin]  — **selesai sebagian: perencanaan dan analisis saja**
 
 **Konteks.** FEP/RBFE adalah standar emas industri untuk seri kongenerik (galat ± 1 kcal/mol). OpenFE
 (MIT) membawa alur ini ke perangkat lunak terbuka berbasis OpenMM + OpenFF — **keduanya sudah terpasang**.
@@ -495,7 +508,7 @@ jelas. Tampilkan estimasi waktu dari `md.uji_kecepatan` [ada] sebelum mulai.
 
 ---
 
-### F10. Docking peptida  ★  (M)
+### F10. Docking peptida  ★  (M)  — **selesai, menunggu rilis**
 
 **Konteks 2026.** Vina/AD-GPU lemah untuk peptida (> 20 ikatan rotasi). Co-folding (Boltz-2) menangani
 peptida secara alami dan **sudah terintegrasi** lewat WSL.
