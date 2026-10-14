@@ -156,7 +156,7 @@ def nilai_gnina_pose(teks_reseptor_pdbqt, teks_ligan_pdbqt, pose_pdbqt, folder):
     return angka_gnina(skor_gnina(teks_reseptor_pdbqt, Chem.MolToMolBlock(mol), folder, pdbqt=True))
 
 
-def _yaml_boltz(sekuens_rantai, smiles, msa_kosong=True):
+def _yaml_boltz(sekuens_rantai, smiles, msa_kosong=True, peptida=None):
     import yaml
     urut = []
     for i, (rantai, seq) in enumerate(sekuens_rantai):
@@ -167,9 +167,19 @@ def _yaml_boltz(sekuens_rantai, smiles, msa_kosong=True):
             urut.append({"protein": entri})
     if not urut:
         raise ValueError("Protein tidak punya sekuens asam amino.")
-    if not smiles:
+    if peptida:
+        # Peptida adalah rantai protein tersendiri, bukan ligan bermolekul kecil; id dipilih yang
+        # belum dipakai reseptor supaya Boltz tidak menggabungkannya dengan rantai reseptor.
+        dipakai = {e["protein"]["id"] for e in urut}
+        pid = next(c for c in "PQRSTUVWXYZ" if c not in dipakai)
+        entri = {"id": pid, "sequence": peptida}
+        if msa_kosong:
+            entri["msa"] = "empty"
+        urut.append({"protein": entri})
+    elif smiles:
+        urut.append({"ligand": {"id": "L", "smiles": smiles}})
+    else:
         raise ValueError("Ligan tidak punya SMILES.")
-    urut.append({"ligand": {"id": "L", "smiles": smiles}})
     return yaml.safe_dump({"version": 1, "sequences": urut}, sort_keys=False, allow_unicode=True)
 
 
@@ -178,14 +188,17 @@ def _langkah_boltz(penuh):
     return ("3", "200") if penuh else ("1", "50")
 
 
-def prediksi_boltz(sekuens_rantai, smiles, folder, gpu=True, msa_server=False, penuh=False):
+def prediksi_boltz(sekuens_rantai, smiles, folder, gpu=True, msa_server=False, penuh=False, peptida=None):
+    """Jalankan Boltz-2. Isi `peptida` dengan sekuens satu huruf untuk co-folding peptida; `smiles`
+    dipakai bila ligannya molekul kecil. Salah satu wajib ada."""
     st = status_boltz()
     if not st["ada"]:
         raise RuntimeError(st["pesan"])
     folder = Path(folder)
     folder.mkdir(parents=True, exist_ok=True)
     yaml_path = folder / "boltz.yaml"
-    yaml_path.write_text(_yaml_boltz(sekuens_rantai, smiles, msa_kosong=not msa_server), encoding="utf-8")
+    yaml_path.write_text(_yaml_boltz(sekuens_rantai, smiles, msa_kosong=not msa_server, peptida=peptida),
+                         encoding="utf-8")
     keluar = folder / "boltz_out"
     aks = "gpu" if gpu else "cpu"
     daur, langkah = _langkah_boltz(penuh)

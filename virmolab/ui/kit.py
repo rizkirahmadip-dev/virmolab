@@ -192,6 +192,12 @@ def salin(teks, status=None, pesan="Disalin ke papan klip."):
         status.setText(pesan)
 
 
+def pesan_peringatan(induk, teks, judul_kotak="Perhatian"):
+    """Kotak peringatan seragam. Dipakai dialog yang perlu menahan pengguna sebelum melanjutkan."""
+    from PySide6.QtWidgets import QMessageBox
+    QMessageBox.warning(induk, judul_kotak, teks)
+
+
 def garis():
     g = QFrame()
     g.setObjectName("garis")

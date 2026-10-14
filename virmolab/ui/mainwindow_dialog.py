@@ -286,6 +286,13 @@ class PembukaDialog:
         d.setAttribute(Qt.WA_DeleteOnClose)
         d.show()
 
+    def buka_peptida(self):
+        from .dialog_peptida import DialogPeptida
+        d = DialogPeptida(self)
+        d.setAttribute(Qt.WA_DeleteOnClose)
+        d.show()
+        return d
+
     def buka_qsar(self):
         from .dialog_qsar import DialogQSAR
         d = DialogQSAR(self, proyek=self.proyek)

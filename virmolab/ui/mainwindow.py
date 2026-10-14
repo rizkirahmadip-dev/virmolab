@@ -426,7 +426,7 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
             self.tab_tengah.setCurrentWidget(tab[k])
             return
         aksi_peta = {"rcsb": lambda: self.ambil(0), "alphafold": lambda: self.ambil(3), "pubchem": lambda: self.ambil(1), "smiles": lambda: self.ambil(2),
-                     "pustaka": self.buka_pustaka, "tanaman": self.buka_tanaman, "buka": self.buka_berkas, "reseptor": self.siapkan_reseptor, "ligan": self.siapkan_ligan,
+                     "pustaka": self.buka_pustaka, "tanaman": self.buka_tanaman, "peptida": self.buka_peptida, "buka": self.buka_berkas, "reseptor": self.siapkan_reseptor, "ligan": self.siapkan_ligan,
                      "validasi": self.validasi_redocking, "validasi_protokol": self.buka_validasi_protokol,
                      "ekspor": lambda: self.buka_ekspor(3),
                      "laporan": lambda: self.buka_ekspor(4), "mpo": self.buka_mpo, "labplanner": self.buka_labplanner,
@@ -647,6 +647,8 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
                            "Unduh senyawa dari PubChem dengan nama atau CID (bisa banyak sekaligus)")
         self.a_smiles = A("Ligan dari SMILES…", "smiles", lambda: self.ambil(2), None,
                           "Buat ligan 3D dari teks SMILES")
+        self.a_peptida = A("Peptida dari sekuens…", "lig", self.buka_peptida, None,
+                           "Bangun kompleks peptida dan reseptor dengan co-folding Boltz-2 (bukan docking Vina)")
         self.a_chembl = A("Ligan dari ChEMBL (aktif dikenal)…", "search", lambda: self.buka_chembl(0), None,
                           "Cari target di ChEMBL lalu impor senyawa aktif (pChEMBL) sebagai ligan pembanding/validasi")
         self.a_ketcher = A("Gambar ligan (Ketcher)…", "edit", lambda: self.gambar_ligan(), "Ctrl+Shift+K",
@@ -890,7 +892,8 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
         self._judul_menu(m, "Langkah 1 · Protein")
         isi(m, (self.a_rcsb, self.a_alphafold, self.a_rec))
         self._judul_menu(m, "Langkah 2 · Ligan")
-        isi(m, (self.a_pubchem, self.a_smiles, self.a_ketcher, self.a_chembl, self.a_pustaka, self.a_tanaman, self.a_lig))
+        isi(m, (self.a_pubchem, self.a_smiles, self.a_ketcher, self.a_chembl, self.a_pustaka, self.a_tanaman,
+                self.a_peptida, self.a_lig))
         self._judul_menu(m, "Langkah 3 · Area docking")
         isi(m, (self.a_kotak_asli, self.a_kotak_res, self.a_kotak_sesuai, self.a_kotak_kantong, self.a_kotak_blind,
                 self.a_box,
@@ -3445,7 +3448,7 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
 
     def jalankan_kofolding_pose(self, info_pose):
         """Jalankan inferensi & analisis konsensus Boltz-2 untuk pose yang dipilih."""
-        from ..core import kofolding, molekul, mesin as mesinmod
+        from ..core import kofolding, konservasi, molekul, mesin as mesinmod
         pr = self.proyek
         if not pr:
             return
@@ -3468,7 +3471,7 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
         # Ekstraksi sekuens rantai dari reseptor
         sekuens_rantai = []
         for c, res_list in sorted(rec_obj.rantai.items()):
-            huruf = [analisis.TIGA_KE_SATU.get(r[0], "X") for r in res_list]
+            huruf = [konservasi.TIGA_KE_SATU.get(r[0], "X") for r in res_list]
             if huruf:
                 sekuens_rantai.append((c, "".join(huruf)))
 

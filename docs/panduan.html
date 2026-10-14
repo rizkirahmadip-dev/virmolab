@@ -357,13 +357,23 @@
 <li><b>Latih ulang QSAR dengan data baru</b> membuka wizard QSAR dengan aktivitas uji lab proyek sudah termuat, sehingga model dapat dilatih ulang memakai data pengukuran Anda sendiri.</li>
 </ul>
 
+<h3 id="peptida">Docking peptida</h3>
+<p><b>Siapkan › Langkah 2 · Ligan › Peptida dari sekuens…</b> membangun kompleks peptida dan reseptor. Fungsi skor docking seperti Vina dirancang untuk molekul kecil dan menjadi tidak dapat diandalkan ketika ligannya punya puluhan ikatan berputar, jadi alur ini tidak memakai docking sama sekali.</p>
+<ul>
+<li><b>Masukan:</b> sekuens peptida dengan kode satu huruf, maksimal 30 residu. Huruf yang bukan asam amino disorot merah di tempatnya, jadi salah ketik langsung terlihat. Kode tidak baku seperti X, B, atau Z diterima tetapi diberi peringatan karena prediksinya kurang dapat dipercaya.</li>
+<li><b>Prasyarat:</b> sama dengan co-folding, yaitu Boltz-2 terpasang di WSL. Reseptor diambil dari proyek, dan peptida dikirim sebagai rantai protein tersendiri.</li>
+<li><b>Pemurnian:</b> kompleks hasil prediksi diminimisasi di pelarut implisit dengan reseptor dikekang, sehingga yang menyesuaikan diri terutama peptidanya. Dinamika singkat dapat ditambahkan, tetapi memakan waktu jauh lebih lama. Setelah itu MM/GBSA dihitung dengan peptida diperlakukan sebagai bagian yang mengikat.</li>
+<li><b>Hasil:</b> keyakinan model, geseran peptida selama minimisasi, perkiraan MM/GBSA, luas permukaan terkubur, serta daftar residu antarmuka kedua rantai. Kompleksnya dapat dimuat ke penampil dengan peptida ditandai warna tersendiri.</li>
+<li>Angka MM/GBSA adalah perkiraan kasar untuk membandingkan beberapa peptida pada target yang sama, bukan ramalan afinitas mutlak. Peringatan kebocoran data latih pada bagian co-folding berlaku juga di sini.</li>
+</ul>
+
 <h3 id="kofolding">Co-folding Boltz-2 dan kesepakatan pose</h3>
 <p>Tab <b>Co-folding</b> pada panel Properti membandingkan pose docking dengan struktur kompleks yang diprediksi model AI Boltz-2. Gunanya sebagai pemeriksaan silang: dua metode yang sama sekali berbeda cara kerjanya, bila sepakat, memberi keyakinan lebih pada pose tersebut.</p>
 <ul>
 <li><b>Prasyarat:</b> Boltz-2 terpasang di WSL lewat <code>build_tools/pasang_gnina_boltz_wsl.sh</code>. Paket dan bobot modelnya berlisensi MIT dan tidak ikut dibundel dalam pemasang VirmoLab. Bila belum terpasang, tombolnya mati dan statusnya menjelaskan cara memasang.</li>
 <li><b>Cara pakai:</b> pilih satu pose docking di penampil, lalu tekan <b>Jalankan co-folding untuk ligan ini</b>. Prediksi berjalan di latar belakang; pada GPU 6 GB sering kehabisan memori, dan bila itu terjadi jalankan dengan CPU.</li>
 <li><b>Penyelarasan:</b> struktur keluaran Boltz-2 disuperposisikan ke reseptor proyek memakai atom Cα sebelum RMSD ligan dihitung. Tanpa langkah ini kedua struktur berada di kerangka koordinat berbeda dan RMSD-nya tidak bermakna.</li>
-<li><b>Kesepakatan:</b> label <i>Sepakat</i>, <i>Sebagian</i>, atau <i>Bertentangan</i> disusun dari RMSD ligan, kemiripan Tanimoto sidik jari interaksi, dan hasil PoseBusters kedua pose. Dialog <b>Konsensus skor</b> menampilkan kolom afinitas Boltz-2 dan kesepakatan, serta dapat disaring agar hanya memuat ligan yang sepakat.</li>
+<li><b>Kesepakatan:</b> <i>Sepakat</i> bila RMSD ligan kurang dari 2,0 &Aring; dan kedua pose lolos PoseBusters; <i>Sebagian</i> bila RMSD-nya kecil tetapi ada pose yang tidak lolos, atau RMSD-nya besar tetapi pola kontaknya masih mirip (Tanimoto IFP minimal 0,6); selain itu <i>Bertentangan</i>. Dialog <b>Konsensus skor</b> menampilkan kolom afinitas Boltz-2 dan kesepakatan, serta dapat disaring agar hanya memuat ligan yang sepakat.</li>
 <li><b>Kesepakatan bukan bukti kebenaran.</b> Boltz-2 dilatih memakai struktur dari PDB. Bila target dan ligan Anda sudah ada di PDB, misalnya 1HSG dengan indinavir, model besar kemungkinan sudah pernah melihat jawabannya sewaktu dilatih, sehingga kesepakatan yang tinggi tidak membuktikan apa pun tentang kemampuan prediksi. Gejala ini disebut kebocoran data latih. VirmoLab memeriksa kemiripan ligan Anda terhadap ligan yang sudah ada di PDB dan memberi peringatan bila kemiripannya tinggi. Uji yang benar-benar bermakna memakai target atau ligan yang belum terwakili di PDB.</li>
 <li>Nilai afinitas Boltz-2 adalah perkiraan model, bukan hasil pengukuran, dan tetap memerlukan uji laboratorium.</li>
 </ul>

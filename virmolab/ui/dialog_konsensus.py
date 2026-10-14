@@ -272,10 +272,30 @@ class DialogKonsensus(QDialog):
         self.info.setHtml("".join(o))
 
     # ------------------------------------------------------------ keluaran
+    def _kalimat_kofolding(self):
+        """Kalimat metode co-folding, hanya bila ada ligan yang benar-benar sudah dianalisis.
+
+        Disusun dari jumlah nyata per label, bukan kalimat tetap, dan menyebut keterbatasannya."""
+        peta = (self.hasil or {}).get("peta_kofold") or {}
+        label = [v.get("kesepakatan") for v in peta.values()
+                 if v.get("kesepakatan") in ("Sepakat", "Sebagian", "Bertentangan")]
+        if not label:
+            return ""
+        n = len(label)
+        rinci = ", ".join(f"{label.count(k)} {k.lower()}" for k in ("Sepakat", "Sebagian", "Bertentangan")
+                          if label.count(k))
+        return (f" Sebagai pemeriksaan silang, {n} ligan juga diprediksi dengan model co-folding Boltz-2; "
+                "struktur keluarannya disuperposisikan ke reseptor memakai atom Cα sebelum RMSD ligan dihitung, "
+                "dan kesepakatan dinilai dari RMSD ligan, kemiripan Tanimoto sidik jari interaksi, serta "
+                f"PoseBusters kedua pose ({rinci}). Boltz-2 dilatih pada struktur PDB, sehingga kesepakatan pada "
+                "target atau ligan yang sudah ada di PDB dapat mencerminkan kebocoran data latih dan bukan "
+                "kemampuan prediksi.")
+
     def salin(self):
         t = K.teks_metode(self.hasil)
         if any(k.startswith("Vinardo") for k in (self.hasil or {}).get("kolom", [])):
             t += " Rescoring memakai AutoDock Vina 1.2 (--score_only) dengan fungsi skor Vina dan Vinardo."
+        t += self._kalimat_kofolding()
         QGuiApplication.clipboard().setText(t)
         self.jw.statusBar().showMessage("Paragraf metode konsensus disalin.", 4000)
 

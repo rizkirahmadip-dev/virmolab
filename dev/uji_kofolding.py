@@ -159,6 +159,32 @@ class UjiKofolding(unittest.TestCase):
         self.assertEqual(hasil.kesepakatan, "–")
 
 
+class UjiParagrafMetode(unittest.TestCase):
+    """Paragraf metode harus dirakit dari hitungan nyata dan diam bila belum ada data."""
+
+    @staticmethod
+    def _kalimat(peta):
+        from virmolab.ui.dialog_konsensus import DialogKonsensus
+
+        class Palsu:
+            hasil = {"peta_kofold": peta}
+
+        return DialogKonsensus._kalimat_kofolding(Palsu())
+
+    def test_tanpa_data_tidak_mengklaim_apa_pun(self):
+        self.assertEqual(self._kalimat({}), "")
+        self.assertEqual(self._kalimat({"a": {"kesepakatan": "–"}}), "")
+
+    def test_jumlah_sesuai_data(self):
+        t = self._kalimat({"a": {"kesepakatan": "Sepakat"}, "b": {"kesepakatan": "Sepakat"},
+                           "c": {"kesepakatan": "Bertentangan"}, "d": {"kesepakatan": "–"}})
+        self.assertIn("3 ligan", t)
+        self.assertIn("2 sepakat", t)
+        self.assertIn("1 bertentangan", t)
+        self.assertNotIn("sebagian", t)
+        self.assertIn("kebocoran data latih", t)
+
+
 class UjiBoltzDaring(unittest.TestCase):
     """Jalur WSL sungguhan. Tanpa --daring uji ini dilewati, bukan dinyatakan lulus."""
 

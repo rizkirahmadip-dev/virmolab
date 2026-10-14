@@ -118,11 +118,15 @@ def skor(query, homolog):
     return hasil
 
 
+# Satu-satunya tabel kode residu di proyek; dipakai juga oleh docking peptida dan co-folding.
+TIGA_KE_SATU = {"ALA": "A", "ARG": "R", "ASN": "N", "ASP": "D", "CYS": "C", "GLN": "Q", "GLU": "E", "GLY": "G",
+                "HIS": "H", "ILE": "I", "LEU": "L", "LYS": "K", "MET": "M", "PHE": "F", "PRO": "P", "SER": "S",
+                "THR": "T", "TRP": "W", "TYR": "Y", "VAL": "V"}
+
+
 def sekuens_rantai(teks_pdb, rantai):
     """Sekuens satu huruf dari ATOM protein (bukan HETATM) pada satu rantai."""
-    TIGA = {"ALA": "A", "ARG": "R", "ASN": "N", "ASP": "D", "CYS": "C", "GLN": "Q", "GLU": "E", "GLY": "G",
-            "HIS": "H", "ILE": "I", "LEU": "L", "LYS": "K", "MET": "M", "PHE": "F", "PRO": "P", "SER": "S",
-            "THR": "T", "TRP": "W", "TYR": "Y", "VAL": "V"}
+    TIGA = TIGA_KE_SATU
     urut, lihat = [], set()
     for b in teks_pdb.splitlines():
         if not b.startswith("ATOM") or len(b) < 26:

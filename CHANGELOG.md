@@ -11,10 +11,21 @@ Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x 
   - Label kesepakatan Sepakat, Sebagian, atau Bertentangan disusun dari RMSD ligan, kemiripan Tanimoto sidik jari interaksi, dan hasil PoseBusters kedua pose.
   - Kolom "Boltz-2 afinitas" dan "Kesepakatan" di dialog Konsensus, beserta saringan untuk menampilkan hanya ligan yang sepakat.
   - Kebaruan ligan diperiksa terhadap ligan yang sudah ada di PDB; kemiripan tinggi diberi peringatan karena struktur tersebut kemungkinan ikut dalam data latih model.
+  - Paragraf metode dialog Konsensus menyebut pemeriksaan silang co-folding hanya bila ada ligan yang benar-benar dianalisis, memuat jumlah per label, dan menyatakan risiko kebocoran data latih.
   - Kegagalan Boltz-2 atau WSL dilaporkan apa adanya sebagai nilai kosong, bukan angka bawaan.
+
+- **Docking peptida (F10)** (Siapkan › Langkah 2 · Ligan › Peptida dari sekuens…; `core/peptida.py`, `ui/dialog_peptida.py`):
+  - Masukan sekuens satu huruf dengan pemeriksaan langsung: huruf yang bukan asam amino disorot merah di tempatnya, batas 30 residu ditegakkan, dan kode tidak baku (B, Z, X, U, O) diterima dengan peringatan.
+  - Kompleks dibangun dengan co-folding Boltz-2, dengan peptida dikirim sebagai rantai protein tersendiri, bukan sebagai ligan bermolekul kecil. Fungsi skor docking tidak dipakai karena dirancang untuk molekul kecil.
+  - Pemurnian OpenMM di pelarut implisit: minimisasi dengan reseptor dikekang, pilihan dinamika singkat, lalu MM/GBSA dengan peptida sebagai bagian "ligan".
+  - Analisis antarmuka lewat `core/ppi.py`: kontak, ikatan hidrogen, jembatan garam, luas terkubur, dan daftar residu antarmuka kedua rantai.
+  - Kompleks dapat dimuat ke penampil dengan peptida ditandai warna tersendiri; hasilnya tersimpan di proyek.
+  - AutoDock CrankPep (ADCP) tidak dipakai karena status lisensinya belum diverifikasi sebagai sumber terbuka.
 
 ### Diperbaiki
 - Sisa ruang di kanan kepala tabel tampil putih pada tema gelap karena QSS hanya mengatur tiap seksi kepala, bukan `QHeaderView` itu sendiri.
+- `ui/mainwindow.py` memanggil `analisis.TIGA_KE_SATU` yang tidak pernah ada, sehingga menjalankan co-folding gagal seketika dengan `AttributeError`. Tabel kode residu kini satu-satunya, di `core/konservasi.py`.
+- `kit.pesan_peringatan` dipanggil tiga tempat tetapi belum pernah didefinisikan, sehingga impor CSV plate reader yang gagal justru melempar `AttributeError`, bukan menampilkan peringatan.
 
 ## [1.4.0] - 14 Oktober 2026
 
