@@ -69,6 +69,14 @@ class DialogFleksibel(QDialog):
         self.sp.valueChanged.connect(self._isi)
         h.addWidget(self.sp)
         h.addStretch(1)
+        b_auto = QPushButton("Pilih 6 terdekat")
+        b_auto.setToolTip("Centang enam rantai samping terdekat dengan ligan acuan (batas praktis Vina/AD-GPU); "
+                          "sisanya dikosongkan")
+        b_auto.clicked.connect(self._pilih_otomatis)
+        h.addWidget(b_auto)
+        b_kosong = QPushButton("Kosongkan")
+        b_kosong.clicked.connect(lambda: self._centang_semua(False))
+        h.addWidget(b_kosong)
         v.addLayout(h)
         self.tabel = QTableWidget(0, 3)
         self.tabel.setHorizontalHeaderLabels(["Residu", "Jarak (Å)", "Torsi ± "])
@@ -95,14 +103,35 @@ class DialogFleksibel(QDialog):
         self._pilih = set(terpilih)
         self._isi()
 
+    def _centang_semua(self, nyala):
+        self.tabel.blockSignals(True)
+        for r in range(self.tabel.rowCount()):
+            self.tabel.item(r, 0).setCheckState(Qt.Checked if nyala else Qt.Unchecked)
+        self.tabel.blockSignals(False)
+        self._simpan_pilihan()
+        self._hitung()
+
+    def _pilih_otomatis(self, n=6):
+        """Centang n residu terdekat (tabel sudah urut jarak). Enam adalah batas praktis: tiap rantai samping
+        menambah 1-4 torsi pada ruang pencarian."""
+        self.tabel.blockSignals(True)
+        for r in range(self.tabel.rowCount()):
+            self.tabel.item(r, 0).setCheckState(Qt.Checked if r < n else Qt.Unchecked)
+        self.tabel.blockSignals(False)
+        self._simpan_pilihan()
+        self._hitung()
+
+    def _simpan_pilihan(self):
+        for r in range(self.tabel.rowCount()):
+            it = self.tabel.item(r, 0)
+            (self._pilih.add if it.checkState() == Qt.Checked else self._pilih.discard)(it.data(Qt.UserRole))
+
     def _matikan(self):
         self.matikan = True
         self.accept()
 
     def _isi(self, *_):
-        for r in range(self.tabel.rowCount()):    # simpan centang baris yang sedang tampil sebelum diisi ulang
-            it = self.tabel.item(r, 0)
-            (self._pilih.add if it.checkState() == Qt.Checked else self._pilih.discard)(it.data(Qt.UserRole))
+        self._simpan_pilihan()                    # centang baris yang sedang tampil disimpan sebelum diisi ulang
         self.tabel.blockSignals(True)
         self.tabel.setRowCount(0)
         for c, i, n, d in calon_residu(self.teks, self.kotak["pusat"], self.kotak["ukuran"], self.acuan,

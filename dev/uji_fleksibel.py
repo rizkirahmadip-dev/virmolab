@@ -44,6 +44,17 @@ def hook():
         self.resize(560, 560)
         self.show()
         QApplication.processEvents()
+        # tombol pilih-otomatis: enam residu terdekat harus tercentang, sisanya kosong
+        self._pilih_otomatis()
+        QApplication.processEvents()
+        auto = [self.tabel.item(r, 0).data(Qt.UserRole) for r in range(self.tabel.rowCount())
+                if self.tabel.item(r, 0).checkState() == Qt.Checked]
+        print("pilih otomatis:", auto, "|", self.l_info.text(), flush=True)
+        assert len(auto) == min(6, self.tabel.rowCount()), f"pilih otomatis mencentang {len(auto)} residu"
+        self._centang_semua(False)
+        QApplication.processEvents()
+        assert not [r for r in range(self.tabel.rowCount())
+                    if self.tabel.item(r, 0).checkState() == Qt.Checked], "Kosongkan tidak membersihkan centang"
         n = 0
         for r in range(self.tabel.rowCount()):
             it = self.tabel.item(r, 0)
