@@ -1,5 +1,8 @@
 """Uji GUI dialog Energi bebas relatif (F9): susun jaringan, periksa kejujuran status, tangkap layar.
 
+Status mesin kini datang dari OpenFE di WSL (core/rbfe_openfe.py), bukan dari paket Python Windows; yang diuji
+adalah dialog mengatakan keadaan sebenarnya, baik saat OpenFE ada maupun tidak.
+
 Keluaran: dev/uji/rbfe/dialog_rbfe_{terang,gelap}.png
 """
 from pathlib import Path
@@ -11,7 +14,7 @@ sys.path.insert(0, str(AKAR))
 from PySide6.QtWidgets import QApplication, QWidget      # noqa: E402
 from rdkit import RDLogger                               # noqa: E402
 
-from virmolab.core import rbfe                           # noqa: E402
+from virmolab.core import rbfe, rbfe_openfe              # noqa: E402
 from virmolab.ui import theme                            # noqa: E402
 from virmolab.ui.dialog_rbfe import DialogRbfe           # noqa: E402
 
@@ -42,7 +45,7 @@ def main():
     from virmolab.ui import kit
     kit.ligan_proyek = lambda jw, **k: SERI
 
-    st = rbfe.status_mesin()
+    st = rbfe_openfe.status()
     for tema in ("terang", "gelap"):
         app.setPalette(theme.palet(tema))
         app.setStyleSheet(theme.qss(tema))
@@ -53,10 +56,15 @@ def main():
             app.processEvents()
         cek(d.daftar.count() == 4, f"seri senyawa terdaftar ({tema})")
 
+        for _ in range(40):          # status WSL diperiksa di thread latar
+            app.processEvents()
         teks_dialog = " ".join(w.text() for w in d.findChildren(type(d.l_status)) if w.text())
-        if not st["ada"]:
-            cek("tidak dapat dijalankan" in teks_dialog or "belum terpasang" in teks_dialog,
-                f"ketidaktersediaan mesin dinyatakan terus terang ({tema})")
+        if st["ada"]:
+            cek("siap di WSL" in teks_dialog or "openfe" in teks_dialog.lower(),
+                f"OpenFE yang terpasang dinyatakan siap ({tema}): {d.l_mesin.text()[:70]}")
+        else:
+            cek("belum terpasang" in teks_dialog or "tidak dapat dijalankan" in teks_dialog,
+                f"ketidaktersediaan mesin dinyatakan terus terang ({tema}): {d.l_mesin.text()[:70]}")
         cek("Eksperimental" in teks_dialog, f"label eksperimental tampil ({tema})")
 
         # Susun langsung tanpa thread supaya uji deterministik
