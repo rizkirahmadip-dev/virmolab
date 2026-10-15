@@ -3,7 +3,8 @@ from pathlib import Path
 import re
 SUMBER = Path("docs/_sumber")
 NAV = [("panduan", "Panduan pengguna"), ("instalasi", "Instalasi"), ("pindah_laptop", "Pindah laptop"),
-       ("gpu", "Setup GPU"), ("troubleshooting", "Mengatasi masalah"), ("metode", "Metode & kriteria")]
+       ("gpu", "Setup GPU"), ("troubleshooting", "Mengatasi masalah"), ("metode", "Metode & kriteria"),
+       ("validasi", "Validasi")]
 versi = re.search(r'__version__ = "([^"]+)"', Path("virmolab/__init__.py").read_text()).group(1)
 for nama, judul in NAV:
     isi = (SUMBER / f"{nama}.html").read_text(encoding="utf-8")

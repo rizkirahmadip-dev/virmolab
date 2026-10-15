@@ -1081,7 +1081,8 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
         self._sub(m, "Dokumentasi", [A(t, None, lambda _=False, k=k: self.buka_panduan(k))
                                      for k, t in (("instalasi", "Instalasi"), ("pindah_laptop", "Pindah laptop"),
                                                   ("gpu", "Setup GPU"), ("troubleshooting", "Mengatasi masalah"),
-                                                  ("metode", "Metode dan kriteria"))])
+                                                  ("metode", "Metode dan kriteria"),
+                                                  ("validasi", "Validasi (angka tolok ukur)"))])
         isi(m, (None,
                 A("Lapor masalah atau kirim saran…", None, self.lapor_masalah, None,
                   "Susun laporan beserta info sistem dan log (Anda yang mengirim)"),

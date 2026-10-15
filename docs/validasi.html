@@ -1,0 +1,123 @@
+<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Validasi · VirmoLab</title><link rel="stylesheet" href="gaya.css"><link rel="icon" href="gambar/ikon.png"></head><body><header><img src="gambar/logo_putih.svg" alt="VirmoLab" style="height:30px;margin-right:6px"><span style="color:#9fb4d3;font-size:13px;margin-right:10px">1.6.0</span><a href="panduan.html">Panduan pengguna</a><a href="instalasi.html">Instalasi</a><a href="pindah_laptop.html">Pindah laptop</a><a href="gpu.html">Setup GPU</a><a href="troubleshooting.html">Mengatasi masalah</a><a href="metode.html">Metode &amp; kriteria</a><a href="validasi.html" class="aktif">Validasi</a></header><main><h1>Validasi: angka yang bisa Anda periksa</h1>
+<p class="lead">Halaman ini memuat hasil pengukuran VirmoLab pada kumpulan data acuan yang terbuka, beserta cara
+menjalankannya kembali. Semua angka di sini berasal dari perhitungan nyata di komputer pengembang (RTX 3060 Laptop,
+Ryzen 7 6800H), bukan dari makalah orang lain, dan skrip yang menghasilkannya ikut dalam kode sumber.</p>
+
+<h2>Cara membaca halaman ini</h2>
+<ul>
+<li><b>RMSD &le; 2 &Aring;</b> berarti pose peringkat 1 berjarak paling jauh 2 &aring;ngstr&ouml;m dari ligan kristal
+(atom berat, simetri ligan diperhitungkan). Ini ukuran yang lazim dipakai untuk menyebut sebuah pose &ldquo;benar&rdquo;.</li>
+<li><b>PB-valid</b> berarti pose itu juga lolos seluruh uji fisika PoseBusters (geometri, tabrakan, energi internal).
+Pose dengan RMSD kecil tetapi gagal uji fisika tidak layak dilaporkan.</li>
+<li><b>Selang kepercayaan 95&nbsp;%</b> memakai metode Wilson. Dengan 85 sampai 428 kasus, selang sekitar &plusmn;10 % memang
+wajar: perbedaan beberapa persen antar-metode belum tentu berarti apa-apa.</li>
+<li>Angka pembanding dari makalah dicantumkan apa adanya agar Anda dapat menilai sendiri apakah pemasangan di komputer
+Anda berperilaku wajar.</li>
+</ul>
+
+<h2>1. Redocking: Astex Diverse Set dan PoseBusters Benchmark Set</h2>
+<p>Dua kumpulan data terbuka yang dipakai makalah PoseBusters (Buttenschoen dkk., <i>Chem Sci</i> 2024): <b>Astex
+Diverse Set</b> (85 kompleks kristal pilihan) dan <b>PoseBusters Benchmark Set</b> (428 kompleks yang dirilis sejak
+2021, dipilih agar bukan data latih metode pembelajaran mesin). Untuk setiap kompleks, VirmoLab menyiapkan reseptor
+dan ligan dengan alur bawaannya sendiri (gemmi, Meeko, protonasi PROPKA, kofaktor dipertahankan), memakai kotak
+docking yang memeluk ligan kristal, lalu mendocking ulang ligannya dengan preset <b>Standar</b>.</p>
+<table>
+<tr><th>Kumpulan data</th><th>Mesin</th><th>RMSD &le; 2 &Aring;</th><th>RMSD &le; 2 &Aring; &amp; PB-valid</th><th>Ada pose &le; 2 &Aring; di 9 teratas</th><th>Median RMSD</th><th>Pembanding makalah (Vina)</th></tr>
+<tr><td>Astex Diverse (85)</td><td>AutoDock Vina</td><td><b>62,4 %</b> (95 % CI 51,7&ndash;71,9)</td><td>60,0 %</td><td>83,5 %</td><td>1,35 &Aring;</td><td>58 % / 56 % PB-valid</td></tr>
+<tr><td>Astex Diverse (85)</td><td>Uni-Dock (GPU)</td><td>57,6 % (95 % CI 47,0&ndash;67,6)</td><td>55,3 %</td><td>82,4 %</td><td>1,47 &Aring;</td><td>&ndash;</td></tr>
+<tr><td>PoseBusters Benchmark (428)</td><td>AutoDock Vina</td><td>50,5 % (95 % CI 45,7&ndash;55,2)</td><td>48,8 %</td><td>74,5 %</td><td>1,98 &Aring;</td><td>60 % / 58 % PB-valid (308 kasus versi pertama)</td></tr>
+</table>
+<p>Satu kasus PoseBusters (7Q27, ligan berboron) gagal karena AutoDock Vina tidak mengenal tipe atom B; itu
+dilaporkan sebagai gagal, bukan dihitung sebagai skor nol. Kumpulan PoseBusters yang dipakai di sini berisi 428
+kompleks (rilis terbaru), sedangkan makalahnya memakai 308 kompleks versi pertama, jadi angkanya tidak sepenuhnya
+sebanding &mdash; 50,5 % di sini berada di kisaran yang sama dengan 60 % yang dilaporkan untuk himpunan yang lebih
+kecil dan lebih mudah.</p>
+<p>Kecepatan pada Astex: median 11,9 detik per ligan untuk Vina (CPU, exhaustiveness 16) dan 3,5 detik untuk
+Uni-Dock dipanggil satu ligan per kali; dalam penggunaan sebenarnya (satu batch berisi puluhan sampai ratusan ligan)
+Uni-Dock turun ke sekitar 0,7 detik per ligan.</p>
+<p>Perbandingan per kasus pada 85 kompleks yang sama: 48 kasus benar di kedua mesin, 5 hanya benar di Vina, 1 hanya
+benar di Uni-Dock, sisanya salah di keduanya. Jadi keduanya setara untuk menyaring, dan pose yang akan dilaporkan
+sebaiknya diperiksa ulang dengan Vina atau AutoDock-GPU.</p>
+<p>Yang bisa disimpulkan: alur preparasi bawaan VirmoLab menghasilkan angka setara dengan yang dilaporkan untuk
+AutoDock Vina pada kumpulan data yang sama, dan Uni-Dock sedikit di bawah Vina dengan selang kepercayaan yang
+bertumpang-tindih. Yang tidak boleh disimpulkan: bahwa docking Anda akan 60 % benar. Kedua
+kumpulan data ini berisi kompleks kristal berkualitas tinggi dengan kantong yang sudah terbentuk; target baru,
+struktur AlphaFold, dan ligan di luar ruang kimia kristal lebih sulit.</p>
+<p>Menjalankan ulang:</p>
+<pre><code>PYTHONIOENCODING=utf-8 PYTHONPATH=. .venv/Scripts/python.exe dev/tolok_ukur_pose.py siapkan --set astex
+PYTHONIOENCODING=utf-8 PYTHONPATH=. .venv/Scripts/python.exe dev/tolok_ukur_pose.py docking --set astex --mesin vina
+PYTHONIOENCODING=utf-8 PYTHONPATH=. .venv/Scripts/python.exe dev/tolok_ukur_pose.py ringkas</code></pre>
+
+<h2>2. Penapisan bertahap (pembelajaran aktif)</h2>
+<p>Skor docking Enamine dari repositori MolPAL (thymidylate kinase 4UNN) dipakai sebagai pengganti docking, sehingga
+seluruh kampanye dapat disimulasikan berulang kali. Batch awal 1&nbsp;% pustaka lalu 5 putaran &times; 1&nbsp;% (total
+6&nbsp;% pustaka didocking); yang diukur fraksi senyawa 1&nbsp;% terbaik yang berhasil ditemukan.</p>
+<table>
+<tr><th>Strategi</th><th>Enamine 10k (5 ulangan)</th><th>Enamine 50k (3 ulangan)</th></tr>
+<tr><td>Jaringan saraf + greedy (bawaan)</td><td><b>63,7 &plusmn; 2,8 %</b></td><td><b>74,4 &plusmn; 1,4 %</b></td></tr>
+<tr><td>Jaringan saraf + UCB</td><td>63,1 &plusmn; 4,4 %</td><td>72,2 &plusmn; 0,7 %</td></tr>
+<tr><td>Random forest + greedy</td><td>52,9 &plusmn; 7,4 %</td><td>56,7 &plusmn; 5,9 %</td></tr>
+<tr><td>Pemilihan acak (pembanding)</td><td>6,2 &plusmn; 2,5 %</td><td>5,1 &plusmn; 0,1 %</td></tr>
+</table>
+<p>Jadi mendocking 6&nbsp;% pustaka menemukan sekitar tiga perempat senyawa terbaiknya &mdash; belasan kali lebih baik
+daripada memilih acak, tetapi seperempatnya tetap terlewat. Perintahnya:
+<code>dev/tolok_ukur_al.py --set 50k</code>.</p>
+
+<h2>3. Energi bebas relatif (RBFE, OpenFE di WSL)</h2>
+<p>Tepi lig_ejm_31 &rarr; lig_ejm_43 dari set tolok ukur TYK2 OpenFE, protokol uji cepat (11 jendela &lambda;, 0,5 ns,
+1 repeat per kaki):</p>
+<table>
+<tr><th>Besaran</th><th>Nilai</th></tr>
+<tr><td>Kaki pelarut</td><td>27,55 &plusmn; 0,41 kkal/mol</td></tr>
+<tr><td>Kaki kompleks</td><td>29,83 &plusmn; 0,85 kkal/mol</td></tr>
+<tr><td>&Delta;&Delta;G hitung</td><td><b>+2,28 &plusmn; 0,95 kkal/mol</b></td></tr>
+<tr><td>&Delta;&Delta;G eksperimen (Ki 0,096 &rarr; 0,84 &micro;M)</td><td>+1,28 kkal/mol</td></tr>
+<tr><td>Selisih</td><td>+1,00 kkal/mol (1,05 &sigma;)</td></tr>
+</table>
+<p>Arah perubahan benar dan selisihnya masih di dalam galat statistik protokol sesingkat itu. Untuk angka yang hendak
+dilaporkan, pakai protokol bawaan OpenFE (5 ns &times; 3 repeat): pada RTX 3060 Laptop itu berarti &plusmn;1,7 hari per
+kaki kompleks per tepi. Uji: <code>dev/uji_rbfe_openfe.py</code>.</p>
+
+<h2>4. Docking dengan rantai samping fleksibel, dan induced fit yang tidak jadi dirilis</h2>
+<p>Lima kasus cross-docking dari Sherman dkk. (<i>J Med Chem</i> 2006) &mdash; ligan kristal satu struktur didocking ke
+struktur lain dari protein yang sama &mdash; dipakai untuk menguji apakah protokol induced fit penuh (pangkas rantai
+samping, docking lunak, relaksasi OpenMM, docking ulang) layak dirilis. <b>Tidak layak:</b> 0 dari 5 kasus mencapai
+RMSD &le; 2 &Aring;, empat di antaranya lebih buruk daripada docking kaku, sementara skornya justru tampak membaik
+(CDK2 &minus;8,16 &rarr; &minus;12,56 kkal/mol pada pose yang salah). Karena itu fiturnya tidak dipasang; rinciannya ada di
+<code>dev/dokumen/INDUCED_FIT_EKSPERIMEN.md</code>.</p>
+<p>Yang dipakai sebagai gantinya adalah rantai samping fleksibel biasa (Vina <code>--flex</code>) dengan enam residu
+kantong terdekat:</p>
+<table>
+<tr><th>Kasus (reseptor &larr; ligan)</th><th>Docking kaku</th><th>Fleksibel 6 residu</th><th>Induced fit penuh</th></tr>
+<tr><td>1KIM &larr; 1KI4 (thymidine kinase)</td><td>4,88</td><td>4,85</td><td>8,01</td></tr>
+<tr><td>2ACR &larr; 1AH3 (aldose reductase)</td><td>7,01</td><td>7,00</td><td>7,54</td></tr>
+<tr><td>1DM2 &larr; 1AQ1 (CDK2)</td><td>7,13</td><td>6,98</td><td>6,62</td></tr>
+<tr><td>1ERR &larr; 3ERT (estrogen receptor)</td><td>5,11</td><td><b>1,71</b></td><td>8,87</td></tr>
+<tr><td>1NSC &larr; 1A4Q (neuraminidase)</td><td>5,65</td><td>6,19</td><td>7,90</td></tr>
+</table>
+<p>Cross-docking memang sulit: 1 dari 5 kasus benar dengan rantai samping fleksibel, 0 dari 5 tanpa. Pemeriksaan
+kewarasan: redocking ligan ke strukturnya sendiri pada kasus yang sama memberi 0,47 &Aring; (1KIM) dan 0,45 &Aring;
+(1KI4), jadi kegagalan di atas memang kesulitan cross-docking, bukan kesalahan preparasi.</p>
+
+<h2>5. Hal-hal yang sudah divalidasi di bagian lain</h2>
+<ul>
+<li><b>Docking kovalen</b>: 6OIM (KRAS G12C&ndash;sotorasib, Cys12), pose peringkat 1 RMSD 1,34 &Aring;. Lihat
+<a href="metode.html">Metode &amp; kriteria</a>.</li>
+<li><b>Pengisian loop yang hilang</b>: uji hapus-loop pada 3KS3 memberi RMSD tulang punggung 0,20&ndash;0,56 &Aring;
+untuk loop 4&ndash;12 residu dengan cangkok AlphaFold.</li>
+<li><b>Deteksi kantong</b>: pusat kantong terbaik 0,9 &Aring; dari ligan MK1 pada 1HSG apo.</li>
+<li><b>Paket validasi protokol</b> di dalam aplikasi (redocking, cross-docking, pengayaan decoy, PoseBusters)
+menghasilkan angka untuk <i>protokol Anda sendiri</i>, dan itulah yang sebaiknya dilaporkan di naskah, bukan angka di
+halaman ini.</li>
+</ul>
+
+<h2>Batas yang perlu diingat</h2>
+<ul>
+<li>Skor docking bukan afinitas terukur. Korelasi skor dengan aktivitas biasanya lemah; yang relatif dapat dipercaya
+adalah bentuk pose dan peringkat kasar.</li>
+<li>Angka pada halaman ini diukur pada satu komputer dengan satu versi program. Versi mesin docking, sistem operasi,
+dan GPU yang berbeda dapat menggeser angkanya.</li>
+<li>Kumpulan data acuan berisi kompleks kristal berkualitas tinggi. Target tanpa struktur kristal, model AlphaFold,
+atau kantong yang baru terbentuk saat ligan terikat jauh lebih sulit daripada angka di atas.</li>
+</ul>
+<footer>VirmoLab 1.6.0 · dokumentasi offline · GPL-3.0-or-later</footer></main></body></html>

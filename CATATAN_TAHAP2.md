@@ -3,7 +3,13 @@
 Untuk sesi baru: baca seluruh file ini dulu. Pengguna berbahasa Indonesia; UI dan pesan aplikasi berbahasa Indonesia.
 (Nama file historis — isinya mencakup semua tahap. Jangan diganti namanya: dirujuk dari `CLAUDE.md`.)
 
-**Versi kode 1.5.0** (15 Okt 2026) — rilis fitur lanjutan: co-folding Boltz-2 (F6), docking peptida (F10),
+**Versi kode 1.6.0** (16 Okt 2026) — rilis penapisan skala besar dan simulasi: mesin docking GPU Uni-Dock
+(WSL), simulasi RBFE OpenFE yang dijalankan langsung dari aplikasi, penapisan pustaka besar dengan pembelajaran
+aktif (MolPAL), dan sunting ligan di dalam kantong dengan penilaian Vina lokal. Angka tolok ukurnya ada di
+`docs/_sumber/validasi.html` (Bantuan › Dokumentasi › Validasi). Induced fit penuh diuji dan **tidak** dirilis
+karena gagal validasi — lihat `dev/dokumen/INDUCED_FIT_EKSPERIMEN.md`.
+
+Sebelumnya **1.5.0** (15 Okt 2026) — fitur lanjutan: co-folding Boltz-2 (F6), docking peptida (F10),
 sifat elektronik kuantum xTB (F7), desain generatif CReM (F8), dan perencanaan energi bebas relatif (F9).
 Dengan ini seluruh F1 sampai F12 pada `RENCANA_PENGEMBANGAN.md` sudah dikerjakan.
 
@@ -14,7 +20,7 @@ Alat luar yang kini ikut atau diperlukan:
 | xtb 6.7.1pre | `bin/xtb` (ikut installer, 59 MB) | LGPL-3.0, GFN2-xTB, jalan di CPU |
 | basis data fragmen CReM | `virmolab/data/crem` (ikut installer, 42 MB) | dibangun sendiri dari 2316 obat lokal, bukan unduhan ChEMBL penuh |
 | Boltz-2 2.2.1 + GNINA 1.3.3 | WSL `~/virmolab-alat` (TIDAK ikut installer) | dipasang pengguna lewat `build_tools/pasang_gnina_boltz_wsl.sh`, perlu GPU |
-| OpenFE | tidak dipakai | hanya mendukung Linux dan macOS; F9 di Windows terbatas pada perencanaan dan analisis |
+| OpenFE 1.13 + Uni-Dock 1.2 | WSL `~/virmolab-alat` (TIDAK ikut installer) | dipasang pengguna lewat `build_tools/pasang_openfe_unidock_wsl.sh` (conda-forge, ±5 GB); OpenFE untuk RBFE, Uni-Dock untuk docking batch di GPU |
 
 Tiga bug yang hanya ketahuan setelah Boltz benar-benar dijalankan (15 Okt): afinitas tidak pernah dihitung
 karena YAML kurang blok `properties.affinity`; metrik keyakinan berskala 0 sampai 1, bukan 0 sampai 100; dan

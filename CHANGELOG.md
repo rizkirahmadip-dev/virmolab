@@ -2,6 +2,42 @@
 
 Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x adalah pra-rilis.
 
+## [1.6.0] - 16 Oktober 2026
+
+Rilis penapisan skala besar dan simulasi: mesin docking GPU Uni-Dock, simulasi RBFE OpenFE yang
+berjalan langsung dari VirmoLab, penapisan pustaka besar dengan pembelajaran aktif, dan penyuntingan
+ligan di dalam kantong dengan penilaian langsung.
+
+### Baru
+- **Mesin docking Uni-Dock (GPU, lewat WSL)** (langkah 4 · Jalankan; `core/unidock.py`, `core/antrean.py`, `ui/panel_docking.py`):
+  - Ratusan ligan didocking dalam satu panggilan GPU dengan fungsi skor Vina atau Vinardo; mode pencarian Cepat, Seimbang, atau Detail.
+  - Terdeteksi otomatis bila sudah dipasang di WSL lewat `build_tools/pasang_openfe_unidock_wsl.sh`; bila belum, tombolnya mati dan pesannya menjelaskan cara memasang. Tidak ikut pemasang Windows.
+  - Keluarannya PDBQT bergaya Vina, sehingga tabel hasil, interaksi, PoseBusters, dan RMSD redocking berjalan seperti biasa.
+  - Batch diulang sekali bila WSL gagal menyalakan mesin virtualnya, dan pesan galat wsl.exe (UTF-16) kini terbaca benar.
+  - Tolok ukur Astex Diverse (85 kompleks): Uni-Dock RMSD ≤ 2 Å pada 57,6 % kasus (PB-valid 55,3 %) dibanding Vina 62,4 % (60,0 %), dengan median 3,5 detik per ligan satuan dan ±0,7 detik per ligan dalam batch, dibanding 11,9 detik untuk Vina.
+  - Perbedaan per kasus tetap ada (redocking MK1 pada 1HSG meleset 9,9 Å di Uni-Dock, benar 1,7 Å di Vina), jadi pose yang akan dilaporkan sebaiknya diperiksa ulang dengan Vina atau AutoDock-GPU.
+- **Simulasi RBFE dijalankan dari VirmoLab** (Analisis › Sifat ligan dan desain › Energi bebas relatif (eksperimental)…; `core/rbfe_openfe.py`, `ui/dialog_rbfe.py`):
+  - OpenFE 1.13 dijalankan di WSL: transformasi dibuat (pemetaan atom LOMAP, hybrid topology), tiap kaki dijalankan dengan `openfe quickrun`, hasilnya disalin kembali ke folder proyek.
+  - Simulasi berjalan terlepas dari aplikasi dan dapat dilanjutkan; kemajuan dibaca dari log dan berkas analisis OpenFE.
+  - Preset protokol: bawaan OpenFE (5 ns × 3 repeat) atau uji cepat (0,5 ns × 1 repeat). Muatan parsial ligan memakai OpenFF NAGL.
+  - Uji pemasangan TYK2 (lig_ejm_31 → lig_ejm_43, protokol uji cepat, RTX 3060 Laptop): ΔΔG +2,28 ± 0,95 kkal/mol terhadap +1,28 kkal/mol dari Ki eksperimen — arah benar, selisih 1,0 kkal/mol.
+- **Penapisan pustaka besar dengan pembelajaran aktif** (Analisis › Penapisan banyak ligan › Penapisan pustaka besar…; `core/pembelajaran_aktif.py`, `ui/pengendali_al.py`, `ui/dialog_pembelajaran_aktif.py`):
+  - Mengikuti MolPAL (Graff dkk., 2021): batch awal acak didocking, model pengganti dilatih dari skornya, lalu batch berikutnya dipilih menurut prediksi dan ketidakpastiannya.
+  - Pustaka dari berkas SMILES/CSV/SDF (boleh .gz), COCONUT, atau obat disetujui; sidik jari pasangan atom 2048 bit; model ensemble jaringan saraf atau random forest; akuisisi UCB, greedy, atau acak sebagai pembanding.
+  - Docking tiap putaran lewat antrean biasa dengan setelan yang dikunci saat kampanye dimulai; kampanye tersimpan di proyek, tetap berjalan walau dialognya ditutup, dan dapat dilanjutkan setelah aplikasi dibuka lagi.
+  - Akurasi prospektif model (Spearman ρ) diukur pada tiap batch sebelum batch itu didocking, dan ditampilkan apa adanya.
+  - Uji retrospektif dengan skor Enamine MolPAL: mendocking 6 % pustaka menemukan 64 % (10 ribu) dan 74 % (50 ribu) senyawa 1 % terbaik, dibanding 6 % dan 5 % untuk pemilihan acak (`dev/tolok_ukur_al.py`).
+- **Sunting di kantong (3D)** (Analisis › Sifat ligan dan desain › Sunting di kantong (3D)…; `core/sunting3d.py`, `ui/dialog_sunting3d.py`):
+  - Gugus disambungkan pada atom yang dipilih dengan mengeklik diagram 2D, atau gugus fungsi diganti bioisosternya; analog dibangun dengan inti dipaku pada koordinat pose induk lalu dinilai dengan Vina `--local_only` dalam hitungan detik.
+  - Tabel usulan memuat ΔG lokal, ΔΔG terhadap induk, efisiensi ligan, jumlah tabrakan, MW, logP, QED, dan SAScore; pose dapat dibuka di penampil dan usulan ditambahkan ke proyek sebagai ligan untuk didocking ulang.
+
+- **Halaman dokumentasi Validasi** (Bantuan › Dokumentasi › Validasi; `docs/_sumber/validasi.html`): angka tolok ukur yang diukur sendiri beserta cara menjalankannya kembali — redocking Astex Diverse (85) dan PoseBusters Benchmark (428), penapisan bertahap, RBFE TYK2, serta cross-docking dengan rantai samping fleksibel.
+  - AutoDock Vina: Astex 62,4 % RMSD ≤ 2 Å (PB-valid 60,0 %), PoseBusters 50,5 % (48,8 %); sebanding dengan 58 % dan 60 % yang dilaporkan makalah PoseBusters untuk himpunan versi pertama.
+  - Uni-Dock: Astex 57,6 % (55,3 %). Pada 85 kompleks yang sama, 48 kasus benar di kedua mesin, 5 hanya di Vina, 1 hanya di Uni-Dock.
+
+### Diperbaiki
+- Jaringan RBFE tidak lagi memuat tepi ganda untuk pasangan yang sama (menggandakan simulasi tanpa informasi baru), dan tepi penutup siklus hanya ditambahkan bila pasangannya memang belum menjadi tepi.
+
 ## [1.5.0] - 15 Oktober 2026
 
 Rilis fitur lanjutan: co-folding Boltz-2, docking peptida, sifat elektronik kuantum, desain

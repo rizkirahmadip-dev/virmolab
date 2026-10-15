@@ -20,6 +20,7 @@
 <tr><td>AutoDock-GPU 1.6 (OpenCL)</td><td>50 run, LGA + ADADELTA, jumlah evaluasi heuristik, AutoStop, seed 42. Pose = wakil terbaik tiap klaster (RMSD 2,0 Å).</td></tr>
 <tr><td>AutoDock Vina 1.2.7</td><td>Exhaustiveness 16, 9 pose, rentang energi 3 kcal/mol, seed 42.</td></tr>
 <tr><td>AutoDock 4.2.6</td><td>LGA, 50 run, populasi 150, 2,5 juta evaluasi, 27 000 generasi, Solis-Wets.</td></tr>
+<tr><td>Uni-Dock 1.2 (CUDA, lewat WSL)</td><td>Fungsi skor Vina atau Vinardo, mode pencarian Cepat/Seimbang/Detail, 9 pose, seed 42; ratusan ligan dihitung dalam satu panggilan GPU. Hanya tersedia bila dipasang di WSL (<code>build_tools/pasang_openfe_unidock_wsl.sh</code>), tidak ikut pemasang. Keluarannya PDBQT bergaya Vina, sehingga analisis pose berjalan sama seperti Vina. Pada Astex Diverse Set (85 kompleks) Uni-Dock mencapai RMSD &le; 2 &Aring; pada 57,6 % kasus (PB-valid 55,3 %; median 1,47 &Aring;) dibanding Vina 62,4 % (60,0 %; 1,35 &Aring;) dengan selang kepercayaan yang bertumpang-tindih, tetapi jauh lebih cepat: median 3,5 detik per ligan satuan dan &plusmn;0,7 detik per ligan dalam batch, dibanding 11,9 detik untuk Vina. Perbedaan per kasus tetap ada (contoh: redocking MK1 pada 1HSG meleset 9,9 &Aring; di Uni-Dock dan benar 1,7 &Aring; di Vina), jadi pose yang akan dilaporkan sebaiknya diperiksa ulang dengan Vina atau AutoDock-GPU.</td></tr>
 </table>
 
 <h2>Docking kovalen (metode tethered)</h2>
@@ -48,6 +49,22 @@
 <li><b>Sidik jari interaksi (IFP)</b>: himpunan bit "residu × jenis interaksi" (kriteria di atas, tanpa vdW) pose terbaik; kemiripan = koefisien Tanimoto |A∩B| / |A∪B|. Acuan kolom "IFP vs kristal" = IFP pose kristal ligan asli terhadap reseptor yang sama.</li>
 <li><b>Kontribusi energi per atom</b>: suku antarmolekul fungsi skor AutoDock Vina (Trott &amp; Olson 2010) dihitung ulang per pasangan atom berat — tipe XS dari tipe AutoDock + ikatan dari jarak kovalen; jarak permukaan d = r − R₁ − R₂; gauss1 (−0,0356), gauss2 (−0,00516), repulsi (0,840), hidrofobik (−0,0351), ikatan H (−0,587); batas 8 Å — dan seluruhnya dibebankan ke atom ligan. Jumlahnya mendekati "Final Intermolecular Energy" <code>vina --score_only</code> (1HSG/indinavir kristal: −19,28 vs −19,27 kcal/mol).</li>
 </ul>
+
+<h2>Penapisan bertahap (pembelajaran aktif)</h2>
+<p>Pustaka besar disaring mengikuti MolPAL (Graff, Shakhnovich &amp; Coley, <i>Chem Sci</i> 2021;12:7866&ndash;7881): senyawa direpresentasikan sebagai sidik jari pasangan atom ter-hash 2048 bit (jarak topologi 1&ndash;3 ikatan, sama dengan bawaan MolPAL), batch awal acak didocking, lalu model pengganti dilatih ulang pada seluruh skor yang sudah diperoleh dan fungsi akuisisi memilih batch berikutnya. Model: ensemble tiga jaringan saraf umpan maju (dua lapis tersembunyi 100 neuron) atau random forest 100 pohon; ketidakpastian diambil dari sebaran prediksi antaranggota/antarpohon. Akuisisi: UCB (prediksi &minus; 2 &times; ketidakpastian), greedy, atau acak sebagai pembanding. Akurasi prospektif model diukur pada setiap batch sebelum batch itu didocking (Spearman &rho;, Pearson r, MAE).</p>
+<p><b>Uji retrospektif</b> (skor docking Enamine dari repositori MolPAL, thymidylate kinase 4UNN; batch awal 1&nbsp;% + 5 putaran &times; 1&nbsp;% = 6&nbsp;% pustaka; fraksi 1&nbsp;% senyawa terbaik yang ditemukan, rata-rata &plusmn; simpangan baku atas pengulangan):</p>
+<table>
+<tr><th>Strategi</th><th>Enamine 10k (5 ulangan)</th><th>Enamine 50k (3 ulangan)</th></tr>
+<tr><td>Jaringan saraf + greedy</td><td>63,7 &plusmn; 2,8 %</td><td>74,4 &plusmn; 1,4 %</td></tr>
+<tr><td>Jaringan saraf + UCB</td><td>63,1 &plusmn; 4,4 %</td><td>72,2 &plusmn; 0,7 %</td></tr>
+<tr><td>Random forest + greedy</td><td>52,9 &plusmn; 7,4 %</td><td>56,7 &plusmn; 5,9 %</td></tr>
+<tr><td>Random forest + UCB</td><td>45,0 &plusmn; 6,4 %</td><td>&ndash;</td></tr>
+<tr><td>Acak (pembanding)</td><td>6,2 &plusmn; 2,5 %</td><td>5,1 &plusmn; 0,1 %</td></tr>
+</table>
+<p>Artinya: dengan mendocking 6&nbsp;% pustaka, sekitar tiga perempat senyawa 1&nbsp;% terbaik ditemukan &mdash; belasan kali lebih baik daripada memilih acak, tetapi tetap bukan jaminan menemukan seluruh senyawa kuat. Skrip ujinya <code>dev/tolok_ukur_al.py</code>.</p>
+
+<h2>Sunting di kantong (3D)</h2>
+<p>Analog dibuat langsung pada pose docking: satu gugus disambungkan pada atom yang dipilih (atau satu gugus fungsi diganti bioisosternya lewat SMARTS reaksi), konformasi analog dibuat dengan inti bersama (MCS) dipaku pada koordinat pose induk (RDKit ETKDGv3 dengan peta koordinat, lalu minimisasi MMFF94 hanya pada gugus baru), kemudian pose diminimisasi di tempat dan dinilai dengan AutoDock Vina <code>--local_only</code>. Yang dilaporkan: &Delta;G lokal, &Delta;&Delta;G terhadap pose induk, efisiensi ligan, jumlah atom berat yang menabrak protein (&lt; 1,7 &Aring;) sebelum minimisasi, serta MW, logP, QED, dan SAScore. <b>Batas:</b> skor lokal memeringkat usulan terhadap pose induk, bukan afinitas; mode ikatan dianggap tetap, sehingga analog yang memerlukan pose berbeda akan dinilai terlalu rendah. Usulan yang menjanjikan harus didocking ulang dari awal.</p>
 
 <h2>Kontrol kualitas pose (PoseBusters)</h2>
 <p>Pose terbaik tiap ligan diperiksa otomatis setelah docking dengan <b>PoseBusters</b> 0.6.5 (konfigurasi <i>dock</i>; Buttenschoen dkk. 2024), di proses terpisah sehingga antarmuka tetap responsif. Proyek lama dilengkapi otomatis saat dibuka. Kolom <b>PoseBusters</b> di tab Hasil: <i>Lulus</i> = semua uji lulus ("PB-valid"); <i>Gagal (n)</i> = n uji gagal (arahkan kursor untuk rincian). Rincian pose mana pun: Analisis › Periksa pose aktif (PoseBusters)….</p>
@@ -173,6 +190,10 @@
 <li>OECD. Guidance Document on the Validation of (Q)SAR Models. OECD Series on Testing and Assessment No. 69, 2007 (lima prinsip validasi)</li>
 <li>Vovk V, Gammerman A, Shafer G. <i>Algorithmic Learning in a Random World.</i> Springer; 2005 (prediksi konformal)</li>
 <li>Pedregosa F, et al. Scikit-learn: Machine Learning in Python. <i>J Mach Learn Res.</i> 2011;12:2825-2830</li>
+<li>Yu Y, Cai C, Wang J, Bo Z, Zhu Z, Zheng H. Uni-Dock: GPU-accelerated docking enables ultralarge virtual screening. <i>J Chem Theory Comput.</i> 2023;19(11):3336-3345. doi:10.1021/acs.jctc.2c01145 (bila Uni-Dock dipakai)</li>
+<li>Graff DE, Shakhnovich EI, Coley CW. Accelerating high-throughput virtual screening through molecular pool-based active learning. <i>Chem Sci.</i> 2021;12(22):7866-7881. doi:10.1039/D0SC06805E (penapisan bertahap)</li>
+<li>Hahn DF, et al. Best practices for constructing, preparing, and evaluating protein-ligand binding affinity benchmarks. <i>Living J Comput Mol Sci.</i> 2022;4(1):1497. doi:10.33011/livecoms.4.1.1497 (praktik RBFE)</li>
+<li>Sherman W, Day T, Jacobson MP, Friesner RA, Farid R. Novel procedure for modeling ligand/receptor induced fit effects. <i>J Med Chem.</i> 2006;49(2):534-553. doi:10.1021/jm050540c (protokol induced fit)</li>
 <li>Szklarczyk D, et al. The STRING database. <i>Nucleic Acids Res.</i> (basis data v12.5, diakses 2026) (interaksi protein)</li>
 <li>Milacic M, et al. The Reactome Pathway Knowledgebase. <i>Nucleic Acids Res.</i> (rilis v97) (jalur biologis)</li>
 <li>Ochoa D, et al. Open Targets Platform. <i>Nucleic Acids Res.</i> (data 2026.09) (asosiasi target-penyakit)</li>
