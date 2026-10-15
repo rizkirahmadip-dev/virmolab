@@ -77,6 +77,11 @@ class Pelaksana(QObject):
         self.timer_dlg.setInterval(1000)
         self.timer_dlg.timeout.connect(self._intip_dlg)
         self._dlg_pos = 0
+        self._ud = None           # batch Uni-Dock berjalan: {"peta": {u00001: ligan}, "keluar": Path}
+        self._ud_ulang = {}       # id job -> berapa kali batch diulang karena WSL gagal start
+        self.timer_ud = QTimer(self)
+        self.timer_ud.setInterval(3000)
+        self.timer_ud.timeout.connect(self._intip_unidock)
         self._qc_pool = None      # PoseBusters di thread terpisah (± 0,4 s/pose) agar GUI tetap responsif
         self.qcSelesai.connect(self._qc_masuk)
 
@@ -160,6 +165,8 @@ class Pelaksana(QObject):
         if j is self.job and self.sibuk():
             j["status"] = "dibatalkan"
             self.proc.kill()
+            if self.tahap == "unidock":
+                self._hentikan_unidock_wsl()
             return  # _proses_selesai menyelesaikan sisanya
         if j["status"] in ("menunggu", "dijeda"):
             j["status"] = "dibatalkan"
@@ -180,10 +187,31 @@ class Pelaksana(QObject):
         """Dipanggil saat aplikasi ditutup: proses dihentikan, job jadi 'dijeda' agar bisa dilanjutkan."""
         if self.sibuk():
             j = self.job
+            ud = self.tahap == "unidock"
             self.proc.kill()
             self.proc.waitForFinished(3000)
+            if ud:
+                self._hentikan_unidock_wsl()
+                for l in (j or {}).get("ligan", []):
+                    if l["status"] == "berjalan":
+                        l["status"], l["progres"] = "menunggu", 0
             if j:
                 j["status"] = "dijeda"
+
+    def _wsl_gagal_start(self):
+        """Keluaran menunjukkan wsl.exe sendiri yang gagal (VM tidak menyala), bukan Uni-Dock yang menolak ligan."""
+        t = (self.keluaran or "").lower()
+        return any(x in t for x in ("wsl/service/", "error_timeout", "tidak dapat memulai", "failed to start",
+                                    "the system cannot find the file wsl", "catastrophic failure"))
+
+    def _hentikan_unidock_wsl(self):
+        """Mematikan wsl.exe tidak selalu mematikan Uni-Dock di dalam WSL; hentikan langsung (pola [u]nidock agar
+        perintah pkill tidak cocok dengan dirinya sendiri)."""
+        try:
+            from .lanjutan import _wsl
+            _wsl("pkill -f 'unidock/bin/[u]nidock' ; true", timeout=20)
+        except Exception:
+            pass
 
     # ---------------------------------------------------------- internal
     def _simpan(self):
@@ -226,7 +254,131 @@ class Pelaksana(QObject):
         if lig is None:
             self._tutup_job(j)
             return
+        if j["mesin"] == "unidock":
+            self._mulai_batch_unidock(j)
+            return
         self._mulai_ligan(j, lig)
+
+    # ----------------------------------------------------------- Uni-Dock (batch di WSL)
+    def _mulai_batch_unidock(self, j):
+        """Semua ligan yang menunggu dikirim dalam satu panggilan Uni-Dock (GPU memproses ratusan sekaligus)."""
+        from . import sanitasi_struktur
+        from . import unidock as U
+        pr = self.proyek
+        folder = self._folder_job(j)
+        batch = []
+        for l in j["ligan"]:
+            if l["status"] != "menunggu":
+                continue
+            if j.get("kovalen") or j.get("flex"):
+                l["status"] = "dilewati"
+                l["pesan"] = "Uni-Dock di VirmoLab belum mendukung residu fleksibel atau docking kovalen"
+                continue
+            f = pr.p(l["pdbqt"])
+            ok, teks, cat = sanitasi_struktur.validasi_sanitasi_pdbqt(f, jenis="ligan") if f.exists() else \
+                (False, "", ["berkas PDBQT ligan tidak ditemukan"])
+            if not ok:
+                l["status"], l["pesan"] = "gagal", "; ".join(cat)
+                continue
+            if cat and teks:
+                try:
+                    f.write_text(teks, encoding="utf-8")
+                except Exception:
+                    pass
+            batch.append(l)
+        if not batch:
+            self._ubah(j)
+            QTimer.singleShot(0, self._berikut)
+            return
+        par = j["parameter"]
+        p = M.Parameter(**{k: v for k, v in par.items() if k in M.Parameter.__dataclass_fields__})
+        keluar = folder / "unidock"
+        for f in keluar.glob("u*_out.pdbqt"):        # sisa batch yang terputus: nomor symlink bisa bergeser
+            f.unlink(missing_ok=True)
+        try:
+            skrip, peta = U.tulis_skrip(pr.p(j["reseptor"]), [pr.p(l["pdbqt"]) for l in batch], keluar,
+                                        M.Kotak(**j["kotak"]), par.get("unidock_mode", "balance"),
+                                        par.get("unidock_skor", "vina"), p.num_modes, p.seed)
+            cmd = U.perintah_wsl(skrip)
+        except Exception as e:
+            for l in batch:
+                l["status"], l["pesan"] = "gagal", f"Uni-Dock tidak dapat disiapkan: {e}"
+            self._ubah(j)
+            QTimer.singleShot(0, self._berikut)
+            return
+        # tulis_skrip menomori symlink sesuai urutan batch (u00001 = ligan pertama)
+        self._ud = {"peta": {f"u{i:05d}": l for i, l in enumerate(batch, 1)}, "keluar": keluar, "n": len(batch)}
+        assert set(self._ud["peta"]) == set(peta)
+        for nama, l in self._ud["peta"].items():
+            l["status"], l["progres"], l["pesan"] = "berjalan", 0, ""
+            l["keluaran"] = pr.rel(U.keluaran_ligan(keluar, nama))
+        self.log.emit(f"Uni-Dock (WSL, GPU): {len(batch)} ligan dalam satu batch, mode "
+                      f"{par.get('unidock_mode', 'balance')}")
+        self.lig, self.tahap = None, "unidock"
+        self.mulai_lig = time.time()
+        self._ubah(j)
+        self._jalankan(cmd, str(folder))
+        self.timer_ud.start()
+
+    def _intip_unidock(self):
+        """Tandai ligan yang berkas keluarannya sudah ada (Uni-Dock menulis per batch kecil di GPU)."""
+        if not self._ud or not self.job:
+            return
+        berubah = False
+        for nama, l in self._ud["peta"].items():
+            if l["progres"] < 100 and (self._ud["keluar"] / f"{nama}_out.pdbqt").exists():
+                l["progres"] = 100
+                berubah = True
+        if berubah:
+            self.jobBerubah.emit(self.job["id"])
+
+    def _selesai_batch_unidock(self, j, folder):
+        self.timer_ud.stop()
+        ud, self._ud = self._ud, None
+        (folder / "log" / "unidock.log").write_text(self.keluaran, encoding="utf-8")
+        per = round((time.time() - self.mulai_lig) / max(1, ud["n"]), 2)
+        batal = j["status"] == "dibatalkan"
+        for nama, l in ud["peta"].items():
+            l["detik"] = per
+            out = ud["keluar"] / f"{nama}_out.pdbqt"
+            pose = []
+            if out.exists():
+                try:
+                    pose = M.baca_hasil("unidock", out)
+                except Exception as e:
+                    l["pesan"] = f"hasil tidak terbaca: {e}"
+            if pose:
+                self._terima_pose(j, l, pose)
+            elif batal:
+                l["status"], l["pesan"] = "dibatalkan", "dibatalkan pengguna"
+            else:
+                l["status"] = "gagal"
+                l["pesan"] = l.get("pesan") or ("Uni-Dock tidak menulis pose; " + M.ringkas_galat(self.keluaran, 300))
+        if batal:
+            j["selesai"] = datetime.now().isoformat(timespec="seconds")
+            self.job = None
+            self.log.emit(f"Job {j['id']} dibatalkan.")
+            self._ubah(j)
+            self.jobSelesai.emit(j["id"])
+            self._berikut()
+            return
+        n_ok = sum(1 for l in ud["peta"].values() if l["status"] == "selesai")
+        # WSL kadang gagal menyalakan VM-nya (mis. saat komputer sibuk): seluruh batch gagal tanpa satu pose pun.
+        # Itu galat sementara, jadi batch diulang sekali sebelum ligannya ditandai gagal.
+        if n_ok == 0 and self._wsl_gagal_start() and self._ud_ulang.get(j["id"], 0) < 1:
+            self._ud_ulang[j["id"]] = self._ud_ulang.get(j["id"], 0) + 1
+            for l in ud["peta"].values():
+                l["status"], l["progres"], l["pesan"] = "menunggu", 0, ""
+            self.log.emit("WSL gagal dijalankan; batch Uni-Dock diulang sekali.")
+            self._ubah(j)
+            QTimer.singleShot(5000, self._berikut)
+            return
+        self.log.emit(f"Uni-Dock selesai: {n_ok}/{ud['n']} ligan berpose ({per:.2f} s per ligan)")
+        if n_ok == 0 and ("cudaError" in self.keluaran or "CUDA" in self.keluaran):
+            self.pesan.emit("Uni-Dock gagal memakai GPU di WSL:\n" + M.ringkas_galat(self.keluaran) +
+                            "\nTutup program lain yang memakai GPU, atau jalankan docking dengan AutoDock-GPU/Vina.")
+        self._ubah(j)
+        self._berikut()
 
     def _tutup_job(self, j):
         ok = [l for l in j["ligan"] if l["status"] == "selesai"]
@@ -395,8 +547,18 @@ class Pelaksana(QObject):
         if e == QProcess.FailedToStart:
             self.keluaran += f"\nProgram gagal dijalankan: {self.proc.program()}"
 
+    @staticmethod
+    def _teks_keluaran(data):
+        """wsl.exe menulis pesan galatnya sendiri dalam UTF-16LE; keluaran program di dalam WSL tetap UTF-8."""
+        if b"\x00" in data[:200]:
+            try:
+                return data.decode("utf-16-le", "replace").replace("\x00", "")
+            except Exception:
+                pass
+        return data.decode("utf-8", "replace")
+
     def _baca(self):
-        t = bytes(self.proc.readAllStandardOutput()).decode("utf-8", "replace")
+        t = self._teks_keluaran(bytes(self.proc.readAllStandardOutput()))
         self.keluaran += t
         if self.tahap == "dock" and self.lig is not None and self.pembaca:
             naik = None
@@ -425,6 +587,25 @@ class Pelaksana(QObject):
                 self.lig["progres"] = v
                 self.jobBerubah.emit(self.job["id"])
 
+    def _terima_pose(self, j, l, pose):
+        """Simpan pose terbaik satu ligan beserta analisis ringan (dipakai semua mesin)."""
+        l["status"], l["progres"] = "selesai", 100
+        l["energi"] = pose[0].energi
+        l["ki"] = pose[0].ki
+        l["rmsd_ref"] = pose[0].rmsd_ref if pose[0].rmsd_ref >= 0 else None
+        l["n_pose"] = len(pose)
+        l["pose"] = [p.ke_dict() for p in pose[:SIMPAN_POSE]]
+        try:  # analisis ringan: LE, interaksi pose terbaik, RMSD ke ligan kristal (bila ada)
+            from . import analisis
+            analisis.ringkas_ligan(self.proyek, l, pose, self._reseptor(j))
+        except Exception as e:
+            self.log.emit(f"Analisis {l['nama']} dilewati: {e}")
+        if j.get("kovalen"):     # skor kovalen bukan ΔG ikatan: Ki dan LE tidak bermakna
+            l["ki"], l["le"] = "", None
+        self._qc_antre(j, l, pose)
+        self.log.emit(f"{l['nama']}: {pose[0].energi:.2f} kcal/mol ({l['detik']:.1f} s)")
+        self.liganSelesai.emit(j["id"], l["id"])
+
     def _proses_selesai(self, kode, status):
         self.timer_dlg.stop()
         j, l, tahap = self.job, self.lig, self.tahap
@@ -449,6 +630,9 @@ class Pelaksana(QObject):
             self.log.emit("Grid map selesai.")
             self._berikut()
             return
+        if tahap == "unidock":
+            self._selesai_batch_unidock(j, folder)
+            return
         # ---- tahap dock
         (folder / "log" / f"{l['id']}.log").write_text(self.keluaran, encoding="utf-8")
         l["detik"] = round(time.time() - self.mulai_lig, 1)
@@ -472,22 +656,7 @@ class Pelaksana(QObject):
             except Exception as e:  # berkas rusak
                 l["pesan"] = f"hasil tidak terbaca: {e}"
         if pose:
-            l["status"], l["progres"] = "selesai", 100
-            l["energi"] = pose[0].energi
-            l["ki"] = pose[0].ki
-            l["rmsd_ref"] = pose[0].rmsd_ref if pose[0].rmsd_ref >= 0 else None
-            l["n_pose"] = len(pose)
-            l["pose"] = [p.ke_dict() for p in pose[:SIMPAN_POSE]]
-            try:  # analisis ringan: LE, interaksi pose terbaik, RMSD ke ligan kristal (bila ada)
-                from . import analisis
-                analisis.ringkas_ligan(self.proyek, l, pose, self._reseptor(j))
-            except Exception as e:
-                self.log.emit(f"Analisis {l['nama']} dilewati: {e}")
-            if j.get("kovalen"):     # skor kovalen bukan ΔG ikatan: Ki dan LE tidak bermakna
-                l["ki"], l["le"] = "", None
-            self._qc_antre(j, l, pose)
-            self.log.emit(f"{l['nama']}: {pose[0].energi:.2f} kcal/mol ({l['detik']:.1f} s)")
-            self.liganSelesai.emit(j["id"], l["id"])
+            self._terima_pose(j, l, pose)
         elif j["mesin"] == "adgpu" and j.get("kovalen") and (M.RE_GALAT_OPENCL.search(self.keluaran)
                                                              or kode in M.KODE_GALAT_DLL):
             l["status"] = "gagal"

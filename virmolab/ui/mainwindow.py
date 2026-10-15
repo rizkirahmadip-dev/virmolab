@@ -1359,6 +1359,7 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
                          icons.ikon("gpu", theme.TOKEN[self.mode]["ok"])))
         alat.append((f"CPU · {e.inti} thread", "cpu", icons.ikon("cpu", theme.TOKEN[self.mode]["ink2"])))
         self.param.set_perangkat(alat)
+        self.param.atur_unidock(getattr(e, "unidock", False))
         self._sinkron = False
         simpan = (self.proyek.parameter if self.proyek else None) or {}
         if e.mode_bawaan == "cpu":
@@ -2958,7 +2959,12 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
         if mesin == "adgpu" and (alat != "gpu" or not (self.env and self.env.opencl_ok)):
             mesin, alat = "vina", "cpu"
             self.pesan.tulis("AutoDock-GPU membutuhkan GPU dengan OpenCL; job dijalankan dengan AutoDock Vina (CPU).")
-        if not mesinmod.tersedia(mesin):
+        if mesin == "unidock":
+            if not mesinmod.tersedia("unidock"):
+                self._galat("Uni-Dock belum terdeteksi di WSL. Pasang dengan build_tools/pasang_openfe_unidock_wsl.sh, "
+                            "lalu buka ulang VirmoLab.")
+                return
+        elif not mesinmod.tersedia(mesin):
             self._galat(f"{mesinmod.PROGRAM[mesin]} tidak ditemukan di folder bin. Pasang ulang VirmoLab.")
             return
         k = mesinmod.Kotak(pusat=self.box["pusat"], ukuran=self.box["ukuran"], spasi=self.box.get("spasi", 0.375))

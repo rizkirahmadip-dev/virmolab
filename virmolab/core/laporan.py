@@ -15,6 +15,8 @@ SITASI = {
             "Trott O, Olson AJ. AutoDock Vina. J Comput Chem. 2010;31(2):455-461. doi:10.1002/jcc.21334",
     "ad4": "Morris GM, Huey R, Lindstrom W, Sanner MF, Belew RK, Goodsell DS, Olson AJ. AutoDock4 and AutoDockTools4. "
            "J Comput Chem. 2009;30(16):2785-2791. doi:10.1002/jcc.21256",
+    "unidock": "Yu Y, Cai C, Wang J, Bo Z, Zhu Z, Zheng H. Uni-Dock: GPU-accelerated docking enables ultralarge "
+               "virtual screening. J Chem Theory Comput. 2023;19(11):3336-3345. doi:10.1021/acs.jctc.2c01145",
     "meeko": "Meeko: preparation of small molecules and receptors for AutoDock (Forli Lab, Scripps Research). "
              "https://github.com/forlilab/Meeko",
     "rdkit": "RDKit: Open-source cheminformatics. https://www.rdkit.org",
@@ -160,6 +162,9 @@ def html(proyek, baris, info, interaksi_terbaik=None, ada_gambar3d=False, ada_di
                     f"{_f(p.get('energy_range'), '{:.1f}')}")
         elif j["mesin"] == "adgpu":
             cari = f"{p.get('nrun')} run, " + ("evaluasi heuristik" if p.get("heuristik") else f"{p.get('nev')} evaluasi")
+        elif j["mesin"] == "unidock":
+            cari = (f"mode pencarian {p.get('unidock_mode', 'balance')}, fungsi skor {p.get('unidock_skor', 'vina')}, "
+                    f"{p.get('num_modes')} pose")
         else:
             cari = f"ga_run {p.get('nrun')}, pop {p.get('pop')}, {p.get('nev')} evaluasi"
         cari += f", seed {p.get('seed') or 'acak'}"
@@ -321,6 +326,8 @@ def html(proyek, baris, info, interaksi_terbaik=None, ada_gambar3d=False, ada_di
     kunci = [m for m in mesin_dipakai] + ["meeko", "rdkit", "openbabel", "gemmi", "3dmol"]
     if "adgpu" in kunci and "ad4" not in kunci:
         kunci.insert(1, "ad4")  # AD-GPU memakai fungsi skor & AutoGrid AutoDock4
+    if "unidock" in kunci and "vina" not in kunci:
+        kunci.insert(kunci.index("unidock") + 1, "vina")    # Uni-Dock memakai fungsi skor Vina
     for x in kunci:
         o.append(f"<li>{escape(SITASI[x])}</li>")
     if jobs_kov:

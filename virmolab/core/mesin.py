@@ -17,7 +17,7 @@ URUT_TIPE = ["A", "C", "N", "NA", "NS", "OA", "OS", "SA", "S", "HD", "HS", "P", 
 ELEMEN = {"A": "C", "C": "C", "H": "H", "HD": "H", "HS": "H", "N": "N", "NA": "N", "NS": "N", "O": "O", "OA": "O",
           "OS": "O", "S": "S", "SA": "S", "P": "P", "F": "F", "I": "I", "CL": "Cl", "BR": "Br", "MG": "Mg", "ZN": "Zn",
           "FE": "Fe", "MN": "Mn", "CA": "Ca", "CU": "Cu", "NI": "Ni", "CO": "Co", "SI": "Si"}
-MESIN = {"adgpu": "AutoDock-GPU", "vina": "AutoDock Vina", "ad4": "AutoDock4"}
+MESIN = {"adgpu": "AutoDock-GPU", "vina": "AutoDock Vina", "ad4": "AutoDock4", "unidock": "Uni-Dock"}
 PROGRAM = {"adgpu": "autodock_gpu.exe", "vina": "vina.exe", "ad4": "autodock4.exe"}
 
 # pesan AD-GPU yang menandakan OpenCL/GPU tidak bisa dipakai -> pindah ke Vina
@@ -102,6 +102,9 @@ def ki_terbaca(dg):
 
 
 def tersedia(mesin):
+    if mesin == "unidock":          # program Linux di WSL; status diperiksa di latar (core/unidock.py)
+        from .unidock import tersedia as ud
+        return ud()
     return paths.program(PROGRAM[mesin]) is not None
 
 
@@ -357,7 +360,8 @@ def baca_vina(path):
 
 
 def baca_hasil(mesin, path):
-    return baca_vina(path) if mesin == "vina" else baca_dlg(path)
+    """Uni-Dock menulis PDBQT bergaya Vina."""
+    return baca_vina(path) if mesin in ("vina", "unidock") else baca_dlg(path)
 
 
 def pose_ke_pdb(pdbqt, resn="LIG"):

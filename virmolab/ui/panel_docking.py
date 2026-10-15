@@ -104,13 +104,16 @@ class PanelDocking(QWidget):
         seg.setSpacing(0)
         self.grp_mesin = QButtonGroup(self)
         self.btn_mesin = {}
-        for i, (k, t) in enumerate((("adgpu", "AD-GPU"), ("vina", "Vina"), ("ad4", "AD4"))):
+        for i, (k, t) in enumerate((("adgpu", "AD-GPU"), ("vina", "Vina"), ("ad4", "AD4"), ("unidock", "Uni-Dock"))):
             b = QPushButton(t)
             b.setMinimumWidth(40)
             b.setToolTip(M.MESIN[k])
             b.setCheckable(True)
             b.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-            if not M.tersedia(k):
+            if k == "unidock":       # status WSL diperiksa di latar saat deteksi perangkat (atur_unidock)
+                b.setEnabled(False)
+                b.setToolTip("Memeriksa Uni-Dock di WSL…")
+            elif not M.tersedia(k):
                 b.setEnabled(False)
                 b.setToolTip(f"{M.PROGRAM[k]} tidak ditemukan di folder bin")
             self.grp_mesin.addButton(b, i)
@@ -194,6 +197,24 @@ class PanelDocking(QWidget):
         fc.addRow(self._m("ga_pop_size"), self.sp_pop)
         fc.addRow(self._m("ga_num_evals"), self.sp_evals)
         self.stack.addWidget(c)
+        # Uni-Dock
+        d = QWidget()
+        fd = QFormLayout(d)
+        fd.setContentsMargins(10, 6, 10, 6)
+        self.cmb_ud_mode = QComboBox()
+        for k, t in (("fast", "Cepat"), ("balance", "Seimbang"), ("detail", "Detail")):
+            self.cmb_ud_mode.addItem(t, k)
+        self.cmb_ud_mode.setCurrentIndex(1)
+        self.cmb_ud_mode.setToolTip("Pengaturan pencarian bawaan Uni-Dock (exhaustiveness dan langkah); Detail "
+                                    "paling teliti dan paling lambat")
+        self.cmb_ud_skor = QComboBox()
+        self.cmb_ud_skor.addItem("Vina", "vina")
+        self.cmb_ud_skor.addItem("Vinardo", "vinardo")
+        self.sp_modes_ud = _spin(1, 50, 9)
+        fd.addRow(self._m("Mode pencarian"), self.cmb_ud_mode)
+        fd.addRow(self._m("Fungsi skor"), self.cmb_ud_skor)
+        fd.addRow(self._m("Jumlah pose"), self.sp_modes_ud)
+        self.stack.addWidget(d)
         vl.addWidget(self.stack)
         fs = QFormLayout()
         fs.setContentsMargins(10, 0, 10, 6)
@@ -211,8 +232,10 @@ class PanelDocking(QWidget):
         self.w_lanjutan.setVisible(False)
         self.b_lanjutan.toggled.connect(self._lipat)
         for s in (self.sp_nrun, self.sp_nev, self.sp_exh, self.sp_modes, self.sp_erange, self.sp_cpu, self.sp_garun,
-                  self.sp_pop, self.sp_evals, self.sp_seed):
+                  self.sp_pop, self.sp_evals, self.sp_seed, self.sp_modes_ud):
             s.valueChanged.connect(self._ubah)
+        self.cmb_ud_mode.currentIndexChanged.connect(self._ubah)
+        self.cmb_ud_skor.currentIndexChanged.connect(self._ubah)
         self.c_heur.toggled.connect(self._ubah)
 
         lay.addStretch(1)
@@ -341,7 +364,7 @@ class PanelDocking(QWidget):
 
     # --------------------------------------------------------- parameter
     def mesin(self):
-        return ["adgpu", "vina", "ad4"][max(0, self.grp_mesin.checkedId())]
+        return ["adgpu", "vina", "ad4", "unidock"][max(0, self.grp_mesin.checkedId())]
 
     def _mesin_ganti(self):
         m = self.mesin()
@@ -349,11 +372,13 @@ class PanelDocking(QWidget):
         self.l_mesin.setText({
             "adgpu": "AutoDock-GPU (OpenCL): algoritma LGA + ADADELTA, sangat cepat di GPU. Butuh grid map (AutoGrid4).",
             "vina": "AutoDock Vina 1.2.7: CPU, tanpa grid map, cocok untuk ligan besar (> 32 torsi).",
-            "ad4": "AutoDock4 klasik (LGA, CPU): lambat, untuk perbandingan dengan penelitian lama."}[m])
+            "ad4": "AutoDock4 klasik (LGA, CPU): lambat, untuk perbandingan dengan penelitian lama.",
+            "unidock": "Uni-Dock (WSL, GPU NVIDIA): fungsi skor Vina, ratusan ligan didocking sekaligus; untuk "
+                       "penapisan besar. Belum mendukung residu fleksibel dan docking kovalen."}[m])
         self._ubah()
 
     def _halaman(self, m):
-        self.stack.setCurrentIndex(["adgpu", "vina", "ad4"].index(m))
+        self.stack.setCurrentIndex(["adgpu", "vina", "ad4", "unidock"].index(m))
         for i in range(self.stack.count()):  # tinggi stack = halaman aktif saja
             self.stack.widget(i).setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred
                                                if i == self.stack.currentIndex() else QSizePolicy.Ignored)
@@ -366,7 +391,9 @@ class PanelDocking(QWidget):
                 "nrun": self.sp_nrun.value() if self.mesin() == "adgpu" else self.sp_garun.value(),
                 "nev": self.sp_nev.value() if self.mesin() == "adgpu" else self.sp_evals.value(),
                 "heuristik": self.c_heur.isChecked(), "exhaustiveness": self.sp_exh.value(),
-                "num_modes": self.sp_modes.value(), "energy_range": self.sp_erange.value(),
+                "num_modes": self.sp_modes_ud.value() if self.mesin() == "unidock" else self.sp_modes.value(),
+                "energy_range": self.sp_erange.value(),
+                "unidock_mode": self.cmb_ud_mode.currentData(), "unidock_skor": self.cmb_ud_skor.currentData(),
                 "cpu": self.sp_cpu.value(), "pop": self.sp_pop.value(), "seed": self.sp_seed.value(),
                 "nrun_gpu": self.sp_nrun.value(), "nrun_ad4": self.sp_garun.value(),
                 "nev_gpu": self.sp_nev.value(), "nev_ad4": self.sp_evals.value()}
@@ -387,6 +414,11 @@ class PanelDocking(QWidget):
                 s.setValue(d[k])
         if "heuristik" in d:
             self.c_heur.setChecked(bool(d["heuristik"]))
+        for cmb, k in ((self.cmb_ud_mode, "unidock_mode"), (self.cmb_ud_skor, "unidock_skor")):
+            if d.get(k) and cmb.findData(d[k]) >= 0:
+                cmb.setCurrentIndex(cmb.findData(d[k]))
+        if m == "unidock" and "num_modes" in d:
+            self.sp_modes_ud.setValue(d["num_modes"])
         i = self._indeks_alat(d.get("perangkat"), d.get("devnum"))
         if i >= 0:
             self.cmb_alat.setCurrentIndex(i)
@@ -402,6 +434,9 @@ class PanelDocking(QWidget):
         d.setdefault("nev_ad4", d.get("nev"))
         d.pop("mesin", None)
         d.pop("perangkat", None)
+        from ..core.unidock import PRESET_KE_MODE
+        if nama in PRESET_KE_MODE:
+            d.setdefault("unidock_mode", PRESET_KE_MODE[nama])
         self.set_parameter(d)
         self._ubah()
 
@@ -503,3 +538,11 @@ class PanelDocking(QWidget):
         warna = self.warna_warn if ada_warn else ("#2e7d32" if getattr(self, "mode", "terang") == "terang" else "#4ade80")
         self.l_kotak.setStyleSheet(f"color:{warna}")
         self.l_kotak.setVisible(bool(pesan))
+
+
+    def atur_unidock(self, ada):
+        """Dipanggil jendela utama setelah deteksi perangkat (pemeriksaan WSL berjalan di thread latar)."""
+        b = self.btn_mesin["unidock"]
+        b.setEnabled(bool(ada))
+        b.setToolTip("Uni-Dock 1.2 di WSL (GPU NVIDIA, fungsi skor Vina)" if ada else
+                     "Uni-Dock belum terpasang di WSL (build_tools/pasang_openfe_unidock_wsl.sh)")

@@ -42,6 +42,7 @@ class Lingkungan:
     cpu: str = ""
     inti: int = 0
     ram_gb: float = 0.0
+    unidock: bool = False              # Uni-Dock (GPU) terpasang di WSL
     program: dict = field(default_factory=dict)   # nama -> jalur bawaan
     eksternal: dict = field(default_factory=dict)  # PyMOL/ChimeraX/DSV -> jalur
     catatan: list = field(default_factory=list)
@@ -194,6 +195,11 @@ def deteksi(manual=None):
     for p in ("autodock_gpu.exe", "vina.exe", "autogrid4.exe", "autodock4.exe"):
         env.program[p] = paths.program(p)
     env.eksternal = cari_eksternal(manual)
+    try:      # WSL dipanggil sekali di thread latar; panel docking membaca hasilnya tanpa memblok GUI
+        from . import unidock
+        env.unidock = unidock.status(segar=True)["ada"]
+    except Exception:
+        env.unidock = False
     if gpus and not env.opencl_ok:
         env.catatan.append("GPU terdeteksi tetapi OpenCL tidak tersedia: driver GPU perlu diperbarui.")
     return env
