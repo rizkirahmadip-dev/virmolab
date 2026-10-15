@@ -256,4 +256,5 @@ def buat_teks_protokol(nama_ligan: str, dg_kkal: float, ki_info: Dict[str, Any],
     lines.append(f"- Kendali Pelarut (VC) : Buffer + DMSO {protokol['dmso_maks_persen']:.1f}% tanpa senyawa.")
     lines.append("- Blanko (BLK)          : Buffer reaksi saja tanpa enzim / sel.")
     lines.append("=" * 65)
-    return "\n".join(lines)
+    from .. import i18n
+    return i18n.t_baris("\n".join(lines))

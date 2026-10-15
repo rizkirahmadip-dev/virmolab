@@ -391,6 +391,9 @@ def susun_paragraf_metode(
     """Rakit paragraf metode dari parameter dan panel nyata. Bagian yang tidak dijalankan tidak disebut."""
     param = parameter or {}
     panel, _ = muat_panel_sah(kelas)
+    from .. import i18n
+    if i18n.inggris():
+        return _paragraf_metode_en(kelas, param, panel, n_sukses, n_gagal, jejak)
     bagian = []
     if param.get("jalur_ligan"):
         sumber = "; ".join(sorted({f"{j.get('sumber', 'ChEMBL')} {j.get('versi', '')}".strip() for j in (jejak or [])})) or "ChEMBL"
@@ -417,3 +420,37 @@ def susun_paragraf_metode(
     bagian.append("Seluruh target kandidat merupakan hipotesis komputasi dan memerlukan validasi eksperimental sebelum "
                   "mekanisme farmakologi dapat dinyatakan.")
     return "Penargetan balik. " + " ".join(bagian)
+
+
+def _paragraf_metode_en(kelas, param, panel, n_sukses, n_gagal, jejak):
+    """Versi Inggris susun_paragraf_metode dengan syarat kalimat yang sama."""
+    bagian = []
+    if param.get("jalur_ligan"):
+        sumber = "; ".join(sorted({f"{j.get('sumber', 'ChEMBL')} {j.get('versi', '')}".strip()
+                                   for j in (jejak or [])})) or "ChEMBL"
+        bagian.append(
+            "In the ligand-based route, 2D structural similarity was computed as the Tanimoto coefficient on Morgan "
+            f"fingerprints (radius 2, 2048 bits) against actives (pChEMBL >= {PCHEMBL_MIN:g}) on single-protein "
+            f"targets from {sumber}; each target was scored by the nearest neighbour and by the mean of the five "
+            "nearest neighbours.")
+    if param.get("jalur_struktur"):
+        if not panel:
+            bagian.append("The structure-based route was not run because the target panel is not available yet.")
+        else:
+            rm = [float(t["rmsd_redocking"]) for t in panel]
+            nu = sorted({t.get("n_umpan") for t in panel if t.get("n_umpan")})
+            bagian.append(
+                f"In the structure-based route, molecules were docked to {len(panel)} crystal structures of the "
+                f"'{kelas}' panel (co-crystal ligand redocking RMSD {min(rm):.2f}–{max(rm):.2f} Å, threshold "
+                f"{RMSD_MAKS:g} Å) using AutoDock Vina (exhaustiveness {param.get('exhaustiveness', 8)}). Energies "
+                "were normalised to z-scores against the score distribution of "
+                f"{'/'.join(str(n) for n in nu) if nu else 'several'} random decoys per target; {n_sukses} targets "
+                f"were docked successfully, {n_gagal} failed and were not ranked.")
+    if param.get("jalur_ligan") and param.get("jalur_struktur"):
+        bagian.append("The ranks from both routes were combined by Borda count; confidence is 'high' when a target "
+                      "is in the top 10 of both routes.")
+    if not bagian:
+        return ""
+    bagian.append("All candidate targets are computational hypotheses and require experimental validation before "
+                  "a pharmacological mechanism can be claimed.")
+    return "Reverse targeting. " + " ".join(bagian)

@@ -195,6 +195,10 @@ def susun_paragraf_metode(sumber_gen: str, n_gen: int, nama_gmt: str, hasil_peng
     sig = [b for b in hasil_pengayaan if b["q"] < 0.05]
     if not n_gen:
         return ""
+    from .. import i18n
+    if i18n.inggris():
+        return _paragraf_metode_en(sumber_gen, n_gen, nama_gmt, hasil_pengayaan, ambang_string, n_ppi,
+                                   ambang_penyakit, n_penyakit, sens, versi_ot, versi_string, v, sig)
     bagian = [f"Jaringan farmakologi dirakit dari {n_gen} target {sumber_gen}."]
     if hasil_pengayaan:
         latar = hasil_pengayaan[0]["n_latar"]
@@ -215,4 +219,34 @@ def susun_paragraf_metode(sumber_gen: str, n_gen: int, nama_gmt: str, hasil_peng
     catatan = ("Jaringan ini merupakan hipotesis komputasi: tepi STRING mencakup bukti ko-ekspresi dan penambangan teks "
                "selain interaksi fisik, dan seluruh hubungan memerlukan validasi eksperimental.") if n_ppi else         "Jaringan ini merupakan hipotesis komputasi dan memerlukan validasi eksperimental."
     bagian.append(catatan)
+    return " ".join(bagian)
+
+
+_SUMBER_GEN_EN = {"hasil penargetan balik": "from reverse targeting"}
+
+
+def _paragraf_metode_en(sumber_gen, n_gen, nama_gmt, hasil_pengayaan, ambang_string, n_ppi, ambang_penyakit,
+                        n_penyakit, sens, versi_ot, versi_string, v, sig):
+    """Versi Inggris susun_paragraf_metode dengan syarat kalimat yang sama."""
+    tak = "version not recorded"
+    bagian = [f"The pharmacological network was assembled from {n_gen} targets "
+              f"{_SUMBER_GEN_EN.get(sumber_gen, sumber_gen)}."]
+    if hasil_pengayaan:
+        bagian.append(
+            f"Pathway enrichment used {v.get('sumber', nama_gmt)} ({v.get('versi', tak)}; {v.get('n_set', '?')} gene "
+            f"sets) with a one-sided hypergeometric test against a background of {hasil_pengayaan[0]['n_latar']} "
+            f"annotated genes and Benjamini-Hochberg correction; {len(sig)} pathways met q < 0.05.")
+    if n_ppi:
+        bagian.append(f"Protein–protein edges come from STRING {versi_string or tak} with a combined score "
+                      f">= {ambang_string:g} ({n_ppi} edges).")
+    if n_penyakit:
+        bagian.append(f"Target–disease associations come from the Open Targets Platform ({versi_ot or tak}) "
+                      f"with an association score >= {ambang_penyakit:g} ({n_penyakit} edges).")
+    if sens and sens.get("kombinasi"):
+        bagian.append(f"A sensitivity analysis over {sens['kombinasi']} combinations of STRING thresholds and "
+                      "target counts yielded stable core nodes (present in >= 80 % of combinations): "
+                      f"{', '.join(sens['inti_stabil']) or 'none'}.")
+    bagian.append("This network is a computational hypothesis: STRING edges include co-expression and text-mining "
+                  "evidence besides physical interactions, and every relationship requires experimental validation."
+                  if n_ppi else "This network is a computational hypothesis and requires experimental validation.")
     return " ".join(bagian)

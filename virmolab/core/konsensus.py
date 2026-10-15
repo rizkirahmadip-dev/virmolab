@@ -108,6 +108,17 @@ def teks_metode(h):
     if not h or h.get("galat"):
         return ""
     w = h.get("W")
+    from .. import i18n
+    if i18n.inggris():
+        t = (f"Consensus ranks were built from {len(h['kolom'])} scoring functions ({', '.join(h['kolom'])}): each "
+             "ligand was ranked per scoring function (1 = lowest ΔG), then sorted by mean rank (mean z-score as "
+             f"tie-breaker). A ligand was considered consistent if it was in the top {h['teratas']:g} % for every "
+             "scoring function. Agreement between scoring functions was assessed with Kendall's coefficient of "
+             "concordance W")
+        if w:
+            t += (f" (W = {w[0]:.3f}; χ²({w[2]}) = {w[1]:.2f}; "
+                  f"p {'< 0.0001' if w[3] < 1e-4 else '= ' + f'{w[3]:.4f}'})")
+        return t + f". {h['n_konsisten']} of {h['n']} ligands were consistent."
     t = (f"Peringkat konsensus disusun dari {len(h['kolom'])} fungsi skor ({', '.join(h['kolom'])}): tiap ligan "
          "diberi peringkat per fungsi skor (1 = ΔG terendah), lalu diurutkan menurut rata-rata peringkat (z-score "
          f"rata-rata sebagai pemisah). Ligan dianggap konsisten bila berada pada {h['teratas']:g} % teratas di semua "

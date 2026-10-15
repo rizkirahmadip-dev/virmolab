@@ -68,6 +68,35 @@ def catatan_basis_data() -> str:
     return f"Basis data fragmen lokal: {p.name}."
 
 
+def _catatan_basis_data_aktif() -> str:
+    from .. import i18n
+    return catatan_basis_data_en() if i18n.inggris() else catatan_basis_data()
+
+
+def catatan_basis_data_en() -> str:
+    """Versi Inggris catatan_basis_data. Isi sumber.txt ditulis dev/buat_db_fragmen.py dalam Bahasa Indonesia,
+    jadi angkanya dibaca ulang dari berkas itu, bukan diterjemahkan kata per kata."""
+    import re
+    p = basis_data()
+    if not p:
+        return "The fragment database is not included in this installation."
+    sumber = p.parent / "sumber.txt"
+    if not sumber.exists():
+        return f"Local fragment database: {p.name}."
+    isi = sumber.read_text(encoding="utf-8")
+    n = re.search(r"dari (\d+) senyawa", isi)
+    rad = re.search(r"Radius konteks: ([\d ]+)\.", isi)
+    inti = re.search(r"Maksimum atom berat inti: (\d+)", isi)
+    tgl = re.search(r"pada (\d{4}-\d{2}-\d{2})", isi)
+    return ("The CReM fragment database was built from "
+            + (f"{n.group(1)} compounds of the local VirmoLab library (approved drugs, ChEMBL snapshot)" if n
+               else "the local VirmoLab library")
+            + (f"; context radii {rad.group(1).strip().replace(' ', ', ')}" if rad else "")
+            + (f"; maximum core size {inti.group(1)} heavy atoms" if inti else "")
+            + "; built with cremdb_create (crem, BSD-3-Clause)"
+            + (f" on {tgl.group(1)}" if tgl else "") + ".")
+
+
 def tersedia() -> Dict[str, Any]:
     """{ada, pesan, db}: apakah paket crem dan basis data fragmen siap dipakai."""
     try:
@@ -81,7 +110,7 @@ def tersedia() -> Dict[str, Any]:
         return {"ada": False, "db": "", "pesan": "Basis data fragmen tidak ditemukan. "
                                                  "Bangun dengan dev/buat_db_fragmen.py."}
     return {"ada": True, "db": str(db),
-            "pesan": f"CReM siap. {catatan_basis_data()}"}
+            "pesan": f"CReM siap. {_catatan_basis_data_aktif()}"}
 
 
 def _mol(smiles: str):
@@ -337,6 +366,20 @@ def paragraf_metode(hasil: Dict[str, Any], operasi: str = "mutate", radius: int 
     n_pareto = len(hasil.get("pareto") or [])
     n_tolak = len(hasil.get("ditolak") or [])
     berdg = [k for k in kandidat if k.dg is not None] if hasattr(kandidat[0], "dg") else []
+    from .. import i18n
+    if i18n.inggris():
+        teks = (f"Analogues were generated from the parent compound with CReM (operation {operasi}, context "
+                f"radius {radius}) using a fragment database built from the local compound library. "
+                f"{len(kandidat)} analogues passed filtering and {n_tolak} were rejected by the substructure "
+                f"filters (PAINS and Brenk), synthetic accessibility (SAScore <= {sa_maks:g}), drug-likeness "
+                f"(QED >= {qed_min:g}), and novelty relative to the parent.")
+        if berdg:
+            teks += (f" {len(berdg)} candidates were docked, and {n_pareto} of them lie on the first Pareto "
+                     "front over binding free energy, QED, and SAScore.")
+            if hasil.get("n_gagal_docking"):
+                teks += f" {hasil['n_gagal_docking']} candidates failed docking and were excluded from the ranking."
+        return (teks + " " + hasil.get("catatan_db_en", catatan_basis_data_en()) +
+                " All analogues are computational proposals that still require assessment by a synthetic chemist.")
     teks = (f"Analog dibangkitkan dari senyawa induk dengan CReM (operasi {operasi}, radius konteks "
             f"{radius}) memakai basis data fragmen yang dibangun dari pustaka senyawa lokal. "
             f"{len(kandidat)} analog lolos penyaringan dan {n_tolak} ditolak oleh saringan substruktur "

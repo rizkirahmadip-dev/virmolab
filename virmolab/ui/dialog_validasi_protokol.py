@@ -20,6 +20,7 @@ from PySide6.QtWidgets import (QApplication, QDialog, QDoubleSpinBox, QFileDialo
 from ..core import catat, decoy, grafik_uji, mesin, validasi_protokol
 from ..core.laporan import id_angka
 from . import kerja, kit
+from .. import i18n
 from .panel_interaksi import KanvasSvg
 
 LANGKAH = ("Redocking", "Cross-docking", "Pengayaan", "Ringkasan")
@@ -561,7 +562,7 @@ class DialogValidasiProtokol(QDialog):
         return d
 
     def _salin_metode(self):
-        teks = validasi_protokol.susun_paragraf_metode(self._ringkasan_dict(), bahasa="id")
+        teks = validasi_protokol.susun_paragraf_metode(self._ringkasan_dict(), bahasa=i18n.BAHASA)
         if not teks:
             self.l_status.setText("Belum ada uji yang dijalankan; paragraf metode kosong.")
             return

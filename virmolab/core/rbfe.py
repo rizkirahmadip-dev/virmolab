@@ -30,6 +30,10 @@ LABEL_EKSPERIMENTAL = (
     "Eksperimental. RBFE menuntut simulasi panjang di GPU dan protokol yang disetel hati-hati; "
     "hasilnya hanya bermakna untuk seri senyawa kongenerik dengan perubahan kecil."
 )
+LABEL_EKSPERIMENTAL_EN = (
+    "Experimental. RBFE requires long GPU simulations and a carefully tuned protocol; "
+    "the results are meaningful only for congeneric series with small changes."
+)
 
 MAKS_ATOM_BERUBAH = 10      # batas perubahan per perturbasi, sesuai rencana F9
 K_BOLTZMANN_KKAL = 0.0019872041      # kkal/(mol K)
@@ -282,6 +286,18 @@ def paragraf_metode(hasil_jaringan: Dict[str, Any], n_lambda: int = 11, n_replik
     if not tepi:
         return ""
     selesai = [t for t in tepi if t.ddg is not None]
+    from .. import i18n
+    if i18n.inggris():
+        teks = (f"A relative free-energy perturbation network was built over "
+                f"{len(hasil_jaringan.get('simpul') or [])} compounds and {len(tepi)} edges "
+                f"({hasil_jaringan.get('mode', 'mst')} mode). Atom mapping for each pair used the RDKit maximum "
+                "common substructure with element and bond-order matching, and only pairs changing up to "
+                f"{MAKS_ATOM_BERUBAH} heavy atoms were used. Planned protocol: {n_lambda} lambda windows, "
+                f"{n_replika} replicas, {ns_per_lambda:g} ns per window.")
+        if selesai:
+            teks += (f" {len(selesai)} edges were analysed with MBAR; consistency was checked via cycle closure in "
+                     "the network.")
+        return teks + " " + LABEL_EKSPERIMENTAL_EN
     teks = (f"Jaringan perturbasi energi bebas relatif disusun atas {len(hasil_jaringan.get('simpul') or [])} "
             f"senyawa dan {len(tepi)} tepi (mode {hasil_jaringan.get('mode', 'mst')}). Pemetaan atom tiap "
             "pasangan memakai substruktur bersama maksimum RDKit dengan pencocokan unsur dan orde ikatan, "

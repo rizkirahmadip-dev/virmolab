@@ -282,6 +282,17 @@ class DialogKonsensus(QDialog):
         if not label:
             return ""
         n = len(label)
+        from .. import i18n
+        if i18n.inggris():
+            nama = {"Sepakat": "agree", "Sebagian": "partly agree", "Bertentangan": "disagree"}
+            rinci = ", ".join(f"{label.count(k)} {nama[k]}" for k in ("Sepakat", "Sebagian", "Bertentangan")
+                              if label.count(k))
+            return (f" As a cross-check, {n} ligands were also predicted with the Boltz-2 co-folding model; the "
+                    "output structures were superimposed on the receptor using Cα atoms before the ligand RMSD was "
+                    "calculated, and agreement was assessed from the ligand RMSD, the Tanimoto similarity of the "
+                    f"interaction fingerprints, and PoseBusters checks of both poses ({rinci}). Boltz-2 was trained "
+                    "on PDB structures, so agreement on targets or ligands already in the PDB may reflect training-"
+                    "data leakage rather than predictive ability.")
         rinci = ", ".join(f"{label.count(k)} {k.lower()}" for k in ("Sepakat", "Sebagian", "Bertentangan")
                           if label.count(k))
         return (f" Sebagai pemeriksaan silang, {n} ligan juga diprediksi dengan model co-folding Boltz-2; "
@@ -294,7 +305,10 @@ class DialogKonsensus(QDialog):
     def salin(self):
         t = K.teks_metode(self.hasil)
         if any(k.startswith("Vinardo") for k in (self.hasil or {}).get("kolom", [])):
-            t += " Rescoring memakai AutoDock Vina 1.2 (--score_only) dengan fungsi skor Vina dan Vinardo."
+            from .. import i18n
+            t += (" Rescoring used AutoDock Vina 1.2 (--score_only) with the Vina and Vinardo scoring functions."
+                  if i18n.inggris() else
+                  " Rescoring memakai AutoDock Vina 1.2 (--score_only) dengan fungsi skor Vina dan Vinardo.")
         t += self._kalimat_kofolding()
         QGuiApplication.clipboard().setText(t)
         self.jw.statusBar().showMessage("Paragraf metode konsensus disalin.", 4000)

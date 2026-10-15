@@ -20,6 +20,7 @@ from PySide6.QtWidgets import (
 )
 
 from ..core import grafik, qsar
+from .. import i18n
 from . import kerja, kit
 
 LANGKAH = ("Data", "Kurasi", "Model", "Validasi", "Prediksi")
@@ -679,7 +680,8 @@ class DialogQSAR(QDialog):
             return
         self.langkah = n
         self.tumpuk.setCurrentIndex(n)
+        nama = [i18n.t(t) for t in LANGKAH]       # per langkah; teks gabungan tidak ada di kamus
         self.l_langkah.setText("  ›  ".join(f"<b>{i + 1}. {t}</b>" if i == n else f"{i + 1}. {t}"
-                                            for i, t in enumerate(LANGKAH)))
+                                            for i, t in enumerate(nama)))
         self.b_mundur.setEnabled(n > 0)
         self.b_maju.setEnabled(n < len(LANGKAH) - 1)

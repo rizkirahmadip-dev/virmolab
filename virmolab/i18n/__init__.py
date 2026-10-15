@@ -46,6 +46,9 @@ def _muat(kode):
         if not urut or len(re.sub(r"\(\.\*\?\)", "", rx)) < 4:
             continue
         _pola.append((re.compile("^" + rx + "$", re.S), urut, hasil))
+    # Pola paling spesifik (bagian tetap terpanjang) dicoba lebih dulu. Tanpa ini pola umum seperti
+    # '{0} ligan' menelan '4 atom berat ligan' sebelum pola '{0} atom berat ligan' sempat dicoba.
+    _pola.sort(key=lambda p: -len(re.sub(r"\(\.\*\?\)", "", p[0].pattern)))
 
 
 def t(s):
@@ -59,6 +62,22 @@ def t(s):
     if len(_cache) < 50000:
         _cache[s] = h
     return h
+
+
+def inggris():
+    """True bila antarmuka berbahasa Inggris. Dipakai modul core untuk teks yang tidak lewat setter Qt,
+    misalnya paragraf metode yang langsung disalin ke papan klip."""
+    return BAHASA == "en"
+
+
+def t_baris(teks):
+    """Terjemahkan teks polos berbaris (ringkasan hasil di QPlainTextEdit) baris per baris.
+
+    setPlainText sengaja tidak dibungkus otomatis karena kotak teks yang sama juga memuat skrip dan kode
+    yang tidak boleh berubah; pemanggil memakai fungsi ini hanya untuk teks UI buatannya sendiri."""
+    if BAHASA == "id" or not teks:
+        return teks
+    return "\n".join(t(b) if b.strip() else b for b in teks.split("\n"))
 
 
 def _terjemah(s):
@@ -78,7 +97,7 @@ def _terjemah(s):
     for rx, urut, hasil in _pola:
         m = rx.match(s)
         if m:
-            nilai = {u: t(g) for u, g in zip(urut, m.groups())}
+            nilai = {u: t(_titik_desimal(g)) for u, g in zip(urut, m.groups())}
             try:
                 return hasil.format(*[nilai.get(i, "") for i in range(max(urut) + 1)])
             except (IndexError, KeyError):
@@ -98,7 +117,26 @@ def _terjemah(s):
         tk = _teks.get(kiri + ": ") or _teks.get(kiri)
         if tk:
             return tk.rstrip() + " " + t(kanan) if tk.endswith(": ") else tk + ": " + t(kanan)
+    # Paragraf yang dirakit dari beberapa kalimat (paragraf metode, catatan dialog): terjemahkan per kalimat,
+    # tetapi hanya bila SEMUA kalimat dikenal. Paragraf setengah Inggris setengah Indonesia lebih buruk
+    # daripada paragraf Indonesia utuh.
+    kalimat = re.split(r"(?<=[.!?])\s+(?=[A-ZΔ(0-9])", inti)
+    if len(kalimat) > 1:
+        hasil = [t(k) for k in kalimat]
+        if all(h != k or not re.search(r"[a-z]{3}", k) for h, k in zip(hasil, kalimat)):
+            return s[:len(s) - len(s.lstrip())] + " ".join(hasil) + s[len(s.rstrip()):]
     return s
+
+
+_DESIMAL = re.compile(r"(?<=\d),(?=\d)")
+
+
+def _titik_desimal(g):
+    """Angka berkoma desimal ala Indonesia (1,34) ditulis bertitik di teks Inggris. Daftar yang dipisah
+    koma-spasi ('A, B') tidak disentuh, dan teks Indonesia tidak pernah melewati fungsi ini."""
+    if not g or ", " in g or not _DESIMAL.search(g):
+        return g
+    return _DESIMAL.sub(".", g)
 
 
 def _ganti_frasa(s):
@@ -231,6 +269,9 @@ def pasang(app):
         return
     BAHASA = kode
     from PySide6 import QtCore, QtGui, QtWidgets as W
+    # Kotak angka (QDoubleSpinBox) mengikuti locale Windows; di Windows berbahasa Indonesia desimalnya koma
+    # walaupun antarmuka berbahasa Inggris. Teks Inggris memakai titik, jadi kotak angka juga.
+    QtCore.QLocale.setDefault(QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.UnitedStates))
 
     # 1. setter
     for kelas, daftar in ((W.QWidget, ("setWindowTitle", "setToolTip", "setStatusTip", "setWhatsThis")),

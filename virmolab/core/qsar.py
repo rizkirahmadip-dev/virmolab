@@ -709,6 +709,9 @@ def susun_paragraf_metode(hasil: Dict[str, Any], data: Sequence[Dict[str, Any]],
     """Paragraf metode dari angka nyata; bagian yang tidak dijalankan tidak disebut."""
     if not hasil:
         return ""
+    from .. import i18n
+    if i18n.inggris():
+        return _paragraf_metode_en(hasil, data, sumber_data, y_acak_hasil)
     koma = lambda x, d=2: f"{x:.{d}f}".replace(".", ",")      # noqa: E731
     e, i = hasil.get("eksternal", {}), hasil.get("internal", {})
     bagian = [
@@ -754,4 +757,59 @@ def susun_paragraf_metode(hasil: Dict[str, Any], data: Sequence[Dict[str, Any]],
                       f"{koma(d['ambang_tanimoto'])}); senyawa di luar domain ditandai dan prediksinya tidak "
                       "boleh ditafsirkan sebagai kuantitatif.")
     bagian.append("Pelaporan mengikuti lima prinsip OECD untuk validasi model QSAR.")
+    return " ".join(bagian)
+
+
+_FITUR_EN = {"morgan": "Morgan2 (2048-bit)", "maccs": "MACCS (167 keys)", "deskriptor": "RDKit 2D descriptor",
+             "gabungan": "RDKit 2D descriptor + Morgan2"}
+
+
+def _paragraf_metode_en(hasil, data, sumber_data="", y_acak_hasil=None):
+    """Versi Inggris susun_paragraf_metode; isi dan syarat tiap kalimat sama persis."""
+    f = lambda x, d=2: f"{x:.{d}f}"      # noqa: E731
+    e, i = hasil.get("eksternal", {}), hasil.get("internal", {})
+    bagian = [
+        f"The QSAR model was built from {len(data)} compounds"
+        + (f" ({sumber_data})" if sumber_data else "")
+        + f" with pIC50 as the endpoint (range {f(min(d['pic50'] for d in data))}-{f(max(d['pic50'] for d in data))}). "
+        "Structures were standardised (largest fragment, neutralisation) and replicate measurements were merged "
+        "as the median.",
+        f"{_FITUR_EN.get(hasil['jenis_fitur'], hasil['jenis_fitur'])} features were used as input to "
+        f"{ALGORITMA.get(hasil['algoritma'], hasil['algoritma'])}; hyperparameters were tuned by grid search with "
+        "5-fold cross-validation within the training set only. The data were split by "
+        + ("Bemis-Murcko scaffold" if hasil["metode_bagi"] == "kerangka" else "random split")
+        + f" ({hasil['n_latih']} training, {hasil['n_uji']} test"
+        + (f", {hasil['n_kalibrasi']} conformal calibration" if hasil.get("n_kalibrasi") else "") + ").",
+    ]
+    if hasil["klasifikasi"]:
+        bagian.append(f"On the test set, balanced accuracy was {f(e.get('ba', float('nan')))} and MCC "
+                      f"{f(e.get('mcc', float('nan')))}"
+                      + (f" with ROC-AUC {f(e['roc_auc'])}" if "roc_auc" in e else "")
+                      + f"; training-set cross-validation gave a balanced accuracy of {f(i.get('ba', float('nan')))}.")
+    else:
+        bagian.append(f"Training-set cross-validation gave Q2 {f(i.get('q2', float('nan')))} "
+                      f"(RMSE {f(i.get('rmse_cv', float('nan')))}), while the test set gave R2 "
+                      f"{f(e.get('r2', float('nan')))}, RMSE {f(e.get('rmse', float('nan')))}, and MAE "
+                      f"{f(e.get('mae', float('nan')))} log units.")
+        gt = hasil.get("golbraikh_tropsha") or {}
+        if gt:
+            bagian.append("The Golbraikh-Tropsha criteria were " + ("met" if gt.get("lulus") else "not met")
+                          + f" (k = {f(gt.get('k', float('nan')))}, r0^2 = {f(gt.get('r0_2', float('nan')))}).")
+    if y_acak_hasil:
+        bagian.append(f"Y-randomization ({y_acak_hasil['n']} runs) gave a mean "
+                      + ("balanced accuracy" if hasil["klasifikasi"] else "R2")
+                      + f" of {f(y_acak_hasil['rata'])} (maximum {f(y_acak_hasil['maks'])}), far below the actual "
+                      "model, so chance correlation can be ruled out.")
+    if hasil.get("konformal", {}).get("cakupan_uji") is not None:
+        k = hasil["konformal"]
+        bagian.append(f"Split conformal prediction ({f((1 - k['alfa']) * 100, 0)} % level) was calibrated on "
+                      f"{k['n_kalibrasi']} compounds and reached an empirical coverage of "
+                      f"{f(k['cakupan_uji'] * 100, 1)} % on the test set.")
+    d = hasil.get("domain") or {}
+    if d:
+        bagian.append(f"The applicability domain was defined by leverage (h* = {f(d['h_bintang'], 3)}) and the "
+                      f"mean Tanimoto similarity to the five nearest neighbours (threshold "
+                      f"{f(d['ambang_tanimoto'])}); compounds outside the domain are flagged and their predictions "
+                      "must not be interpreted quantitatively.")
+    bagian.append("Reporting follows the five OECD principles for QSAR model validation.")
     return " ".join(bagian)

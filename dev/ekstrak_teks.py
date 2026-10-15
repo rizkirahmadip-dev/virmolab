@@ -15,6 +15,9 @@ BERKAS = sorted(Path("virmolab/ui").glob("*.py")) + [Path(f"virmolab/core/{n}.py
     "statistik", "analisis", "kemiripan", "admet", "protonasi", "periksa_protein", "sifat", "grafik", "grafik_uji",
     "uji", "pustaka", "chembl", "env", "qc", "konsensus", "ujimandiri", "mesin", "prep_reseptor", "prep_ligan",
     "molekul", "laporan", "ekspor", "p2rank", "pindah", "proyek", "antrean", "alphafold", "md")]
+# Modul core fitur 1.2+ (F1-F12) juga menghasilkan teks tampil: alasan penolakan, paragraf metode, label.
+BERKAS += [p for p in sorted(Path("virmolab/core").glob("*.py")) if p not in BERKAS and p.stem not in (
+    "__init__", "paths", "catat", "lokal", "_sascorer_impl")]
 LEWATI_FUNGSI = {"value", "setValue", "contains", "remove", "findData", "get", "setdefault", "pop", "startswith",
                  "endswith", "split", "replace", "join", "strip", "rstrip", "lstrip", "objectName", "setObjectName",
                  "js", "runJavaScript", "setProperty", "property", "getattr", "hasattr", "setStyleSheet", "format",

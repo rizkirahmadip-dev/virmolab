@@ -784,6 +784,12 @@ class DialogFarmakofor(QDialog):
         tol_teks = (f"{kit.f(tol[0], 1)} Å" if len(tol) == 1 else f"{kit.f(tol[0], 1)}–{kit.f(tol[-1], 1)} Å")
         n_eks = len(self._kueri.get("eksklusi", []))
         bf = self.sl_bobot.value() / 100.0
+        from .. import i18n
+        if i18n.inggris():
+            teks = self._metode_en(aktif, fitur, tol, n_eks, bf)
+            kit.salin(teks)
+            self.lbl_status.setText("Paragraf metode disalin ke papan klip.")
+            return
         eksklusi_teks = (f", ditambah {n_eks} bola volume eksklusi dari atom berat protein dalam radius 4,0 Å"
                          if n_eks else "")
 
@@ -808,6 +814,30 @@ class DialogFarmakofor(QDialog):
 
         kit.salin(teks)
         self.lbl_status.setText("Paragraf metode disalin ke papan klip.")
+
+    def _metode_en(self, aktif, fitur, tol, n_eks, bf):
+        """Versi Inggris paragraf metode di atas, dengan angka dan syarat kalimat yang sama."""
+        tol_teks = f"{tol[0]:.1f} Å" if len(tol) == 1 else f"{tol[0]:.1f}–{tol[-1]:.1f} Å"
+        teks = (
+            "Ligand-based 3D virtual screening was performed with the VirmoLab pharmacophore and shape module "
+            "(RDKit). The pharmacophore query was extracted from the reference pose using the BaseFeatures.fdef "
+            f"feature definitions; {len(aktif)} of {len(fitur)} features were used with a spatial tolerance of "
+            f"{tol_teks}"
+            + (f", plus {n_eks} excluded-volume spheres from protein heavy atoms within 4.0 Å" if n_eks else "")
+            + f". Up to {self.sp_konf.value()} ETKDGv3 conformers (RMSD pruning 0.5 Å) were generated for each "
+            "library compound, and each conformer was rigidly aligned to the reference ligand with rdShapeAlign "
+            f"(shape and colour Tanimoto). The final score is the weighted mean of {bf:.2f} pharmacophore score "
+            "(fraction of matched features × distance precision, minus an excluded-volume clash penalty) and "
+            f"{1.0 - bf:.2f} shape–colour score; the highest-scoring conformer is reported."
+        )
+        v = self._val_terakhir
+        if v and v.get("auc") is not None:
+            teks += (f" Query discrimination was tested on {v['n_aktif']} actives and {v['n_decoy']} decoys: "
+                     f"ROC-AUC {v['auc']:.3f}, BEDROC (α = 20) {v['bedroc']:.3f}")
+            if v.get("ef1") is not None:
+                teks += f", EF1% {v['ef1']:.1f}"
+            teks += "."
+        return teks + " Screening ranks are hypotheses that must be confirmed by docking and experimental assays."
 
     def _kirim_ke_docking(self):
         """Tambahkan senyawa teratas sebagai ligan di jendela utama lalu buka Siapkan ligan.

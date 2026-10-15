@@ -64,6 +64,11 @@ def estimasi_kinetika(
 
     # Konversi waktu ke unit yang manusiawi
     def _format_waktu(detik: float) -> str:
+        # Ligan transien bisa ber-τ di bawah satu milidetik; '0.0 detik' menyembunyikan besarnya.
+        if detik < 1e-3:
+            return f"{detik * 1e6:.1f} µs"
+        if detik < 1:
+            return f"{detik * 1e3:.1f} ms"
         if detik < 60:
             return f"{detik:.1f} detik"
         elif detik < 3600:

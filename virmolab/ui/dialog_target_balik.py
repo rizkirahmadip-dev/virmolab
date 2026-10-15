@@ -41,6 +41,7 @@ except ImportError:
     Draw = None
 
 from ..core import catat, graf, jaringan, pengayaan, target_balik
+from .. import i18n
 from . import kit
 
 
@@ -767,7 +768,7 @@ class DialogTargetBalik(QDialog):
 
         for row, tgt in enumerate(panel):
             self.tabel_hasil.setItem(row, 0, kit.sel_angka(row + 1, d=0))
-            self.tabel_hasil.setItem(row, 1, kit.sel(f"{tgt.get('nama', '')} · {tgt['pdb']}"))
+            self.tabel_hasil.setItem(row, 1, kit.sel(f"{i18n.t(tgt.get('nama', ''))} · {tgt['pdb']}"))
             self.tabel_hasil.setItem(row, 2, kit.sel(tgt.get("gen", tgt.get("pdb", ""))))
             self.tabel_hasil.setItem(row, 3, kit.sel_angka(None))
             self.tabel_hasil.setItem(row, 4, kit.sel_angka(None))

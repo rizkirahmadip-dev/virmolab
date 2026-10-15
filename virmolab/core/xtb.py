@@ -31,6 +31,10 @@ CATATAN_METODE = (
     "GFN2-xTB semi-empiris; celah HOMO–LUMO cenderung lebih kecil dari DFT, pakai untuk tren "
     "antar-ligan, bukan nilai absolut. Bukan DFT."
 )
+CATATAN_METODE_EN = (
+    "GFN2-xTB is semi-empirical; its HOMO–LUMO gaps tend to be smaller than DFT values, so use it for trends "
+    "between ligands, not absolute values. Not DFT."
+)
 
 # Pelarut ALPB yang didukung xtb dan masuk akal untuk kerja docking
 PELARUT = ("water", "methanol", "dmso", "acetonitrile", "chcl3", "toluene", "none")
@@ -392,6 +396,17 @@ def paragraf_metode(hasil: HasilXtb, pelarut: str = "water") -> str:
         return ""
     info = tersedia()
     versi = f" {info['versi']}" if info.get("versi") else ""
+    from .. import i18n
+    if i18n.inggris():
+        larut = "the gas phase" if pelarut == "none" else f"ALPB implicit solvent ({pelarut})"
+        bagian = [f"Electronic descriptors were computed with GFN2-xTB (xtb{versi}) in {larut}"]
+        if hasil.celah_ev is not None:
+            bagian.append(f"HOMO-LUMO gap {hasil.celah_ev:.2f} eV")
+        if hasil.dipol_debye is not None:
+            bagian.append(f"dipole moment {hasil.dipol_debye:.2f} D")
+        if hasil.fukui:
+            bagian.append("condensed Fukui indices from Mulliken charges (f+, f-, f0)")
+        return ". ".join([", ".join(bagian), CATATAN_METODE_EN])
     larut = "fase gas" if pelarut == "none" else f"pelarut implisit ALPB ({pelarut})"
     bagian = [f"Deskriptor elektronik dihitung dengan GFN2-xTB (xtb{versi}) pada {larut}"]
     if hasil.celah_ev is not None:

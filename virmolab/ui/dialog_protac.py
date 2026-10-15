@@ -5,6 +5,7 @@ from PySide6.QtWidgets import (
 )
 
 from ..core import protac
+from .. import i18n
 from . import kit
 
 
@@ -130,7 +131,7 @@ class DialogPROTAC(QDialog):
                 f"Bentangan linker        : {kit.f(h['panjang_linker_est'], 1, 'Å')} (rantai terentang penuh, bukan hasil pemodelan)\n"
                 f"SMILES                  : {h['smiles']}"
             )
-            self.txt_res.setPlainText(teks)
+            self.txt_res.setPlainText(i18n.t_baris(teks))
         except Exception as e:
             self.txt_res.setPlainText(f"Gagal merakit PROTAC: {e}")
 

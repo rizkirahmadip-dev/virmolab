@@ -23,13 +23,16 @@ def warna(kunci):
 
 
 def f(v, d=2, satuan=""):
-    """Angka gaya Indonesia (koma desimal, minus asli); '–' bila kosong."""
+    """Angka gaya Indonesia (koma desimal, minus asli); '–' bila kosong. Di antarmuka berbahasa Inggris
+    desimalnya titik, supaya tidak bercampur dengan teks Inggris di sekitarnya."""
     if v is None or v == "":
         return "–"
     try:
-        t = id_angka(f"{float(v):.{d}f}")
+        t = f"{float(v):.{d}f}"
     except (TypeError, ValueError):
         return str(v)
+    from .. import i18n
+    t = ("−" + t[1:] if t.startswith("-") else t) if i18n.inggris() else id_angka(t)
     return f"{t} {satuan}".rstrip()
 
 
@@ -86,7 +89,9 @@ class Kartu(QFrame):
         v = QVBoxLayout(self)
         v.setContentsMargins(12, 8, 12, 9)
         v.setSpacing(1)
-        self.l_label = QLabel(label.upper())
+        # Diterjemahkan sebelum dijadikan huruf besar; kamus menyimpan bentuk biasa ('Ikatan-H', bukan 'IKATAN-H').
+        from .. import i18n
+        self.l_label = QLabel(i18n.t(label).upper())
         self.l_label.setObjectName("kartuLabel")
         self.l_nilai = QLabel(nilai)
         self.l_nilai.setObjectName("kartuNilai")

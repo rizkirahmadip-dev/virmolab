@@ -4,6 +4,7 @@ from PySide6.QtWidgets import (
 )
 
 from ..core import kinetika
+from .. import i18n
 from . import kit
 
 
@@ -150,8 +151,8 @@ class DialogKinetika(QDialog):
             f"• Kd Termodinamika     : {hasil['Kd_nM']:.2f} nM ({hasil['dG']} kcal/mol)\n"
             f"• Laju Asosiasi (k_on)  : {hasil['k_on']} M⁻¹ s⁻¹\n"
             f"• Laju Disosiasi (k_off): {hasil['k_off']} s⁻¹\n"
-            f"• Waktu Tinggal (τ)    : {hasil['tau_detik']:.1f} detik (~ {hasil['tau_teks']})\n"
-            f"• Waktu Paruh (t₁/₂)   : {hasil['t_setengah_detik']:.1f} detik (~ {hasil['t_setengah_teks']})\n\n"
+            f"• Waktu Tinggal (τ)    : {hasil['tau_teks']}\n"
+            f"• Waktu Paruh (t₁/₂)   : {hasil['t_setengah_teks']}\n\n"
             f"Wawasan PK/PD: {hasil['penjelasan']}"
         )
-        self.txt_detail.setPlainText(teks)
+        self.txt_detail.setPlainText(i18n.t_baris(teks))
