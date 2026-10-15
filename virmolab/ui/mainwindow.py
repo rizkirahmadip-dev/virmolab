@@ -460,7 +460,7 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
             t1 = "Belum ada protein. Ambil dari RCSB (mis. 1HSG) atau buka berkas."
         siap = pr.ligan_siap() if pr else []
         mentah = [o for o in self.objek.values() if o.jenis == "ligan" and not o.info.get("siap_docking")
-                  and not o.info.get("ligan_asli")]
+                  and not o.info.get("ligan_asli") and not o.info.get("kofaktor")]
         asli = [o for o in self.objek.values() if o.jenis == "ligan" and o.info.get("ligan_asli")
                 and not o.info.get("siap_docking")]
         n_war = sum(1 for l in siap if l.get("status") == "peringatan")
@@ -1443,7 +1443,8 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
         """Sembunyikan air, ion, aditif, dan ligan masukan agar viewport bersih."""
         n = 0
         for oid, obj in list(self.objek.items()):
-            if obj.jenis in ("air", "ion") or obj.info.get("aditif") or (obj.grup == GRUP_LIGAN and not obj.info.get("ligan_asli")):
+            if obj.jenis in ("air", "ion") or obj.info.get("aditif") or (
+                    obj.grup == GRUP_LIGAN and not obj.info.get("ligan_asli") and not obj.info.get("kofaktor")):
                 if obj.tampil:
                     self.set_tampil(oid, False)
                     self.hier.set_centang(oid, False)
@@ -2771,7 +2772,8 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
             return o.teks
         bagian = [o.teks] + [x.teks for x in self.objek.values()
                              if x.sumber == o.sumber and x.id != o.id and x.fmt == "pdb"
-                             and (x.jenis == "ion" or (x.jenis == "ligan" and x.info.get("ligan_asli")))]
+                             and (x.jenis == "ion" or (x.jenis == "ligan" and (x.info.get("ligan_asli")
+                                                                                 or x.info.get("kofaktor"))))]
         return "\n".join(b for t in bagian for b in t.splitlines()
                          if b.startswith(("ATOM", "HETATM", "TER", "CRYST1"))) + "\nEND\n"
 

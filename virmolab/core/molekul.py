@@ -18,6 +18,20 @@ AIR = {"HOH", "WAT", "H2O", "DOD", "TIP", "TIP3", "SOL"}
 ION = {"NA", "CL", "K", "MG", "CA", "ZN", "FE", "FE2", "MN", "CU", "CU1", "CO", "NI", "CD", "HG", "SR", "BA", "CS",
        "IOD", "BR", "LI", "RB", "AL", "PT", "AU", "AG", "PB", "SO4", "PO4"}
 # aditif kristalisasi / pelarut / buffer umum: bukan ligan asli (tidak dipakai untuk pusat grid & redocking)
+# Kofaktor, gugus prostetik, dan koenzim umum. Bukan "ligan asli" bila struktur juga memuat ligan lain: pada
+# CYP3A4 + ketokonazol, HEM (43 atom) lebih besar dari obatnya dan dulu terpilih sebagai ligan asli
+# sehingga kotak grid dipusatkan di heme dan heme ikut dibuang saat preparasi.
+KOFAKTOR = {"HEM", "HEC", "HEA", "HEB", "HDD", "HAS", "SRM", "HNI", "COH", "ZNH", "MNH", "FAD", "FMN", "FDA", "FAS",
+            "NAD", "NAP", "NDP", "NAI", "NAJ", "NDO", "SAM", "SAH", "SFG", "PLP", "PMP", "TPP", "COA", "ACO",
+            "SCA", "MLC", "B12", "CNC", "COB", "BTN", "H4B", "MTE", "MGD", "PQQ", "F42", "LUM",
+            "FES", "SF4", "F3S", "CLA", "CHL", "BCL", "BCR", "PL9", "U10", "UQ1", "UQ2", "MQ7", "RET", "TOP",
+            "ADP", "ATP", "ANP", "ACP", "GDP", "GTP", "GNP", "GCP", "UDP", "UTP", "CTP", "AMP", "ADN"}
+# Gugus prostetik: terikat permanen, tidak pernah menjadi ligan docking (CYP apo hanya berisi HEM, dan heme itu
+# harus tetap di reseptor). Ko-substrat (NAD, ATP, SAM, CoA) di luar daftar ini boleh menjadi ligan asli bila
+# tidak ada ligan lain, misalnya struktur kinase dengan ANP saja.
+PROSTETIK = {"HEM", "HEC", "HEA", "HEB", "HDD", "HAS", "SRM", "HNI", "COH", "ZNH", "MNH", "FAD", "FMN", "FDA",
+             "FAS", "B12", "CNC", "COB", "FES", "SF4", "F3S", "CLA", "CHL", "BCL", "BCR", "PL9", "U10", "MQ7",
+             "RET", "MTE", "MGD", "PQQ", "F42", "LUM", "TPP", "H4B", "BTN", "PLP", "PMP"}
 ADITIF = {"GOL", "EDO", "PEG", "PGE", "PG4", "1PE", "P6G", "DMS", "ACT", "ACE", "FMT", "MPD", "MRD", "TRS", "EPE",
           "MES", "BME", "DTT", "IMD", "CIT", "FLC", "TAR", "MLI", "SCN", "NO3", "NH4", "AZI", "BU3", "IPA", "EOH",
           "MOH", "DOX", "BTB", "HEZ", "PEO", "SIN", "ACY", "CO3", "BCT", "OXY", "IOD", "2PE", "12P", "15P", "PE4",
@@ -158,6 +172,8 @@ def pecah_struktur(st, nama, sumber=""):
                 ion.append((ch.name, r))
             else:
                 lig[(ch.name, r.name, r.seqid.num)] = r
+    # Kofaktor hanya dianggap ligan asli bila tidak ada ligan lain (struktur kinase + ANP saja, misalnya).
+    ada_ligan_lain = any(k[1].upper() not in ADITIF and k[1].upper() not in KOFAKTOR for k in lig)
     for (c, resn, resi), r in lig.items():
         s = gemmi.Structure()
         s.cell, s.spacegroup_hm = st.cell, st.spacegroup_hm
@@ -168,8 +184,12 @@ def pecah_struktur(st, nama, sumber=""):
         s.add_model(m)
         o = Objek(nama=f"{resn} {resi} {c}", jenis="ligan", teks=s.make_pdb_string(), sumber=sumber)
         rumus, mw, berat = _rumus([a.element.name for a in r])
+        kof = resn.upper() in KOFAKTOR
         o.info = {"resn": resn, "resi": resi, "rantai": c, "atom": len(r), "atom_berat": berat, "rumus": rumus,
-                  "mw": mw, "ligan_asli": resn.upper() not in ADITIF}
+                  "mw": mw, "ligan_asli": resn.upper() not in ADITIF and resn.upper() not in PROSTETIK
+                  and not (kof and ada_ligan_lain)}
+        if kof:
+            o.info["kofaktor"] = True
         if resn.upper() in ADITIF:
             o.info["aditif"] = True
             o.tampil = False

@@ -32,6 +32,9 @@ datas += collect_data_files("admet_ai") + collect_data_files("chemprop") + colle
 datas += collect_data_files("lightning") + collect_data_files("lightning_fabric")
 datas += [(str(AKAR / "virmolab" / "i18n" / "en.json"), "virmolab/i18n")]
 datas += [(str(AKAR / "virmolab" / "data" / "nama_tanaman_id.csv"), "virmolab/data")]   # nama lokal tanaman obat (F1)
+# SMILES CCD kofaktor (heme, flavin, NAD(P), ...): tanpa berkas ini preparasi kofaktor bergantung internet
+assert (AKAR / "virmolab" / "data" / "kofaktor_ccd.json").is_file(), "virmolab/data/kofaktor_ccd.json tidak ada"
+datas += [(str(AKAR / "virmolab" / "data" / "kofaktor_ccd.json"), "virmolab/data")]
 # Wajib ada: tanpa ini fitur terpasang rusak diam-diam, jadi build harus gagal bila folder hilang
 for _d in ("panel_target", "gmt", "crem"):   # panel target (F3), set gen Reactome/GO (F3b), fragmen CReM (F8)
     assert (AKAR / "virmolab" / "data" / _d).is_dir(), f"virmolab/data/{_d} tidak ada"

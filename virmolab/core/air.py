@@ -6,7 +6,7 @@ kristalisasi, dan bukan ion logam.
 """
 import gemmi
 
-from .molekul import ADITIF, AIR
+from .molekul import ADITIF, AIR, KOFAKTOR, PROSTETIK
 from .prep_reseptor import LOGAM
 
 
@@ -36,9 +36,13 @@ def telaah(st):
                 continue
             het.append((ch.name, str(r.seqid.num), nama, atom))
     ligan = None
-    calon = [h for h in het if h[2] not in AIR and h[2] not in ADITIF and h[2] not in LOGAM and len(h[3]) > 1]
-    if calon:
-        ligan = max(calon, key=lambda h: len(h[3]))
+    calon = [h for h in het if h[2] not in AIR and h[2] not in ADITIF and h[2] not in LOGAM and len(h[3]) > 1
+             and h[2] not in PROSTETIK]
+    # Ko-substrat (NAD, ATP, SAM, …) bukan ligan asli selama ada kandidat lain; gugus prostetik (heme, flavin)
+    # tidak pernah: pada CYP + obat HEM lebih besar dari obatnya, dan pada CYP apo heme harus tetap di reseptor.
+    bukan_kof = [h for h in calon if h[2] not in KOFAKTOR]
+    if bukan_kof or calon:
+        ligan = max(bukan_kof or calon, key=lambda h: len(h[3]))
     lig_xyz = [p for _, p in ligan[3]] if ligan else []
     jembatan = []
     for ch, resi, nama, atom in het:
@@ -55,6 +59,8 @@ def telaah(st):
         if nama in AIR or nama in ADITIF or nama in LOGAM or len(atom) <= 1:
             continue
         if ligan and (ch, resi, nama) == (ligan[0], ligan[1], ligan[2]):
+            continue
+        if ligan and nama == ligan[2]:      # salinan ligan utama di rantai lain (kristal multimer)
             continue
         kofaktor.append({"rantai": ch, "resi": resi, "resn": nama, "atom": len(atom)})
     return {"jembatan": jembatan, "kofaktor": kofaktor,

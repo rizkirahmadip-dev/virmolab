@@ -4,7 +4,7 @@ Memeriksa: metode & resolusi, rantai, celah rantai (jarak C-N antar residu berur
 berat hilang, konformasi alternatif, okupansi < 1, residu non-standar, ligan/ion/air, dan B-faktor.
 Hasil = dict ringkasan + daftar temuan (tingkat: 'ok' | 'info' | 'peringatan' | 'masalah').
 """
-from .molekul import ADITIF, AIR
+from .molekul import ADITIF, AIR, PROSTETIK
 
 # jumlah atom berat sisi + tulang punggung (tanpa OXT) asam amino baku
 ATOM_BERAT = {"ALA": 5, "ARG": 11, "ASN": 8, "ASP": 8, "CYS": 6, "GLN": 9, "GLU": 9, "GLY": 4, "HIS": 10, "ILE": 8,
@@ -96,10 +96,14 @@ def periksa(teks, fmt="pdb"):
     if nonbaku:
         temuan.append(("peringatan", f"Residu non-standar: {', '.join(sorted(nonbaku)[:8])}"
                        + (" …" if len(nonbaku) > 8 else "") + " - bisa dibuang saat preparasi"))
-    lig = [l for l, k in ligan if k != "aditif"]
+    lig = [l for l, k in ligan if k != "aditif" and l.split()[0] not in PROSTETIK]
+    prost = [l for l, k in ligan if l.split()[0] in PROSTETIK]
     if lig:
         temuan.append(("info", f"Ligan kristal: {', '.join(lig[:6])}" + (" …" if len(lig) > 6 else "")
                        + " - dipakai untuk pusat grid & validasi redocking"))
+    if prost:
+        temuan.append(("info", f"Gugus prostetik: {', '.join(prost[:6])}" + (" …" if len(prost) > 6 else "")
+                       + " - bagian situs aktif; dipertahankan bila 'Pertahankan kofaktor' dicentang"))
     if logam:
         temuan.append(("info", f"Ion logam: {', '.join(logam[:8])} - pertahankan bila di situs aktif"))
     if res_info["b_rerata"] and res_info["b_rerata"] > 80:

@@ -105,8 +105,9 @@ class DialogReseptor(QDialog):
                                    "Ditulis ke PDBQT sebagai akseptor. Meeko sendiri membuang HOH, "
                                    "jadi atomnya ditambahkan kembali setelah preparasi.")
         self.c_kof = QCheckBox("Pertahankan kofaktor (HEM, NAD, dan HET lain selain ligan utama)")
-        self.c_kof.setToolTip("Bukan aditif kristalisasi dan bukan ligan terbesar. "
-                              "Bila Meeko menolak residunya, preparasi beralih ke Open Babel.")
+        self.c_kof.setToolTip("Bukan aditif kristalisasi dan bukan ligan utama. Tiap kofaktor disiapkan terpisah "
+                              "dengan templat Chemical Component Dictionary (tipe atom dan muatan pada pH yang "
+                              "dipilih); logam di dalamnya, seperti Fe heme, ditulis sebagai ion.")
         h = QHBoxLayout()
         self.c_logam = QCheckBox("Pertahankan ion logam (Zn, Mg, Ca, Mn, Fe, Cu, Co, Ni) dalam radius")
         self.c_logam.setChecked(True)
@@ -271,6 +272,14 @@ class DialogReseptor(QDialog):
         # saran otomatis: ada atom hilang -> PROPKA/PDB2PQR (melengkapi)
         if info["hilang"]:
             self.r_propka.setChecked(True)
+        # gugus prostetik (heme, flavin, Fe-S) bagian dari situs aktif: jangan dibuang bersama ligan
+        from ..core.molekul import PROSTETIK
+        prost = sorted({l.split()[0] for l, _k in info["ligan"] if l.split()[0] in PROSTETIK})
+        if prost:
+            self.c_kof.setChecked(True)
+            self.c_kof.setToolTip(f"Dicentang otomatis: struktur memuat gugus prostetik {', '.join(prost)}. "
+                                  "Gugus ini terikat permanen dan ikut membentuk kantong; tiap kofaktor disiapkan "
+                                  "terpisah dengan templat Chemical Component Dictionary, logamnya sebagai ion.")
 
     def _isi_ringkas(self):
         op = self.opsi()

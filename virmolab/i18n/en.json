@@ -4292,7 +4292,8 @@
 "Jejak": "Provenance",
 "Pemeriksaan gagal": "Check failed",
 "Aplikasi tetap bisa dipakai seperti biasa.": "The application keeps working as usual.",
-"Pemeriksaan": "Check"
+"Pemeriksaan": "Check",
+"Bukan aditif kristalisasi dan bukan ligan utama. Tiap kofaktor disiapkan terpisah dengan templat Chemical Component Dictionary (tipe atom dan muatan pada pH yang dipilih); logam di dalamnya, seperti Fe heme, ditulis sebagai ion.": "Not a crystallisation additive and not the main ligand. Each cofactor is prepared separately with a Chemical Component Dictionary template (atom types and charges at the chosen pH); metals inside it, such as heme Fe, are written as ions."
 },
 "pola": {
 "ADMET-AI: memprediksi {0} senyawa (memuat model ±10–20 s)…": "ADMET-AI: predicting {0} compounds (loading models ±10–20 s)…",
@@ -5447,6 +5448,11 @@
 "VirmoLab {0} sudah terbit (terpasang {1}). Bantuan › Periksa pembaruan… untuk catatan rilis dan tautan unduhan.": "VirmoLab {0} has been released (installed {1}). Help › Check for updates… for release notes and download links.",
 "VirmoLab {0} tersedia - Bantuan › Periksa pembaruan…": "VirmoLab {0} available - Help › Check for updates…",
 "Nomor versi rilis tidak dikenali: {0}": "Release version number not recognised: {0}",
-"Pemeriksaan pembaruan dilewati: {0}": "Update check skipped: {0}"
+"Pemeriksaan pembaruan dilewati: {0}": "Update check skipped: {0}",
+"Dicentang otomatis: struktur memuat gugus prostetik {0}. Gugus ini terikat permanen dan ikut membentuk kantong; tiap kofaktor disiapkan terpisah dengan templat Chemical Component Dictionary, logamnya sebagai ion.": "Ticked automatically: the structure contains the prosthetic group(s) {0}. These are permanently bound and shape the pocket; each cofactor is prepared separately with a Chemical Component Dictionary template, its metal as an ion.",
+"Gugus prostetik: {0} - bagian situs aktif; dipertahankan bila 'Pertahankan kofaktor' dicentang": "Prosthetic groups: {0} - part of the active site; kept when 'Keep cofactors' is ticked",
+"{0}: kofaktor tidak dapat disiapkan dan dibuang ({1}).": "{0}: cofactor could not be prepared and was removed ({1}).",
+"{0} {1}{2}: orde ikatan ditebak Open Babel ({3}); tipe atom aromatik dan keadaan protonasi bisa keliru.": "{0} {1}{2}: bond orders guessed by Open Babel ({3}); aromatic atom types and protonation states may be wrong.",
+"Kofaktor {0}": "Cofactor {0}"
 }
 }

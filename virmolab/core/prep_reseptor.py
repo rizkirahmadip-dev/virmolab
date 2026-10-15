@@ -262,14 +262,29 @@ def siapkan(teks, opsi=None, fmt="pdb", lapor=None):
         raise GalatPrep("Tidak ada residu protein setelah pembersihan. Periksa pilihan rantai.")
     pdb = tulis_pdb(bersih)
     log(f"Struktur bersih: {len(bersih[0])} rantai, {n_res} residu, {bersih[0].count_atom_sites()} atom berat")
+    # Kofaktor dipisah dari polimer: Meeko tidak punya templatnya, dan bila satu residu ditolak seluruh
+    # preparasi jatuh ke cadangan Open Babel (yang gagal total pada heme). Lihat core/kofaktor.py.
+    kof = []
+    pdb_protein = pdb
+    if opsi.kofaktor:
+        prot = bersih.clone()
+        for ch, ch_asli in zip(prot[0], bersih[0]):
+            for i in range(len(ch) - 1, -1, -1):
+                if ch[i].het_flag == "H" and ch[i].name.upper() not in AIR:
+                    kof.append((ch_asli[i], ch.name))
+                    del ch[i]
+        kof.reverse()
+        if kof:
+            prot.remove_empty_chains()
+            pdb_protein = tulis_pdb(prot)
     peringatan, dibuang = [], []
     metode = "Meeko (Gasteiger)" if opsi.muatan == "gasteiger" else "Meeko (muatan templat)"
     hp = None
-    pdb_meeko = pdb
+    pdb_meeko = pdb_protein
     if opsi.protonasi == "propka":
         from . import protonasi
         try:
-            hp = protonasi.jalankan(pdb, opsi.ph, opsi.optimasi_h, lapor=lapor)
+            hp = protonasi.jalankan(pdb_protein, opsi.ph, opsi.optimasi_h, lapor=lapor)
             pdb_meeko = hp.pdb
             if logam:       # His pengikat logam: tautomer ditetapkan dari geometri koordinasi
                 pdb_meeko, his = protonasi.sesuaikan_his_logam(pdb_meeko, [p for _, _, _, p, _, _ in logam])
@@ -295,9 +310,23 @@ def siapkan(teks, opsi=None, fmt="pdb", lapor=None):
         log(f"Meeko gagal ({str(e).strip().splitlines()[0][:200] if str(e).strip() else type(e).__name__}); "
             "memakai cadangan Open Babel")
         peringatan.append("Meeko gagal; reseptor disiapkan dengan Open Babel (H polar, Gasteiger).")
-        pdbqt = _openbabel(pdb)
+        pdbqt = _openbabel(pdb_protein)
         metode = "Open Babel (Gasteiger)"
     baris = [b for b in pdbqt.splitlines() if b.strip()]
+    ringkas_kof = []
+    if kof:
+        from . import kofaktor
+        hk = kofaktor.siapkan(kof, ph=opsi.ph, lapor=log)
+        if hk.baris:
+            nomor = hitung_atom(pdbqt) + 1
+            baris = [b for b in baris if not b.startswith(("END", "TER"))]
+            for b in hk.baris:
+                baris.append(b[:6] + f"{nomor % 100000:5d}" + b[11:])
+                nomor += 1
+            pdbqt = "\n".join(baris) + "\n"
+        logam = logam + hk.logam
+        peringatan += hk.peringatan
+        ringkas_kof = hk.ringkas
     if logam:
         baris = [b for b in baris if not b.startswith(("END", "TER"))] + _baris_logam(logam, hitung_atom(pdbqt) + 1)
         log("Ion logam dipertahankan: " + ", ".join(f"{r} {c}{i}" for r, _, _, _, c, i in logam))
@@ -322,7 +351,8 @@ def siapkan(teks, opsi=None, fmt="pdb", lapor=None):
             peringatan.append(f"{len(air_baris)} air penjembatan ditulis sebagai akseptor OA. "
                               "Skornya tidak setara dengan air eksplisit.")
     pdbqt = "\n".join(baris) + "\n"
-    h = HasilReseptor(pdbqt=pdbqt, pdb_bersih=pdb, metode=metode, atom=hitung_atom(pdbqt), residu=n_res - len(dibuang),
+    h = HasilReseptor(pdbqt=pdbqt, pdb_bersih=pdb, metode=metode, atom=hitung_atom(pdbqt),
+                      residu=n_res - len(kof) - len(dibuang),
                       dibuang=dibuang, logam=[f"{r} {c}{i}" for r, _, _, _, c, i in logam], peringatan=peringatan,
                       protonasi=hp, pdb_meeko=pdb_meeko if metode.startswith("Meeko") else "")
     jumlah_h = sum(1 for b in baris if b.startswith(("ATOM", "HETATM")) and b[77:].split()[:1] == ["HD"])
@@ -337,7 +367,8 @@ def siapkan(teks, opsi=None, fmt="pdb", lapor=None):
         f"Tipe atom    : {' '.join(sorted(tipe_atom(pdbqt)))}",
         f"Air dihapus  : {'ya' if opsi.hapus_air else 'tidak'}"
         + (" (air penjembatan dipertahankan)" if opsi.air_jembatan else ""),
-        f"Kofaktor     : {'dipertahankan' if opsi.kofaktor else 'dibuang bersama ligan'}",
+        "Kofaktor     : " + (("; ".join(ringkas_kof) if ringkas_kof else "tidak ada") if opsi.kofaktor
+                                else "dibuang bersama ligan"),
         f"Ligan dihapus: {'ya' if opsi.hapus_ligan else 'tidak'}",
         f"Altloc       : {'A' if opsi.altloc == 'A' else 'okupansi tertinggi'}",
         f"Ion logam    : {', '.join(h.logam) or '-'}",
@@ -386,7 +417,9 @@ def buat_fleksibel(pdb_meeko, pdbqt_lama, residu, opsi=None):
     rigid, _dibuang, _log, flex, gagal = _meeko(pdb_meeko, opsi, fleksibel=residu)
     if not flex.strip():
         raise GalatPrep("Tidak ada residu yang bisa dibuat fleksibel: " + "; ".join(gagal))
-    logam = [b for b in pdbqt_lama.splitlines() if b.startswith("HETATM") and b[17:20].strip().upper() in LOGAM]
+    # Meeko menulis polimer sebagai ATOM; semua HETATM di PDBQT lama (ion logam, kofaktor, air penjembatan)
+    # disiapkan di luar Meeko dan harus ikut ke reseptor kaku yang baru.
+    logam = [b for b in pdbqt_lama.splitlines() if b.startswith("HETATM")]
     baris = [b for b in rigid.splitlines() if b.strip() and not b.startswith(("END", "TER"))]
     rigid = "\n".join(baris + logam) + "\n"
     berhasil = []
