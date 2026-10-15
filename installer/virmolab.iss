@@ -36,6 +36,12 @@ WizardSizePercent=110
 Compression=lzma2/max
 SolidCompression=yes
 LZMANumBlockThreads=4
+#ifdef TandaTangan
+; Penanda "virmolab" didefinisikan rilis.py lewat ISCC /S (build_tools\tanda_tangan.ps1); setup dan uninstaller
+; ikut ditandatangani. Tanpa /DTandaTangan installer dibangun tanpa tanda tangan seperti sebelumnya.
+SignTool=virmolab
+SignedUninstaller=yes
+#endif
 CloseApplications=yes
 ChangesAssociations=yes
 ShowLanguageDialog=auto

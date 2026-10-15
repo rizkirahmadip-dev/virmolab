@@ -11,5 +11,6 @@ tidak perlu membacanya. Panduan untuk pengguna ada di `docs/` dan di menu Bantua
 | `RENCANA_LENGKAP.md` | peta kerja awal sampai rilis 1.0, sebagian besar sudah selesai |
 | `IDE_BARU.md` | daftar gagasan yang belum diputuskan |
 | `RIWAYAT_PEMBERSIHAN.md` | catatan perapian repositori |
+| `TANDA_TANGAN_KODE.md` | cara menandatangani installer (Authenticode) dan pilihan sertifikat |
 
 Status versi dan peta berkas ada di `../../CATATAN_TAHAP2.md`.

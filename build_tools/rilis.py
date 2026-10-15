@@ -2,10 +2,13 @@
 
   .venv\\Scripts\\python.exe build_tools\\rilis.py            (semua)
   .venv\\Scripts\\python.exe build_tools\\rilis.py --tanpa-build   (pakai dist\\ yang ada)
-Hasil di folder rilis\\.
+  .venv\\Scripts\\python.exe build_tools\\rilis.py --wajib-tanda-tangan   (berhenti bila sertifikat belum diatur)
+Hasil di folder rilis\\. Tanda tangan kode aktif bila VIRMOLAB_TANDA_PFX / VIRMOLAB_TANDA_SHA1 diatur
+(lihat build_tools\\tanda_tangan.ps1 dan dev\\dokumen\\TANDA_TANGAN_KODE.md).
 """
 import hashlib
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -46,6 +49,21 @@ def jalan(cmd, **kw):
     subprocess.run([str(c) for c in cmd], check=True, cwd=AKAR, **kw)
 
 
+TANDA = AKAR / "build_tools" / "tanda_tangan.ps1"
+
+
+def tanda_tangan_aktif():
+    """Sertifikat diatur lewat variabel lingkungan sesi build (lihat build_tools/tanda_tangan.ps1)."""
+    return bool(os.environ.get("VIRMOLAB_TANDA_PFX") or os.environ.get("VIRMOLAB_TANDA_SHA1"))
+
+
+def tandatangani(*berkas):
+    cmd = ["powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(TANDA)] + [str(b) for b in berkas]
+    p = subprocess.run(cmd, cwd=AKAR)
+    if p.returncode != 0:
+        sys.exit(f"Penandatanganan gagal (kode {p.returncode}); rilis dihentikan.")
+
+
 def sha256(f):
     h = hashlib.sha256()
     with open(f, "rb") as b:
@@ -58,6 +76,11 @@ def main():
     # Konsol/berkas log Windows bisa cp1252; detail uji memuat karakter seperti '−' (U+2212).
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     RILIS.mkdir(exist_ok=True)
+    ttd = tanda_tangan_aktif()
+    if not ttd and "--wajib-tanda-tangan" in sys.argv:
+        sys.exit("--wajib-tanda-tangan: VIRMOLAB_TANDA_PFX atau VIRMOLAB_TANDA_SHA1 belum diatur.")
+    print("Tanda tangan kode:", "aktif" if ttd else
+          "TIDAK aktif - Windows SmartScreen akan memperingatkan pengguna (lihat dev/dokumen/TANDA_TANGAN_KODE.md)")
     langkah("Dokumentasi")
     jalan([PY, "dev/buat_docs.py"])
     jalan([PY, "dev/buat_tutorial_pdf.py"])
@@ -67,6 +90,10 @@ def main():
         jalan([PY, "-m", "PyInstaller", "build_tools/virmolab.spec", "--noconfirm", "--distpath", "dist",
                "--workpath", "build", "--log-level", "WARN"])
     (DIST / "portable.flag").unlink(missing_ok=True)
+    if ttd:
+        # Ditandatangani SEBELUM uji mandiri, supaya yang diuji adalah biner yang benar-benar dirilis.
+        langkah("Tanda tangan kode (exe)")
+        tandatangani(DIST / "VirmoLab.exe", DIST / "VirmoLab-cli.exe")
 
     langkah("Uji mandiri hasil build")
     hasil = AKAR / "build" / "uji_mandiri.json"
@@ -87,7 +114,12 @@ def main():
     print(f"  ukuran terpasang: {ukuran / 2**20:.0f} MB")
 
     langkah("Installer (Inno Setup)")
-    jalan([ISCC, f"/DVersi={VERSI}", "/Q", "installer/virmolab.iss"])
+    iscc = [ISCC, f"/DVersi={VERSI}", "/Q"]
+    if ttd:
+        # $q = tanda kutip versi Inno (jalur berspasi); $f = berkas yang ditandatangani (setup & uninstaller).
+        iscc += ["/DTandaTangan=1",
+                 f"/Svirmolab=powershell.exe -NoProfile -ExecutionPolicy Bypass -File $q{TANDA}$q $f"]
+    jalan(iscc + ["installer/virmolab.iss"])
     setup = RILIS / f"VirmoLab-Setup-{VERSI}.exe"
 
     langkah("Portable (zip)")
