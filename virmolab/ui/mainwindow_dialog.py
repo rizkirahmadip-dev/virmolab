@@ -314,6 +314,13 @@ class PembukaDialog:
         d.setAttribute(Qt.WA_DeleteOnClose)
         d.show()
 
+    def buka_sunting3d(self):
+        from .dialog_sunting3d import DialogSunting3D
+        d = DialogSunting3D(self)
+        d.setAttribute(Qt.WA_DeleteOnClose)
+        d.show()
+        return d
+
     def buka_pembelajaran_aktif(self):
         from .dialog_pembelajaran_aktif import DialogPembelajaranAktif
         if not self.proyek:

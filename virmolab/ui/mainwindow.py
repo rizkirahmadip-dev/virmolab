@@ -435,7 +435,7 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
                      "md": self.buka_md, "penapisan": self.buka_penapisan, "ppi": self.buka_ppi,
                      "fbdd": self.buka_fbdd, "kantong": self.buka_kantong,
                      "target_balik": self.buka_target_balik, "qsar": self.buka_qsar,
-                     "pembelajaran_aktif": self.buka_pembelajaran_aktif,
+                     "pembelajaran_aktif": self.buka_pembelajaran_aktif, "sunting3d": self.buka_sunting3d,
                      "farmakofor": self.buka_farmakofor}
         if k in aksi_peta:
             aksi_peta[k]()
@@ -983,6 +983,9 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
               "Pasangan ligan yang berbeda satu gugus R, jurang aktivitas (activity cliff), dan arah "
               "substitusi yang menaikkan afinitas"),
             None,
+            A("Sunting di kantong (3D)…", "lig", self.buka_sunting3d, None,
+              "Tumbuhkan gugus pada pose yang sudah ada dan nilai langsung di tempat dengan Vina lokal; inti ligan "
+              "tetap pada koordinat pose induk"),
             A("Desain berbasis fragmen (FBDD)…", "plus", self.buka_fbdd, None,
               "Tumbuhkan gugus bioisosterik pada fragmen, atau sambungkan dua fragmen dengan linker"),
             A("Perancang PROTAC…", "link", self.buka_protac, None,
