@@ -24,7 +24,7 @@ asumsi yang sama dengan kodenya tidak dapat menangkap kesalahan asumsi itu.
 **Versi kode 1.4.0** (14 Okt 2026) — rilis 1.4.0 menggabungkan rencana 1.3 dan 1.4: penargetan balik (F3a),
 jaringan & pengayaan jalur (F3b), QSAR (F5), penapisan farmakofor & bentuk 3D (F4), pelacak hipotesis uji lab (F12).
 Rinciannya di `CHANGELOG.md` [1.4.0]; rencana fitur selanjutnya (1.5–1.6) di `RENCANA_PENGEMBANGAN.md` dan
-prompt siap salin di `PROMPT_SISA.md`.
+prompt siap salin di `dev/dokumen/PROMPT_SISA.md`.
 
 **Status singkat:** Tahap 1–4 (MVP v1.0, Lampiran E3) **selesai** + **v1.1 selesai** (§4e) + UI/UX & menu dirombak (§4f) + Kelompok A, Dimorphite, P2Rank (§4g) + **sisa fitur v1.x selesai** (§4h: Format grafik, patah sumbu, ROC, kontingensi, komposer figur, gaya tersimpan, laporan Word/HTML interaktif, animasi). Versi kode 0.9.0 (pra-rilis).
 Versi kode **0.9.6** (§4n: penelitian lanjutan — konservasi offline, energi per residu, umpan, enumerasi, mutasi, naskah). Belum ada build installer sejak 0.9.4 (folder `rilis/` dibersihkan 10 Okt 2026).

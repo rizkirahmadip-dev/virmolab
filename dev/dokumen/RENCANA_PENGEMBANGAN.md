@@ -24,7 +24,7 @@ Cara membaca:
 - **[ada]** = sudah ada di kode 1.1.2 (dicek dengan grep, bukan ingatan).
 - **[cek]** = fakta eksternal (versi, lisensi, alamat API) yang **wajib diverifikasi ulang saat implementasi**;
   pencarian web 13 Okt 2026 tidak menemukan sumber resmi 2026 untuk butir itu.
-- **[izin]** = butuh unduhan/paket baru → minta izin pengguna dulu (aturan proyek, `CATATAN_TAHAP2.md` §2).
+- **[izin]** = butuh unduhan/paket baru → minta izin pengguna dulu (aturan proyek, `../../CATATAN_TAHAP2.md` §2).
 - Ukuran: **S** ≈ 1 sesi kerja, **M** ≈ 2–3 sesi, **L** ≈ 4+ sesi.
 
 ---
@@ -100,7 +100,7 @@ Diambil dari kode dan catatan yang sudah ada. Setiap fitur baru **harus** mengik
 4. i18n: `dev/ekstrak_teks.py` → terjemahkan ke `dev/i18n_tambahan.json` → `dev/buat_kamus.py`
    → `dev/cek_mutu_i18n.py` = 0 masalah.
 5. Dokumen: bagian baru di `docs/panduan.html` (+ `docs/metode.html` untuk metode ilmiah & sitasi).
-6. `CHANGELOG.md` bagian **Baru**; peta berkas di `CATATAN_TAHAP2.md`.
+6. `CHANGELOG.md` bagian **Baru**; peta berkas di `../../CATATAN_TAHAP2.md`.
 7. Paragraf metode otomatis + sitasi (DOI diverifikasi, bukan dari ingatan).
 8. Regresi penuh **hanya** sebelum rilis, bukan per fitur.
 

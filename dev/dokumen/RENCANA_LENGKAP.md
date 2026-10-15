@@ -1,6 +1,6 @@
 # VirmoLab — Rencana Lengkap Seluruh Tahap
 
-Dokumen ini adalah peta kerja detail dari awal sampai rilis. Baca bersama `CATATAN_TAHAP2.md` (konteks, keputusan teknis, jebakan yang sudah ditemui).
+Dokumen ini adalah peta kerja detail dari awal sampai rilis. Baca bersama `../../CATATAN_TAHAP2.md` (konteks, keputusan teknis, jebakan yang sudah ditemui).
 
 **Status ringkas**
 
@@ -37,7 +37,7 @@ Dokumen ini adalah peta kerja detail dari awal sampai rilis. Baca bersama `CATAT
 
 ---
 
-## Tahap 2 — Preparasi & Docking (SELESAI — rincian di CATATAN_TAHAP2.md §4b)
+## Tahap 2 — Preparasi & Docking (SELESAI — rincian di ../../CATATAN_TAHAP2.md §4b)
 
 ### 2.1 Model data proyek (kerjakan pertama, dipakai semua fitur berikutnya)
 File baru: `core/proyek.py`.
@@ -127,7 +127,7 @@ File: `core/antrean.py`, UI `PanelAntrean`.
 
 ---
 
-## Tahap 3 — Analisis & Ekspor (SELESAI inti MVP — rincian di CATATAN_TAHAP2.md §4c)
+## Tahap 3 — Analisis & Ekspor (SELESAI inti MVP — rincian di ../../CATATAN_TAHAP2.md §4c)
 
 ### 3.1 Tabel hasil
 - Tab tengah baru "Hasil" (`ui/tab_hasil.py`): satu baris per ligan (pose terbaik) dengan kolom peringkat, ligan, ΔG (kcal/mol), Ki (perkiraan, 298 K), LE (−ΔG/atom berat), klaster teratas (n/N), RMSD l.b./u.b. (Vina) atau RMSD referensi (AD), jumlah interaksi per jenis.
@@ -173,7 +173,7 @@ File: `ui/diagram2d.py` (render SVG; tampilkan di tab tengah "Diagram 2D" dengan
 
 ---
 
-## Tahap 4 — Distribusi, Pindah Laptop, Dokumentasi (SELESAI — rincian di CATATAN_TAHAP2.md §4d)
+## Tahap 4 — Distribusi, Pindah Laptop, Dokumentasi (SELESAI — rincian di ../../CATATAN_TAHAP2.md §4d)
 
 ### 4.1 Packaging
 - Ikon aplikasi `virmolab/aset/virmolab.ico` (heksagon + aksen biru; adaptasi `E:\Bikin Docking Simpel\app\buat_ikon.py`).
@@ -591,7 +591,7 @@ Disepakati pengguna (8 Okt 2026): tidak menambah fitur baru lagi; mulai membangu
 | Versi | Isi |
 |---|---|
 | **v1.0** | MVP (E3) |
-| v1.1 | Grid box drag mouse, PoseBusters QC, drug-likeness RDKit + BOILED-Egg, statistik dasar (histogram, korelasi, LE), ekspor Excel penuh — **SELESAI 8 Okt 2026**, dikerjakan sebelum rilis 1.0 atas permintaan pengguna (rincian CATATAN_TAHAP2.md §4e) |
+| v1.1 | Grid box drag mouse, PoseBusters QC, drug-likeness RDKit + BOILED-Egg, statistik dasar (histogram, korelasi, LE), ekspor Excel penuh — **SELESAI 8 Okt 2026**, dikerjakan sebelum rilis 1.0 atas permintaan pengguna (rincian ../../CATATAN_TAHAP2.md §4e) |
 | v1.2 | Modul grafik & statistik ala Prism (A7b) bertahap, ProLIF heatmap + kemiripan IFP, pewarnaan kontribusi per atom — **SELESAI (0.9.0–0.9.2)** |
 | v1.3 | P2Rank deteksi kantong, Asisten Alur, wizard preparasi protein penuh + optimasi ikatan H, ChEMBL validasi & korelasi — **SELESAI (0.9.0–0.9.2)** |
 | v1.4 | Konsensus skor + ROC/EF/BEDROC, laporan Word & HTML interaktif, komposer figur, animasi |
@@ -615,4 +615,4 @@ Disepakati pengguna (8 Okt 2026): tidak menambah fitur baru lagi; mulai membangu
 - Peringatan bila validasi redocking belum dilakukan atau gagal (RMSD > 2 Å) saat membuat laporan.
 
 ## E8. Status rencana
-**Rencana selesai.** Langkah berikutnya: sesi baru → baca `CATATAN_TAHAP2.md` + dokumen ini → kerjakan Tahap 2 dengan fokus MVP v1.0 (E3).
+**Rencana selesai.** Langkah berikutnya: sesi baru → baca `../../CATATAN_TAHAP2.md` + dokumen ini → kerjakan Tahap 2 dengan fokus MVP v1.0 (E3).

@@ -113,7 +113,7 @@ Baca juga bagian "Blok verifikasi wajib" di PROMPT_SISA.md dan patuhi.
 7. Tambahkan uji fitur baru ke core/ujimandiri.py (uji mandiri dalam aplikasi beku): sumber_data (cache), tanaman
    (nama lokal → takson dari CSV paket), md_analisis (SASA/PCA sintetis), validasi_protokol (paragraf dari ringkasan kosong = "").
 8. Jalankan dev/uji_dialog_lanjut_gui.py untuk semua dialog baru (tanaman, validasi_protokol) dan lihat tangkapan layarnya.
-9. Perbarui CATATAN_TAHAP2.md (status versi, peta berkas) dan RENCANA_PENGEMBANGAN.md (tandai F1, F2, F11 selesai).
+9. Perbarui ../../CATATAN_TAHAP2.md (status versi, peta berkas) dan RENCANA_PENGEMBANGAN.md (tandai F1, F2, F11 selesai).
 10. Laporkan ringkas; JANGAN commit dan JANGAN build — pengguna yang memutuskan.
 ```
 

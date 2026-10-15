@@ -2,7 +2,7 @@
 
 Open Babel berlisensi GPL-2.0; dipanggil sebagai proses terpisah (agregasi),
 bukan di-import ke proses Python yang juga memuat Qt (LGPL-3). Lihat
-RENCANA_LENGKAP.md Lampiran B2.
+dev/dokumen/RENCANA_LENGKAP.md Lampiran B2.
 """
 import os
 import subprocess

@@ -46,7 +46,7 @@ Log regresi lengkap disalin ke `dev\riwayat\` sebelum folder uji dibersihkan:
 - `regresi_093.txt` — ada satu gagal: `uji_cli` (pesan: area docking belum ditentukan lewat `--pusat`, `--acuan`, atau `--kantong`).
 - `regresi_094.txt` — 48/49 lulus; yang gagal: `uji_md_gui`.
 
-Uji 0.9.5 yang dicatat di `CATATAN_TAHAP2.md` §4m, bukan di tiga log itu: GUI `dev\uji_095_gui.py` 15/15, konsol dan plugin 9/9, RCSB 3/3, docking kovalen GUI `dev\uji_kovalen.py` 20/20.
+Uji 0.9.5 yang dicatat di `../../CATATAN_TAHAP2.md` §4m, bukan di tiga log itu: GUI `dev\uji_095_gui.py` 15/15, konsol dan plugin 9/9, RCSB 3/3, docking kovalen GUI `dev\uji_kovalen.py` 20/20.
 
 ## Kalau nanti terasa seperti bug
 

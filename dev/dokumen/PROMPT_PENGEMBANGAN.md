@@ -101,7 +101,7 @@ Tugas:
    - dev/uji_graf.py: graf 10 simpul -> SVG valid (xml.etree parse), GraphML bisa dibaca ulang networkx.
    - uji_proyek.py: tambahkan pemeriksaan jejak pulang-pergi simpan/buka.
 7. Penutup sesuai RENCANA §0.6 (pyflakes, i18n untuk teks UI baru, CHANGELOG bagian Baru di versi [1.2.0] -
-   buat bagian baru bila belum ada, CATATAN_TAHAP2.md peta berkas).
+   buat bagian baru bila belum ada, ../../CATATAN_TAHAP2.md peta berkas).
 Aturan: jangan commit, jangan build, jangan jalankan dev/regresi.py. Keluaran uji tampilkan ringkasan saja.
 Laporan akhir ≤ 15 baris.
 ```
@@ -687,7 +687,7 @@ Python: .venv/Scripts/python.exe (PYTHONIOENCODING=utf-8, PYTHONPATH=.).
 5. dev/siapkan_contoh.py lalu dev/regresi.py SEKALI. Tampilkan hanya ringkasan + nama uji gagal. Bila gagal:
    bedakan bug aplikasi vs bug uji; perbaiki; ulangi HANYA uji yang gagal.
 6. Tambahkan uji fitur baru ke core/ujimandiri.py bila relevan (uji mandiri dalam aplikasi beku).
-7. Perbarui CATATAN_TAHAP2.md (status versi, peta berkas) dan RENCANA_PENGEMBANGAN.md (tandai fitur selesai).
+7. Perbarui ../../CATATAN_TAHAP2.md (status versi, peta berkas) dan RENCANA_PENGEMBANGAN.md (tandai fitur selesai).
 8. Laporkan ringkas; JANGAN commit dan JANGAN build — pengguna yang memutuskan.
 ```
 

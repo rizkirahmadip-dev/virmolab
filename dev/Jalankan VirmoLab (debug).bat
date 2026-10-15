@@ -1,6 +1,6 @@
 @echo off
 title VirmoLab (Konsol Debug & Log)
-cd /d "%~dp0"
+cd /d "%~dp0.."
 set PYTHONIOENCODING=utf-8
 
 if exist ".venv\Scripts\python.exe" (
