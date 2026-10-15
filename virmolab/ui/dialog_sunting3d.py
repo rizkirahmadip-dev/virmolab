@@ -430,7 +430,7 @@ class DialogSunting3D(QDialog):
             if u.status == "ok" and (terbaik is None or (u.energi or 0) < (terbaik.energi or 0)):
                 terbaik = u
             sel = [kit.sel(u.nama), kit.sel(u.perubahan), kit.sel_angka(u.energi), _sel_delta(u.d_energi),
-                   kit.sel_angka(u.le, 3), kit.sel(str(u.tabrakan), u.tabrakan), kit.sel_angka(u.mw, 1),
+                   kit.sel_angka(u.le, 3), kit.sel_angka(u.tabrakan, 0), kit.sel_angka(u.mw, 1),
                    kit.sel_angka(u.logp), kit.sel_angka(u.qed, 3), kit.sel_angka(u.sascore),
                    kit.sel("Selesai" if u.status == "ok" else f"Gagal: {u.alasan}")]
             sel[0].setData(Qt.UserRole + 1, u)

@@ -29,6 +29,15 @@ METODE = {"acak": "Acak", "rf+greedy": "RF · greedy", "rf+ucb": "RF · UCB", "m
           "mlp+ucb": "JS · UCB", "rf+acak": "Acak", "mlp+acak": "Acak"}
 
 
+def _sel_int(v):
+    """Sel bilangan bulat yang diurutkan sebagai angka (QTableWidgetItem biasa mengurut sebagai teks:
+    peringkat 9 akan jatuh di antara 89 dan 90)."""
+    it = kit.SelAngka(_n(v))
+    it.setData(Qt.UserRole, float(v))
+    it.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
+    return it
+
+
 def _jenis(label, jenis):
     """Ganti gaya label catatan (muted | info | peringatan) setelah label dibuat."""
     label.setObjectName(jenis)
@@ -531,9 +540,9 @@ class DialogPembelajaranAktif(QDialog):
         t.setRowCount(len(rp))
         for r, x in enumerate(rp):
             mutu = x["mutu"]
-            sel = [kit.sel(str(x["ke"]), x["ke"]), kit.sel(METODE.get(x["metode"], x["metode"])),
-                   kit.sel(_n(x["n_batch"]), x["n_batch"]), kit.sel(_n(x["n_kumulatif"]), x["n_kumulatif"]),
-                   kit.sel(_n(x["gagal"]), x["gagal"]), kit.sel_angka(x["terbaik"]), kit.sel_angka(x["rata_top"]),
+            sel = [_sel_int(x["ke"]), kit.sel(METODE.get(x["metode"], x["metode"])),
+                   _sel_int(x["n_batch"]), _sel_int(x["n_kumulatif"]),
+                   _sel_int(x["gagal"]), kit.sel_angka(x["terbaik"]), kit.sel_angka(x["rata_top"]),
                    kit.sel_angka(mutu.get("rho")) if mutu else kit.sel("–"),
                    kit.sel("Selesai" if x["selesai"] else "Didocking…")]
             for c, it in enumerate(sel):
@@ -556,8 +565,8 @@ class DialogPembelajaranAktif(QDialog):
         for r, (i, s) in enumerate(baris):
             nama = pus.nama[i] if pus else nama_lig.get(i, f"#{i}")
             smi = pus.smiles[i] if pus else ""
-            sel = [kit.sel(str(r + 1), r + 1), kit.sel(nama), kit.sel_angka(s), kit.sel_angka(prediksi.get(i)),
-                   kit.sel(str(ke.get(i, "")), ke.get(i)), kit.sel(smi)]
+            sel = [_sel_int(r + 1), kit.sel(nama), kit.sel_angka(s), kit.sel_angka(prediksi.get(i)),
+                   _sel_int(ke[i]) if i in ke else kit.sel("–"), kit.sel(smi)]
             sel[1].setData(Qt.UserRole + 1, (e.get("pose") or {}).get(str(i)))
             for c, it in enumerate(sel):
                 t.setItem(r, c, it)
@@ -575,7 +584,7 @@ class DialogPembelajaranAktif(QDialog):
         if not pus:
             return
         for r, (i, mu, sd) in enumerate(daftar):
-            sel = [kit.sel(str(r + 1), r + 1), kit.sel(pus.nama[i]), kit.sel_angka(mu), kit.sel_angka(sd),
+            sel = [_sel_int(r + 1), kit.sel(pus.nama[i]), kit.sel_angka(mu), kit.sel_angka(sd),
                    kit.sel(pus.smiles[i])]
             for c, it in enumerate(sel):
                 t.setItem(r, c, it)
