@@ -169,6 +169,14 @@ def jaringan(perturbasi: Sequence[Perturbasi], mode: str = "mst",
     tepi cadangan sehingga terbentuk siklus yang dapat dipakai memeriksa konsistensi.
     """
     layak = [p for p in perturbasi if p.peta and not p.pesan]
+    # MMP dapat menghasilkan pasangan yang sama lebih dari sekali (potongan berbeda, pemetaan sama);
+    # tepi ganda tidak menambah informasi, hanya menggandakan simulasi. Disimpan yang paling mudah.
+    terbaik = {}
+    for p in layak:
+        k = frozenset((p.a, p.b))
+        if k not in terbaik or p.skor < terbaik[k].skor:
+            terbaik[k] = p
+    layak = list(terbaik.values())
     simpul = sorted({x for p in layak for x in (p.a, p.b)})
     if not layak:
         return {"tepi": [], "simpul": simpul, "mode": mode, "pesan": "Tidak ada pasangan yang layak."}
@@ -198,8 +206,11 @@ def jaringan(perturbasi: Sequence[Perturbasi], mode: str = "mst",
         else:
             sisa.append(p)
 
-    # Tambah tepi termurah yang menutup siklus, supaya ada pemeriksaan konsistensi
-    tepi += sisa[:max(0, min(len(sisa), max(1, len(simpul) // 3)))]
+    # Tambah tepi termurah yang benar-benar menutup siklus baru (bukan pasangan yang sudah jadi tepi),
+    # supaya konsistensi jaringan bisa diperiksa tanpa menggandakan simulasi.
+    dipakai = {frozenset((p.a, p.b)) for p in tepi}
+    tambahan = [p for p in sisa if frozenset((p.a, p.b)) not in dipakai]
+    tepi += tambahan[:max(0, min(len(tambahan), max(1, len(simpul) // 3)))]
     n_komponen = len({cari(s) for s in simpul})
     pesan = "" if n_komponen == 1 else f"Jaringan terpecah menjadi {n_komponen} bagian yang tidak terhubung."
     return {"tepi": tepi, "simpul": simpul, "mode": "mst", "pesan": pesan}
