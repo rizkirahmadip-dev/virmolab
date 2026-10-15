@@ -274,6 +274,34 @@ class PembukaDialog:
         d = DialogPengaturan(self)
         d.exec()
 
+    def buka_pembaruan(self, hasil=None):
+        from .dialog_pembaruan import DialogPembaruan
+        d = DialogPembaruan(self, hasil)
+        d.setAttribute(Qt.WA_DeleteOnClose)
+        d.show()
+
+    def _cek_pembaruan_otomatis(self):
+        """Sekali sehari di latar; hanya menulis satu baris ke panel Pesan bila ada versi baru.
+        Gagal jaringan diam saja (dicatat di log), karena aplikasi tetap bekerja tanpa internet."""
+        from ..core import pembaruan
+        from . import kerja
+        if not pembaruan.perlu_diperiksa(self.st):
+            return
+
+        def selesai(h):
+            st = h.get("status")
+            if st in ("baru", "terkini", "belum_ada_rilis"):
+                pembaruan.catat_diperiksa(self.st)
+            if st == "baru":
+                self.pesan.tulis(f"VirmoLab {h['versi']} sudah terbit (terpasang {h['versi_sekarang']}). "
+                                 "Bantuan › Periksa pembaruan… untuk catatan rilis dan tautan unduhan.")
+                self.statusBar().showMessage(f"VirmoLab {h['versi']} tersedia - Bantuan › Periksa pembaruan…", 15000)
+            elif st == "galat":
+                self.log.tulis("Pemeriksaan pembaruan dilewati: " + h.get("pesan", ""))
+
+        kerja.jalankan(lambda lapor: pembaruan.periksa(), selesai=selesai,
+                       galat=lambda g: self.log.tulis("Pemeriksaan pembaruan dilewati: " + g.split("\n")[0]))
+
     def buka_tanaman(self):
         from .dialog_tanaman import DialogTanaman
         d = DialogTanaman(self)

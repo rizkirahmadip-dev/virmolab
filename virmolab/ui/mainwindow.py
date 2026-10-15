@@ -1079,6 +1079,8 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
                 A("Buka folder log", None, lambda: QDesktopServices.openUrl(QUrl.fromLocalFile(str(paths.LOG))), None),
                 A("Lisensi dan cara mengutip…", None, self._buka_lisensi, None),
                 None,
+                A("Periksa pembaruan…", None, self.buka_pembaruan, None,
+                  "Bandingkan versi terpasang dengan rilis terbaru di GitHub"),
                 A("Tentang VirmoLab", None, self.tentang, None)))
 
     def _buka_lisensi(self):
@@ -1395,6 +1397,9 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
             QTimer.singleShot(1200, lambda: self.apa_baru(self.st.value("versi_dilihat", "") or None))
             self.st.setValue("versi_dilihat", VERSI)
         self.s_folder.setText(self.st.value("folder_kerja", str(paths.folder_kerja_bawaan())))
+        if not getattr(self, "_pembaruan_dijadwal", False):
+            self._pembaruan_dijadwal = True        # deteksi() bisa dipanggil ulang dari Pengaturan
+            QTimer.singleShot(8000, self._cek_pembaruan_otomatis)
 
     # ------------------------------------------------------------- objek
     def _fokus(self, sel):

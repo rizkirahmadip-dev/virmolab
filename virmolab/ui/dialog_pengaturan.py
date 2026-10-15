@@ -1,11 +1,11 @@
 """Dialog Pengaturan Aplikasi VirmoLab."""
 
 from PySide6.QtWidgets import (
-    QDialog, QFileDialog, QFormLayout, QGroupBox, QHBoxLayout,
+    QCheckBox, QDialog, QFileDialog, QFormLayout, QGroupBox, QHBoxLayout,
     QLabel, QLineEdit, QMessageBox, QPushButton, QVBoxLayout
 )
 
-from ..core import paths, sumber_data
+from ..core import paths, pembaruan, sumber_data
 from . import kit
 
 
@@ -75,6 +75,17 @@ class DialogPengaturan(QDialog):
         ))
         lay.addWidget(gb_cache)
 
+        # 4. Pembaruan
+        gb_baru = QGroupBox("Pembaruan")
+        v_b = QVBoxLayout(gb_baru)
+        self.c_pembaruan = QCheckBox("Periksa versi baru sekali sehari saat aplikasi dibuka")
+        self.c_pembaruan.setChecked(pembaruan.otomatis_aktif(self.st))
+        v_b.addWidget(self.c_pembaruan)
+        v_b.addWidget(kit.ket("Hanya nomor versi rilis terbaru yang dibaca dari GitHub; tidak ada data proyek yang "
+                              "dikirim dan tidak ada yang dipasang otomatis. Bila ada versi baru, satu baris muncul "
+                              "di panel Pesan."))
+        lay.addWidget(gb_baru)
+
         lay.addStretch(1)
 
         # Baris tombol bawah
@@ -120,6 +131,7 @@ class DialogPengaturan(QDialog):
             elif nama in manual:
                 manual.pop(nama, None)
         self.st.setValue("eksternal", manual)
+        self.st.setValue("cek_pembaruan", self.c_pembaruan.isChecked())
         if self.jw and hasattr(self.jw, "deteksi"):
             self.jw.deteksi()
 
