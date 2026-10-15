@@ -62,7 +62,8 @@ def _tangkap(t, v, tb):
 sys.excepthook = _tangkap
 
 DIALOG = ["admet", "mpo", "labplanner", "penapisan", "mmp", "selektivitas", "interpretasi", "ppi", "kantong", "fbdd",
-          "skrip_publikasi", "diagnostik", "terowongan", "kinetika", "protac", "metabolisme", "rescore_ml", "tanaman", "validasi_protokol", "target_balik", "qsar", "farmakofor", "peptida"]
+          "skrip_publikasi", "diagnostik", "terowongan", "kinetika", "protac", "metabolisme", "rescore_ml", "tanaman", "validasi_protokol", "target_balik", "qsar", "farmakofor", "peptida",
+          "pembelajaran_aktif", "sunting3d"]
 if PILIH:
     DIALOG = [d for d in DIALOG if d in PILIH]
 

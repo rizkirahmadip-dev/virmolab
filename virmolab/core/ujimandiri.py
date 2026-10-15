@@ -675,6 +675,70 @@ def uji(lapor=None):
         return f"aturan label benar; Boltz: {'siap' if st.get('ada') else 'belum terpasang'}"
     cek("Co-folding (aturan kesepakatan)", kofolding_uji)
 
+    def pembelajaran_aktif_uji():
+        """Penapisan bertahap: sidik jari, model pengganti, dan pemilihan batch berjalan di paket terpasang."""
+        import numpy as np
+        from . import pembelajaran_aktif as pa
+        smi = ["CCO", "CCN", "CCC", "c1ccccc1", "c1ccncc1", "CC(=O)O", "CC(=O)N", "CCCl", "CCBr", "CCOC",
+               "CC(C)O", "CC(C)N", "CCCCO", "c1ccc(O)cc1", "c1ccc(N)cc1", "CC(=O)OC", "CCS", "CCOCC",
+               "CC(C)(C)O", "c1ccc(Cl)cc1", "CCCCCC", "CC(N)=O", "CCC(=O)O", "CCCN", "CCCO"]
+        pus = pa.siapkan_pustaka([(s, f"u{i}") for i, s in enumerate(smi)])
+        if len(pus) < 20 or pus.fp.shape[1] != pa.NBIT // 8:   # duplikat kanonik boleh terbuang
+            raise RuntimeError(f"sidik jari salah bentuk: {len(pus)} senyawa, {pus.fp.shape}")
+        kp = pa.Kampanye(len(pus), {"awal": 15, "batch": 5, "putaran": 1, "model": "rf", "akuisisi": "ucb"})
+        idx = kp.batch_awal()
+        rng = np.random.default_rng(0)
+        kp.catat({i: float(-6 - rng.random()) for i in idx})
+        pilih, info = kp.pilih_berikut(pus)
+        if len(pilih) != 5 or set(pilih) & set(idx):
+            raise RuntimeError("batch berikutnya kosong atau mengulang senyawa yang sudah didocking")
+        if not info.get("model"):
+            raise RuntimeError("model pengganti tidak terlatih")
+        return f"{len(pus)} senyawa, sidik jari pasangan atom {pa.NBIT} bit, model {info['model']} memilih {len(pilih)}"
+    cek("Penapisan bertahap (pembelajaran aktif)", pembelajaran_aktif_uji)
+
+    def sunting3d_uji():
+        """Sunting di kantong: titik tumbuh dikenali dan gugus tersambung tanpa merusak molekul."""
+        from rdkit import Chem
+        from . import sunting3d
+        mol = Chem.AddHs(Chem.MolFromSmiles("c1ccc(O)cc1"))
+        from rdkit.Chem import AllChem
+        AllChem.EmbedMolecule(mol, randomSeed=42)
+        titik = sunting3d.titik_tumbuh(mol)
+        if len(titik) < 5:
+            raise RuntimeError(f"titik tumbuh fenol hanya {len(titik)}")
+        usul = sunting3d.usulan_tumbuh(mol, titik[0][0], sunting3d.GUGUS[:3])
+        jadi = [u for u in usul if u[2] is not None]
+        if len(jadi) != 3:
+            raise RuntimeError(f"hanya {len(jadi)} dari 3 gugus tersambung")
+        smi = Chem.MolToSmiles(jadi[0][2])
+        if "." in smi:
+            raise RuntimeError(f"gugus tidak tersambung: {smi}")
+        return f"{len(titik)} titik tumbuh; 3 gugus tersambung (contoh {smi})"
+    cek("Sunting di kantong (3D)", sunting3d_uji)
+
+    def unidock_uji():
+        """Skrip batch Uni-Dock tersusun benar; keberadaan programnya di WSL dilaporkan apa adanya."""
+        import tempfile
+        from pathlib import Path as _P
+        from . import mesin as _m, unidock
+        with tempfile.TemporaryDirectory(prefix="vmd_ud_") as d:
+            d = _P(d)
+            lig = d / "lig.pdbqt"
+            lig.write_text("ROOT\nENDROOT\n", encoding="utf-8")
+            rec = d / "rec.pdbqt"
+            rec.write_text("ATOM\n", encoding="utf-8")
+            skrip, peta = unidock.tulis_skrip(rec, [lig], d / "keluar",
+                                              _m.Kotak(pusat=[0, 0, 0], ukuran=[20, 20, 20], spasi=0.375))
+            isi = skrip.read_bytes()
+        if b"\r\n" in isi:
+            raise RuntimeError("skrip bash ditulis dengan CRLF; bash menolaknya")
+        if b"--ligand_index" not in isi or list(peta) != ["u00001"]:
+            raise RuntimeError("skrip batch tidak memakai daftar ligan lewat symlink")
+        st = unidock.status()
+        return f"skrip batch benar (LF, symlink); Uni-Dock: {'siap di WSL' if st['ada'] else 'belum terpasang'}"
+    cek("Uni-Dock (skrip batch)", unidock_uji)
+
     return hasil
 
 
