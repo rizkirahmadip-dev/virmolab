@@ -63,6 +63,7 @@ def migrasi_proyek(data: dict) -> dict:
     data.setdefault("target_balik", [])
     data.setdefault("peptida", [])
     data.setdefault("xtb", {})
+    data.setdefault("pembelajaran_aktif", [])
     return data
 
 
@@ -90,6 +91,7 @@ class Proyek:
         self.target_balik = []        # penargetan balik: [{ligan_id, kelas, hasil, parameter, jejak}]
         self.peptida = []             # docking peptida: [{sekuens, rantai_peptida, plddt, mmgbsa, antarmuka}]
         self.xtb = {}                 # sifat elektronik GFN2-xTB per ligan: {nama: {homo_ev, celah_ev, fukui, ...}}
+        self.pembelajaran_aktif = []  # penapisan bertahap: [{id, nama, pustaka, ringkasan_pustaka, kampanye, status, job}]
 
     def catat_jejak(self, jejak):
         """Catat jejak sumber data internet (objek Jejak atau dict) tanpa duplikat (kunci sumber+kueri)."""
@@ -127,7 +129,7 @@ class Proyek:
                 "blast": self.blast, "syarat_jarak": self.syarat_jarak,
                 "eksperimen": self.eksperimen, "md": self.md, "templat": self.templat,
                 "jejak": self.jejak, "target_balik": self.target_balik, "peptida": self.peptida,
-                "xtb": self.xtb}
+                "xtb": self.xtb, "pembelajaran_aktif": self.pembelajaran_aktif}
 
     def simpan(self):
         self.siapkan_folder()
@@ -181,6 +183,7 @@ class Proyek:
         pr.target_balik = d.get("target_balik") or []
         pr.peptida = d.get("peptida") or []
         pr.xtb = d.get("xtb") or {}
+        pr.pembelajaran_aktif = d.get("pembelajaran_aktif") or []
         # job yang terputus (aplikasi ditutup/crash) bisa dilanjutkan
         for j in pr.job:
             if j.get("status") in ("berjalan", "menunggu"):
@@ -244,8 +247,11 @@ class Proyek:
         return hasil, peta
 
     # ------------------------------------------------------------- ligan
-    def ligan_siap(self):
-        return [l for l in self.ligan if l.get("status") in ("siap", "peringatan") and l.get("pdbqt")]
+    def ligan_siap(self, al=False):
+        """Ligan siap docking. Ligan penapisan bertahap (ribuan, ditandai 'al') hanya ikut bila al=True, supaya
+        tidak terbawa ke docking biasa, laporan, dan daftar ligan."""
+        return [l for l in self.ligan if l.get("status") in ("siap", "peringatan") and l.get("pdbqt")
+                and (al or not l.get("al"))]
 
     def cari_ligan(self, lid):
         return next((l for l in self.ligan if l["id"] == lid), None)

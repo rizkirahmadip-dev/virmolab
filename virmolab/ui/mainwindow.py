@@ -68,6 +68,8 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
         self._bawah_dikunci = False       # True bila pengguna sendiri yang membuka panel bawah
         self._bawah_ditutup_pengguna = False   # True bila pengguna menutupnya: galat cukup jadi lencana
         self.pelaksana = antreanmod.Pelaksana(self)
+        from .pengendali_al import PengendaliAL
+        self.pengendali_al = PengendaliAL(self)   # penapisan bertahap: tetap berjalan walau dialognya ditutup
         self.t_simpan = QTimer(self)
         self.t_simpan.setSingleShot(True)
         self.t_simpan.setInterval(1000)
@@ -433,6 +435,7 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
                      "md": self.buka_md, "penapisan": self.buka_penapisan, "ppi": self.buka_ppi,
                      "fbdd": self.buka_fbdd, "kantong": self.buka_kantong,
                      "target_balik": self.buka_target_balik, "qsar": self.buka_qsar,
+                     "pembelajaran_aktif": self.buka_pembelajaran_aktif,
                      "farmakofor": self.buka_farmakofor}
         if k in aksi_peta:
             aksi_peta[k]()
@@ -999,6 +1002,9 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
         m.addAction(self.a_rbfe)
 
         self._sub(m, "Penapisan banyak ligan", (
+            A("Penapisan pustaka besar (pembelajaran aktif)…", "chart", self.buka_pembelajaran_aktif, None,
+              "Docking sebagian kecil pustaka (ribuan sampai ratusan ribu senyawa), latih model dari skornya, lalu "
+              "docking senyawa berikutnya yang diprediksi paling kuat (MolPAL)"),
             A("Dasbor penapisan virtual…", "table", self.buka_penapisan, None,
               "Peta panas, diagram sebar, saringan multikriteria, dan penandaan hit teratas untuk "
               "penapisan banyak ligan"),

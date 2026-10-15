@@ -314,6 +314,15 @@ class PembukaDialog:
         d.setAttribute(Qt.WA_DeleteOnClose)
         d.show()
 
+    def buka_pembelajaran_aktif(self):
+        from .dialog_pembelajaran_aktif import DialogPembelajaranAktif
+        if not self.proyek:
+            self._pastikan_proyek()
+        d = DialogPembelajaranAktif(self)
+        d.setAttribute(Qt.WA_DeleteOnClose)
+        d.show()
+        return d
+
     def buka_rbfe(self):
         from .dialog_rbfe import DialogRbfe
         d = DialogRbfe(self)
