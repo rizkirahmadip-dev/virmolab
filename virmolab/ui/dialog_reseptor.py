@@ -126,6 +126,31 @@ class DialogReseptor(QDialog):
         self.l_logam.setObjectName("muted")
         gv.addWidget(self.l_logam)
         v.addWidget(g)
+        g_loop = QGroupBox("Residu hilang")
+        gl = QVBoxLayout(g_loop)
+        self.l_celah = QLabel()
+        self.l_celah.setWordWrap(True)
+        gl.addWidget(self.l_celah)
+        self.c_loop = QCheckBox("Lengkapi loop yang hilang di tengah rantai")
+        self.c_loop.toggled.connect(lambda _=None: self.cmb_loop.setEnabled(self.c_loop.isChecked()))
+        hl = QHBoxLayout()
+        hl.addWidget(self.c_loop)
+        self.cmb_loop = QComboBox()
+        self.cmb_loop.addItem("Otomatis (AlphaFold; PDBFixer ≤ 5 residu)", "otomatis")
+        self.cmb_loop.addItem("Model AlphaFold saja", "alphafold")
+        self.cmb_loop.addItem("PDBFixer saja", "pdbfixer")
+        self.cmb_loop.setEnabled(False)
+        hl.addWidget(self.cmb_loop)
+        hl.addStretch(1)
+        gl.addLayout(hl)
+        self.l_loop_ket = QLabel("AlphaFold: segmen dari model AlphaFold DB untuk UniProt yang sama dicangkok pada "
+                                 "residu sayap, lalu sambungannya diminimisasi; keandalannya mengikuti pLDDT. "
+                                 "PDBFixer hanya menempatkan residu tanpa memodelkan bentuk loop. Ujung rantai "
+                                 "tidak dimodelkan.")
+        self.l_loop_ket.setObjectName("muted")
+        self.l_loop_ket.setWordWrap(True)
+        gl.addWidget(self.l_loop_ket)
+        v.addWidget(g_loop)
         g2 = QGroupBox("Konformasi alternatif")
         f2 = QFormLayout(g2)
         self.cmb_alt = QComboBox()
@@ -241,6 +266,53 @@ class DialogReseptor(QDialog):
         logam = self.ada_logam.get(o.id, []) if o else []
         self.l_logam.setText("Ion logam di struktur: " + (", ".join(logam) if logam else "tidak ada"))
         self._periksa()
+        self._isi_celah()
+
+    def _isi_celah(self):
+        """Celah internal rantai dari SEQRES (bila tersimpan) dan jaraknya ke ligan asli."""
+        import re
+        o = self.objek()
+        self._celah = []
+        if o:
+            from ..core import air, prep_reseptor
+            from ..core import residu_hilang as RH
+            try:
+                st = prep_reseptor.baca_struktur(self.teks_sumber(o), o.fmt if o.fmt in ("pdb", "cif") else "pdb")
+                st.setup_entities()
+                lg = air.telaah(st).get("ligan")
+                titik = []
+                if lg:
+                    for ch in st[0]:
+                        for r in ch:
+                            if ch.name == lg["rantai"] and str(r.seqid.num) == str(lg["resi"]) and r.name == lg["resn"]:
+                                titik = [(a.pos.x, a.pos.y, a.pos.z) for a in r]
+                self._celah = [c for c in RH.cari_celah(st, o.info.get("sekuens"), titik) if c.jenis == "internal"]
+            except Exception as e:
+                self.l_celah.setText(f"Celah rantai tidak dapat diperiksa: {e}")
+                self.c_loop.setEnabled(False)
+                return
+        rcsb = bool(o and re.match(r"^RCSB [0-9A-Za-z]{4}$", o.sumber or ""))
+        if not self._celah:
+            self.l_celah.setText("Tidak ada residu hilang di tengah rantai.")
+            self.c_loop.setChecked(False)
+            self.c_loop.setEnabled(False)
+            return
+        from .. import i18n
+        n = sum(c.n for c in self._celah)
+        dekat = [c for c in self._celah if c.jarak_kantong is not None and c.jarak_kantong <= 10]
+        # tiap kalimat diterjemahkan sendiri; kalimat gabungan tidak ada di kamus
+        kal = [f"{len(self._celah)} celah di tengah rantai ({n} residu)"
+               + (f"; {len(dekat)} dalam 10 Å dari ligan asli: " + "; ".join(i18n.t(c.label()) for c in dekat[:3])
+                  if dekat else "") + "."]
+        if not o.info.get("sekuens"):
+            kal.append("SEQRES diambil dari header RCSB saat preparasi." if rcsb else
+                       "Berkas tanpa SEQRES: jumlah residu ditebak dari penomoran dan nama residunya tidak diketahui.")
+        if not o.info.get("uniprot") and not rcsb:
+            kal.append("Aksesi UniProt tidak diketahui, sehingga model AlphaFold tidak dapat dipakai.")
+        self.l_celah.setText(" ".join(i18n.t(k) for k in kal))
+        self.c_loop.setEnabled(True)
+        # bawaan: dilengkapi bila celah dekat kantong (kantong berlubang mengubah hasil docking)
+        self.c_loop.setChecked(bool(dekat))
 
     def _periksa(self):
         o = self.objek()
@@ -295,7 +367,10 @@ class DialogReseptor(QDialog):
               else "baku templat Meeko"),
              ("Optimasi ikatan H", ("ya" if op.optimasi_h else "tidak") if op.protonasi == "propka" else " - "),
              ("Atom hilang", "dilengkapi PDB2PQR" if op.protonasi == "propka" else "residu tak lengkap dibuang"),
-             ("Muatan parsial", self.cmb_q.currentText())]
+             ("Muatan parsial", self.cmb_q.currentText()),
+             ("Residu hilang", (f"dilengkapi ({self.cmb_loop.currentText()})" if op.lengkapi_loop else
+                                (f"tidak dilengkapi ({len(self._celah)} celah)" if getattr(self, "_celah", None)
+                                 else "tidak ada celah")))]
         self.t_ringkas.setHtml("<table cellspacing=6>" + "".join(
             f"<tr><td style='color:#5b6b82'>{escape(k)}</td><td><b>{escape(v)}</b></td></tr>" for k, v in b)
             + "</table><p style='color:#5b6b82'>Hasil: reseptor PDBQT + PDB bersih + laporan preparasi (dengan tabel "
@@ -306,14 +381,23 @@ class DialogReseptor(QDialog):
         return next((o for o in self.protein if o.id == oid), None)
 
     def opsi(self):
+        import re
         rantai = [c for c, cb in self.cek_rantai.items() if cb.isChecked()]
+        o = self.objek()
+        info = o.info if o else {}
+        m = re.match(r"^RCSB ([0-9A-Za-z]{4})$", (o.sumber or "") if o else "")
+        loop = self.c_loop.isChecked() and self.c_loop.isEnabled()
         return OpsiReseptor(rantai=rantai if len(rantai) < len(self.cek_rantai) else None,
                             hapus_air=self.c_air.isChecked(), hapus_ligan=self.c_lig.isChecked(),
                             pertahankan_logam=self.c_logam.isChecked(), radius_logam=self.sp_rad.value(),
                             altloc=self.cmb_alt.currentData(), muatan=self.cmb_q.currentData(),
                             protonasi="propka" if self.r_propka.isChecked() else "templat", ph=self.sp_ph.value(),
                             optimasi_h=self.c_opt.isChecked(), air_jembatan=self.c_jembatan.isChecked(),
-                            kofaktor=self.c_kof.isChecked())
+                            kofaktor=self.c_kof.isChecked(), lengkapi_loop=loop,
+                            metode_loop=self.cmb_loop.currentData(),
+                            sekuens=info.get("sekuens") if loop else None,
+                            uniprot=info.get("uniprot") if loop else None,
+                            kode_pdb=m.group(1) if (loop and m) else "")
 
     def accept(self):
         if not any(cb.isChecked() for cb in self.cek_rantai.values()):

@@ -225,6 +225,19 @@ def baca_teks_struktur(teks, nama, fmt="pdb", sumber=""):
     hasil = pecah_struktur(st, nama, sumber)
     if not hasil:
         raise GalatImpor("Tidak ada atom yang bisa dibaca dari berkas ini.")
+    # SEQRES dan aksesi UniProt hanya ada di berkas asli (objek protein menyimpan baris ATOM saja); disimpan
+    # untuk deteksi residu hilang dan pengisian loop saat preparasi reseptor.
+    try:
+        from .residu_hilang import info_sekuens
+        sek, unp = info_sekuens(teks, fmt)
+    except Exception:
+        sek, unp = {}, {}
+    for o in hasil:
+        if o.jenis == "protein":
+            if sek:
+                o.info["sekuens"] = sek
+            if unp:
+                o.info["uniprot"] = unp
     return hasil
 
 

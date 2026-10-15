@@ -38,6 +38,11 @@ class OpsiReseptor:
     optimasi_h: bool = True          # PDB2PQR: optimasi jaringan ikatan H + flip His/Asn/Gln
     air_jembatan: bool = False       # bila air dibuang: oksigen yang menjembatani protein dan ligan dipertahankan
     kofaktor: bool = False           # HET selain ligan utama dan aditif (HEM, NAD, …) ikut struktur
+    lengkapi_loop: bool = False      # isi residu hilang di tengah rantai (core/residu_hilang.py)
+    metode_loop: str = "otomatis"    # otomatis | alphafold | pdbfixer
+    sekuens: dict = None             # {rantai: [nama residu SEQRES]} dari berkas sumber
+    uniprot: dict = None             # {rantai: aksesi UniProt} dari DBREF / _struct_ref
+    kode_pdb: str = ""               # bila sekuens kosong: SEQRES/DBREF diambil dari header RCSB
 
 
 @dataclass
@@ -53,6 +58,7 @@ class HasilReseptor:
     laporan: str = ""
     protonasi: object = None                        # protonasi.HasilProtonasi bila memakai PROPKA
     pdb_meeko: str = ""                             # PDB masukan Meeko (setelah protonasi) - dasar residu fleksibel
+    loop: list = field(default_factory=list)        # residu_hilang.Celah (dict) bila pengisian loop diminta
 
 
 class GalatPrep(Exception):
@@ -251,12 +257,42 @@ def tipe_atom(pdbqt):
     return t
 
 
+def _lengkapi_loop(bersih, opsi, log):
+    """Isi celah internal rantai; struktur dikembalikan apa adanya bila tidak ada celah atau pengisian gagal."""
+    from . import residu_hilang as RH
+    sekuens, uniprot = dict(opsi.sekuens or {}), dict(opsi.uniprot or {})
+    if not sekuens and opsi.kode_pdb:
+        try:
+            sekuens, u2 = RH.info_dari_rcsb(opsi.kode_pdb)
+            uniprot = uniprot or u2
+            log(f"SEQRES/DBREF {opsi.kode_pdb} diambil dari header RCSB")
+        except Exception as e:
+            log(f"Header RCSB {opsi.kode_pdb} tidak dapat diambil ({e}); celah dicari dari geometri saja")
+    celah = [c for c in RH.cari_celah(bersih, sekuens) if c.jenis == "internal"]
+    if not celah:
+        log("Tidak ada residu hilang di tengah rantai")
+        return bersih, []
+    try:
+        baru, celah = RH.lengkapi(bersih, celah, opsi.metode_loop, uniprot, lapor=log)
+    except Exception as e:
+        log(f"Pengisian loop gagal ({str(e).splitlines()[0][:200] if str(e) else type(e).__name__}); "
+            "struktur dipakai tanpa loop tambahan")
+        for c in celah:
+            c.metode, c.catatan = "dibiarkan", f"pengisian gagal: {str(e)[:160]}"
+        return bersih, celah
+    baru.setup_entities()
+    return baru, celah
+
+
 def siapkan(teks, opsi=None, fmt="pdb", lapor=None):
     """Siapkan reseptor dari teks PDB/mmCIF. Kembalikan HasilReseptor."""
     opsi = opsi or OpsiReseptor()
     log = (lambda s: lapor.log.emit(s)) if lapor else (lambda s: None)
     st = baca_struktur(teks, fmt)
     bersih, logam = bersihkan(st, opsi)
+    loop = []
+    if opsi.lengkapi_loop:
+        bersih, loop = _lengkapi_loop(bersih, opsi, log)
     n_res = sum(len(ch) for ch in bersih[0])
     if not n_res:
         raise GalatPrep("Tidak ada residu protein setelah pembersihan. Periksa pilihan rantai.")
@@ -351,10 +387,19 @@ def siapkan(teks, opsi=None, fmt="pdb", lapor=None):
             peringatan.append(f"{len(air_baris)} air penjembatan ditulis sebagai akseptor OA. "
                               "Skornya tidak setara dengan air eksplisit.")
     pdbqt = "\n".join(baris) + "\n"
+    for c in loop:
+        if c.metode == "PDBFixer":
+            peringatan.append(f"Loop {c.label()} diisi PDBFixer: bentuk loop tidak dimodelkan, perlakukan sebagai "
+                              "perkiraan kasar bila loop itu dekat kantong.")
+        elif c.metode == "dibiarkan":
+            peringatan.append(f"Loop {c.label()} tidak diisi: {c.catatan}.")
+        elif c.plddt is not None and c.plddt < 70:
+            peringatan.append(f"Loop {c.label()} dari AlphaFold ber-pLDDT {c.plddt:.0f} (< 70): posisinya kurang pasti.")
     h = HasilReseptor(pdbqt=pdbqt, pdb_bersih=pdb, metode=metode, atom=hitung_atom(pdbqt),
                       residu=n_res - len(kof) - len(dibuang),
                       dibuang=dibuang, logam=[f"{r} {c}{i}" for r, _, _, _, c, i in logam], peringatan=peringatan,
-                      protonasi=hp, pdb_meeko=pdb_meeko if metode.startswith("Meeko") else "")
+                      protonasi=hp, pdb_meeko=pdb_meeko if metode.startswith("Meeko") else "",
+                      loop=[c.ke_dict() for c in loop])
     jumlah_h = sum(1 for b in baris if b.startswith(("ATOM", "HETATM")) and b[77:].split()[:1] == ["HD"])
     q_total = sum(float(b[70:76]) for b in baris if b.startswith(("ATOM", "HETATM")) and _angka(b[70:76]))
     h.laporan = "\n".join([
@@ -373,6 +418,11 @@ def siapkan(teks, opsi=None, fmt="pdb", lapor=None):
         f"Altloc       : {'A' if opsi.altloc == 'A' else 'okupansi tertinggi'}",
         f"Ion logam    : {', '.join(h.logam) or '-'}",
         f"Residu dibuang ({len(dibuang)}): {', '.join(dibuang) or '-'}",
+        "Residu hilang: " + ("; ".join(
+            f"{c.label()} -> {c.metode}" + (f", pLDDT {c.plddt:.0f}" if c.plddt is not None else "")
+            + (f", sambungan {c.sambungan[0]}/{c.sambungan[1]} Å" if c.sambungan and None not in c.sambungan else "")
+            + (f", bentrok {c.bentrok}" if c.bentrok else "") for c in loop)
+            if loop else ("tidak ada celah di tengah rantai" if opsi.lengkapi_loop else "tidak dilengkapi")),
     ] + (_laporan_protonasi(hp) if hp else ["Protonasi    : keadaan baku templat Meeko (Asp/Glu −, Lys/Arg +, "
                                              "His netral)"])
       + ([""] + ["Peringatan: " + p for p in peringatan] if peringatan else [])) + "\n"

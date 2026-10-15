@@ -2821,7 +2821,16 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
         pr.reseptor = {"nama": asal.nama, "sumber": asal.sumber, "pdbqt": "reseptor/reseptor.pdbqt",
                        "bersih": "reseptor/bersih.pdb", "asli": "reseptor/asli.pdb", "metode": h.metode,
                        "atom": h.atom, "residu": h.residu, "dibuang": h.dibuang, "logam": h.logam,
-                       "opsi": vars(opsi)}
+                       "opsi": {k: v for k, v in vars(opsi).items() if k != "sekuens"}}
+        loop = getattr(h, "loop", None) or []
+        if loop:
+            pr.reseptor["loop"] = loop
+            isi = [c for c in loop if c.get("metode") not in ("", "dibiarkan")]
+            self.pesan.tulis(
+                f"Residu hilang: {len(isi)} dari {len(loop)} celah dilengkapi ("
+                + "; ".join(f"{c['rantai']} {c['sebelum']}–{c['sesudah']}: {c['metode']}"
+                            + (f", pLDDT {c['plddt']:.0f}" if c.get("plddt") is not None else "") for c in loop[:4])
+                + (" …" if len(loop) > 4 else "") + "). Rincian di reseptor/laporan_prep.txt.")
         if getattr(h, "pdb_meeko", ""):
             pr.reseptor["meeko"] = "reseptor/untuk_meeko.pdb"
         if lama_flex:
