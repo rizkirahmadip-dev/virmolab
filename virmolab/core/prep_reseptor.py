@@ -112,6 +112,27 @@ def _pusat_ligan(st):
     return xs
 
 
+def _mse_ke_met(st):
+    """Selenometionin (MSE, untuk fase SeMet kristalografi) -> metionin: Se diganti S di posisi yang sama.
+    Meeko tidak punya templat MSE dan menolak seluruh rantai; perubahan ini isosterik dan lazim (PDBFixer,
+    Schrödinger PrepWizard melakukan hal yang sama). Mengembalikan jumlah residu yang diubah."""
+    n = 0
+    for ch in st[0]:
+        for r in ch:
+            if r.name != "MSE":
+                continue
+            r.name = "MET"
+            r.het_flag = "A"
+            for a in r:
+                if a.name.strip() == "SE":
+                    a.name = "SD"
+                    a.element = gemmi.Element("S")
+            n += 1
+    if n:
+        st.setup_entities()
+    return n
+
+
 def bersihkan(st, opsi):
     """Kembalikan (struktur protein bersih, daftar ion logam [(resn, elemen, muatan, pos, rantai, resi)])."""
     st = st.clone()
@@ -120,6 +141,7 @@ def bersihkan(st, opsi):
     else:
         _altloc_tertinggi(st)
     st.remove_hydrogens()
+    _mse_ke_met(st)
     if opsi.rantai:
         for i in range(len(st[0]) - 1, -1, -1):
             if st[0][i].name not in opsi.rantai:
@@ -289,7 +311,10 @@ def siapkan(teks, opsi=None, fmt="pdb", lapor=None):
     opsi = opsi or OpsiReseptor()
     log = (lambda s: lapor.log.emit(s)) if lapor else (lambda s: None)
     st = baca_struktur(teks, fmt)
+    n_mse = sum(1 for ch in st[0] for r in ch if r.name == "MSE" and (not opsi.rantai or ch.name in opsi.rantai))
     bersih, logam = bersihkan(st, opsi)
+    if n_mse:
+        log(f"Selenometionin: {n_mse} MSE diubah menjadi MET (Se -> S)")
     loop = []
     if opsi.lengkapi_loop:
         bersih, loop = _lengkapi_loop(bersih, opsi, log)
@@ -418,6 +443,7 @@ def siapkan(teks, opsi=None, fmt="pdb", lapor=None):
         f"Altloc       : {'A' if opsi.altloc == 'A' else 'okupansi tertinggi'}",
         f"Ion logam    : {', '.join(h.logam) or '-'}",
         f"Residu dibuang ({len(dibuang)}): {', '.join(dibuang) or '-'}",
+        f"Selenometionin: {n_mse} MSE diubah menjadi MET (Se -> S)" if n_mse else "Selenometionin: tidak ada",
         "Residu hilang: " + ("; ".join(
             f"{c.label()} -> {c.metode}" + (f", pLDDT {c.plddt:.0f}" if c.plddt is not None else "")
             + (f", sambungan {c.sambungan[0]}/{c.sambungan[1]} Å" if c.sambungan and None not in c.sambungan else "")
