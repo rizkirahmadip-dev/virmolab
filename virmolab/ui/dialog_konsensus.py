@@ -92,12 +92,12 @@ class DialogKonsensus(QDialog):
         terakhir = {k: v[1] for k, v in terakhir.items()}
         for j in jobs:
             n = sum(1 for l in j["ligan"] if l.get("status") == "selesai")
-            it = QListWidgetItem(f"{M.MESIN.get(j['mesin'], j['mesin'])} · {j['id'][-13:]} · {n} ligan")
+            it = QListWidgetItem(f"{M.label_mesin(j)} · {j['id'][-13:]} · {n} ligan")
             it.setData(Qt.UserRole, ("job", j["id"]))
             it.setFlags(it.flags() | Qt.ItemIsUserCheckable)
             it.setCheckState(Qt.Checked if terakhir.get(j["mesin"]) == j["id"] and n >= 3 else Qt.Unchecked)
             self.daftar.addItem(it)
-            self.c_pose.addItem(f"{M.MESIN.get(j['mesin'], j['mesin'])} · {j['id'][-13:]} · {n} ligan", j["id"])
+            self.c_pose.addItem(f"{M.label_mesin(j)} · {j['id'][-13:]} · {n} ligan", j["id"])
         for k, t in K.FUNGSI_RESCORE.items():
             it = QListWidgetItem(t)
             it.setData(Qt.UserRole, ("rescore", k))
@@ -171,7 +171,7 @@ class DialogKonsensus(QDialog):
                         lid = l["id"]
                         d[lid] = min(d.get(lid, 1e9), l["energi"])
                         nama[lid] = l.get("nama", lid)
-                kolom[f"{M.MESIN.get(j['mesin'], j['mesin'])} ·{j['id'][-6:]}"] = d
+                kolom[f"{M.label_mesin(j)} ·{j['id'][-6:]}"] = d
         if j_pose:
             for k in perlu:
                 d = {}

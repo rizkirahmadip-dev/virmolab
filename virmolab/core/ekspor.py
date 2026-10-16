@@ -57,13 +57,15 @@ def baris_hasil(proyek, jobs=None):
                           (p0.get("rmsd_ref") if p0 and p0.get("rmsd_ref", -1) >= 0 else None),
                           **{k: n.get(k, 0) for k in ("hbond", "hidrofobik", "pi", "pikation", "garam", "halogen",
                                                       "logam")},
-                          "n_pose": l.get("n_pose"), "mesin": M.MESIN.get(j["mesin"], j["mesin"]), "job": j["id"],
+                          "n_pose": l.get("n_pose"), "mesin": (f"{l['program']} (impor)" if j.get("impor") and l.get("program")
+                                                    else M.label_mesin(j)), "job": j["id"],
                           "detik": l.get("detik"), "smiles": (proyek.smiles_ligan(lig) if hasattr(proyek, "smiles_ligan") else lig.get("smiles", "")), "residu": l.get("residu") or {}, "ifp": l.get("ifp") or [],
                           "pose": pose_tampil, "qc": l.get("qc"), "kovalen": bool(j.get("kovalen")),
                           "posebusters": qc.teks_sel(l.get("qc")),
                           "posebusters_gagal": ", ".join((l.get("qc") or {}).get("gagal") or []),
                           "mmgbsa": (l.get("mmgbsa") or {}).get("dG"), "mmgbsa_sd": (l.get("mmgbsa") or {}).get("sd"),
                           "mmgbsa_metode": (l.get("mmgbsa") or {}).get("metode", ""),
+                          "skor_impor": l.get("skor_impor") or {}, "energi_sumber": l.get("energi_sumber", ""),
                           "gnina": (l.get("gnina") or {}).get("affinity"),
                           "cnnscore": (l.get("gnina") or {}).get("cnnscore"),
                           "cnnaffinity": (l.get("gnina") or {}).get("cnnaffinity"),
@@ -202,6 +204,8 @@ def simpan_xlsx(path, proyek, baris, interaksi_per_ligan=None, info=None, sifat_
         for k, v in j["parameter"].items():
             par.append([j["id"], k, str(v)])
         par.append([j["id"], "kotak", str(j["kotak"])])
+        for k, v in (j.get("impor") or {}).items():
+            par.append([j["id"], f"impor.{k}", str(v)])
     lembar(wb.create_sheet(), "Parameter", ["Job", "Parameter", "Nilai"], par)
     lembar(wb.create_sheet(), "Info", ["Kunci", "Nilai"], [[k, str(v)] for k, v in (info or {}).items()] +
            [["Dibuat", datetime.now().isoformat(timespec="seconds")],

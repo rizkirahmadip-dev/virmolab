@@ -7,7 +7,7 @@ menyenggol kode viewer, antrean, atau ekspor. Semua metode di sini memakai `self
 Pola tiap pembuka: periksa syarat (proyek, reseptor, pose aktif) → beri pesan jelas bila belum terpenuhi →
 buat dialog, sambungkan sinyalnya, lalu tampilkan dengan WA_DeleteOnClose supaya tidak menumpuk di memori.
 """
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QTimer
 
 from ..core import molekul
 from . import kit
@@ -15,6 +15,59 @@ from . import kit
 
 class PembukaDialog:
     """Kumpulan metode `buka_*` JendelaUtama (mixin; lihat mainwindow.JendelaUtama)."""
+
+    # ------------------------------------------------------------ impor hasil eksternal
+    def buka_impor_docking(self, berkas=()):
+        from .dialog_impor_docking import DialogImporDocking
+        d = DialogImporDocking(self, berkas)
+        d.setAttribute(Qt.WA_DeleteOnClose)
+        d.selesai.connect(self._impor_docking_selesai)
+        d.show()
+
+    def _impor_docking_selesai(self, job):
+        """Job impor masuk proyek: segarkan tabel & antrean, buka pose terbaik, jalankan PoseBusters di latar."""
+        pr = self.proyek
+        if not pr:
+            return
+        self.antrean.muat(pr.job)
+        self._muat_hasil()
+        self.minta_simpan()
+        im = job.get("impor") or {}
+        self.log.tulis(f"Impor {im.get('program', '')}: {len(job['ligan'])} ligan masuk sebagai job {job['id']} "
+                       f"(reseptor: {im.get('reseptor') or '-'}).")
+        for c in job.get("catatan") or []:
+            self.pesan.tulis("Impor docking: " + c)
+        for l in job["ligan"]:
+            if l.get("pesan"):
+                self.log.tulis(f"  {l['nama']}: {l['pesan']}")
+        terbaik = min(job["ligan"], key=lambda l: l["energi"])
+        self.ke_langkah(4)
+        # pindah ke ruang Analisis mengubah ukuran viewport: fokus kamera setelah tata letak tenang
+        QTimer.singleShot(350, lambda: self.buka_pose(job["id"], terbaik["id"], 1))
+        QTimer.singleShot(1200, lambda: self.aktif in self.objek and (self.viewer.js("segarkanKanvas"),
+                                                                      self.viewer.js("fokus", {"id": self.aktif})))
+        self.analisis_ulang()
+
+    def buka_impor_md(self, berkas=()):
+        from .dialog_impor_md import DialogImporMD
+        d = DialogImporMD(self, berkas)
+        d.setAttribute(Qt.WA_DeleteOnClose)
+        d.selesai.connect(self.buka_md_hasil)
+        d.show()
+
+    def buka_md_hasil(self, rid):
+        """Jendela analisis trajektori (mode lihat) untuk satu hasil MD proyek, mis. trajektori impor."""
+        from .dialog_md import DialogMD
+        d = DialogMD(self, lihat=rid)
+        d.setAttribute(Qt.WA_DeleteOnClose)
+        d.show()
+        d.raise_()
+
+    def buka_grafik_berkas(self, berkas=()):
+        from .dialog_grafik_berkas import DialogGrafikBerkas
+        d = DialogGrafikBerkas(self, berkas)
+        d.setAttribute(Qt.WA_DeleteOnClose)
+        d.show()
 
     def buka_asisten(self):
         from .dialog_asisten import DialogAsisten
@@ -34,7 +87,13 @@ class PembukaDialog:
             self._galat("Modul MD (OpenMM/OpenFF) tidak terpasang. Pasang ulang VirmoLab.")
             return
         if not self.proyek or not any(l["status"] == "selesai" for j in self.proyek.job for l in j["ligan"]):
-            self._galat("Belum ada hasil docking. Jalankan docking dulu (langkah 4), lalu buka MD & MM/GBSA.")
+            ada = [r for r in (self.proyek.md if self.proyek else []) if r.get("status") == "selesai"]
+            if ada:     # proyek tanpa docking tetapi berisi trajektori impor: buka jendela analisis saja
+                self.buka_md_hasil(ada[-1]["id"])
+                return
+            self._galat("Belum ada hasil docking. Jalankan docking dulu (langkah 4), lalu buka MD & MM/GBSA. "
+                        "Trajektori dari program lain bisa dibuka lewat Berkas › Impor hasil eksternal › "
+                        "Trajektori MD.")
             return
         d = getattr(self, "_dlg_md", None)
         if d is None or (d.proyek_awal is not self.proyek and not d.proses_berjalan()):

@@ -2,6 +2,25 @@
 
 Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x adalah pra-rilis.
 
+## [Belum dirilis]
+
+### Baru
+- **Impor hasil docking dari program lain** (Berkas › Impor hasil eksternal › Hasil docking…; `core/impor_docking.py`, `ui/dialog_impor_docking.py`):
+  - PDBQT AutoDock Vina, QuickVina, Smina, GNINA, dan Uni-Dock (multi-MODEL, termasuk residu fleksibel), DLG AutoDock4/AutoDock-GPU, SDF/MOL2 multi-pose (GNINA, GOLD, Glide, rDock, MOE, Discovery Studio, DiffDock), serta PDB kompleks atau multi-MODEL.
+  - Pose dibangun ulang dengan orde ikatan benar (REMARK SMILES Meeko, atau Open Babel dengan perbaikan muatan dan H non-polar) lalu disimpan sebagai job proyek, sehingga tabel hasil, interaksi, diagram 2D, PoseBusters, MD, dan ekspor berjalan seperti hasil docking VirmoLab. Reseptor tiap job impor dipakai untuk analisisnya sendiri.
+  - Kolom ΔG hanya diisi skor berdimensi energi. Fitness GOLD, CNNscore, atau confidence DiffDock tidak disamakan dengan ΔG: kolom ΔG diisi skor ulang Vina (`--score_only`) dan skor asli tetap tampil di tooltip, panel Properti, ekspor, dan laporan.
+- **Impor trajektori MD** (Berkas › Impor hasil eksternal › Trajektori MD…; `core/impor_md.py`, `ui/dialog_impor_md.py`):
+  - Topologi GRO, PDB, PRMTOP, PSF, CIF; trajektori XTC, TRR, DCD, NetCDF, MDCRD, serta PDB/GRO multi-frame. Beberapa bagian disambung menurut waktu atau diperlakukan sebagai replika independen. Topologi yang jumlah atomnya cocok dicari otomatis di folder trajektori.
+  - Dibaca bertahap (frame terpilih dan atom zat terlarut saja) di proses terpisah. Molekul yang terpotong kotak periodik diutuhkan dan lompatan antarframe dihapus, lalu frame disejajarkan pada Cα. Koordinat terbaca sama persis dengan MDAnalysis 2.10, dan RMSD dari trajektori terbungkus PBC sama dengan trajektori asli (selisih ≤ 0,002 Å).
+  - Analisis memakai pipa MD yang ada (RMSD, RMSF, Rg, SASA, ikatan H, okupansi interaksi, barcode, PCA, FEL, klaster ligan). Jendela analisis kini punya daftar Hasil untuk memilih run MD tersimpan dan tombol Putar di viewport.
+- **Pemutar trajektori di viewport 3D**: bilah putar/jeda, penggeser bingkai, waktu (ns), dan kecepatan, untuk MD internal maupun impor.
+- **Grafik dari berkas data** (Berkas › Impor hasil eksternal › Grafik XVG/CSV…; `core/impor_grafik.py`, `ui/dialog_grafik_berkas.py`): XVG gmx, DAT cpptraj/VMD, dan CSV/TSV (desimal koma dikenali); beberapa berkas ditumpuk, konversi nm→Å, nm²→Å², ps→ns, kJ/mol→kcal/mol, rata-rata bergerak, histogram, statistik paruh kedua, simpan SVG/PDF/PNG/TIFF atau kirim ke Komposer Figur.
+- Seret-lepas dan Berkas › Buka mengarahkan berkas hasil docking, trajektori, dan grafik ke dialog impor yang sesuai.
+
+### Diperbaiki
+- Ligan PDB keluaran Vina/Open Babel yang nama atomnya kembar ("C", "C", "O", …) terpangkas menjadi beberapa atom karena gemmi menganggapnya konformasi alternatif; atom kini dinamai ulang sebelum dibaca.
+- Analisis SASA MD bisa menjatuhkan aplikasi (access violation di FreeSASA Shrake-Rupley RDKit setelah beberapa panggilan beruntun); kini memakai algoritme Lee-Richards.
+
 ## [1.6.0] - 16 Oktober 2026
 
 Rilis penapisan skala besar dan simulasi: mesin docking GPU Uni-Dock, simulasi RBFE OpenFE yang

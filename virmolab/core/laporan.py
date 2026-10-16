@@ -157,6 +157,18 @@ def html(proyek, baris, info, interaksi_terbaik=None, ada_gambar3d=False, ada_di
              "<th>Grid box (pusat; ukuran; spasi)</th><th>Ligan</th></tr>")
     for j in jobs:
         p = j["parameter"]
+        if j.get("impor"):     # pose dari program lain: pencarian dan grid box bukan milik VirmoLab
+            from .impor_docking import label_skor
+            im = j["impor"]
+            ok = sum(1 for l in j["ligan"] if l["status"] == "selesai")
+            sumber_e = ("skor ulang Vina (--score_only)" if im.get("energi") == "vina_ulang"
+                        else label_skor(im["energi"]) if im.get("energi") else "-")
+            cari = (f"Hasil impor {im.get('program', '')}; docking tidak dijalankan di VirmoLab. "
+                    f"Urutan pose: {label_skor(im['skor_utama']) if im.get('skor_utama') else 'berkas asal'}. "
+                    f"ΔG: {sumber_e}.")
+            o.append(f"<tr><td>{escape(j['id'])}</td><td>{escape(M.label_mesin(j))}</td><td>-</td>"
+                     f"<td>{escape(cari)}</td><td>-</td><td class='n'>{ok}/{len(j['ligan'])}</td></tr>")
+            continue
         if j["mesin"] == "vina":
             cari = (f"exhaustiveness {p.get('exhaustiveness')}, {p.get('num_modes')} pose, rentang "
                     f"{_f(p.get('energy_range'), '{:.1f}')}")
@@ -172,7 +184,7 @@ def html(proyek, baris, info, interaksi_terbaik=None, ada_gambar3d=False, ada_di
         kot = (f"({' · '.join(_n(v) for v in k['pusat'])}); {' × '.join(_n(v, 1) for v in k['ukuran'])} Å; "
                f"{_n(k.get('spasi', 0.375), 3)} Å")
         ok = sum(1 for l in j["ligan"] if l["status"] == "selesai")
-        o.append(f"<tr><td>{escape(j['id'])}</td><td>{escape(M.MESIN[j['mesin']])}"
+        o.append(f"<tr><td>{escape(j['id'])}</td><td>{escape(M.label_mesin(j))}"
                  + (" (alih dari AD-GPU)" if j["mesin"] != j.get("mesin_asal") else "")
                  + f"</td><td>{'GPU' if j.get('perangkat') == 'gpu' else 'CPU'}</td><td>{escape(cari)}</td>"
                    f"<td>{escape(kot)}</td><td class='n'>{ok}/{len(j['ligan'])}</td></tr>")

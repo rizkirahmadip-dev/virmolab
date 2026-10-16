@@ -503,7 +503,7 @@ class DialogPembelajaranAktif(QDialog):
         elif j is not None:
             n_sel = sum(1 for l in j["ligan"] if l["status"] in ("selesai", "gagal", "dilewati"))
             self.l_tahap.setText(f"Docking putaran {j['al']['putaran']}: {_n(n_sel)}/{_n(len(j['ligan']))} ligan "
-                                 f"({M.MESIN.get(j['mesin'], j['mesin'])}). Kemajuan rinci ada di panel Antrean.")
+                                 f"({M.label_mesin(j)}). Kemajuan rinci ada di panel Antrean.")
         else:
             self.l_tahap.setText("")
         self.pb.setVisible(bool(tahap))

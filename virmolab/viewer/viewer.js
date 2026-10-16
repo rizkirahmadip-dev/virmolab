@@ -637,6 +637,35 @@ const VM = {
   filmStop() {
     if (this._filmTimer) { clearInterval(this._filmTimer); this._filmTimer = null; }
   },
+  /* Pemutar trajektori dikendalikan Qt (ui/pemutar_trajektori.py): PDB multi-MODEL dimuat tanpa diputar,
+     bingkai dipilih lewat filmKe(i). Objek lain disembunyikan selama film tampil karena trajektori impor punya
+     kerangka koordinat sendiri; filmHapus() menampilkannya kembali. */
+  filmMuat(id, teks) {
+    this.filmHapus(id, false);
+    const m = this.v.addModelsAsFrames(teks, 'pdb', {keepH: true});
+    this._filmTersembunyi = [];
+    Object.entries(this.models).forEach(([k, o]) => {
+      if (!(o.m.isHidden && o.m.isHidden())) { o.m.hide(); this._filmTersembunyi.push(k); }
+    });
+    this.models[id] = {m, surf: [], spec: null};
+    m.setStyle({}, {cartoon: {color: 'spectrum', opacity: 0.92}});
+    m.setStyle({hetflag: true}, {stick: {radius: 0.22, colorscheme: 'greenCarbon'}});
+    m.setStyle({hetflag: true, elem: ['Zn', 'Mg', 'Ca', 'Fe', 'Mn', 'Cu', 'Co', 'Ni', 'Cd']}, {sphere: {scale: 0.4}});
+    const n = (m.getNumFrames && m.getNumFrames()) || 1;
+    this.v.setFrame(0);
+    this.v.zoomTo({model: m});
+    this.v.render();
+    return n;
+  },
+  filmKe(i) { this.v.setFrame(i); this.v.render(); return i; },
+  filmHapus(id, render = true) {
+    this.filmStop();
+    if (this.models[id]) this.remove(id);
+    (this._filmTersembunyi || []).forEach(k => { const o = this.models[k]; if (o) o.m.show(); });
+    this._filmTersembunyi = [];
+    if (render) this.v.render();
+    return true;
+  },
   /* Animasi untuk ekspor GIF/WebP: kanvas diset lebar x tinggi (seperti gambar()), lalu animBingkai(t) dengan
      t = 0..1 memutar/menggoyang pandangan awal atau beralih mulus dari seluruh protein ke pandangan sekarang. */
   animMulai(lebar, tinggi, latar, mode, sudut) {

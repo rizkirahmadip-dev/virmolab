@@ -105,6 +105,9 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
         self.bar_view.setIconSize(QSize(16, 16))
         v3.addWidget(self.bar_view)
         v3.addWidget(self.viewer, 1)
+        from .pemutar_trajektori import PemutarTrajektori
+        self.pemutar = PemutarTrajektori(self)      # muncul saat trajektori MD diputar di viewport
+        v3.addWidget(self.pemutar)
         self.awal = HalamanAwal()
         self.awal.aksi.connect(self._aksi_awal)
         self.stak_view = QStackedWidget()
@@ -641,6 +644,15 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
                           "Simpan sekarang (proyek juga tersimpan otomatis setiap ada perubahan)")
         self.a_buka = A("Buka berkas struktur…", "open", self.buka_berkas, "Ctrl+O",
                         "Buka protein atau ligan dari komputer: PDB, CIF, PDBQT, SDF, MOL2, SMILES")
+        self.a_impor_dock = A("Hasil docking…", "import", lambda: self.buka_impor_docking(), None,
+                              "Pose dan skor dari Vina, Smina, GNINA, AutoDock4/-GPU, GOLD, Glide, rDock, MOE, "
+                              "DiffDock: dianalisis seperti hasil docking VirmoLab")
+        self.a_impor_md = A("Trajektori MD…", "import", lambda: self.buka_impor_md(), None,
+                            "Trajektori GROMACS, AMBER, NAMD, CHARMM, atau OpenMM: RMSD, RMSF, Rg, SASA, ikatan H, "
+                            "interaksi, PCA, FEL, klaster, dan pemutar 3D")
+        self.a_impor_grafik = A("Grafik XVG/CSV…", "chart", lambda: self.buka_grafik_berkas(), None,
+                                "Plot keluaran gmx (RMSD, RMSF, energi, Rg, ikatan H) atau CSV/DAT dengan gaya "
+                                "grafik VirmoLab")
         self.a_rcsb = A("Protein dari RCSB PDB…", "import", lambda: self.ambil(0), "Ctrl+Shift+P",
                         "Unduh struktur protein dengan kode PDB (mis. 1HSG, 6LU7)")
         self.a_alphafold = A("Protein dari AlphaFold DB…", "import", lambda: self.ambil(3), None,
@@ -774,6 +786,7 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
         # ---------------------------------------------------------------- Berkas
         m = menu("&Berkas")
         isi(m, (self.a_baru, self.a_templat, self.a_buka_proyek, self.a_terakhir, self.a_simpan, None, self.a_buka))
+        self._sub(m, "Impor hasil eksternal", (self.a_impor_dock, self.a_impor_md, self.a_impor_grafik))
         self._sub(m, "Ambil dari internet", (self.a_rcsb, self.a_alphafold, self.a_pubchem, self.a_smiles, self.a_chembl,
                                              self.a_pustaka, self.a_tanaman, self.a_ketcher))
         m.addSeparator()
@@ -1081,7 +1094,7 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
         self._sub(m, "Dokumentasi", [A(t, None, lambda _=False, k=k: self.buka_panduan(k))
                                      for k, t in (("instalasi", "Instalasi"), ("pindah_laptop", "Pindah laptop"),
                                                   ("gpu", "Setup GPU"), ("troubleshooting", "Mengatasi masalah"),
-                                                  ("metode", "Metode dan kriteria"),
+                                                  ("metode", "Metode dan kriteria"),
                                                   ("validasi", "Validasi (angka tolok ukur)"))])
         isi(m, (None,
                 A("Lapor masalah atau kirim saran…", None, self.lapor_masalah, None,
@@ -1583,6 +1596,10 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
                               ("Residu kovalen", kov), ("Gugus reaktif", i.get("warhead") or "-")]
                 else:
                     baris += [("ΔG (kcal/mol)", kit.f(i.get("energi", 0))), ("Ki perkiraan", id_angka(i.get("ki") or "–"))]
+                if i.get("energi_sumber"):    # pose impor: asal ΔG dan skor asli program docking
+                    from ..core.impor_docking import label_skor
+                    baris.append(("Sumber ΔG", i["energi_sumber"]))
+                    baris += [(label_skor(k), kit.f(v, 3)) for k, v in (i.get("skor_impor") or {}).items()]
                 if i.get("klaster"):
                     baris.append(("Ukuran klaster", i["klaster"]))
                 if i.get("residu_flex") and not kov:
@@ -1856,10 +1873,32 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
     # -------------------------------------------------------------- impor
     def buka_berkas(self):
         fs, _ = QFileDialog.getOpenFileNames(self, "Buka struktur", self.st.value("dir_terakhir", ""),
-                                             "Struktur (*.pdb *.ent *.pdbqt *.cif *.mmcif *.sdf *.sd *.mol *.mol2 *.smi);;Semua (*.*)")
+                                             "Struktur (*.pdb *.ent *.pdbqt *.cif *.mmcif *.sdf *.sd *.mol *.mol2 *.smi);;"
+                                             "Hasil docking (*.pdbqt *.dlg *.sdf);;"
+                                             "Trajektori MD (*.xtc *.trr *.dcd *.nc *.netcdf *.mdcrd *.crd);;"
+                                             "Grafik (*.xvg *.csv *.tsv *.dat);;Semua (*.*)")
         if fs:
             self.st.setValue("dir_terakhir", str(Path(fs[0]).parent))
-            self.impor(fs)
+            self._buka_sesuai_jenis(fs)
+
+    def _buka_sesuai_jenis(self, fs):
+        """Arahkan berkas: hasil docking -> dialog impor docking, trajektori/topologi MD -> dialog impor MD,
+        XVG/CSV -> grafik; struktur biasa -> objek viewer."""
+        from ..core import impor_docking, impor_grafik, impor_md
+        dock = [f for f in fs if impor_docking.tampak_hasil_docking(f)]
+        traj = [f for f in fs if Path(f).suffix.lower() in impor_md.EKSTENSI_TRAJEKTORI]
+        graf = [f for f in fs if Path(f).suffix.lower() in impor_grafik.EKSTENSI]
+        top = [f for f in fs if traj and Path(f).suffix.lower() in impor_md.EKSTENSI_TOPOLOGI and f not in dock]
+        sisa = [f for f in fs if f not in dock + traj + graf + top]
+        if dock:
+            self.buka_impor_docking(dock + [f for f in sisa if impor_docking.tampak_reseptor(f)])
+            sisa = [f for f in sisa if not impor_docking.tampak_reseptor(f)]
+        if traj:
+            self.buka_impor_md(top + traj)
+        if graf:
+            self.buka_grafik_berkas(graf)
+        if sisa:
+            self.impor(sisa)
 
     def impor(self, berkas):
         def kerjakan(lapor):
@@ -2000,9 +2039,9 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
         for d in dirs:
             fs.remove(d)
             fs += [str(p) for p in Path(d).rglob("*") if p.suffix.lower() in
-                   (".pdb", ".pdbqt", ".cif", ".sdf", ".mol", ".mol2", ".smi")]
+                   (".pdb", ".pdbqt", ".cif", ".sdf", ".mol", ".mol2", ".smi", ".dlg")]
         if fs:
-            self.impor(fs)
+            self._buka_sesuai_jenis(fs)
 
     # ------------------------------------------------------------ grid box
     def _koordinat(self, o, sel=None):
@@ -3393,6 +3432,37 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
             if f.exists():
                 QDesktopServices.openUrl(QUrl.fromLocalFile(str(f)))
 
+    def _tampilkan_reseptor_job(self, j):
+        """Job impor membawa reseptornya sendiri: muat sebagai objek protein (sekali) dan tampilkan, sementara
+        reseptor job impor lain disembunyikan agar interaksi tidak dihitung terhadap protein yang salah."""
+        pr = self.proyek
+        f = pr.p(j["reseptor_pdb"]) if pr else None
+        o = next((x for x in self.objek.values() if x.jenis == "protein" and x.info.get("reseptor_job") == j["id"]),
+                 None)
+        if o is None:
+            if not f or not f.exists():
+                return None
+            try:
+                objek = molekul.baca_teks_struktur(f.read_text(encoding="utf-8", errors="replace"),
+                                                   f"Reseptor {j.get('label_mesin') or j['id']}", "pdb", str(f))
+            except Exception as e:
+                self.log.tulis(f"Reseptor job {j['id']} tidak terbaca: {e}")
+                return None
+            o = next((x for x in objek if x.jenis == "protein"), None)
+            if o is None:
+                return None
+            o.info["reseptor_job"] = j["id"]
+            o.grup = f"Hasil impor · {j['id'][-6:]}"
+            self.tambah_objek([o], fokus=False)
+        for x in self.objek.values():
+            if x.jenis == "protein" and x.info.get("reseptor_job") and x is not o and x.tampil:
+                self.set_tampil(x.id, False)
+                self.hier.set_centang(x.id, False)
+        if not o.tampil:
+            self.set_tampil(o.id, True)
+            self.hier.set_centang(o.id, True)
+        return o
+
     def buka_pose(self, jid, lid, k=1, maks=9):
         """Muat pose hasil satu ligan sebagai objek di grup 'Hasil · <ligan>'; pose k ditampilkan & dipilih."""
         pr = self.proyek
@@ -3426,9 +3496,14 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
                 o.tampil = False
                 o.info = {"energi": p.energi, "ki": "" if j.get("kovalen") else p.ki, "rmsd_lb": p.rmsd_lb, "rmsd_ub": p.rmsd_ub,
                           "rmsd_ref": p.rmsd_ref, "klaster": p.klaster, "ligan": l["nama"], "job": jid, "lid": lid,
-                          "peringkat": p.peringkat, "mesin": mesinmod.MESIN[j["mesin"]], "pdbqt": p.pdbqt,
+                          "peringkat": p.peringkat, "pdbqt": p.pdbqt,
+                          "mesin": f"{l['program']} (impor)" if j.get("impor") and l.get("program")
+                          else mesinmod.label_mesin(j),
                           "lig_pdbqt": l["pdbqt"], "atom": len(o.teks.splitlines()) - 1,
                           "rmsd_kristal": simpan.get(p.peringkat, {}).get("rmsd_kristal")}
+                if j.get("impor"):
+                    o.info["energi_sumber"] = l.get("energi_sumber", "")
+                    o.info["skor_impor"] = simpan.get(p.peringkat, {}).get("skor") or {}
                 if j.get("kovalen"):
                     o.info["kovalen"] = j["kovalen"].get("label") or j["kovalen"].get("residu")
                     o.info["warhead"] = l.get("warhead", "")
@@ -3445,6 +3520,13 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
                                "residu": len(o.info["residu_flex"])}
                     lama.append(fo)
             self.tambah_objek(lama, fokus=False)
+        if j.get("reseptor_pdb"):
+            self._tampilkan_reseptor_job(j)
+        else:   # pose docking proyek: reseptor job impor tidak boleh menumpuk di kantong yang sama
+            for x in self.objek.values():
+                if x.jenis == "protein" and x.info.get("reseptor_job") and x.tampil:
+                    self.set_tampil(x.id, False)
+                    self.hier.set_centang(x.id, False)
         sasaran = next((o for o in lama if o.info.get("peringkat") == k), lama[0] if lama else None)
         for o in lama:
             on = o is sasaran or bool(o.info.get("sematkan")) or bool(
@@ -3627,7 +3709,7 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
         sif = {l["id"]: dict(l.get("sifat") if isinstance(l.get("sifat"), dict) else {}, pchembl=l.get("pchembl"))
                for l in pr.ligan}
         baris = stat_mod.dataset(eksmod.baris_hasil(pr), sif)
-        jobs = [(j["id"], f"{j['id']} · {mesinmod.MESIN.get(j['mesin'], j['mesin'])}") for j in pr.job]
+        jobs = [(j["id"], f"{j['id']} · {mesinmod.label_mesin(j)}") for j in pr.job]
         self.statistik.muat(baris, jobs)
 
     def _ekspor_statistik(self, fmt):
@@ -3831,13 +3913,13 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
             self._galat("Validasi redocking gagal: RMSD terhadap kristal tidak bisa dihitung.")
             return
         r = l["rmsd_kristal"]
-        self.proyek.validasi = {"ligan": l["nama"], "job": j["id"], "mesin": mesinmod.MESIN[j["mesin"]],
+        self.proyek.validasi = {"ligan": l["nama"], "job": j["id"], "mesin": mesinmod.label_mesin(j),
                                 "rmsd": r, "rmsd_min": l.get("rmsd_kristal_min"), "energi": l["energi"],
                                 "tanggal": j.get("selesai")}
         ok = r <= 2.0
         teks = (f"RMSD pose terbaik terhadap kristal: {r:.2f} Å - {'VALID (≤ 2,0 Å)' if ok else 'TIDAK VALID (> 2,0 Å)'}\n"
                 f"RMSD minimum di antara pose teratas: {l.get('rmsd_kristal_min', r):.2f} Å\n"
-                f"ΔG pose terbaik: {l['energi']:.2f} kcal/mol ({mesinmod.MESIN[j['mesin']]})")
+                f"ΔG pose terbaik: {l['energi']:.2f} kcal/mol ({mesinmod.label_mesin(j)})")
         self.pesan.tulis("Validasi redocking - " + teks.replace("\n", "; "))
         # tumpang-tindih: kristal karbon magenta, pose karbon biru (residu kontak abu-abu)
         pose = self.buka_pose(j["id"], l["id"], 1)
@@ -3896,7 +3978,7 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
                 v.js("residuKontak", r.id, {"or": [dict({"resi": sorted(x)}, **({"chain": c} if c else {}))
                                                    for c, x in res.items()]})
             v.js("fokus", {"id": po.id}, 0)
-            self.banding.label[i].setText(f"{l['nama']} · {p.energi:.2f} kcal/mol · {mesinmod.MESIN[j['mesin']]}")
+            self.banding.label[i].setText(f"{l['nama']} · {p.energi:.2f} kcal/mol · {mesinmod.label_mesin(j)}")
             pendek = {"adgpu": "AD-GPU", "vina": "Vina", "ad4": "AD4"}[j["mesin"]]
             baris.append((f"{l['nama']} · {pendek}", p.energi, analisis.residu_kontak(daftar)))
         semua = self.banding.peta.muat(baris)

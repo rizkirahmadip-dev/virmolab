@@ -215,11 +215,42 @@ def pecah_struktur(st, nama, sumber=""):
     return hasil
 
 
+def nama_atom_unik(teks):
+    """PDB keluaran Open Babel/Vina menamai atom ligan hanya dengan unsur ("C", "C", "O"...). gemmi menganggap
+    nama kembar dalam satu residu sebagai konformasi alternatif lalu membuangnya, sehingga ligan tersisa
+    beberapa atom. Residu HETATM bernama kembar dinamai ulang C1, C2, O1... (kolom PDB tetap)."""
+    kunci_baris, nama = {}, {}
+    baris = teks.splitlines()
+    model = 0
+    for i, b in enumerate(baris):
+        if b.startswith("MODEL"):
+            model += 1
+        elif b.startswith("HETATM") and len(b) >= 27:
+            k = (model, b[21], b[17:20], b[22:27])
+            kunci_baris.setdefault(k, []).append(i)
+            nama.setdefault(k, []).append(b[12:16].strip())
+    kembar = [k for k, n in nama.items() if len(n) != len(set(n))]
+    if not kembar:
+        return teks
+    for k in kembar:
+        hit = {}
+        for i in kunci_baris[k]:
+            b = baris[i]
+            el = b[76:78].strip() if len(b) >= 78 and b[76:78].strip() else re.sub(r"[^A-Za-z]", "", b[12:16])[:1]
+            el = (el or "X").capitalize()
+            hit[el] = hit.get(el, 0) + 1
+            nm = f"{el}{hit[el]}"
+            nm = (f" {nm:<3}" if len(el) == 1 and len(nm) < 4 else f"{nm:<4}")[:4]
+            baris[i] = b[:12] + nm + b[16:]
+    return "\n".join(baris) + ("\n" if teks.endswith("\n") else "")
+
+
 def baca_teks_struktur(teks, nama, fmt="pdb", sumber=""):
     if fmt == "cif":
         doc = gemmi.cif.read_string(teks)
         st = gemmi.make_structure_from_block(doc.sole_block())
     else:
+        teks = nama_atom_unik(teks)
         st = gemmi.read_pdb_string(teks)
     st.setup_entities()
     hasil = pecah_struktur(st, nama, sumber)

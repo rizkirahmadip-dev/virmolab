@@ -127,7 +127,7 @@ class PanelAntrean(QWidget):
         jalan = next((l for l in lig if l["status"] == "berjalan"), None)
         prog = (len(selesai) + (jalan["progres"] / 100 if jalan else 0)) / max(1, len(lig)) * 100
         it.setText(0, f"{j['id']} · {j['nama']}")
-        it.setText(1, M.MESIN.get(j["mesin"], j["mesin"]) + (" (alih)" if j["mesin"] != j.get("mesin_asal") else ""))
+        it.setText(1, M.label_mesin(j) + (" (alih)" if j["mesin"] != j.get("mesin_asal") else ""))
         it.setText(2, "GPU" if j.get("perangkat") == "gpu" else "CPU")
         it.setText(4, f"{LABEL_STATUS.get(j['status'], j['status'])} {len(selesai)}/{len(lig)}")
         it.setForeground(4, QColor(self._warna(j["status"])))
@@ -226,7 +226,7 @@ class PanelHasil(QWidget):
                 self.tabel.insertRow(r)
                 nilai = [l["nama"], l["energi"], l.get("ki", ""),
                          l["rmsd_ref"] if l.get("rmsd_ref") is not None else None, l.get("n_pose", 0),
-                         M.MESIN.get(j["mesin"], j["mesin"]), j["id"], _durasi(l.get("detik"))]
+                         M.label_mesin(j), j["id"], _durasi(l.get("detik"))]
                 for k, v in enumerate(nilai):
                     it = QTableWidgetItem()
                     if isinstance(v, (int, float)) and not isinstance(v, bool):

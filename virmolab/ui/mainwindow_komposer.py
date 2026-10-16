@@ -191,10 +191,20 @@ class KomposerFigur:
             self.log.tulis(f"BOILED-Egg disimpan: {f}")
             self.statusBar().showMessage(f"BOILED-Egg disimpan: {f}", 5000)
 
-    def _reseptor_objek(self):
-        siap = [o for o in self.objek.values() if o.jenis == "protein" and o.info.get("siap_docking")]
-        lain = [o for o in self.objek.values() if o.jenis == "protein"]
-        return (siap or lain or [None])[0]
+    def _reseptor_objek(self, o=None):
+        """Protein acuan interaksi. Pose job impor memakai reseptor job itu sendiri; pose lain memakai reseptor
+        proyek (siap docking) lebih dulu, bukan reseptor impor."""
+        o = o or self.objek.get(getattr(self, "aktif", None))
+        jid = o.info.get("job") if o is not None else None
+        if jid:
+            r = next((x for x in self.objek.values() if x.jenis == "protein" and x.info.get("reseptor_job") == jid),
+                     None)
+            if r is not None:
+                return r
+        prot = [x for x in self.objek.values() if x.jenis == "protein"]
+        siap = [x for x in prot if x.info.get("siap_docking")]
+        lain = [x for x in prot if not x.info.get("reseptor_job")]
+        return (siap or lain or prot or [None])[0]
 
     def _mol_objek(self, o):
         if o.jenis == "pose" and o.info.get("pdbqt") and self.proyek and o.info.get("lig_pdbqt"):
@@ -259,7 +269,7 @@ class KomposerFigur:
 
     def analisis_objek(self, o):
         """Interaksi pose/ligan aktif -> panel Interaksi, viewport, diagram 2D."""
-        rec = self._reseptor_objek()
+        rec = self._reseptor_objek(o)
         if rec is None or o.jenis not in ("pose", "ligan") or o.info.get("aditif"):
             return
         try:

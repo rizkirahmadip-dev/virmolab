@@ -7,6 +7,7 @@ Argumen:
   --qc-pekerja ALAMAT KUNCI (internal) proses pekerja PoseBusters, tersambung lewat named pipe
   --admet MASUK KELUAR      (internal) prediksi ADMET-AI di proses terpisah (JSON masuk/keluar)
   --md TUGAS.json           (internal) MD / MM-GBSA OpenMM di proses terpisah (core/md.py)
+  --impor-md TUGAS.json     (internal) baca & analisis trajektori MD eksternal di proses terpisah (core/impor_md.py)
 """
 import os
 import sys
@@ -35,6 +36,10 @@ def main():
         siapkan_kimia()
         from .core import md
         sys.exit(md.jalankan_tugas(arg[1]))
+    if arg[:1] == ["--impor-md"]:        # impor trajektori MD eksternal (core/impor_md.py), tanpa jendela
+        siapkan_kimia()
+        from .core import impor_md
+        sys.exit(impor_md.jalankan_tugas(arg[1]))
     siapkan_kimia()
     if "--uji-mandiri" in arg:
         i = arg.index("--uji-mandiri")

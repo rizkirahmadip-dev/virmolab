@@ -18,6 +18,11 @@ ELEMEN = {"A": "C", "C": "C", "H": "H", "HD": "H", "HS": "H", "N": "N", "NA": "N
           "OS": "O", "S": "S", "SA": "S", "P": "P", "F": "F", "I": "I", "CL": "Cl", "BR": "Br", "MG": "Mg", "ZN": "Zn",
           "FE": "Fe", "MN": "Mn", "CA": "Ca", "CU": "Cu", "NI": "Ni", "CO": "Co", "SI": "Si"}
 MESIN = {"adgpu": "AutoDock-GPU", "vina": "AutoDock Vina", "ad4": "AutoDock4", "unidock": "Uni-Dock"}
+
+
+def label_mesin(j):
+    """Nama mesin job untuk tampilan. Job impor menyimpan pose bergaya Vina tetapi berasal dari program lain."""
+    return j.get("label_mesin") or MESIN.get(j.get("mesin"), j.get("mesin") or "")
 PROGRAM = {"adgpu": "autodock_gpu.exe", "vina": "vina.exe", "ad4": "autodock4.exe"}
 
 # pesan AD-GPU yang menandakan OpenCL/GPU tidak bisa dipakai -> pindah ke Vina

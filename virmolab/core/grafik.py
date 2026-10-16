@@ -122,14 +122,14 @@ class Kanvas:
 
 # ------------------------------------------------------------------ jenis grafik
 def histogram(nilai, label_x="", judul="", kelas=None, gelap=False, transparan=False, lebar=760, tinggi=520,
-              garis_rerata=True, catatan=""):
+              garis_rerata=True, catatan="", label_y="Jumlah ligan"):
     import numpy as np
     v = np.asarray(nilai, float)
     if kelas is None or kelas <= 0:
         kelas = min(30, max(5, len(np.histogram_bin_edges(v, "fd")) - 1)) if len(v) > 3 else 5
     jumlah, tepi = np.histogram(v, bins=kelas)
     k = Kanvas(lebar, tinggi, gelap, transparan, judul)
-    k.sumbu([tepi[0], tepi[-1]], [0, max(1, int(jumlah.max()))], label_x, "Jumlah ligan", desimal_y=0, bulat_y=True)
+    k.sumbu([tepi[0], tepi[-1]], [0, max(1, int(jumlah.max()))], label_x, label_y, desimal_y=0, bulat_y=True)
     for n, a, b in zip(jumlah, tepi[:-1], tepi[1:]):
         if n:
             k.out.append(f'<rect x="{k.X(a) + 0.5:.2f}" y="{k.Y(n):.2f}" width="{max(0.5, k.X(b) - k.X(a) - 1):.2f}" '
@@ -213,14 +213,15 @@ PALET_GARIS = ["#2b6fd6", "#cf3f3f", "#2f9e6b", "#c98a12", "#7a4cc2", "#0f8a9a",
 def garis(seri, label_x="", label_y="", judul="", gelap=False, transparan=False, lebar=760, tinggi=480,
           catatan="", y_nol=False, acuan=None, x_nol=True):
     """seri: [(nama, xs, ys)] -> grafik garis (mis. RMSD/MM-GBSA terhadap waktu, RMSF per residu).
-    acuan: [(nilai_y, label)] garis putus-putus horizontal."""
+    acuan: [(nilai_y, label)] atau [(nilai_y, label, warna)] garis putus-putus horizontal; label kosong = tanpa
+    teks (mis. rerata beberapa seri yang warnanya sudah sama dengan seri)."""
     seri = [(n, list(x), list(y)) for n, x, y in seri if len(x) and len(x) == len(y)]
     if not seri:
         k = Kanvas(lebar, tinggi, gelap, transparan, judul)
         k.teks(lebar / 2, tinggi / 2, "Tidak ada data", 12, "middle", warna_=k.w["tinta2"])
         return k.selesai()
     xs = [v for _, x, _ in seri for v in x] + ([0.0] if x_nol and min(v for _, x, _ in seri for v in x) >= 0 else [])
-    ys = [v for _, _, y in seri for v in y] + ([0.0] if y_nol else []) + [a for a, _ in (acuan or [])]
+    ys = [v for _, _, y in seri for v in y] + ([0.0] if y_nol else []) + [a[0] for a in (acuan or [])]
     tepi = 0.04 * ((max(ys) - min(ys)) or 1.0)          # ruang tepi hanya di sumbu y (sumbu x pas data)
     ys = ys + [max(ys) + tepi] + ([] if y_nol and min(ys) >= 0 else [min(ys) - tepi])
     legenda = len(seri) > 1
@@ -228,10 +229,12 @@ def garis(seri, label_x="", label_y="", judul="", gelap=False, transparan=False,
     k.sumbu(xs, ys, label_x, label_y)
     k.out.append(f'<defs><clipPath id="areaG"><rect x="{k.kiri}" y="{k.atas}" width="{k.pw}" height="{k.ph}"/>'
                  f'</clipPath></defs>')
-    for a, t in acuan or []:
-        k.out.append(f'<line x1="{k.kiri}" y1="{k.Y(a):.2f}" x2="{k.kiri + k.pw}" y2="{k.Y(a):.2f}" stroke="{MERAH}" '
+    for ac in acuan or []:
+        a, t, w_ac = ac[0], ac[1], (ac[2] if len(ac) > 2 else MERAH)
+        k.out.append(f'<line x1="{k.kiri}" y1="{k.Y(a):.2f}" x2="{k.kiri + k.pw}" y2="{k.Y(a):.2f}" stroke="{w_ac}" '
                      f'stroke-width="1.2" stroke-dasharray="5,3"/>')
-        k.teks(k.kiri + k.pw - 4, k.Y(a) - 5, t, 10, "end", warna_=MERAH)
+        if t:
+            k.teks(k.kiri + k.pw - 4, k.Y(a) - 5, t, 10, "end", warna_=w_ac)
     for i, (nama, x, y) in enumerate(seri):
         w = PALET_GARIS[i % len(PALET_GARIS)]
         d = "M" + " L".join(f"{k.X(a):.2f},{k.Y(b):.2f}" for a, b in zip(x, y))

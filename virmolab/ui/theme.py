@@ -143,6 +143,7 @@ QLabel#judulMenu {{ color: {t['mut']}; font-size: 8pt; font-weight: 600; padding
 QLabel#judulHalaman {{ font-size: 11pt; font-weight: 600; color: {t['ink']}; }}
 QLabel#statusLangkah {{ color: {t['ink2']}; }}
 QFrame#garis {{ background: {t['line2']}; border: 0; }}
+QFrame#bilahPemutar {{ background: {t['surf']}; border-top: 1px solid {t['line']}; }}
 QWidget#kakiPanel {{ border-top: 1px solid {t['line2']}; }}
 QPushButton#aksiLangkah {{ text-align: left; padding: 6px 10px; }}
 QPushButton#aksiLangkah:hover {{ border-color: {t['acc']}; background: {t['accs']}; color: {t['acct']}; }}

@@ -239,7 +239,7 @@ class Pelaksana(QObject):
         if j["status"] != "berjalan":
             j["status"] = "berjalan"
             j["mulai"] = j["mulai"] or datetime.now().isoformat(timespec="seconds")
-            self.log.emit(f"Mulai job {j['id']} ({M.MESIN[j['mesin']]}, {len(j['ligan'])} ligan)")
+            self.log.emit(f"Mulai job {j['id']} ({M.label_mesin(j)}, {len(j['ligan'])} ligan)")
         if j["id"] in self.minta_jeda:
             self.minta_jeda.discard(j["id"])
             j["status"] = "dijeda"

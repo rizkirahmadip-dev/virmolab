@@ -246,7 +246,7 @@ class DialogKemiripan(QDialog):
                 for j in reversed(jw.proyek.job):
                     n = sum(1 for l in j["ligan"] if l["status"] == "selesai" and "kristal" not in l["nama"].lower())
                     if n:
-                        self.c_job.addItem(f"{mesinmod.MESIN.get(j['mesin'], j['mesin'])} · {j['id']} · {n} ligan", j["id"])
+                        self.c_job.addItem(f"{mesinmod.label_mesin(j)} · {j['id']} · {n} ligan", j["id"])
                         if n > n_maks:      # bawaan: job dengan ligan terbanyak (bukan job validasi kristal)
                             terbaik, n_maks = self.c_job.count() - 1, n
                 self.c_job.setCurrentIndex(terbaik)

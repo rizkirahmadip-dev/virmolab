@@ -150,6 +150,8 @@ def tooltip(q):
 
 def jalur_protein(proyek, j=None):
     """PDB reseptor bersih (berelemen) untuk PoseBusters; None bila tidak ada."""
+    if j and j.get("reseptor_pdb") and proyek.p(j["reseptor_pdb"]).exists():   # job impor: reseptor sendiri
+        return proyek.p(j["reseptor_pdb"])
     r = proyek.reseptor or {}
     for k in ("bersih", "asli"):
         if r.get(k) and proyek.p(r[k]).exists():

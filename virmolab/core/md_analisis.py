@@ -187,7 +187,9 @@ def hitung_sasa_frame(coords_angstrom: np.ndarray,
                 conf.SetAtomPosition(i, (float(c[0]), float(c[1]), float(c[2])))
             m.AddConformer(conf)
 
-            opts = rdFreeSASA.SASAOpts(rdFreeSASA.SASAAlgorithm.ShrakeRupley, rdFreeSASA.SASAClassifier.Protor)
+            # Lee-Richards, bukan Shrake-Rupley: SR FreeSASA (RDKit 2026.03) bisa access violation setelah beberapa
+            # panggilan beruntun pada sistem ribuan atom, dan crash di kode C itu menjatuhkan seluruh aplikasi.
+            opts = rdFreeSASA.SASAOpts(rdFreeSASA.SASAAlgorithm.LeeRichards, rdFreeSASA.SASAClassifier.Protor)
             opts.probeRadius = probe
             rad_list = [float(r) for r in radii]
             sasa_kompleks = rdFreeSASA.CalcSASA(m, rad_list, -1, None, opts)
@@ -544,6 +546,9 @@ def barcode_interaksi_dan_hb(modeller, info, frames, mol, stride: int = 1,
     top = modeller.topology
     atoms = list(top.atoms())
     lig = info["idx_ligan"]
+    if not lig:     # MD protein tanpa ligan (mis. trajektori impor apo): tidak ada interaksi protein–ligan
+        return {"hb_per_frame": [], "interaksi_frek": {},
+                "barcode": {"residu": [], "matriks_rle": encode_rle(np.zeros((0, 0))), "n_frame": 0}}
     rec_idx = [i for i in range(len(atoms)) if i not in set(lig)]
 
     # Saring residu reseptor dalam radius 12 Å dari ligan pada frame acuan

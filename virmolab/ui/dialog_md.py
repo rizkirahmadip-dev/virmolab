@@ -61,11 +61,14 @@ def _jam(j):
 class DialogMD(QDialog):
     selesai = Signal(dict, dict)          # (hasil.json, catatan proses)
 
-    def __init__(self, jw):
+    def __init__(self, jw, lihat=None):
+        """lihat: id run di proyek.md untuk mode lihat saja (mis. trajektori impor): panel menjalankan MD
+        disembunyikan karena hasilnya tidak bergantung pada pose docking proyek."""
         super().__init__(jw)
         self.jw = jw
+        self.lihat = lihat
         self.proyek_awal = jw.proyek
-        self.setWindowTitle("MD & MM/GBSA - OpenMM")
+        self.setWindowTitle("Analisis trajektori MD" if lihat else "MD & MM/GBSA - OpenMM")
         self.setWindowFlags(self.windowFlags() | Qt.WindowMinMaxButtonsHint)
         self.resize(1180, 820)
         self.proses = None
@@ -74,6 +77,10 @@ class DialogMD(QDialog):
         self._buf = ""
         lay = QVBoxLayout(self)
         lay.addWidget(kit.judul(
+            "Analisis trajektori dinamika molekul",
+            "RMSD, RMSF, radius girasi, SASA, ikatan hidrogen, okupansi interaksi, PCA, FEL, dan klaster konformasi "
+            "ligan dari trajektori MD. Pilih hasil lain di daftar Hasil, atau putar trajektori di viewport 3D.")
+            if lihat else kit.judul(
             "Dinamika molekul dan MM/GBSA",
             "Penyempurnaan pasca-docking: kompleks diminimisasi atau disimulasikan dengan OpenMM (protein "
             "Amber ff14SB, ligan OpenFF Sage 2.3 dengan muatan NAGL setara AM1-BCC). ΔG MM/GBSA berguna untuk "
@@ -169,6 +176,7 @@ class DialogMD(QDialog):
         self.l_baterai.setStyleSheet(f"color:{kit.hx('warn')};")
         vk.addWidget(self.l_baterai)
         bagi.addWidget(kiri)
+        self.kiri = kiri
 
         # ---- kanan: hasil (UI F2: Ringkasan, Stabilitas, Interaksi, PCA & FEL, Klaster, Replika, Log)
         self.tab = QTabWidget()
@@ -318,7 +326,22 @@ class DialogMD(QDialog):
         self.log.setObjectName("mono")
         self.tab.addTab(self.log, "Log")
 
-        bagi.addWidget(self.tab)
+        kanan = QWidget()
+        vkn = QVBoxLayout(kanan)
+        vkn.setContentsMargins(0, 0, 0, 0)
+        h_run = QHBoxLayout()
+        h_run.addWidget(QLabel("Hasil"))
+        self.cb_run = QComboBox()
+        self.cb_run.setToolTip("Hasil MD tersimpan di proyek, termasuk trajektori impor")
+        self.cb_run.activated.connect(lambda *_: self._buka_run(self.cb_run.currentData()))
+        h_run.addWidget(self.cb_run, 1)
+        self.b_putar = QPushButton("Putar di viewport")
+        self.b_putar.setToolTip("Putar trajektori ligan terpilih di viewport 3D dengan bilah pemutar")
+        self.b_putar.clicked.connect(self._putar)
+        h_run.addWidget(self.b_putar)
+        vkn.addLayout(h_run)
+        vkn.addWidget(self.tab, 1)
+        bagi.addWidget(kanan)
         bagi.setSizes([430, 750])
         lay.addWidget(bagi, 1)
         self.prog = QProgressBar()
@@ -357,12 +380,92 @@ class DialogMD(QDialog):
             hb.addWidget(b)
         lay.addLayout(hb)
         self.hasil = None
+        if lihat:
+            self.kiri.setVisible(False)
+            for w in (self.b_jalan, self.b_jeda, self.b_lanjut, self.prog):
+                w.setVisible(False)
+            self.resize(1000, 820)
         self.muat()
 
     # ------------------------------------------------------------- data
+    def _isi_run(self, pilih=None):
+        """Daftar hasil MD/MM-GBSA selesai di proyek (internal dan impor), terbaru di atas."""
+        pr = self.jw.proyek
+        self.cb_run.blockSignals(True)
+        self.cb_run.clear()
+        for r in reversed((pr.md if pr else []) or []):
+            if r.get("status") != "selesai" or not pr.p(r["folder"], "hasil.json").exists():
+                continue
+            jenis = "impor" if r.get("impor") else {"md": "MD", "mmgbsa": "MM/GBSA"}.get(r.get("mode"), r.get("mode"))
+            nama = ", ".join(x.get("nama", "") for x in (r.get("ligan") or [])[:3])
+            self.cb_run.addItem(f"{r['id']} · {jenis} · {nama}", r["id"])
+        i = self.cb_run.findData(pilih or (self.run or {}).get("id"))
+        if i >= 0:
+            self.cb_run.setCurrentIndex(i)
+        self.cb_run.blockSignals(False)
+        self.cb_run.setEnabled(self.cb_run.count() > 0)
+
+    def _buka_run(self, rid):
+        pr = self.jw.proyek
+        r = next((x for x in (pr.md if pr else []) if x.get("id") == rid), None)
+        if not r:
+            return
+        f = pr.p(r["folder"], "hasil.json")
+        try:
+            h = json.loads(f.read_text(encoding="utf-8"))
+        except (OSError, ValueError) as e:
+            self.l_status.setText(f"Hasil {rid} tidak terbaca: {e}")
+            return
+        self.run = dict(r)
+        self._tampil_hasil(h, pr.p(r["folder"]))
+
+    def _waktu(self, x, n, dt=None):
+        """Sumbu waktu (ns) n titik: waktu frame asli (trajektori impor) atau (i+1)·interval (MD internal)."""
+        w = (x.get("trajektori") or {}).get("waktu_ns")
+        if w and len(w) >= n:
+            return list(w[:n])
+        dt = dt if dt is not None else (self.hasil.get("opsi") or {}).get("interval_ps", 10) / 1000.0
+        return [(i + 1) * dt for i in range(n)]
+
+    def _folder_traj(self, x):
+        """Folder berisi topologi.pdb + trajektori_terlarut.dcd untuk ligan hasil (replika pertama bila ada)."""
+        sub = self.folder_hasil / (x.get("folder") or self._ligan_folder_nama(x))
+        if not (sub / "trajektori_terlarut.dcd").exists() and (sub / "replika_1" / "trajektori_terlarut.dcd").exists():
+            sub = sub / "replika_1"
+        return sub
+
+    def _putar(self):
+        x = self._ligan_hasil()
+        if not x:
+            self.l_status.setText("Pilih hasil MD dulu.")
+            return
+        sub = self._folder_traj(x)
+        if not (sub / "trajektori_terlarut.dcd").exists():
+            self.l_status.setText("Trajektori tidak ditemukan di folder hasil.")
+            return
+        from . import kerja
+        from ..core import impor_md
+        self.b_putar.setEnabled(False)
+        self.l_status.setText("Menyiapkan bingkai trajektori…")
+
+        def jadi(h, x=x):
+            teks, idx = h
+            semua = self._waktu(x, max(idx) + 1)
+            self.b_putar.setEnabled(True)
+            self.l_status.setText(f"{len(idx)} bingkai diputar di viewport 3D.")
+            self.jw.pemutar.muat(teks, [semua[i] for i in idx], x.get("nama", ""))
+
+        def gagal(e):
+            self.b_putar.setEnabled(True)
+            self.l_status.setText("Trajektori tidak bisa diputar: " + e.splitlines()[0])
+        kerja.jalankan(lambda lapor, f=sub: impor_md.film_pdb(f), selesai=jadi, galat=gagal)
     def muat(self):
         from ..core import ekspor as eksmod
         pr = self.jw.proyek
+        if self.lihat:
+            self._isi_run(self.lihat)
+            self._buka_run(self.lihat)
+            return
         self.baris = eksmod.baris_hasil(pr) if pr else []
         self.tabel.blockSignals(True)
         self.tabel.setRowCount(0)
@@ -395,6 +498,7 @@ class DialogMD(QDialog):
                 self.run = self.run or dict(terakhir)
                 self._tampil_hasil(json.loads(f.read_text(encoding="utf-8")), pr.p(terakhir["folder"]))
         self._muat_kecepatan()
+        self._isi_run()
         self._tombol()
 
     def _segarkan_mmgbsa(self):
@@ -502,7 +606,16 @@ class DialogMD(QDialog):
             self.l_status.setText("Pilih minimal satu ligan hasil docking.")
             return
         rec = pr.reseptor or {}
-        sumber = rec.get("meeko") or rec.get("bersih")
+        sumber, rec_pdbqt = rec.get("meeko") or rec.get("bersih"), rec.get("pdbqt")
+        job_pilih = [self.jw.pelaksana.cari(b["job"]) or {} for b in pilih]
+        if any(j.get("reseptor_pdb") for j in job_pilih):    # hasil impor membawa reseptornya sendiri
+            pasangan = {(j.get("reseptor_pdb"), j.get("reseptor")) if j.get("reseptor_pdb") else (sumber, rec_pdbqt)
+                        for j in job_pilih}
+            if len(pasangan) > 1:
+                QMessageBox.warning(self, "MD & MM/GBSA", "Ligan terpilih berasal dari reseptor berbeda (job impor "
+                                    "dan job proyek). Pilih ligan dari satu reseptor saja.")
+                return
+            sumber, rec_pdbqt = pasangan.pop()
         if not sumber or not pr.p(sumber).exists():
             QMessageBox.warning(self, "MD & MM/GBSA", "Berkas reseptor bersih tidak ditemukan. Siapkan ulang reseptor.")
             return
@@ -533,7 +646,7 @@ class DialogMD(QDialog):
                 "interval_ps": self.sp_interval.value(), "frame_mmgbsa": self.sp_frame.value(),
                 "platform": self.cb_plat.currentData(), "replika": self.sp_replika.value()}
         tugas = {"mode": mode, "folder": str(folder), "ligan": ligan, "opsi": opsi,
-                 "reseptor": {"pdb": str(pr.p(sumber)), "pdbqt": str(pr.p(rec["pdbqt"]))}}
+                 "reseptor": {"pdb": str(pr.p(sumber)), "pdbqt": str(pr.p(rec_pdbqt)) if rec_pdbqt else ""}}
         (folder / "tugas.json").write_text(json.dumps(tugas, ensure_ascii=False, indent=1), encoding="utf-8")
         self.run = {"id": rid, "folder": pr.rel(folder), "mode": mode, "tingkat": self.tingkat() if mode != "uji" else "",
                     "tanggal": datetime.now().isoformat(timespec="seconds"), "status": "berjalan", "opsi": opsi,
@@ -690,6 +803,9 @@ class DialogMD(QDialog):
             if rm and sum(rm) / len(rm) > 3.0:
                 self.t_hasil.item(r, 7).setForeground(kit.warna("bad"))
                 self.t_hasil.item(r, 7).setToolTip("RMSD rerata > 3 Å: pose tidak stabil selama MD")
+        impor = bool(L) and all(x.get("impor") for x in L)
+        for c in range(1, 7):        # ΔG docking dan komponen MM/GBSA tidak ada pada trajektori impor
+            self.t_hasil.setColumnHidden(c, impor)
         self.t_hasil.resizeColumnsToContents()
         if L:
             self.t_hasil.setCurrentCell(0, 0)
@@ -718,10 +834,10 @@ class DialogMD(QDialog):
         dt = (self.hasil.get("opsi") or {}).get("interval_ps", 10) / 1000.0
 
         if kunci == "rmsd":
-            n = len(tr.get("rmsd_ligan") or [])
-            t = [(i + 1) * dt for i in range(n)]
-            seri = [("Ligan (berat)", t, tr.get("rmsd_ligan") or []),
-                    ("Protein Cα", t, tr.get("rmsd_ca") or [])]
+            n = max(len(tr.get("rmsd_ligan") or []), len(tr.get("rmsd_ca") or []))
+            t = self._waktu(x, n, dt)
+            seri = [("Ligan (berat)", t[:len(tr.get("rmsd_ligan") or [])], tr.get("rmsd_ligan") or []),
+                    ("Protein Cα", t[:len(tr.get("rmsd_ca") or [])], tr.get("rmsd_ca") or [])]
             return grafik.garis(seri, "Waktu (ns)", "RMSD (Å)", f"RMSD - {x['nama']}", gelap=gelap, y_nol=True,
                                 catatan="Superposisi pada Cα protein frame pertama produksi; RMSD > 3 Å = pose bergeser")
         if kunci == "rmsf":
@@ -731,7 +847,7 @@ class DialogMD(QDialog):
                                 catatan=(f"Residu 1 = {tr['residu'][0]}, terakhir = {tr['residu'][-1]}" if tr.get("residu") else ""))
         if kunci == "rg":
             rg_list = an.get("rg") or []
-            t = [(i + 1) * dt for i in range(len(rg_list))]
+            t = self._waktu(x, len(rg_list), dt)
             return grafik.garis([("Radius Girasi (Rg)", t, rg_list)], "Waktu (ns)", "Rg (Å)",
                                 f"Radius Girasi Protein - {x['nama']}", gelap=gelap, y_nol=False,
                                 catatan="Ukuran kekompakan lipatan protein selama simulasi")
@@ -740,8 +856,10 @@ class DialogMD(QDialog):
             prot = sasa_info.get("protein") or []
             terkubur = sasa_info.get("terkubur") or []
             n_pt = max(len(prot), len(terkubur))
-            step_stride = (len(tr.get("rmsd_ligan") or [0]) / float(n_pt)) if n_pt else 1.0
-            t = [(i + 1) * step_stride * dt for i in range(n_pt)]
+            n_fr = max(len(tr.get("rmsd_ligan") or []), len(tr.get("rmsd_ca") or []), 1)
+            step_stride = (n_fr / float(n_pt)) if n_pt else 1.0
+            semua = self._waktu(x, n_fr, dt)
+            t = [semua[min(n_fr - 1, int(round(i * step_stride)))] for i in range(n_pt)]
             seri = []
             if prot:
                 seri.append(("SASA Protein", t[:len(prot)], prot))
@@ -807,12 +925,20 @@ class DialogMD(QDialog):
         if mm.get("dG") is not None:
             self.k_dg.isi(f"{kit.f(mm['dG'])} ± {kit.f(mm.get('sd', 0.0))}", "kcal/mol")
         else:
-            self.k_dg.isi("–", "kcal/mol")
+            self.k_dg.isi("–", "tidak dihitung untuk trajektori impor" if x.get("impor") else "kcal/mol")
 
         n_rep = len(x.get("replika") or []) or 1
         ns = (x.get("md") or {}).get("ns") or len(rm_lig) * dt
         teks = (f"{n_rep} replika × {kit.f(ns, 1)} ns: kestabilan lokal pose, bukan afinitas."
                 + (" Saran: ≥ 3 replika untuk publikasi." if n_rep < 3 else ""))
+        im = x.get("impor") or {}
+        if im:
+            teks = (f"Trajektori impor ({', '.join(Path(b).name for b in im.get('berkas', [])[:3])}): "
+                    f"{n_rep} replika × {kit.f(ns, 2)} ns, {im.get('frame')} dari {im.get('frame_asli')} frame "
+                    f"(tiap {im.get('stride')}), ligan {im.get('ligan') or 'tidak ada'}. MM/GBSA tidak dihitung "
+                    "karena parameter medan gaya program asal tidak dibawa.")
+            for c in im.get("catatan") or []:
+                teks += "\n• " + c[0].upper() + c[1:]
         for p in an.get("peringatan") or []:
             teks += f"\n• {p}"
         self.l_catatan_md.setText(teks)
@@ -915,8 +1041,7 @@ class DialogMD(QDialog):
             self.t_replika.setItem(r_idx_row, 5, QTableWidgetItem(f"{r_dg:.2f}" if r_dg is not None else "-"))
 
             if r_rm:
-                t_rep = [(j + 1) * dt for j in range(len(r_rm))]
-                seri_rep.append((f"Replika {rep_no}", t_rep, r_rm))
+                seri_rep.append((f"Replika {rep_no}", self._waktu(rep, len(r_rm), dt), r_rm))
 
         agregat = self.hasil.get("replika_agregat") or x.get("replika_agregat") or {}
         if agregat:
@@ -966,7 +1091,7 @@ class DialogMD(QDialog):
         pdb_path = kl.get("pdb_medoid")
         if not pdb_path or not Path(pdb_path).exists():
             # Ekspor terlebih dahulu
-            sub = self.folder_hasil / f"{self._ligan_folder_nama(x)}"
+            sub = self._folder_traj(x)
             from ..core import md_analisis
             top_f = sub / "topologi.pdb"
             dcd_f = sub / "trajektori_terlarut.dcd"
@@ -1147,8 +1272,9 @@ class DialogMD(QDialog):
         n = max(len(rm_l), len(rm_c), len(rg), len(hb))
 
         lines = ["frame,waktu_ns,rmsd_ligan_A,rmsd_ca_A,rg_A,ikatan_h"]
+        waktu = self._waktu(x, n, dt)
         for i in range(n):
-            t_ns = (i + 1) * dt
+            t_ns = waktu[i]
             v_rl = f"{rm_l[i]:.3f}" if i < len(rm_l) else ""
             v_rc = f"{rm_c[i]:.3f}" if i < len(rm_c) else ""
             v_rg = f"{rg[i]:.3f}" if i < len(rg) else ""

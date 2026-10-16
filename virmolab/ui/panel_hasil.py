@@ -23,6 +23,16 @@ K_QC = 8
 # kolom tampil bawaan (sisanya lewat klik kanan pada judul kolom)
 TAMPIL_BAWAAN = {0, 1, 2, 4, 6, K_QC, 9, K_IFP, K_MMGBSA, K_GNINA, K_CNN, K_PK, K_JARAK}
 
+
+
+def _tip_impor(skor, sumber):
+    """Tooltip ΔG baris hasil impor: asal angka ΔG dan skor asli program docking."""
+    from ..core.impor_docking import label_skor
+    t = f"Hasil impor. ΔG: {sumber}."
+    if skor:
+        t += " Skor asli: " + "; ".join(f"{label_skor(k)} {id_angka(f'{v:.3f}'.rstrip('0').rstrip('.'))}"
+                                        for k, v in skor.items()) + "."
+    return t
 
 class ItemAngka(QTreeWidgetItem):
     """Sortir numerik untuk kolom angka (sel kosong di akhir)."""
@@ -232,6 +242,8 @@ class PanelHasil(QWidget):
             it.setText(1, b["ligan"])
             self._sel(it, 2, b["energi"])
             it.setToolTip(2, arti.arti_skor(b.get("kovalen")))
+            if b.get("energi_sumber"):
+                it.setToolTip(2, _tip_impor(b.get("skor_impor"), b["energi_sumber"]))
             it.setText(3, id_angka(b["ki"] or ""))
             self._sel(it, 4, b["le"], "{:.3f}")
             self._sel(it, 5, b["klaster"])
@@ -289,7 +301,8 @@ class PanelHasil(QWidget):
                 c.setData(1, Qt.UserRole + 1, (b["job"], b["lid"], p["peringkat"]))
                 c.setText(1, f"Pose {p['peringkat']}")
                 self._sel(c, 2, p["energi"])
-                c.setToolTip(2, arti.arti_skor(b.get("kovalen")))
+                c.setToolTip(2, _tip_impor(p.get("skor"), b["energi_sumber"]) if b.get("energi_sumber")
+                             else arti.arti_skor(b.get("kovalen")))
                 self._sel(c, 5, p.get("klaster") or None)
                 self._sel(c, 6, p.get("rmsd_kristal"))
                 self._sel(c, 7, p["rmsd_ref"] if p.get("rmsd_ref", -1) >= 0 else
