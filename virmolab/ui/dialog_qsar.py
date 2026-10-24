@@ -567,6 +567,12 @@ class DialogQSAR(QDialog):
         h.addWidget(kit.tombol("Ekspor CSV…", self._ekspor_csv))
         h.addStretch(1)
         v.addLayout(h)
+        # Peringatan cakupan domain: muncul hanya setelah prediksi, bila banyak senyawa di luar domain.
+        self.l_domain = kit.catatan("", "peringatan")
+        self.l_domain.setMinimumHeight(3 * self.l_domain.fontMetrics().lineSpacing() + 4)
+        self.l_domain.setAlignment(Qt.AlignTop)
+        self.l_domain.setVisible(False)
+        v.addWidget(self.l_domain)
         self.tabel_prediksi = kit.tabel(["Ligan", "pIC50 prediksi", "Interval 90 %", "Kemiripan kNN", "Domain"],
                                         regang=0, urut=True)
         v.addWidget(self.tabel_prediksi, 1)
@@ -598,22 +604,59 @@ class DialogQSAR(QDialog):
         for p, lg in zip(self.prediksi, self._ligan_prediksi):
             p["nama"] = lg["nama"]
             p["kunci"] = lg.get("kunci")
+        rd = qsar.ringkas_domain(self.prediksi)
         self.tabel_prediksi.setSortingEnabled(False)
         self.tabel_prediksi.setRowCount(len(self.prediksi))
-        for r, p in enumerate(self.prediksi):
-            self.tabel_prediksi.setItem(r, 0, kit.sel(p["nama"]))
+        # Senyawa di dalam domain di atas (urut prediksi), senyawa di luar domain di bawah dan diredupkan: angkanya
+        # tetap terlihat, tetapi tidak tampil seolah ikut peringkat.
+        kunci_nilai = "peluang_aktif" if self.model["klasifikasi"] else "pic50"
+        urut = sorted(self.prediksi, key=lambda p: (not p["dalam_domain"],
+                                                   -(p.get(kunci_nilai) if p.get(kunci_nilai) is not None else 0)))
+        redup = kit.warna("mut")
+        for r, p in enumerate(urut):
+            sel = [kit.sel(p["nama"])]
             if self.model["klasifikasi"]:
-                self.tabel_prediksi.setItem(r, 1, kit.sel("aktif" if p["kelas"] else "tidak aktif"))
-                self.tabel_prediksi.setItem(r, 2, kit.sel_angka(p.get("peluang_aktif")))
+                sel += [kit.sel("aktif" if p["kelas"] else "tidak aktif"), kit.sel_angka(p.get("peluang_aktif"))]
             else:
-                self.tabel_prediksi.setItem(r, 1, kit.sel_angka(p["pic50"]))
                 iv = (f"{kit.f(p['bawah'])} – {kit.f(p['atas'])}" if p.get("bawah") is not None else "–")
-                self.tabel_prediksi.setItem(r, 2, kit.sel(iv))
-            self.tabel_prediksi.setItem(r, 3, kit.sel_angka(p["tanimoto"]))
-            self.tabel_prediksi.setItem(r, 4, kit.sel("di dalam" if p["dalam_domain"] else "di luar"))
+                sel += [kit.sel_angka(p["pic50"]), kit.sel(iv)]
+            sel += [kit.sel_angka(p["tanimoto"]), kit.sel("di dalam" if p["dalam_domain"] else "di luar")]
+            for c, it in enumerate(sel):
+                if not p["dalam_domain"]:
+                    it.setForeground(redup)
+                    it.setToolTip(i18n.t("Di luar domain aplikabilitas: angka ini tidak boleh ditafsirkan atau "
+                                         "diperingkat."))
+                self.tabel_prediksi.setItem(r, c, it)
+        # Tanpa ini, mengaktifkan kembali pengurutan menerapkan ulang kolom urut sebelumnya dan urutan di atas hilang.
+        self.tabel_prediksi.horizontalHeader().setSortIndicator(-1, Qt.AscendingOrder)
         self.tabel_prediksi.setSortingEnabled(True)
-        n_luar = sum(1 for p in self.prediksi if not p["dalam_domain"])
+        n_luar = rd["n"] - rd["n_dalam"]
         self.l_status.setText(f"{len(self.prediksi)} ligan diprediksi; {n_luar} di luar domain aplikabilitas.")
+        self._tampilkan_peringatan_domain(rd)
+
+    def _tampilkan_peringatan_domain(self, rd):
+        t = i18n.t
+        persen = kit.f(100 * rd["fraksi"], 0)
+        med = kit.f(rd["median_tanimoto"], 2) if rd["median_tanimoto"] is not None else "–"
+        ambang = kit.f((self.model.get("domain") or {}).get("ambang_tanimoto"), 2)
+        if rd["tingkat"] == "baik":
+            self.l_domain.setVisible(False)
+            return
+        if rd["tingkat"] == "terbatas":
+            teks = t(f"Hanya {rd['n_dalam']} dari {rd['n']} ligan ({persen} %) berada di dalam domain aplikabilitas. "
+                     "Peringkatkan hanya senyawa di dalam domain (bagian atas tabel); senyawa yang diredupkan berada "
+                     "di luar domain.")
+            self.l_domain.setObjectName("info")
+        else:
+            teks = t(f"Model ini tidak cocok untuk seri ligan ini: {rd['n_dalam']} dari {rd['n']} ligan ({persen} %) "
+                     f"berada di dalam domain aplikabilitas, dengan median kemiripan kNN {med} terhadap set latih "
+                     f"(ambang {ambang}). Prediksinya tidak boleh dipakai untuk memeringkat atau memilih senyawa. "
+                     "Latih model dari data yang kerangkanya mirip dengan seri ini.")
+            self.l_domain.setObjectName("peringatan")
+        self.l_domain.style().unpolish(self.l_domain)
+        self.l_domain.style().polish(self.l_domain)
+        self.l_domain.setText(teks)
+        self.l_domain.setVisible(True)
 
     def _ke_panel_hasil(self):
         if not self.prediksi:
@@ -625,7 +668,12 @@ class DialogQSAR(QDialog):
             return
         peta = {p["nama"]: p for p in self.prediksi}
         panel.set_qsar(peta, klasifikasi=self.model["klasifikasi"])
-        self.l_status.setText(f"{len(peta)} prediksi ditulis ke kolom panel Hasil.")
+        rd = qsar.ringkas_domain(self.prediksi)
+        if rd["tingkat"] == "tidak_cocok":
+            self.l_status.setText(f"{len(peta)} prediksi ditulis ke kolom panel Hasil, tetapi hanya {rd['n_dalam']} "
+                                  "yang berada di dalam domain; jangan dipakai untuk memeringkat ligan.")
+        else:
+            self.l_status.setText(f"{len(peta)} prediksi ditulis ke kolom panel Hasil.")
 
     def _simpan_model(self):
         if not self.model:

@@ -642,6 +642,24 @@ def label_fitur(hasil: Dict[str, Any], nama: str) -> str:
     return f"{nama} · {sub}" if sub else nama
 
 
+CAKUPAN_BAIK = 0.8          # >= 80 % senyawa di dalam domain: prediksi boleh diperingkat
+CAKUPAN_MIN = 0.5           # < 50 %: model tidak cocok untuk seri ini
+
+
+def ringkas_domain(prediksi_list: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
+    """Seberapa banyak senyawa yang diprediksi berada di dalam domain aplikabilitas, dan apa artinya.
+
+    tingkat: 'baik' (>= 80 %), 'terbatas' (50-80 %: hanya senyawa di dalam domain yang boleh diperingkat),
+    'tidak_cocok' (< 50 %: model tidak mewakili seri ini; pada data galam Artikel 4, 0 dari 156)."""
+    n = len(prediksi_list)
+    n_dalam = sum(1 for p in prediksi_list if p.get("dalam_domain"))
+    fraksi = n_dalam / n if n else 0.0
+    tingkat = "baik" if fraksi >= CAKUPAN_BAIK else "terbatas" if fraksi >= CAKUPAN_MIN else "tidak_cocok"
+    sim = sorted(p["tanimoto"] for p in prediksi_list if p.get("tanimoto") is not None)
+    median = sim[len(sim) // 2] if sim else None
+    return {"n": n, "n_dalam": n_dalam, "fraksi": fraksi, "tingkat": tingkat, "median_tanimoto": median}
+
+
 def prediksi(hasil: Dict[str, Any], smiles: Sequence[str]) -> List[Dict[str, Any]]:
     """Prediksi senyawa baru + interval konformal + penanda domain aplikabilitas."""
     model = hasil.get("_model")

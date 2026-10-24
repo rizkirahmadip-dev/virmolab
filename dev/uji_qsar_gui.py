@@ -126,6 +126,48 @@ def selesai_semua():
               not d.prediksi[-1]["dalam_domain"])
         if d.prediksi[-1]["dalam_domain"]:
             galat.append("alkana asing seharusnya ditandai di luar domain")
+        if d.l_domain.isVisibleTo(d):
+            galat.append("8/9 di dalam domain: peringatan domain seharusnya tersembunyi")
+        bawah = d.tabel_prediksi.item(d.tabel_prediksi.rowCount() - 1, 0).text()
+        if bawah != "alkana asing":
+            galat.append(f"senyawa di luar domain seharusnya di baris terbawah, didapat {bawah}")
+    langkah_asing()
+
+
+def langkah_asing():
+    """Seri bahan alam yang asing bagi model AChE (kasus Artikel 4): peringatan 'tidak cocok' harus muncul."""
+    from virmolab.ui import kerja
+    asing = [b.split("	")[1] for b in (Path(__file__).resolve().parent / "data" / "glikosida_pubchem.tsv")
+             .read_text(encoding="utf-8").splitlines() if b and not b.startswith("#")][:10]
+    d.prediksi = []
+    d._ligan_prediksi = [{"nama": f"bahan alam {i + 1}", "smiles": s} for i, s in enumerate(asing)]
+    d._ligan_prediksi.append({"nama": "ligan latih", "smiles": d.data[0]["smiles"]})
+    d._mulai_sibuk("uji prediksi seri asing")
+    model, smiles = d.model, [lg["smiles"] for lg in d._ligan_prediksi]
+    kerja.jalankan(lambda lapor=None: qsar.prediksi(model, smiles),
+                   selesai=d._prediksi_selesai, galat=lambda e: galat.append(str(e)))
+    tunggu(lambda: bool(d.prediksi) or galat, selesai_asing)
+
+
+def selesai_asing():
+    for _ in range(10):
+        app.processEvents()
+    simpan("5prediksi_asing")
+    rd = qsar.ringkas_domain(d.prediksi)
+    print(f"seri asing: {rd['n_dalam']}/{rd['n']} di dalam domain, tingkat {rd['tingkat']}; peringatan:",
+          d.l_domain.text()[:160])
+    if rd["tingkat"] != "tidak_cocok":
+        galat.append(f"seri bahan alam seharusnya tidak_cocok, didapat {rd['tingkat']}")
+    if not d.l_domain.isVisibleTo(d) or "tidak cocok" not in d.l_domain.text():
+        galat.append("peringatan 'tidak cocok' tidak tampil")
+    if d.tabel_prediksi.item(0, 0).text() != "ligan latih":
+        galat.append("senyawa di dalam domain seharusnya di baris teratas, didapat "
+                     + d.tabel_prediksi.item(0, 0).text())
+    luar = [float(d.tabel_prediksi.item(r, 1).text().replace(",", ".")) for r in range(1, d.tabel_prediksi.rowCount())]
+    if luar != sorted(luar, reverse=True):
+        galat.append(f"senyawa di luar domain seharusnya urut prediksi menurun, didapat {luar}")
+    if d.l_domain.height() + 2 < d.l_domain.heightForWidth(d.l_domain.width()):
+        galat.append("label peringatan domain terpotong")
     teks = qsar.susun_paragraf_metode(d.model, d.data, d.sumber_data, d.y_acak or None)
     print("paragraf:", teks[:130], "…")
     print(f"jeda GUI terlama: {jeda_maks[0]:.2f} s")
