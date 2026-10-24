@@ -179,6 +179,9 @@ class DialogPembelajaranAktif(QDialog):
         self.sp_putaran.valueChanged.connect(self._perbarui_rencana)
         f.addRow("Putaran sesudah batch awal", self.sp_putaran)
         self.l_rencana = kit.catatan("", "muted")
+        # rencana + perkiraan waktu sampai 3 baris; QFormLayout tidak menambah tinggi untuk label berbungkus
+        self.l_rencana.setMinimumHeight(3 * self.l_rencana.fontMetrics().lineSpacing() + 4)
+        self.l_rencana.setAlignment(Qt.AlignTop)
         f.addRow(self.l_rencana)
         v.addWidget(g)
 

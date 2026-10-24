@@ -128,6 +128,7 @@ QPushButton:pressed {{ background: {t['hov']}; }}
 QPushButton#primary {{ background: {t['acc']}; color: #ffffff; border-color: {t['acct']}; font-weight: 600; }}
 QPushButton#primary:hover {{ background: {t['acc2']}; }}
 QPushButton:disabled {{ color: {t['mut']}; background: {t['panel']}; }}
+QPushButton#primary:disabled {{ background: {t['line']}; color: {t['mut']}; border-color: {t['line']}; }}
 QPushButton:checked {{ background: {t['acc']}; color: #ffffff; border-color: {t['acct']}; }}
 
 QCheckBox, QRadioButton {{ spacing: 6px; }}

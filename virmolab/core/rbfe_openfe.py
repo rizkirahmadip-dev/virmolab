@@ -26,6 +26,7 @@ import json
 import math
 import re
 import shlex
+import threading
 from pathlib import Path
 
 from .lanjutan import ALAT, _wsl, _wsl_ada
@@ -34,6 +35,7 @@ PY = f"{ALAT}/openfe/bin/python"
 OPENFE = f"{ALAT}/openfe/bin/openfe"
 NS_PER_HARI_TERUKUR = 99.0      # kaki kompleks TYK2 (±4.700 atom berat + air), RTX 3060 Laptop, CUDA, HMR 3 amu
 _status = {"diperiksa": False, "ada": False, "versi": ""}
+_kunci_status = threading.Lock()
 
 SKRIP_SIAPKAN = r'''
 """Dibuat VirmoLab: transformasi OpenFE untuk tiap tepi (pelarut + kompleks)."""
@@ -93,15 +95,20 @@ print("RENCANA", len(rencana))
 
 def status(segar=False):
     """{ada, versi, pesan}; memanggil WSL hanya sekali (atau bila segar=True)."""
-    if segar or not _status["diperiksa"]:
-        _status["diperiksa"] = True
-        _status["ada"] = _wsl_ada(f"test -x {OPENFE} && echo ADA")
-        if _status["ada"]:
-            try:
-                p = _wsl(f"{OPENFE} --version", timeout=60)
-                _status["versi"] = (p.stdout or "").strip().splitlines()[-1] if p.stdout else ""
-            except Exception:
-                _status["versi"] = ""
+    # Kunci: pemanggil kedua selama WSL masih menyala (±10 s saat dingin) menunggu jawaban pertama. Dulu
+    # "diperiksa" sudah True sebelum WSL menjawab, sehingga dialog yang dibuka di jeda itu diberi tahu
+    # OpenFE belum terpasang dan tombol Jalankan mati.
+    with _kunci_status:
+        if segar or not _status["diperiksa"]:
+            ada = _wsl_ada(f"test -x {OPENFE} && echo ADA")
+            versi = ""
+            if ada:
+                try:
+                    p = _wsl(f"{OPENFE} --version", timeout=60)
+                    versi = (p.stdout or "").strip().splitlines()[-1] if p.stdout else ""
+                except Exception:
+                    versi = ""
+            _status.update(diperiksa=True, ada=ada, versi=versi)
     pesan = (f"{_status['versi'] or 'OpenFE'} siap di WSL. Simulasi berjalan di GPU NVIDIA lewat WSL; hasil "
              "disalin ke folder proyek rbfe/." if _status["ada"] else
              "OpenFE belum terpasang di WSL. Pasang dengan build_tools/pasang_openfe_unidock_wsl.sh "

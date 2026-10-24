@@ -9,6 +9,7 @@ interaksi, PoseBusters, dan RMSD redocking berjalan sama seperti Vina.
 Modul ini murni: menyusun skrip batch dan memetakan keluaran; eksekusi (QProcess, progres, batal) ada di antrean.
 """
 import shlex
+import threading
 from pathlib import Path
 
 from .lanjutan import ALAT, _wsl, _wsl_ada, ke_wsl
@@ -17,20 +18,25 @@ PROGRAM = f"{ALAT}/unidock/bin/unidock"
 MODE = {"fast": "Cepat", "balance": "Seimbang", "detail": "Detail"}
 PRESET_KE_MODE = {"Cepat": "fast", "Standar": "balance", "Teliti": "detail"}
 _status = {"ada": False, "versi": "", "diperiksa": False}
+_kunci_status = threading.Lock()
 _akar_drive = {}
 
 
 def status(segar=False):
     """{ada, versi, pesan}. Memanggil WSL (±1-3 s) hanya bila belum pernah diperiksa atau segar=True."""
-    if segar or not _status["diperiksa"]:
-        _status["diperiksa"] = True
-        _status["ada"] = _wsl_ada(f"test -x {PROGRAM} && echo ADA")
-        if _status["ada"]:
-            try:
-                p = _wsl(f"{PROGRAM} --version", timeout=40)
-                _status["versi"] = (p.stdout or "").strip().splitlines()[0] if p.stdout else ""
-            except Exception:
-                _status["versi"] = ""
+    # Kunci: pemanggil kedua selama WSL masih menyala menunggu jawaban pertama, bukan membaca "tidak ada"
+    # dari status yang sudah ditandai diperiksa tetapi belum terisi.
+    with _kunci_status:
+        if segar or not _status["diperiksa"]:
+            ada = _wsl_ada(f"test -x {PROGRAM} && echo ADA")
+            versi = ""
+            if ada:
+                try:
+                    p = _wsl(f"{PROGRAM} --version", timeout=40)
+                    versi = (p.stdout or "").strip().splitlines()[0] if p.stdout else ""
+                except Exception:
+                    versi = ""
+            _status.update(diperiksa=True, ada=ada, versi=versi)
     pesan = (f"{_status['versi'] or 'Uni-Dock'} siap di WSL (GPU NVIDIA). Banyak ligan didocking sekaligus; "
              "fungsi skor Vina, jadi ΔG setara Vina." if _status["ada"] else
              "Uni-Dock belum terpasang di WSL. Pasang dengan build_tools/pasang_openfe_unidock_wsl.sh "

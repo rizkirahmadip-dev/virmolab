@@ -137,6 +137,9 @@ class DialogRbfe(QDialog):
                             "VirmoLab ditutup, dan dapat dilanjutkan.")
         self.l_sim.setWordWrap(True)
         self.l_sim.setObjectName("muted")
+        # status run sampai 4 baris di kolom 360 px; tanpa tinggi minimum QGroupBox memangkasnya atas-bawah
+        self.l_sim.setMinimumHeight(4 * self.l_sim.fontMetrics().lineSpacing() + 4)
+        self.l_sim.setAlignment(Qt.AlignTop)
         v_sim.addWidget(self.l_sim)
         vk.addWidget(g_sim)
         kiri.setFixedWidth(360)
