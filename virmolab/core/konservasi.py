@@ -157,6 +157,58 @@ def terapkan_bfaktor(teks_pdb, rantai, skor_posisi):
     return "\n".join(baris) + ("\n" if teks_pdb.endswith("\n") else "")
 
 
+def koordinat_ligan(teks):
+    """Koordinat atom berat ligan dari teks PDB/PDBQT (baris ATOM/HETATM) atau blok MOL/SDF."""
+    xyz = []
+    baris = (teks or "").splitlines()
+    if any(b.startswith(("ATOM", "HETATM")) for b in baris):
+        for b in baris:
+            if b.startswith(("ATOM", "HETATM")) and len(b) >= 54:
+                el = (b[76:78].strip() if len(b) >= 78 else "") or b[12:16].strip()[:1]
+                if el.upper().startswith("H") and not el.upper().startswith("HG"):
+                    continue
+                xyz.append((float(b[30:38]), float(b[38:46]), float(b[46:54])))
+        return xyz
+    if len(baris) > 3 and "V2000" in baris[3]:
+        n = int(baris[3][:3])
+        for b in baris[4:4 + n]:
+            p = b.split()
+            if len(p) >= 4 and p[3] != "H":
+                xyz.append((float(p[0]), float(p[1]), float(p[2])))
+    return xyz
+
+
+def ringkas_kantong(teks_pdb, rantai, skor_posisi, xyz_ligan, jarak=5.0):
+    """Konservasi residu kantong: residu rantai yang punya atom dalam `jarak` Å dari atom berat ligan.
+
+    Kembalikan {residu: [(label, aa, identitas)], rata_kantong, rata_rantai, n} atau None bila tidak ada residu
+    dalam jarak itu. Posisi tanpa homolog yang menutupinya (n = 0) tidak ikut dirata-rata."""
+    import numpy as np
+    if not xyz_ligan:
+        return None
+    lig = np.asarray(xyz_ligan, dtype=float)
+    urut = sekuens_rantai(teks_pdb, rantai)
+    peta = {(ch, resi_t): (aa, s) for (_i, aa, ch, resi_t), s in zip(urut, skor_posisi)}
+    dekat = {}
+    batas = jarak * jarak
+    for b in teks_pdb.splitlines():
+        if not b.startswith("ATOM") or len(b) < 54 or (rantai and b[21].strip() != rantai):
+            continue
+        k = (b[21].strip(), b[22:26].strip())
+        if k not in peta or k in dekat:
+            continue
+        p = np.array([float(b[30:38]), float(b[38:46]), float(b[46:54])])
+        if float(((lig - p) ** 2).sum(axis=1).min()) <= batas:
+            dekat[k] = b[17:20].strip()
+    if not dekat:
+        return None
+    residu = [(f"{resn}{k[1]}", peta[k][0], peta[k][1]["identitas"]) for k, resn in dekat.items() if peta[k][1]["n"]]
+    tertutup = [s["identitas"] for s in skor_posisi if s["n"]]
+    return {"residu": sorted(residu, key=lambda r: r[2]), "n": len(residu),
+            "rata_kantong": sum(r[2] for r in residu) / len(residu) if residu else None,
+            "rata_rantai": sum(tertutup) / len(tertutup) if tertutup else None, "jarak": jarak}
+
+
 def unduh_fasta(kueri, n=12, timeout=25):
     """FASTA dari pencarian nama UniProt. Kosong bila layanan tidak menjawab."""
     q = urllib.parse.urlencode({"query": kueri, "format": "fasta", "size": str(n)})

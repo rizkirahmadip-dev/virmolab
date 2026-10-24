@@ -4,6 +4,7 @@ from PySide6.QtWidgets import (QCheckBox, QDialog, QFileDialog, QHBoxLayout, QLa
                                QPlainTextEdit, QPushButton, QSpinBox, QStackedWidget, QTextEdit,
                                QVBoxLayout, QWidget)
 
+from .. import i18n
 from ..core import (air, kampanye, konservasi, lanjutan, mutasi, naskah, senyawa, syarat)
 
 
@@ -339,9 +340,23 @@ class DialogPenelitian(QDialog):
         self.jw.viewer.tampil(prot, __import__("virmolab.core.molekul", fromlist=["spek_viewer"]).spek_viewer(prot))
         rendah = [f"{urut[i][2]}{urut[i][3]} {h['aa']} {h['identitas']:.0%}"
                   for i, h in enumerate(hasil) if h["n"] and h["identitas"] < 0.5][:12]
-        self._tulis(f"Konservasi {len(hasil)} posisi pada rantai {rantai}, {len(fasta)} homolog. "
-                    f"Protein diwarnai menurut B-faktor (100 = utuh terkonservasi).\n"
-                    f"Posisi < 50%: {', '.join(rendah) or 'tidak ada'}")
+        # Diterjemahkan per bagian: lapisan terjemahan hanya mencocokkan string utuh, dan teks ini disambung.
+        teks = i18n.t(f"Konservasi {len(hasil)} posisi pada rantai {rantai}, {len(fasta)} homolog. "
+                      f"Protein diwarnai menurut B-faktor (100 = utuh terkonservasi).\n"
+                      f"Posisi < 50%: {', '.join(rendah) or 'tidak ada'}")
+        # Ringkasan kantong: yang dipakai untuk argumen selektivitas adalah residu di sekitar ligan, bukan seluruh rantai.
+        pose = self._pose()
+        kantong = konservasi.ringkas_kantong(prot.teks, rantai, hasil,
+                                             konservasi.koordinat_ligan(pose.teks if pose else ""))
+        if kantong and kantong["rata_kantong"] is not None:
+            paling = ", ".join(f"{r[0]} {r[2]:.0%}" for r in kantong["residu"][:6])
+            teks += "\n\n" + i18n.t(
+                f"Kantong ({kantong['n']} residu ≤ {kantong['jarak']:g} Å dari {pose.nama}): identitas rata-rata "
+                f"{kantong['rata_kantong']:.0%}, seluruh rantai {kantong['rata_rantai']:.0%}.") + "\n" + i18n.t(
+                f"Residu kantong paling kurang terkonservasi: {paling}")
+        else:
+            teks += "\n\n" + i18n.t("Pilih pose atau ligan di panel Objek untuk ringkasan konservasi residu kantong.")
+        self._tulis(teks)
 
     def _uniprot(self):
         k = self.e_uniprot.text().strip()
