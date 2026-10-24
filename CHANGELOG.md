@@ -24,6 +24,7 @@ Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x 
 - **QSAR: pembagian berbasis kerangka terbalik** (`core/qsar.py`). Set uji diisi lebih dulu dengan kerangka terbesar, sehingga satu keluarga kongenerik besar menjadi set uji dan R² eksternal negatif besar walau RMSE kecil. Kini kerangka terbanyak masuk set latih dan kerangka jarang menjadi set uji, sesuai docstring-nya. Model QSAR berpembagian kerangka yang dibuat sebelumnya perlu dilatih ulang.
 - **QSAR: prediksi molekul besar gagal** ("Input X contains infinity…"). Deskriptor `Ipc` mencapai ±10⁴² pada triterpenoid dan tanin, melampaui float32 scikit-learn. `Ipc` dikeluarkan (AvgIpc tetap dipakai) dan nilai fitur dipangkas ke rentang float32 yang aman.
 - **QSAR: model tersimpan dicocokkan lewat nama fitur.** `qsar.muat()` memetakan ulang indeks kolom bila daftar deskriptor berubah, dan menolak model yang memakai deskriptor yang tidak lagi dihitung (misalnya `Ipc`) dengan anjuran melatih ulang, alih-alih diam-diam memakai kolom yang salah.
+- **Mode English: sisa teks Indonesia** di dialog Penapisan bertahap (ringkasan setelan docking, sumber pustaka, tooltip tombol Mulai), Sunting di kantong 3D (nama gugus, status penilaian), Energi bebas relatif (beban simulasi, status run), dan halaman Uni-Dock panel docking. Teks yang dirakit dari potongan kini diterjemahkan per potongan; 186 entri kamus baru. Audit `dev/uji_bahasa_lanjut.py` kini ikut memeriksa kedua dialog baru dan halaman Uni-Dock.
 
 ## [1.6.0] - 16 Oktober 2026
 

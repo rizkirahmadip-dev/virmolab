@@ -8,6 +8,7 @@ diperiksa terhadap kata Indonesia umum. Tangkapan tiap halaman disimpan untuk di
 Keluaran: dev/uji/bahasa_lanjut/<dialog>_<halaman>.png dan sisa.txt. Bahasa dikembalikan ke 'id' di akhir.
 """
 import json
+import os
 import re
 import shutil
 import sys
@@ -45,6 +46,8 @@ if not CALON:
     print("LEWAT: belum ada proyek .vmd berisi hasil docking (jalankan dev/siapkan_contoh.py)")
     raise SystemExit(0)
 SUMBER = max(CALON, key=_n_job).resolve()
+if os.environ.get("VD_PROYEK"):          # audit keadaan tertentu, mis. dev/uji/kerja_al/<proyek>.vmd (kampanye sudah ada)
+    SUMBER = Path(os.environ["VD_PROYEK"]).resolve()
 PROYEK = OUT / SUMBER.name
 shutil.copytree(SUMBER, PROYEK)
 st.setValue("folder_kerja", str(OUT))
@@ -106,7 +109,7 @@ sys.excepthook = _tangkap
 DIALOG = ["admet", "mpo", "labplanner", "penapisan", "mmp", "selektivitas", "interpretasi", "ppi", "kantong", "fbdd",
           "skrip_publikasi", "diagnostik", "terowongan", "kinetika", "protac", "metabolisme", "rescore_ml", "tanaman",
           "validasi_protokol", "target_balik", "qsar", "farmakofor", "peptida", "xtb", "generatif", "rbfe",
-          "konsensus", "md"]
+          "konsensus", "md", "pembelajaran_aktif", "sunting3d"]
 if PILIH:
     DIALOG = [d for d in DIALOG if d in PILIH]
 
@@ -177,6 +180,13 @@ def hook():
             QTimer.singleShot(3500, s.l3)
 
         def l3(s):
+            # Halaman Uni-Dock di panel docking hanya tampil bila mesinnya dipilih; tanpa ini tidak pernah diperiksa.
+            if not PILIH or "panel_unidock" in PILIH:
+                s.param.atur_unidock(True)
+                s.param.set_parameter({"mesin": "unidock", "perangkat": "gpu"})
+                for _ in range(10):
+                    QApplication.processEvents()
+                periksa("panel docking/Uni-Dock", s.param)
             for nama in DIALOG:
                 sebelum = set(QApplication.topLevelWidgets())
                 try:

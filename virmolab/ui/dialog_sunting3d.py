@@ -197,7 +197,7 @@ class DialogSunting3D(QDialog):
         self.daftar_gugus = QListWidget()
         self.daftar_gugus.setSelectionMode(QAbstractItemView.NoSelection)
         for label, smi, singkat in S.GUGUS:
-            it = QListWidgetItem(f"{label}   ({singkat})")
+            it = QListWidgetItem(f"{i18n.t(label)}   ({singkat})")      # nama gugus diterjemahkan sebelum disambung
             it.setData(Qt.UserRole, (label, smi, singkat))
             it.setFlags(it.flags() | Qt.ItemIsUserCheckable)
             it.setCheckState(Qt.Checked if singkat in ("Me", "F", "Cl", "OH", "OMe", "CF3", "CN", "NH2") else
@@ -416,9 +416,10 @@ class DialogSunting3D(QDialog):
         ok = [u for u in self._hasil if u.status == "ok"]
         gagal = len(self._hasil) - len(ok)
         lebih = [u for u in ok if u.d_energi is not None and u.d_energi < 0]
-        self._status(f"{len(ok)} usulan dinilai"
-                     + (f", {gagal} gagal" if gagal else "")
-                     + (f"; {len(lebih)} berskor lebih kuat daripada pose induk." if ok else "."))
+        t = i18n.t        # potongan diterjemahkan satu per satu, lalu disambung
+        self._status(t(f"{len(ok)} usulan dinilai")
+                     + (", " + t(f"{gagal} gagal") if gagal else "")
+                     + ("; " + t(f"{len(lebih)} berskor lebih kuat daripada pose induk") + "." if ok else "."))
 
     def _isi_tabel(self):
         baris = sorted(self._hasil, key=lambda u: (u.status != "ok", u.energi if u.energi is not None else 0))

@@ -34,5 +34,5 @@ if tambah.exists():
 for k, v in kamus["pola"].items():
     if sorted(re.findall(r"\{\d+\}", k)) != sorted(re.findall(r"\{\d+\}", v)):
         print("PLACEHOLDER BEDA:", k[:70])
-KELUAR.write_text(json.dumps(kamus, ensure_ascii=False, indent=0), encoding="utf-8")
+KELUAR.write_text(json.dumps(kamus, ensure_ascii=False, indent=1), encoding="utf-8")
 print(len(kamus["teks"]), "teks,", len(kamus["pola"]), "pola")

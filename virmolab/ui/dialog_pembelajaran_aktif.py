@@ -311,14 +311,14 @@ class DialogPembelajaranAktif(QDialog):
         elif k == "coconut":
             from ..core import pustaka
             batas, lip = self.sp_coconut.value(), self.chk_lipinski.isChecked()
-            self._sumber_teks = f"COCONUT (≤ {_n(batas)} senyawa{', Lipinski ≤ 1' if lip else ''})"
+            self._sumber_teks = i18n.t(f"COCONUT (≤ {_n(batas)} senyawa{', Lipinski ≤ 1' if lip else ''})")
 
             def ambil(lapor):
                 baris = pustaka.cari_coconut(lipinski_maks=1 if lip else None, batas=batas, atom_min=6)
                 return PA.siapkan_pustaka([(b["smiles"], b.get("id") or "") for b in baris if b.get("smiles")], lapor)
         else:
             from ..core import pustaka
-            self._sumber_teks = "Obat disetujui (ChEMBL)"
+            self._sumber_teks = i18n.t("Obat disetujui (ChEMBL)")
 
             def ambil(lapor):
                 return PA.siapkan_pustaka([(o["smiles"], o["nama"]) for o in pustaka.obat() if o.get("smiles")], lapor)
@@ -383,27 +383,30 @@ class DialogPembelajaranAktif(QDialog):
         mesin = p["mesin"]
         if mesin == "adgpu" and (p["perangkat"] != "gpu" or not (jw.env and jw.env.opencl_ok)):
             mesin = "vina"
+        # Teks dirakit dari potongan ("a · b · c"): lapisan terjemahan hanya mencocokkan string utuh, jadi tiap
+        # potongan diterjemahkan di sini sebelum disambung.
+        t = i18n.t
         bagian = [M.MESIN.get(mesin, mesin)]
         if mesin == "unidock":
-            bagian.append({"fast": "mode Cepat", "balance": "mode Seimbang", "detail": "mode Detail"}
-                          .get(p.get("unidock_mode"), ""))
+            bagian.append(t({"fast": "mode Cepat", "balance": "mode Seimbang", "detail": "mode Detail"}
+                            .get(p.get("unidock_mode"), "")))
         elif mesin == "vina":
             bagian.append(f"exhaustiveness {p.get('exhaustiveness', 8)}")
         kotak = jw.box or {}
         if kotak.get("pusat"):
-            bagian.append("kotak " + " × ".join(kit.f(x, 1) for x in kotak["ukuran"]) + " Å")
+            bagian.append(t("kotak") + " " + " × ".join(kit.f(x, 1) for x in kotak["ukuran"]) + " Å")
         rec = (pr.reseptor or {}).get("nama") if pr else None
         masalah = []
         if not pr or not pr.reseptor or not pr.p(pr.reseptor.get("pdbqt", "")).exists():
-            masalah.append("reseptor belum disiapkan (langkah 1)")
+            masalah.append(t("reseptor belum disiapkan (langkah 1)"))
         if not kotak.get("pusat"):
-            masalah.append("area docking belum diatur (langkah 3)")
+            masalah.append(t("area docking belum diatur (langkah 3)"))
         if pr and (pr.reseptor or {}).get("kovalen", {}).get("aktif"):
-            masalah.append("docking kovalen aktif (tidak didukung untuk penapisan bertahap)")
-        teks = " · ".join(b for b in bagian if b) + (f" · reseptor {rec}" if rec else "")
-        teks += ". Setelan diambil dari langkah 3–4 dan dikunci saat kampanye dimulai."
+            masalah.append(t("docking kovalen aktif (tidak didukung untuk penapisan bertahap)"))
+        teks = " · ".join(b for b in bagian if b) + (f" · {t('reseptor')} {rec}" if rec else "")
+        teks += t(". Setelan diambil dari langkah 3–4 dan dikunci saat kampanye dimulai.")
         if mesin == "vina":
-            teks += " Untuk ribuan ligan, Uni-Dock (GPU, WSL) jauh lebih cepat."
+            teks += t(" Untuk ribuan ligan, Uni-Dock (GPU, WSL) jauh lebih cepat.")
         self.l_docking.setText(teks)
         if self._pustaka is not None and len(self._pustaka):
             kp = PA.Kampanye(len(self._pustaka), self._pengaturan())
@@ -418,7 +421,7 @@ class DialogPembelajaranAktif(QDialog):
         else:
             self.l_rencana.setText("Ukuran batch bawaan: 1 % pustaka (minimal 50), seperti uji MolPAL.")
         self.b_mulai.setEnabled(self._pustaka is not None and len(self._pustaka) >= 100 and not masalah)
-        self.b_mulai.setToolTip("Perlu: " + "; ".join(masalah) if masalah else
+        self.b_mulai.setToolTip(t("Perlu: ") + "; ".join(masalah) if masalah else
                                 ("Baca pustaka (≥ 100 senyawa) lebih dulu" if self._pustaka is None
                                  or len(self._pustaka) < 100 else ""))
 
@@ -426,7 +429,7 @@ class DialogPembelajaranAktif(QDialog):
         if self._pustaka is None:
             return
         pg = self._pengaturan()
-        nama = f"{self._sumber_teks or 'Pustaka'} · {_n(len(self._pustaka))}"
+        nama = f"{self._sumber_teks or i18n.t('Pustaka')} · {_n(len(self._pustaka))}"
         cid = self.al.buat(nama, self._pustaka, pg, self._sumber_teks)
         self._pustaka = None
         self.l_pustaka.setText("Pustaka dipakai untuk kampanye baru. Baca lagi untuk kampanye berikutnya.")
