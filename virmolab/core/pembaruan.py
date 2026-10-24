@@ -13,7 +13,10 @@ import urllib.request
 
 from .. import __version__ as VERSI
 
-REPO = "virmolab/virmolab"
+# Harus repo yang benar-benar dimiliki pengembang. Nama "virmolab" di GitHub belum terdaftar; menunjuk ke sana
+# berarti siapa pun yang mendaftarkannya dapat menyajikan "rilis" palsu ke semua aplikasi terpasang. Selama repo
+# ini privat, API membalas 404 dan dialog menyatakan "belum ada rilis".
+REPO = "rizkirahmadip-dev/virmolab"
 API_TERBARU = f"https://api.github.com/repos/{REPO}/releases/latest"
 HALAMAN_RILIS = f"https://github.com/{REPO}/releases"
 JEDA_DETIK = 24 * 3600          # pemeriksaan otomatis paling sering sekali sehari

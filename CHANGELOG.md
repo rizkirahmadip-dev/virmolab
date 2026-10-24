@@ -2,7 +2,11 @@
 
 Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x adalah pra-rilis.
 
-## [Belum dirilis]
+## [1.6.1] - 24 Oktober 2026
+
+Rilis perbaikan: tiga perbaikan QSAR yang dapat membalik kesimpulan (model QSAR berpembagian kerangka dari versi
+sebelumnya perlu dilatih ulang), impor hasil docking, trajektori MD, dan grafik dari program lain, serta paragraf
+metode RBFE yang disusun dari run yang benar-benar selesai.
 
 ### Baru
 - **Impor hasil docking dari program lain** (Berkas › Impor hasil eksternal › Hasil docking…; `core/impor_docking.py`, `ui/dialog_impor_docking.py`):
@@ -25,6 +29,13 @@ Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x 
 - **QSAR: prediksi molekul besar gagal** ("Input X contains infinity…"). Deskriptor `Ipc` mencapai ±10⁴² pada triterpenoid dan tanin, melampaui float32 scikit-learn. `Ipc` dikeluarkan (AvgIpc tetap dipakai) dan nilai fitur dipangkas ke rentang float32 yang aman.
 - **QSAR: model tersimpan dicocokkan lewat nama fitur.** `qsar.muat()` memetakan ulang indeks kolom bila daftar deskriptor berubah, dan menolak model yang memakai deskriptor yang tidak lagi dihitung (misalnya `Ipc`) dengan anjuran melatih ulang, alih-alih diam-diam memakai kolom yang salah.
 - **Mode English: sisa teks Indonesia** di dialog Penapisan bertahap (ringkasan setelan docking, sumber pustaka, tooltip tombol Mulai), Sunting di kantong 3D (nama gugus, status penilaian), Energi bebas relatif (beban simulasi, status run), dan halaman Uni-Dock panel docking. Teks yang dirakit dari potongan kini diterjemahkan per potongan; 186 entri kamus baru. Audit `dev/uji_bahasa_lanjut.py` kini ikut memeriksa kedua dialog baru dan halaman Uni-Dock.
+- **OpenFE/Uni-Dock dilaporkan "belum terpasang" padahal ada** (`core/rbfe_openfe.py`, `core/unidock.py`). Pemeriksaan WSL ditandai selesai sebelum WSL menjawab, sehingga dialog yang dibuka selama WSL masih menyala (±10 detik saat dingin) diberi status kosong dan tombol Jalankan mati. Pemanggil kedua kini menunggu jawaban pertama.
+- **Tombol utama yang nonaktif tampak aktif** di seluruh aplikasi (misalnya Susun jaringan, Jalankan, Mulai penapisan): gaya `#primary` mengalahkan gaya `:disabled`. Kini tombol utama nonaktif berwarna redup seperti tombol lain.
+- Teks status run RBFE dan rencana putaran penapisan bertahap terpotong atas-bawah; labelnya kini diberi tinggi cukup.
+
+### Diubah
+- **Cek pembaruan menunjuk repo pengembang** `rizkirahmadip-dev/virmolab` (`core/pembaruan.py`). Nama `virmolab` di GitHub belum terdaftar, sehingga siapa pun yang mendaftarkannya dapat menyajikan rilis palsu ke aplikasi terpasang. Selama repo masih privat, pemeriksaan menjawab "belum ada rilis". `CITATION.cff` dan URL deskripsi tanda tangan kode ikut diganti.
+- Nomor versi di `pyproject.toml` kini dibaca dari `virmolab/__init__.py` (sebelumnya tertinggal di 1.1.1).
 
 ## [1.6.0] - 16 Oktober 2026
 

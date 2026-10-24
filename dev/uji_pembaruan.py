@@ -34,7 +34,7 @@ cek(not P.lebih_baru("1.5.9", "1.6.0"), "lebih lama tidak ditawarkan")
 cek(not P.lebih_baru("1.7.0-rc1", "1.6.0"), "pra-rilis tidak ditawarkan")
 
 CONTOH = {
-    "tag_name": "v1.7.0", "html_url": "https://github.com/virmolab/virmolab/releases/tag/v1.7.0",
+    "tag_name": "v1.7.0", "html_url": "https://github.com/rizkirahmadip-dev/virmolab/releases/tag/v1.7.0",
     "published_at": "2026-11-02T08:00:00Z", "body": "## Baru\n- Fitur A\n- Fitur B",
     "assets": [{"name": "SHA256SUMS-1.7.0.txt", "browser_download_url": "https://x/s", "size": 190},
                {"name": "VirmoLab-Portable-1.7.0.zip", "browser_download_url": "https://x/p", "size": 760_000_000},

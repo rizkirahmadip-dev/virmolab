@@ -36,7 +36,7 @@ foreach ($f in $Berkas) {
     if (-not (Test-Path -LiteralPath $f)) { Write-Output "GAGAL: berkas tidak ada: $f"; exit 1 }
     if ($signtool) {
         $arg = @('sign', '/fd', 'sha256', '/tr', $tsa, '/td', 'sha256', '/d', 'VirmoLab',
-                 '/du', 'https://github.com/virmolab/virmolab')
+                 '/du', 'https://github.com/rizkirahmadip-dev/virmolab')
         if ($pfx) { $arg += @('/f', $pfx); if ($sandi) { $arg += @('/p', $sandi) } }
         else { $arg += @('/sha1', $sidik) }
         # Cap waktu kadang gagal sesaat (server sibuk); diulang sebelum menyerah.

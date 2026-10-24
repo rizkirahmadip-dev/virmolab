@@ -3,7 +3,12 @@
 Untuk sesi baru: baca seluruh file ini dulu. Pengguna berbahasa Indonesia; UI dan pesan aplikasi berbahasa Indonesia.
 (Nama file historis — isinya mencakup semua tahap. Jangan diganti namanya: dirujuk dari `CLAUDE.md`.)
 
-**Versi kode 1.6.0** (16 Okt 2026) — rilis penapisan skala besar dan simulasi: mesin docking GPU Uni-Dock
+**Versi kode 1.6.1** (24 Okt 2026) — perbaikan QSAR (pembagian kerangka terbalik, Ipc melampaui float32,
+pemetaan kolom model tersimpan), impor hasil docking/MD/grafik dari program lain, paragraf metode RBFE dari
+hasil run, dan cek pembaruan kini menunjuk `rizkirahmadip-dev/virmolab` (nama `virmolab` di GitHub belum
+dimiliki).
+
+Sebelumnya **1.6.0** (16 Okt 2026) — rilis penapisan skala besar dan simulasi: mesin docking GPU Uni-Dock
 (WSL), simulasi RBFE OpenFE yang dijalankan langsung dari aplikasi, penapisan pustaka besar dengan pembelajaran
 aktif (MolPAL), dan sunting ligan di dalam kantong dengan penilaian Vina lokal. Angka tolok ukurnya ada di
 `docs/_sumber/validasi.html` (Bantuan › Dokumentasi › Validasi). Induced fit penuh diuji dan **tidak** dirilis
