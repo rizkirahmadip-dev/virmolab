@@ -94,6 +94,24 @@ def uji_hasil_nyata(folder):
         f"MLE segitiga menyeimbangkan siklus ({ {k: round(v[0], 2) for k, v in tiga.items()} })")
 
 
+def uji_paragraf_metode(h):
+    """Paragraf metode setelah run nyata memuat yang benar-benar dijalankan (dibaca dari JSON), bukan rencana."""
+    idn, ing = R.paragraf_metode(h, en=False), R.paragraf_metode(h, en=True)
+    print("PARAGRAF (ID):", idn, flush=True)
+    for butir in ("OpenFE 1.13.0", "OpenMM 8.4", "CUDA", "Amber ff14SB", "TIP3P", "openff-2.2.1", "NAGL",
+                  "11 jendela lambda", "298,15 K", "dodecahedron", "0,1 ns ekuilibrasi", "0,5 ns produksi",
+                  "ΔG(kompleks) − ΔG(pelarut)", "Eksperimental"):
+        cek(butir in idn, f"paragraf ID memuat '{butir}'")
+    for butir in ("OpenFE 1.13.0", "0.5 ns of production", "298.15 K", "Experimental"):
+        cek(butir in ing, f"paragraf EN memuat '{butir}'")
+    cek("direncanakan" not in idn and "Planned" not in ing, "paragraf run tidak berbunyi 'direncanakan'")
+    kosong = R.paragraf_metode({"tepi": [{"ddg": None}], "setel": {}, "versi": {}}, en=False)
+    cek(kosong == "", "tanpa tepi selesai paragraf kosong, bukan paragraf separuh jadi")
+    rusak = dict(h, setel={"forcefield_settings": {}})
+    cek(R.paragraf_metode(rusak, en=False) == "" or "None" not in R.paragraf_metode(rusak, en=False),
+        "pengaturan tidak lengkap tidak menghasilkan kata 'None' di naskah")
+
+
 def uji_kumpulkan_palsu():
     """kumpulkan() membaca struktur folder run; dibuat dari hasil nyata dengan nama berkas yang dipakai VirmoLab."""
     with tempfile.TemporaryDirectory() as tmp:
@@ -112,6 +130,9 @@ def uji_kumpulkan_palsu():
         t = h["tepi"][0]
         cek(t["ddg"] is not None and abs(t["ddg"] - 2.281) < 0.01, f"kumpulkan(): ΔΔG tepi {t['ddg']:.3f}")
         cek(abs(h["ligan"]["lig_ejm_43"][0] - t["ddg"]) < 1e-6, "kumpulkan(): ΔG relatif ligan dari MLE")
+        cek(h["versi"].get("openfe") == "1.13.0" and h["versi"].get("openmm") == "8.4",
+            f"kumpulkan(): versi perangkat lunak dibaca dari JSON hasil ({h['versi']})")
+        uji_paragraf_metode(h)
         uji_hasil_nyata(sumber)
 
 

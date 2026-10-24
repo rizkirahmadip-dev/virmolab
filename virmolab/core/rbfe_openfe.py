@@ -270,12 +270,25 @@ def baca_hasil_kaki(path):
     return est, unc, setel
 
 
+def versi_hasil(path):
+    """Versi perangkat lunak yang menjalankan kaki ini ({openfe, gufe, openmm}). OpenFE mencatatnya di keluaran unit
+    penyiapan pada JSON hasil, jadi angkanya dibaca dari hasil nyata, bukan dari paket yang kebetulan terpasang."""
+    d = json.loads(Path(path).read_text(encoding="utf-8"))
+    v = {}
+    for u in (d.get("unit_results") or {}).values():
+        o = u.get("outputs") or {}
+        for sumber, kunci in (("openfe_version", "openfe"), ("gufe_version", "gufe"), ("openmm_version", "openmm")):
+            if o.get(sumber) and kunci not in v:
+                v[kunci] = str(o[sumber])
+    return v
+
+
 def kumpulkan(folder_run):
-    """-> {tepi: [{a, b, ddg, galat, dg_kompleks, dg_pelarut}], ligan: {nama: (dg_rel, galat)}, setel}."""
+    """-> {tepi: [{a, b, ddg, galat, dg_kompleks, dg_pelarut}], ligan: {nama: (dg_rel, galat)}, setel, versi}."""
     folder = Path(folder_run)
     info = json.loads((folder / "run.json").read_text(encoding="utf-8"))
     balik = {v: k for k, v in info["peta_nama"].items()}
-    hasil, setel = [], {}
+    hasil, setel, versi = [], {}, {}
     for a, b in info["tepi"]:
         aa, bb = info["peta_nama"][a], info["peta_nama"][b]
         fk, fp = folder / "hasil" / f"{aa}__{bb}__kompleks.json", folder / "hasil" / f"{aa}__{bb}__pelarut.json"
@@ -285,9 +298,84 @@ def kumpulkan(folder_run):
             gp, ep, _ = baca_hasil_kaki(fp)
             if gk is not None and gp is not None:
                 row.update(ddg=gk - gp, galat=math.hypot(ek or 0.0, ep or 0.0), dg_kompleks=gk, dg_pelarut=gp)
+                versi = versi or versi_hasil(fk)
         hasil.append(row)
     lig = mle([r for r in hasil if r["ddg"] is not None], [balik.get(v, v) for v in info["peta_nama"].values()])
-    return {"tepi": hasil, "ligan": lig, "setel": setel}
+    return {"tepi": hasil, "ligan": lig, "setel": setel, "versi": versi}
+
+
+def paragraf_metode(h, en=None):
+    """Paragraf metode dari run OpenFE yang benar-benar selesai. Perangkat lunak dan pengaturan dibaca dari JSON
+    hasil (kumpulkan), bukan dari rencana di dialog, supaya yang tertulis di naskah sama dengan yang dijalankan.
+    Kosong bila belum ada tepi yang selesai atau pengaturan di JSON tidak lengkap (pemanggil lalu memakai paragraf
+    rencana); paragraf separuh jadi lebih berbahaya daripada tidak ada."""
+    try:
+        return _paragraf_metode(h, en)
+    except (KeyError, TypeError, ValueError, AttributeError):
+        return ""
+
+
+def _paragraf_metode(h, en):
+    from .. import i18n
+    from .rbfe import LABEL_EKSPERIMENTAL, LABEL_EKSPERIMENTAL_EN
+    en = i18n.inggris() if en is None else en
+    s = h.get("setel") or {}
+    selesai = [t for t in h.get("tepi", []) if t.get("ddg") is not None]
+    if not selesai or not s:
+        return ""
+
+    def g(grup, kunci):
+        v = (s.get(grup) or {}).get(kunci)
+        return float(v["magnitude"]) if isinstance(v, dict) and "magnitude" in v else v
+
+    def a(x, d=2):
+        """Angka dengan desimal sesuai bahasa; bilangan bulat tanpa nol di belakang."""
+        t = f"{float(x):.{d}f}".rstrip("0").rstrip(".")
+        return t if en else t.replace(".", ",")
+
+    v = h.get("versi") or {}
+    ff = ((s.get("forcefield_settings") or {}).get("forcefields")) or []
+    protein = "Amber ff14SB" if any("ff14SB" in f for f in ff) else ", ".join(ff[:2])
+    air = {"tip3p": "TIP3P", "tip4pew": "TIP4P-Ew", "spce": "SPC/E"}.get(str(g("solvation_settings", "solvent_model")),
+                                                                        str(g("solvation_settings", "solvent_model")))
+    ligan_ff = (s.get("forcefield_settings") or {}).get("small_molecule_forcefield") or "OpenFF"
+    muatan = {"nagl": "OpenFF NAGL", "am1bcc": "AM1-BCC", "am1bccelf10": "AM1-BCC ELF10", "espaloma": "espaloma"}.get(
+        str(g("partial_charge_settings", "partial_charge_method") or "nagl").lower(), "OpenFF NAGL")
+    n_win = g("lambda_settings", "lambda_windows")
+    ulang = s.get("protocol_repeats") or 1
+    perangkat = f"OpenFE {v['openfe']}" if v.get("openfe") else "OpenFE"
+    if v.get("openmm"):
+        perangkat += f" (OpenMM {v['openmm']}, {g('engine_settings', 'compute_platform') or 'GPU'})"
+    n_tepi = len(selesai)
+    if en:
+        return (f"Relative binding free energies were computed with the {perangkat} RelativeHybridTopologyProtocol: "
+                f"hybrid-topology alchemical transformations with {a(n_win, 0)} lambda windows and Hamiltonian replica "
+                f"exchange, each leg (complex and solvent) repeated {ulang} time(s). Proteins were described with "
+                f"{protein} and {air} water, ligands with {ligan_ff}, and ligand partial charges came from {muatan}. "
+                f"Systems were solvated in a {g('solvation_settings', 'box_shape')} box with "
+                f"{a(g('solvation_settings', 'solvent_padding'), 1)} nm padding; long-range electrostatics used PME "
+                f"({a(g('forcefield_settings', 'nonbonded_cutoff'), 1)} nm cutoff), hydrogen masses were repartitioned "
+                f"to {a(g('forcefield_settings', 'hydrogen_mass'), 1)} amu with a {a(g('integrator_settings', 'timestep'), 0)}"
+                f" fs time step, at {a(g('thermo_settings', 'temperature'), 2)} K and "
+                f"{a(g('thermo_settings', 'pressure'), 0)} bar (Langevin integrator, Monte Carlo barostat). Each window "
+                f"ran {a(g('simulation_settings', 'equilibration_length'))} ns of equilibration and "
+                f"{a(g('simulation_settings', 'production_length'))} ns of production. Free energies of each leg were "
+                f"estimated with MBAR; the ddG of each of the {n_tepi} edges is dG(complex) - dG(solvent), and relative "
+                f"dG values per ligand come from a maximum-likelihood estimate over the network. "
+                + LABEL_EKSPERIMENTAL_EN)
+    return (f"Energi bebas ikatan relatif dihitung dengan RelativeHybridTopologyProtocol {perangkat}: transformasi "
+            f"alkimia topologi hibrid dengan {a(n_win, 0)} jendela lambda dan pertukaran replika Hamiltonian, tiap kaki "
+            f"(kompleks dan pelarut) diulang {ulang} kali. Protein dimodelkan dengan {protein} dan air {air}, ligan "
+            f"dengan {ligan_ff}, dan muatan parsial ligan dari {muatan}. Sistem dilarutkan dalam kotak "
+            f"{g('solvation_settings', 'box_shape')} dengan jarak pelarut {a(g('solvation_settings', 'solvent_padding'), 1)} "
+            f"nm; interaksi elektrostatik jarak jauh memakai PME (cutoff {a(g('forcefield_settings', 'nonbonded_cutoff'), 1)}"
+            f" nm), massa hidrogen disetel ulang menjadi {a(g('forcefield_settings', 'hydrogen_mass'), 1)} amu dengan "
+            f"langkah waktu {a(g('integrator_settings', 'timestep'), 0)} fs, pada {a(g('thermo_settings', 'temperature'), 2)} "
+            f"K dan {a(g('thermo_settings', 'pressure'), 0)} bar (integrator Langevin, barostat Monte Carlo). Tiap "
+            f"jendela dijalankan {a(g('simulation_settings', 'equilibration_length'))} ns ekuilibrasi dan "
+            f"{a(g('simulation_settings', 'production_length'))} ns produksi. Energi bebas tiap kaki diestimasi dengan "
+            f"MBAR; ΔΔG tiap tepi ({n_tepi} tepi) adalah ΔG(kompleks) − ΔG(pelarut), dan ΔG relatif tiap ligan berasal "
+            f"dari estimasi kemungkinan maksimum atas jaringan. " + LABEL_EKSPERIMENTAL)
 
 
 def mle(tepi, nama):

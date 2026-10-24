@@ -16,6 +16,7 @@ Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x 
 - **Pemutar trajektori di viewport 3D**: bilah putar/jeda, penggeser bingkai, waktu (ns), dan kecepatan, untuk MD internal maupun impor.
 - **Grafik dari berkas data** (Berkas › Impor hasil eksternal › Grafik XVG/CSV…; `core/impor_grafik.py`, `ui/dialog_grafik_berkas.py`): XVG gmx, DAT cpptraj/VMD, dan CSV/TSV (desimal koma dikenali); beberapa berkas ditumpuk, konversi nm→Å, nm²→Å², ps→ns, kJ/mol→kcal/mol, rata-rata bergerak, histogram, statistik paruh kedua, simpan SVG/PDF/PNG/TIFF atau kirim ke Komposer Figur.
 - Seret-lepas dan Berkas › Buka mengarahkan berkas hasil docking, trajektori, dan grafik ke dialog impor yang sesuai.
+- **Paragraf metode RBFE dari run yang benar-benar selesai** (Energi bebas relatif › Salin metode; `core/rbfe_openfe.py`): setelah simulasi OpenFE, versi OpenFE/OpenMM, platform, medan gaya protein dan ligan, model air, metode muatan parsial, jumlah jendela λ, ulangan, kotak, suhu, tekanan, dan panjang ekuilibrasi/produksi dibaca dari JSON hasil, bukan dari rencana di dialog. Bila belum ada tepi selesai atau pengaturannya tidak lengkap, dialog kembali ke paragraf rencana, tidak menulis paragraf separuh jadi.
 
 ### Diperbaiki
 - Ligan PDB keluaran Vina/Open Babel yang nama atomnya kembar ("C", "C", "O", …) terpangkas menjadi beberapa atom karena gemmi menganggapnya konformasi alternatif; atom kini dinamai ulang sebelum dibaca.

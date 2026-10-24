@@ -14,6 +14,7 @@ from PySide6.QtWidgets import (QComboBox, QDialog, QDoubleSpinBox, QFileDialog, 
                                QHBoxLayout, QLabel, QListWidget, QListWidgetItem, QSpinBox,
                                QSplitter, QTableWidgetItem, QTabWidget, QVBoxLayout, QWidget)
 
+from .. import i18n
 from ..core import rbfe, rbfe_openfe
 from . import kerja, kit
 
@@ -34,6 +35,7 @@ class DialogRbfe(QDialog):
         self._jaringan = None
         self._kerja = None
         self._run = None              # folder run OpenFE aktif (proyek/rbfe/<waktu>)
+        self._hasil_openfe = None     # keluaran rbfe_openfe.kumpulkan() untuk run aktif, bila sudah dimuat
         self._wsl = {"ada": False}
         self._t_pantau = QTimer(self)
         self._t_pantau.setInterval(20000)
@@ -254,15 +256,17 @@ class DialogRbfe(QDialog):
         ns_hari = rbfe_openfe.NS_PER_HARI_TERUKUR if self._wsl.get("ada") else None
         e = rbfe.estimasi_waktu(len(tepi), n_lambda=self.s_lambda.value(), n_replika=self.s_replika.value(),
                                 ns_per_lambda=self.s_ns.value(), ns_per_hari=ns_hari)
-        beban = (f"{len(tepi)} tepi × {self.s_lambda.value()} jendela λ × {self.s_replika.value()} replika "
-                 f"× {kit.f(self.s_ns.value(), 1)} ns = {kit.f(e['total_ns'], 0)} ns simulasi kaki kompleks.")
+        # Kalimat diterjemahkan satu per satu: lapisan terjemahan hanya mencocokkan kalimat utuh yang semuanya dikenal.
+        t = i18n.t
+        beban = t(f"{len(tepi)} tepi × {self.s_lambda.value()} jendela λ × {self.s_replika.value()} replika "
+                  f"× {kit.f(self.s_ns.value(), 1)} ns = {kit.f(e['total_ns'], 0)} ns simulasi kaki kompleks.")
         if e["hari"] is None:
-            beban += (" Lama perhitungan belum dapat diperkirakan karena kecepatan mesin ini belum diukur; "
-                      "jalankan tolok ukur di dialog MD terlebih dahulu.")
+            beban += " " + t("Lama perhitungan belum dapat diperkirakan karena kecepatan mesin ini belum diukur; "
+                             "jalankan tolok ukur di dialog MD terlebih dahulu.")
         else:
-            beban += (f" Sekitar {kit.f(e['hari'], 1)} hari pada ±{rbfe_openfe.NS_PER_HARI_TERUKUR:g} ns/hari "
-                      "(terukur di RTX 3060 Laptop, sistem TYK2); GPU dan ukuran protein lain mengubah angka ini. "
-                      "Kaki pelarut menambah ±15-20 %.")
+            beban += (" " + t(f"Sekitar {kit.f(e['hari'], 1)} hari pada ±{rbfe_openfe.NS_PER_HARI_TERUKUR:g} ns/hari "
+                              "(terukur di RTX 3060 Laptop, sistem TYK2); GPU dan ukuran protein lain mengubah "
+                              "angka ini.") + " " + t("Kaki pelarut menambah ±15-20 %."))
         self.l_beban.setText(beban)
 
     def _terapkan_protokol(self, *_):
@@ -315,8 +319,8 @@ class DialogRbfe(QDialog):
         nama = sorted({t.a for t in tepi} | {t.b for t in tepi})
         tanpa = [n for n in nama if not baris.get(n)]
         if tanpa:
-            self.l_sim.setText("Belum di-docking, jadi tidak punya pose awal: " + ", ".join(tanpa[:6])
-                               + ". Docking seri ini dulu dengan kotak yang sama.")
+            self.l_sim.setText(i18n.t("Belum di-docking, jadi tidak punya pose awal: ") + ", ".join(tanpa[:6])
+                               + i18n.t(". Docking seri ini dulu dengan kotak yang sama."))
             return
         try:
             ligan = [(n, rbfe_openfe.pose_dari_baris(self.proyek, baris[n])) for n in nama]
@@ -336,8 +340,8 @@ class DialogRbfe(QDialog):
         self._run = folder
         self.b_henti.setEnabled(True)
         self.b_muat.setEnabled(True)
-        self.l_sim.setText(f"Simulasi dimulai ({len(tepi)} tepi, {2 * len(tepi)} kaki). Folder: rbfe/{folder.name}"
-                           + (". Catatan: " + "; ".join(catatan) if catatan else "."))
+        self.l_sim.setText(i18n.t(f"Simulasi dimulai ({len(tepi)} tepi, {2 * len(tepi)} kaki). Folder: rbfe/{folder.name}")
+                           + (f". {i18n.t('Catatan')}: " + "; ".join(i18n.t(c) for c in catatan) if catatan else "."))
         self._t_pantau.start()
 
     def _hentikan(self):
@@ -363,14 +367,16 @@ class DialogRbfe(QDialog):
         def tampil(kem):
             berjalan = [(n, v) for n, v in kem.items() if not v.get("selesai") and "persen" in v]
             n_hasil = sum(1 for v in kem.values() if v.get("selesai"))
-            teks = f"Run rbfe/{self._run.name}: {max(n_hasil, selesai)} dari {total} kaki selesai."
+            t = i18n.t
+            teks = t(f"Run rbfe/{self._run.name}: {max(n_hasil, selesai)} dari {total} kaki selesai.")
             for n, v in berjalan[:2]:
-                teks += f" Berjalan: {n.replace('__', ' → ', 1).replace('__', ' · ')} {v['persen']:.0f} %"
-                teks += f", sisa ±{v['sisa']}." if v.get("sisa") else "."
+                a, b, kaki = (n.split("__") + ["", "", ""])[:3]
+                teks += " " + t(f"Berjalan: {a} → {b} · {kaki} {v['persen']:.0f} %")
+                teks += (", " + t(f"sisa ±{v['sisa']}") + ".") if v.get("sisa") else "."
             if "GAGAL siapkan" in teks_log:
-                teks += " Penyiapan transformasi gagal; lihat log/siapkan.log di WSL."
+                teks += " " + t("Penyiapan transformasi gagal; lihat log/siapkan.log di WSL.")
             if "SEMUA_SELESAI" in teks_log:
-                teks += " Semua kaki selesai."
+                teks += " " + t("Semua kaki selesai.")
                 self._t_pantau.stop()
                 self._muat_hasil()
             self.l_sim.setText(teks)
@@ -442,6 +448,13 @@ class DialogRbfe(QDialog):
         self.l_status.setText(f"Jaringan disimpan ke {p}")
 
     def _salin_metode(self):
+        # Setelah simulasi nyata, paragraf metode dibaca dari hasil run (versi OpenFE, medan gaya, protokol yang
+        # benar-benar dipakai), bukan dari rencana di dialog.
+        teks = rbfe_openfe.paragraf_metode(self._hasil_openfe) if self._hasil_openfe else ""
+        if teks:
+            kit.salin(teks)
+            self.l_status.setText("Paragraf metode run OpenFE disalin ke papan klip.")
+            return
         if not self._jaringan:
             self.l_status.setText("Susun jaringan terlebih dahulu.")
             return

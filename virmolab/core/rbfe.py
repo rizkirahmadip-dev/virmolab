@@ -9,12 +9,13 @@ Modul ini menyiapkan dan menganalisis perhitungan RBFE untuk seri senyawa kongen
 5. `tutup_siklus` memeriksa konsistensi: jumlah ΔΔG mengelilingi siklus seharusnya nol.
 6. `estimasi_waktu` memperkirakan lama perhitungan dari kecepatan mesin pengguna sendiri.
 
-YANG TIDAK DILAKUKAN MODUL INI: menjalankan simulasi alkimianya. Mesin RBFE sumber terbuka yang
-matang (OpenFE) hanya berjalan di Linux dan macOS; dokumentasi resminya menyatakan tidak kompatibel
-dengan Windows. `status_mesin()` melaporkan hal itu apa adanya, dan antarmuka menolak menjalankan
-perhitungan alih-alih berpura-pura bisa. Bagian perencanaan dan analisis di sini tetap berguna:
-pengguna dapat menyusun jaringan perturbasi di VirmoLab lalu menjalankannya di mesin Linux, dan
-membawa keluarannya kembali ke sini untuk dianalisis.
+YANG TIDAK DILAKUKAN MODUL INI: menjalankan simulasi alkimianya. Modul ini hanya perencanaan dan analisis
+(murni Python, tanpa Qt). Simulasinya dijalankan OpenFE, yang hanya berjalan di Linux dan macOS, jadi
+VirmoLab memanggilnya lewat WSL: lihat `core/rbfe_openfe.py` (penyiapan run, eksekusi, pembacaan hasil,
+paragraf metode dari hasil nyata). `status_mesin()` di bawah hanya menjawab apakah paket OpenFE ada di
+lingkungan Python Windows ini, dan itu hampir selalu tidak; status yang dipakai dialog adalah
+`rbfe_openfe.status()` (OpenFE di WSL). Jaringan yang disusun di sini juga dapat diekspor dan dijalankan
+di mesin Linux lain, lalu keluarannya dibawa kembali untuk dianalisis.
 
 Seluruh fitur ini berlabel eksperimental.
 """
