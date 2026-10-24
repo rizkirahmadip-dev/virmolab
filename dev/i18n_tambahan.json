@@ -1496,7 +1496,7 @@
   "Senyawa dari tanaman obat": "Medicinal plant compounds",
   "Senyawa yang dilaporkan dari suatu tanaman menurut LOTUS (Wikidata), lengkap dengan rujukan. Kehadiran senyawa di basis data belum tentu berarti kadarnya bermakna.": "Compounds reported from a plant according to LOTUS (Wikidata), with references. Presence in database does not necessarily imply significant concentration.",
   "Sertakan seluruh genus": "Include entire genus",
-  "Stereo lengkap": "Defined stereo",
+  "Stereo lengkap": "Full stereo",
   "Tanaman:": "Plant:",
   "Cari senyawa yang dilaporkan dari suatu tanaman (LOTUS/Wikidata, COCONUT), lengkap dengan rujukan, lalu impor ke proyek": "Search compounds reported from a plant (LOTUS/Wikidata, COCONUT), complete with references, and import into project",
   "Senyawa dari tanaman obat…": "Medicinal plant compounds…",
@@ -2211,7 +2211,7 @@
   "Saringan": "Filters",
   "SAScore maks:": "Max SAScore:",
   "QED min:": "Min QED:",
-  "Longgarkan ambang bila induk sendiri di luar ambang": "Relax the thresholds when the parent itself falls outside them",
+  "Longgarkan ambang bila induk sendiri di luar ambang": "Relax thresholds when the parent fails them",
   "Tanpa ini, induk ber-QED rendah seperti inhibitor peptidomimetik membuat seluruh turunannya tertolak": "Without this, a low-QED parent such as a peptidomimetic inhibitor causes all of its analogues to be rejected",
   "Buang PAINS dan Brenk": "Discard PAINS and Brenk",
   "Bangun analog": "Build analogues",
@@ -3335,7 +3335,9 @@
   "N-glikosida": "N-glycoside",
   "S-glikosida": "S-glycoside",
   "ester glikosil": "glycosyl ester",
-  "aglikon": "aglycone"
+  "aglikon": "aglycone",
+  "Di luar domain aplikabilitas: angka ini tidak boleh ditafsirkan atau diperingkat.": "Outside the applicability domain: this value must not be interpreted or ranked.",
+  "Pilih pose atau ligan di panel Objek untuk ringkasan konservasi residu kantong.": "Select a pose or ligand in the Objects panel for a pocket-residue conservation summary."
  },
  "pola": {
   "{0} siap": "{0} ready",
@@ -4384,6 +4386,11 @@
   "{0} (kotak {1})": "{0} (box {1})",
   "{0} C-glikosida tetap menempel pada aglikon.": "{0} C-glycoside(s) remain attached to the aglycone.",
   "{0} C-glikosida; ikatan C-C anomerik tidak dihidrolisis beta-glukosidase sehingga tidak dipotong.": "{0} C-glycoside(s); the anomeric C–C bond is not hydrolysed by beta-glucosidases, so it was not cleaved.",
-  "{0} gula ({1} atom berat) menambah {2} kkal/mol, yaitu {3} per atom; LE aglikon {4}.": "{0} sugar(s) ({1} heavy atoms) add {2} kcal/mol, i.e. {3} per atom; aglycone LE {4}."
+  "{0} gula ({1} atom berat) menambah {2} kkal/mol, yaitu {3} per atom; LE aglikon {4}.": "{0} sugar(s) ({1} heavy atoms) add {2} kcal/mol, i.e. {3} per atom; aglycone LE {4}.",
+  "Hanya {0} dari {1} ligan ({2} %) berada di dalam domain aplikabilitas. Peringkatkan hanya senyawa di dalam domain (bagian atas tabel); senyawa yang diredupkan berada di luar domain.": "Only {0} of {1} ligands ({2} %) are inside the applicability domain. Rank only the compounds inside the domain (top of the table); dimmed compounds are outside it.",
+  "Model ini tidak cocok untuk seri ligan ini: {0} dari {1} ligan ({2} %) berada di dalam domain aplikabilitas, dengan median kemiripan kNN {3} terhadap set latih (ambang {4}). Prediksinya tidak boleh dipakai untuk memeringkat atau memilih senyawa. Latih model dari data yang kerangkanya mirip dengan seri ini.": "This model is not suitable for this ligand series: {0} of {1} ligands ({2} %) are inside the applicability domain, with a median kNN similarity of {3} to the training set (threshold {4}). Its predictions must not be used to rank or select compounds. Train a model on data whose scaffolds resemble this series.",
+  "{0} prediksi ditulis ke kolom panel Hasil, tetapi hanya {1} yang berada di dalam domain; jangan dipakai untuk memeringkat ligan.": "{0} predictions written to the Results panel column, but only {1} are inside the domain; do not use them to rank ligands.",
+  "Kantong ({0} residu ≤ {1} Å dari {2}): identitas rata-rata {3}, seluruh rantai {4}.": "Pocket ({0} residues ≤ {1} Å from {2}): mean identity {3}, whole chain {4}.",
+  "Residu kantong paling kurang terkonservasi: {0}": "Least conserved pocket residues: {0}"
  }
 }

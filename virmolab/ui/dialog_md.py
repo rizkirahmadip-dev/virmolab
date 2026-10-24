@@ -124,6 +124,9 @@ class DialogMD(QDialog):
             d = QLabel(des)
             d.setObjectName("muted")
             d.setWordWrap(True)
+            # dua baris pada lebar minimum dialog; di dalam QSplitter tinggi-untuk-lebar tidak diteruskan ke tata letak
+            d.setMinimumHeight(2 * d.fontMetrics().lineSpacing() + 2)
+            d.setAlignment(Qt.AlignTop | Qt.AlignLeft)
             g.addWidget(d, i * 2 + 1, 0, 1, 3)
         g.setColumnStretch(2, 1)
         self.grp.idToggled.connect(lambda *_: self._perkiraan())

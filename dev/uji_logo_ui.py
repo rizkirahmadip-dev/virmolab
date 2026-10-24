@@ -11,7 +11,13 @@ def hook():
     class U(mainwindow.JendelaUtama):
         def __init__(s):
             super().__init__()
-            QTimer.singleShot(2500, s.a)
+            QTimer.singleShot(2500, s.tunggu_env)
+
+        def tunggu_env(s):
+            # Wizard di aplikasi baru dibuat setelah deteksi perangkat selesai (s.env terisi); saat komputer sibuk
+            # deteksi itu bisa lebih lama dari jeda tetap, jadi tunggu env alih-alih menebak waktunya.
+            QTimer.singleShot(300, s.a if s.env is not None else s.tunggu_env)
+
         def a(s):
             for mode in ("terang", "gelap"):
                 s.terapkan_tema(mode)

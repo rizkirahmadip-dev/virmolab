@@ -154,7 +154,7 @@ def main():
     hasil = sorted(p.name for p in (folder_run / "hasil").glob("*.json"))
     cek(any(h.endswith("__kompleks.json") for h in hasil) and any(h.endswith("__pelarut.json") for h in hasil),
         f"hasil kedua kaki tersalin ke folder proyek ({hasil})")
-    cek("GAGAL" not in log, "log run tanpa kata GAGAL")
+    cek("GAGAL" not in log, "log run tanpa penanda kegagalan")  # teks cek tanpa kata itu: runner regresi mencarinya
 
     # dialog membaca hasilnya sendiri lewat timer pantau; beri kesempatan, lalu paksa bila perlu
     tunggu(lambda: d._hasil_openfe is not None if hasattr(d, "_hasil_openfe") else False, 60)
