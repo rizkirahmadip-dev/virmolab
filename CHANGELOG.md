@@ -20,6 +20,9 @@ Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x 
 ### Diperbaiki
 - Ligan PDB keluaran Vina/Open Babel yang nama atomnya kembar ("C", "C", "O", …) terpangkas menjadi beberapa atom karena gemmi menganggapnya konformasi alternatif; atom kini dinamai ulang sebelum dibaca.
 - Analisis SASA MD bisa menjatuhkan aplikasi (access violation di FreeSASA Shrake-Rupley RDKit setelah beberapa panggilan beruntun); kini memakai algoritme Lee-Richards.
+- **QSAR: pembagian berbasis kerangka terbalik** (`core/qsar.py`). Set uji diisi lebih dulu dengan kerangka terbesar, sehingga satu keluarga kongenerik besar menjadi set uji dan R² eksternal negatif besar walau RMSE kecil. Kini kerangka terbanyak masuk set latih dan kerangka jarang menjadi set uji, sesuai docstring-nya. Model QSAR berpembagian kerangka yang dibuat sebelumnya perlu dilatih ulang.
+- **QSAR: prediksi molekul besar gagal** ("Input X contains infinity…"). Deskriptor `Ipc` mencapai ±10⁴² pada triterpenoid dan tanin, melampaui float32 scikit-learn. `Ipc` dikeluarkan (AvgIpc tetap dipakai) dan nilai fitur dipangkas ke rentang float32 yang aman.
+- **QSAR: model tersimpan dicocokkan lewat nama fitur.** `qsar.muat()` memetakan ulang indeks kolom bila daftar deskriptor berubah, dan menolak model yang memakai deskriptor yang tidak lagi dihitung (misalnya `Ipc`) dengan anjuran melatih ulang, alih-alih diam-diam memakai kolom yang salah.
 
 ## [1.6.0] - 16 Oktober 2026
 

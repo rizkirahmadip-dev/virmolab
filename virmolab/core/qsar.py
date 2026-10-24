@@ -198,6 +198,21 @@ def _mol(smiles: str):
     return Chem.MolFromSmiles(smiles)
 
 
+def _daftar_deskriptor():
+    from rdkit.Chem import Descriptors
+    return [(n, f) for n, f in Descriptors.descList if not n.startswith("fr_") and n != "Ipc"]
+
+
+def _nama_fitur_semua(jenis: str) -> List[str]:
+    """Nama seluruh kolom hitung_fitur() sebelum penyaringan, dalam urutan yang sama."""
+    nama = [f"morgan_{i}" for i in range(2048)] if jenis in ("morgan", "gabungan") else []
+    if jenis == "maccs":
+        nama += [f"maccs_{i}" for i in range(167)]
+    if jenis in ("deskriptor", "gabungan"):
+        nama += [n for n, _f in _daftar_deskriptor()]
+    return nama
+
+
 def hitung_fitur(smiles: Sequence[str], jenis: str = "morgan",
                  kolom_terpilih: Optional[List[int]] = None) -> Tuple[np.ndarray, List[str], List[int]]:
     """Matriks fitur (n x p), nama fitur, dan indeks kolom yang dipertahankan.
@@ -205,7 +220,7 @@ def hitung_fitur(smiles: Sequence[str], jenis: str = "morgan",
     kolom_terpilih: untuk data baru, pakai kolom hasil penyaringan dari set latih (jangan menyaring ulang).
     """
     from rdkit import DataStructs
-    from rdkit.Chem import Descriptors, MACCSkeys, rdFingerprintGenerator
+    from rdkit.Chem import MACCSkeys, rdFingerprintGenerator
     mols = [_mol(s) for s in smiles]
     if any(m is None for m in mols):
         raise GalatQSAR("Ada SMILES yang tidak dapat diurai saat menghitung fitur.")
@@ -225,7 +240,12 @@ def hitung_fitur(smiles: Sequence[str], jenis: str = "morgan",
         bagian.append(X)
         nama += [f"maccs_{i}" for i in range(167)]
     if jenis in ("deskriptor", "gabungan"):
-        daftar = [(n, f) for n, f in Descriptors.descList if not n.startswith("fr_")]
+        # Ipc (information content indeks Bonchev-Trinajstic) tumbuh eksponensial terhadap ukuran molekul dan
+        # mencapai orde 1e42 pada triterpenoid serta tanin, melampaui batas float32 yang dipakai scikit-learn
+        # sehingga predict() gagal dengan "Input X contains infinity". Nilainya tetap berhingga sehingga tidak
+        # tertangkap penyaring non-finite di bawah. AvgIpc, yang terbatas dan ada di daftar yang sama, tetap
+        # dipakai. RDKit sendiri menganjurkan AvgIpc untuk keperluan ini.
+        daftar = _daftar_deskriptor()
         X = np.zeros((len(mols), len(daftar)), dtype=float)
         for i, m in enumerate(mols):
             for j, (_n, f) in enumerate(daftar):
@@ -244,6 +264,11 @@ def hitung_fitur(smiles: Sequence[str], jenis: str = "morgan",
         raise GalatQSAR(f"Jenis fitur tidak dikenal: {jenis}")
 
     X = np.hstack([b.astype(float) for b in bagian])
+    # Jaring pengaman: deskriptor tertentu dapat membesar jauh melampaui float32 pada molekul besar, dan
+    # scikit-learn menolak masukan seperti itu. Nilainya dipangkas ke rentang float32 yang aman, bukan
+    # dibuang, agar senyawanya tetap dapat diprediksi.
+    aman = np.finfo(np.float32).max / 1e3
+    X = np.clip(np.nan_to_num(X, nan=0.0, posinf=aman, neginf=-aman), -aman, aman)
     if kolom_terpilih is not None:
         return X[:, kolom_terpilih], [nama[i] for i in kolom_terpilih], list(kolom_terpilih)
 
@@ -285,8 +310,14 @@ def bagi(data: Sequence[Dict[str, Any]], metode: str = "acak", bagian_uji: float
         kelompok = sorted(kel.values(), key=len, reverse=True)
         latih: List[int] = []
         uji: List[int] = []
+        # Kerangka terbanyak isinya masuk set latih, kerangka paling jarang jadi set uji. Urutan ini penting:
+        # mengisi set uji lebih dulu akan menaruh satu keluarga kongenerik besar di set uji, sehingga ragam
+        # aktivitas set uji runtuh dan R2 eksternal menjadi negatif besar walau RMSE-nya kecil. Pengujian
+        # yang dimaksudkan pembagian kerangka adalah kemampuan meramal kerangka BARU yang jarang, bukan
+        # meramal satu keluarga besar dari sisa data.
+        n_latih = n - n_uji
         for g in kelompok:
-            (uji if len(uji) < n_uji else latih).extend(g)
+            (latih if len(latih) < n_latih else uji).extend(g)
         return sorted(latih), sorted(uji)
     rng = np.random.default_rng(benih)
     urut = rng.permutation(n)
@@ -700,6 +731,16 @@ def muat(path) -> Dict[str, Any]:
     h = joblib.load(Path(path))
     if "_model" not in h:
         raise GalatQSAR("Berkas model tidak berisi model QSAR VirmoLab.")
+    # `_kolom` adalah indeks ke daftar deskriptor saat model dilatih. Daftar itu bisa berubah (Ipc dikeluarkan
+    # karena melampaui float32, atau RDKit menambah deskriptor), sehingga indeks lama diam-diam menunjuk kolom
+    # lain. Indeks dipetakan ulang lewat nama fitur; model yang memakai fitur yang kini tidak dihitung ditolak.
+    if h.get("jenis_fitur") in ("deskriptor", "gabungan") and h.get("_nama_fitur"):
+        indeks = {n: i for i, n in enumerate(_nama_fitur_semua(h["jenis_fitur"]))}
+        hilang = [n for n in h["_nama_fitur"] if n not in indeks]
+        if hilang:
+            raise GalatQSAR(f"Model ini memakai deskriptor yang tidak lagi dihitung VirmoLab ({', '.join(hilang[:5])}); "
+                            "latih ulang model dari data aslinya.")
+        h["_kolom"] = [indeks[n] for n in h["_nama_fitur"]]
     return h
 
 
