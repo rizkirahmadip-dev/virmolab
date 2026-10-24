@@ -1,4 +1,4 @@
-<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Panduan pengguna · VirmoLab</title><link rel="stylesheet" href="gaya.css"><link rel="icon" href="gambar/ikon.png"></head><body><header><img src="gambar/logo_putih.svg" alt="VirmoLab" style="height:30px;margin-right:6px"><span style="color:#9fb4d3;font-size:13px;margin-right:10px">1.6.1</span><a href="panduan.html" class="aktif">Panduan pengguna</a><a href="instalasi.html">Instalasi</a><a href="pindah_laptop.html">Pindah laptop</a><a href="gpu.html">Setup GPU</a><a href="troubleshooting.html">Mengatasi masalah</a><a href="metode.html">Metode &amp; kriteria</a><a href="validasi.html">Validasi</a></header><main><h1>Panduan pengguna</h1>
+<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Panduan pengguna · VirmoLab</title><link rel="stylesheet" href="gaya.css"><link rel="icon" href="gambar/ikon.png"></head><body><header><img src="gambar/logo_putih.svg" alt="VirmoLab" style="height:30px;margin-right:6px"><span style="color:#9fb4d3;font-size:13px;margin-right:10px">1.7.0</span><a href="panduan.html" class="aktif">Panduan pengguna</a><a href="instalasi.html">Instalasi</a><a href="pindah_laptop.html">Pindah laptop</a><a href="gpu.html">Setup GPU</a><a href="troubleshooting.html">Mengatasi masalah</a><a href="metode.html">Metode &amp; kriteria</a><a href="validasi.html">Validasi</a></header><main><h1>Panduan pengguna</h1>
 <p class="lead">Alur lengkap docking di VirmoLab, dari mengimpor protein sampai laporan (PDF, Word, atau HTML interaktif) — semuanya di dalam satu aplikasi, dipandu lima langkah.</p>
 
 <nav class="isi"><b>Isi:</b>
@@ -292,6 +292,9 @@
 </ol>
 <p>Contoh pada protease HIV 1HSG (Vina, exhaustiveness 4, dipakai sebagai uji alur, bukan target yang relevan secara biologis): kosmosiin −8,75 vs apigenin −7,82 kkal/mol, tetapi LE 0,282 vs 0,391; arbutin −6,60 vs hidrokuinon −4,56 kkal/mol, LE 0,347 vs 0,570. Keduanya "unggul karena ukuran".</p>
 
+<h3 id="konservasi">Konservasi residu kantong</h3>
+<p>Analisis › Simulasi dan penelitian lanjut › Penelitian lanjutan › <b>Konservasi residu</b>. Tempel homolog FASTA (atau ambil dari UniProt, BLAST Swiss-Prot NCBI, EBI, atau RCSB; pencarian daring mengirim sekuens rantai keluar dari komputer ini), lalu klik <b>Hitung &amp; warnai B-faktor</b>. Persen identitas tiap posisi dihitung di komputer ini (Needleman–Wunsch, BLOSUM62) dan protein diwarnai menurut B-faktor (100 = terkonservasi penuh). Bila pose atau ligan dipilih di panel Objek, keluaran juga meringkas <b>residu kantong</b> (atom ≤ 5 Å dari ligan): jumlahnya, identitas rata-rata kantong dibanding seluruh rantai, dan residu kantong yang paling kurang terkonservasi. Residu kantong yang berbeda antar-homolog adalah titik awal argumen selektivitas; kantong yang terkonservasi penuh berarti selektivitas sulit dicapai lewat kantong itu.</p>
+
 <h3 id="selektivitas">Selektivitas multi-target</h3>
 <p>Membandingkan ligan yang sama pada beberapa proyek target: matriks ligan × target, normalisasi Z-score per target, celah ΔΔG, dan klasifikasi profil (selektif, semi-selektif, promiskuitas). Perbandingan hanya sahih bila semua target didocking dengan mesin, ukuran kotak, dan protokol persiapan yang sama.</p>
 
@@ -342,7 +345,7 @@
 <li><b>Kurasi:</b> struktur dibakukan (fragmen terbesar, netralisasi), senyawa anorganik dan serpihan dibuang beserta alasannya, pengukuran ganda digabung sebagai median, lalu rentang pengukuran yang lebih dari 1 log dan pasangan <i>activity cliff</i> (kemiripan Tanimoto &ge; 0,85 dengan beda &ge; 1,5 log) ditandai untuk Anda putuskan.</li>
 <li><b>Model:</b> regresi atau klasifikasi; fitur Morgan2, MACCS, deskriptor RDKit 2D, atau gabungan; algoritma Random Forest, SVR, kNN, Gaussian Process, atau Ridge. Hiperparameter disetel dengan validasi silang 5 lipatan <i>di dalam set latih saja</i>.</li>
 <li><b>Validasi:</b> dua pembagian dilaporkan berdampingan. Pembagian acak hampir selalu lebih baik daripada pembagian kerangka Bemis-Murcko; selisih yang besar berarti model hanya mengenali kerangka yang sudah dilihat, dan aplikasi menuliskan peringatan itu. Tersedia pula Q&sup2;, R&sup2; set uji, kriteria Golbraikh-Tropsha, Y-randomization 50&times;, plot prediksi vs terukur, plot Williams, dan kepentingan fitur permutasi (bit Morgan disertai contoh substrukturnya).</li>
-<li><b>Prediksi:</b> ligan proyek diprediksi beserta interval konformal 90 % dan penanda domain aplikabilitas. Hasilnya dapat ditulis ke kolom <i>pIC50 prediksi</i> di panel Hasil, diekspor ke CSV, atau modelnya disimpan bersama kartu model (berisi sidik data, metrik, versi paket, dan tanggal).</li>
+<li><b>Prediksi:</b> ligan proyek diprediksi beserta interval konformal 90 % dan penanda domain aplikabilitas. Senyawa di dalam domain ditaruh di atas tabel, senyawa di luar domain diredupkan di bawah. Bila kurang dari separuh ligan berada di dalam domain, VirmoLab menyatakan model tidak cocok untuk seri itu: jangan memeringkat atau memilih senyawa dari prediksinya, tetapi latih model dari data yang kerangkanya mirip. Hasilnya dapat ditulis ke kolom <i>pIC50 prediksi</i> di panel Hasil, diekspor ke CSV, atau modelnya disimpan bersama kartu model (berisi sidik data, metrik, versi paket, dan tanggal).</li>
 <li>Senyawa di luar domain tetap diberi angka, tetapi ditandai dan tidak boleh ditafsirkan sebagai nilai kuantitatif.</li>
 </ul>
 
@@ -484,4 +487,4 @@ VirmoLab-cli info</pre>
 <tr><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd></td><td>Komposer figur</td><td></td><td></td></tr>
 </table>
 <div class="peringatan">Hasil docking adalah prediksi komputasi, bukan bukti aktivitas biologis; konfirmasi dengan uji eksperimen. Ki dihitung dari ΔG sebagai perkiraan.</div>
-<footer>VirmoLab 1.6.1 · dokumentasi offline · GPL-3.0-or-later</footer></main></body></html>
+<footer>VirmoLab 1.7.0 · dokumentasi offline · GPL-3.0-or-later</footer></main></body></html>

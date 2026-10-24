@@ -2,14 +2,27 @@
 
 Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x adalah pra-rilis.
 
-## [Belum dirilis]
+## [1.7.0] - 24 Oktober 2026
+
+Rilis fitur untuk penelitian bahan alam: perbandingan glikosida–aglikon yang adil terhadap ukuran molekul, ringkasan
+konservasi residu kantong, dan peringatan tegas bila model QSAR dipakai di luar domainnya. Seluruh 31 dialog analisis
+diaudit otomatis untuk teks terpotong dalam bahasa Indonesia dan Inggris.
 
 ### Baru
+- **Konservasi residu kantong** (Penelitian lanjutan › Konservasi residu; `core/konservasi.py`): setelah persen identitas dihitung, residu rantai yang atomnya ≤ 5 Å dari pose atau ligan terpilih diringkas, yaitu jumlah residu, identitas rata-rata kantong dibanding seluruh rantai, dan residu kantong yang paling kurang terkonservasi. Inilah angka yang dipakai untuk argumen selektivitas. Diuji pada 1HSG dengan homolog bermutasi yang diketahui (`dev/uji_konservasi_kantong.py [--gui]`): kantong MK1 16 residu, dan Asp25, Gly48, Ile50 yang dimutasi muncul sebagai yang paling kurang terkonservasi.
 - **Glikosida dan aglikon** (Analisis › Sifat ligan dan desain › Glikosida dan aglikon…; `core/glikosida.py`, `ui/dialog_glikosida.py`):
   - Unit gula siklik (piranosa/furanosa, kriteria diadaptasi dari Sugar Removal Utility, Schaub dkk. 2020) dikenali pada ligan proyek dan disorot pada diagram 2D; ikatan O-, N-, S-glikosidik dan ester glikosil diputus pada karbon anomerik dengan heteroatom penghubung tetap pada aglikon, seperti hidrolisis enzimatik. C-glikosida tidak dipotong; oligosakarida, tanin terhidrolisis, dan aglikon < 6 atom berat ditandai.
   - Aglikon yang belum ada ditambahkan ke proyek dengan satu klik, siap didocking dengan reseptor dan kotak yang sama.
   - Pasangan glikosida–aglikon hanya dibandingkan bila keduanya didocking dengan reseptor, kotak, dan mesin yang sama: ΔΔG, efisiensi ligan (LE; Hopkins dkk. 2004), Fit Quality (FQ; Reynolds dkk. 2007), sumbangan skor per atom gula, dan kesimpulan ("Unggul karena ukuran" bila tiap atom gula menyumbang lebih kecil daripada LE aglikon). Paragraf metode berikut empat rujukan terverifikasi dan ekspor CSV.
   - Diuji pada 26 molekul rujukan PubChem (aglikon sama dengan entri PubChem untuk 9 glikosida) dan alur GUI dengan docking Vina sungguhan di 1HSG (`dev/uji_glikosida.py --gui`, ±45 detik, bahasa Indonesia dan Inggris).
+
+### Diubah
+- **QSAR: peringatan cakupan domain aplikabilitas** (langkah 5 Prediksi; `core/qsar.ringkas_domain`). Bila < 80 % ligan berada di dalam domain, muncul keterangan; bila < 50 %, peringatan tegas bahwa model tidak cocok untuk seri itu (dengan median kemiripan kNN dan ambangnya) dan prediksinya tidak boleh dipakai untuk memeringkat. Senyawa di dalam domain ditaruh di atas tabel; senyawa di luar domain diredupkan di bawah dengan keterangan alat. Menulis prediksi seperti itu ke panel Hasil disertai peringatan. Kasus nyata: 0 dari 156 senyawa galam berada di dalam domain model AChE.
+
+### Diperbaiki
+- Dialog MD: keterangan tiga tingkat simulasi terpotong atas-bawah pada ukuran jendela minimum.
+- Mode English: dua kotak centang terpotong mendatar (Desain generatif: pelonggaran ambang; Tanaman obat: filter stereo); terjemahannya dipendekkan.
+- Alat audit baru `dev/uji_label_terpotong.py [--en]`: membuka 31 dialog analisis pada ukuran bawaan dan minimum, mengunjungi setiap tab dan halaman wizard, dan mencatat label berbungkus yang lebih pendek dari teksnya serta label/tombol yang lebih sempit dari teksnya. Sekarang 0 temuan dalam kedua bahasa.
 
 ## [1.6.1] - 24 Oktober 2026
 

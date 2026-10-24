@@ -3,7 +3,10 @@
 Untuk sesi baru: baca seluruh file ini dulu. Pengguna berbahasa Indonesia; UI dan pesan aplikasi berbahasa Indonesia.
 (Nama file historis — isinya mencakup semua tahap. Jangan diganti namanya: dirujuk dari `CLAUDE.md`.)
 
-**Versi kode 1.6.1** (24 Okt 2026) — perbaikan QSAR (pembagian kerangka terbalik, Ipc melampaui float32,
+**Versi kode 1.7.0** (24 Okt 2026) — glikosida lawan aglikon, ringkasan konservasi residu kantong,
+peringatan cakupan domain QSAR, audit teks terpotong 31 dialog (`dev/uji_label_terpotong.py`).
+
+Sebelumnya **1.6.1** (24 Okt 2026) — perbaikan QSAR (pembagian kerangka terbalik, Ipc melampaui float32,
 pemetaan kolom model tersimpan), impor hasil docking/MD/grafik dari program lain, paragraf metode RBFE dari
 hasil run, dan cek pembaruan kini menunjuk `rizkirahmadip-dev/virmolab` (nama `virmolab` di GitHub belum
 dimiliki).
