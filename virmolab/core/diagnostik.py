@@ -100,6 +100,8 @@ def periksa_semua() -> List[Dict[str, Any]]:
     # 6. OpenMM & Akselerasi GPU (MD & MM/GBSA)
     try:
         import openmm
+        from .md import _muat_plugin_openmm
+        _muat_plugin_openmm(openmm)      # folder aplikasi ber-huruf non-ASCII: plugin dimuat ulang lewat jalur pendek
         platforms = [openmm.Platform.getPlatform(i).getName() for i in range(openmm.Platform.getNumPlatforms())]
         ada_gpu = any(p in ("CUDA", "OpenCL") for p in platforms)
         status_omm = "ok" if ada_gpu else "warn"

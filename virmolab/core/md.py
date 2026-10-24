@@ -102,9 +102,29 @@ def _jalur_nagl():
     return str(f)
 
 
+def _muat_plugin_openmm(mm):
+    """OpenMM memuat plugin platform (CPU, CUDA, OpenCL) lewat API berkas C++ yang gagal pada folder ber-huruf
+    non-ASCII, sehingga hanya platform Reference yang tersisa. Bila itu terjadi, plugin dimuat ulang dari jalur
+    pendek 8.3 folder yang sama."""
+    if mm.Platform.getNumPlatforms() > 1:
+        return
+    import os
+    from openmm import version
+    from . import paths
+    lib = paths.jalur_pendek(version.openmm_library_path)
+    if lib == version.openmm_library_path:
+        return
+    try:
+        with os.add_dll_directory(lib):
+            mm.Platform.loadPluginsFromDirectory(os.path.join(lib, "plugins"))
+    except Exception:          # noqa: BLE001 - kegagalan dilaporkan oleh platform_terbaik
+        pass
+
+
 def platform_terbaik(pilih="auto"):
     """(nama, Platform, properti) - CUDA → OpenCL → CPU; tiap kandidat diuji dengan konteks kecil."""
     import openmm as mm
+    _muat_plugin_openmm(mm)
     urut = ["CUDA", "OpenCL", "CPU"] if pilih == "auto" else [pilih, "CPU"]
     galat = []
     for nama in urut:
@@ -121,6 +141,10 @@ def platform_terbaik(pilih="auto"):
             return nama, p, prop
         except Exception as e:
             galat.append(f"{nama}: {str(e).splitlines()[0][:120]}")
+    if not galat:          # tidak satu pun plugin platform termuat (bukan konteks yang gagal dibuat)
+        raise GalatMD("Plugin platform OpenMM tidak dapat dimuat. Bila folder VirmoLab memuat huruf non-ASCII dan "
+                      "nama pendek 8.3 dimatikan di drive itu, pasang ulang VirmoLab di folder berhuruf biasa "
+                      "(mis. C:\\VirmoLab).")
     raise GalatMD("Tidak ada platform OpenMM yang bisa dipakai: " + "; ".join(galat))
 
 

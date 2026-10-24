@@ -134,7 +134,10 @@ def _fitur(mol):
     from rdkit import Chem, RDConfig
     from rdkit.Chem import ChemicalFeatures
     if _pabrik is None:
-        _pabrik = ChemicalFeatures.BuildFeatureFactory(os.path.join(RDConfig.RDDataDir, "BaseFeatures.fdef"))
+        # Dibaca lewat Python, bukan BuildFeatureFactory(jalur): pembuka berkas C++ RDKit gagal bila folder
+        # aplikasi memuat huruf non-ASCII (mis. dipasang di C:\Users\Rizkí\...).
+        with open(os.path.join(RDConfig.RDDataDir, "BaseFeatures.fdef"), encoding="utf-8") as f:
+            _pabrik = ChemicalFeatures.BuildFeatureFactoryFromString(f.read())
     hasil = {}
     if mol is None:
         return hasil

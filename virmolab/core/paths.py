@@ -107,6 +107,19 @@ def _migrasi_pengaturan(st):
     st.sync()
 
 
+def jalur_pendek(p):
+    """Jalur pendek 8.3 Windows (selalu ASCII) untuk pustaka C++ yang membuka berkas lewat API ANSI dan gagal pada
+    huruf non-ASCII, misalnya aplikasi terpasang di C:\\Users\\Rizkí\\... Mengembalikan jalur asli bila bukan Windows
+    atau nama pendek dimatikan di volume itu."""
+    p = str(p)
+    if sys.platform != "win32" or p.isascii():
+        return p
+    import ctypes
+    buf = ctypes.create_unicode_buffer(1024)
+    n = ctypes.windll.kernel32.GetShortPathNameW(p, buf, len(buf))
+    return buf.value if 0 < n < len(buf) and buf.value.isascii() else p
+
+
 def program(nama):
     """Jalur program bawaan (vina.exe, autodock_gpu.exe, ...)."""
     p = BIN / nama

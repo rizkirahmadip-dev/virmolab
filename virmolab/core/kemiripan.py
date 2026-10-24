@@ -152,7 +152,9 @@ def _pabrik():
         import os
         from rdkit import RDConfig
         from rdkit.Chem import ChemicalFeatures
-        _PABRIK = ChemicalFeatures.BuildFeatureFactory(os.path.join(RDConfig.RDDataDir, "BaseFeatures.fdef"))
+        # lewat Python: pembuka berkas C++ RDKit gagal pada folder aplikasi ber-huruf non-ASCII
+        with open(os.path.join(RDConfig.RDDataDir, "BaseFeatures.fdef"), encoding="utf-8") as f:
+            _PABRIK = ChemicalFeatures.BuildFeatureFactoryFromString(f.read())
     return _PABRIK
 
 

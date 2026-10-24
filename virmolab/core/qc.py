@@ -69,9 +69,31 @@ def tersedia():
         return False   # pencarian paket gagal = anggap tidak terpasang; PoseBusters memang opsional
 
 
+def _fdef_lewat_python():
+    """PoseBusters (modules/sucos.py) membangun pabrik fitur RDKit dari JALUR berkas saat diimpor, dan pembuka berkas
+    C++ RDKit gagal bila folder aplikasi memuat huruf non-ASCII (mis. C:\\Users\\Rizkí\\...). Pembangunnya dibungkus
+    sebelum posebusters diimpor agar berkas dibaca lewat Python, lalu diteruskan sebagai teks."""
+    from rdkit.Chem import ChemicalFeatures, rdMolChemicalFeatures as F
+    if getattr(F.BuildFeatureFactory, "_lewat_python", False):
+        return
+    asli = F.BuildFeatureFactory
+
+    def bangun(path):
+        try:
+            with open(path, encoding="utf-8") as f:
+                return F.BuildFeatureFactoryFromString(f.read())
+        except (OSError, TypeError):
+            return asli(path)
+
+    bangun._lewat_python = True
+    F.BuildFeatureFactory = bangun
+    ChemicalFeatures.BuildFeatureFactory = bangun
+
+
 def _busters():
     global _pb
     if _pb is None:
+        _fdef_lewat_python()
         from posebusters import PoseBusters
         logging.getLogger("posebusters").setLevel(logging.ERROR)
         _pb = PoseBusters(config="dock", max_workers=0)   # tanpa multiprocessing (aman di exe beku)
@@ -80,6 +102,7 @@ def _busters():
 
 def _muat_protein(path):
     from pathlib import Path
+    _fdef_lewat_python()
     from posebusters.tools.loading import safe_load_mol
     p = Path(path)
     k = (str(p), p.stat().st_mtime)

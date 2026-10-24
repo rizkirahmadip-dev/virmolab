@@ -20,6 +20,10 @@ def _jalan(cmd, timeout=60):
 
 def uji(lapor=None):
     hasil = []
+    # Satu QApplication untuk seluruh uji: butir tema butuh widget, sedangkan butir video membuat QCoreApplication
+    # bila belum ada, dan satu proses hanya boleh punya satu aplikasi Qt.
+    from PySide6.QtWidgets import QApplication
+    _app = QApplication.instance() or QApplication(["VirmoLab"])          # noqa: F841 - dijaga hidup selama uji
 
     def cek(nama, fn):
         t = time.time()
@@ -252,8 +256,14 @@ def uji(lapor=None):
         geo = {n: ok for _k, n, g, ok in h["uji"] if g == "Geometri"}
         if not geo or not all(geo.values()):
             raise RuntimeError(f"uji geometri asam asetat gagal: {h['gagal']}")
-        import posebusters
-        return f"posebusters {posebusters.__version__}, {h['n_uji']} uji, proses pekerja {'ya' if pek else 'TIDAK'}"
+        # versi dari metadata, bukan `import posebusters`: impor itu membangun pabrik fitur RDKit dari jalur berkas
+        # di proses ini (lihat qc._fdef_lewat_python) dan gagal di folder ber-huruf non-ASCII
+        from importlib.metadata import PackageNotFoundError, version
+        try:
+            versi = version("posebusters")
+        except PackageNotFoundError:          # metadata paket tidak ikut dibundel
+            versi = "?"
+        return f"posebusters {versi}, {h['n_uji']} uji, proses pekerja {'ya' if pek else 'TIDAK'}"
     cek("Kontrol kualitas pose (PoseBusters)", posebusters)
 
     def dimorphite():
@@ -753,6 +763,30 @@ def uji(lapor=None):
         le, fq = glikosida.efisiensi(-8.0, h.atom_berat_aglikon)
         return f"kosmosiin -> apigenin ({h.atom_berat} -> {h.atom_berat_aglikon} atom); C-glikosida utuh; FQ {fq:.2f}"
     cek("Glikosida dan aglikon", glikosida_uji)
+
+    def tema_uji():
+        """Stylesheet terpasang sungguhan dengan ikon di folder data aplikasi ini. Qt menolak SELURUH stylesheet
+        tanpa pesan bila satu url() rusak (dulu: jalur ber-huruf non-ASCII), dan aplikasi tampil polos."""
+        from PySide6.QtWidgets import QApplication, QPushButton
+        from ..ui import theme
+        app = QApplication.instance()
+        if not isinstance(app, QApplication):
+            raise RuntimeError("butuh QApplication (uji dijalankan tanpa antarmuka)")
+        lama = app.styleSheet()
+        hasil_mode = []
+        for mode in ("terang", "gelap"):
+            app.setStyleSheet(theme.qss_berikon(mode, paths.APPDATA))
+            b = QPushButton("uji")
+            b.setObjectName("primary")
+            b.ensurePolished()
+            warna = b.palette().button().color().name()
+            if warna != theme.TOKEN[mode]["acc"]:
+                raise RuntimeError(f"stylesheet {mode} tidak berlaku (tombol utama {warna}, harap "
+                                   f"{theme.TOKEN[mode]['acc']}); folder data: {paths.APPDATA}")
+            hasil_mode.append(mode)
+        app.setStyleSheet(lama)          # dijalankan dari menu Bantuan: tema aplikasi dikembalikan
+        return f"stylesheet {' & '.join(hasil_mode)} berlaku; ikon di {paths.APPDATA}"
+    cek("Tema antarmuka (stylesheet)", tema_uji)
 
     return hasil
 

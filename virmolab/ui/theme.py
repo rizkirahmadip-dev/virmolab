@@ -103,17 +103,19 @@ QLineEdit, QSpinBox, QDoubleSpinBox, QComboBox, QPlainTextEdit, QTextEdit {{
 QLineEdit:focus, QSpinBox:focus, QDoubleSpinBox:focus, QComboBox:focus, QPlainTextEdit:focus {{ border-color: {t['acc']}; }}
 QComboBox {{ padding-right: 22px; }}
 QComboBox::drop-down {{ border: 0; width: 20px; subcontrol-origin: padding; subcontrol-position: center right; }}
-QComboBox::down-arrow {{ image: url(ICON_CHEVRON); width: 12px; height: 12px; }}
-QComboBox::down-arrow:disabled {{ image: url(ICON_CHEVRON_REDUP); }}
+/* url berkutip: jalur ikon tanpa kutip yang memuat huruf non-ASCII (mis. C:/Users/Rizkí/...) membuat
+   Qt menolak SELURUH stylesheet */
+QComboBox::down-arrow {{ image: url("ICON_CHEVRON"); width: 12px; height: 12px; }}
+QComboBox::down-arrow:disabled {{ image: url("ICON_CHEVRON_REDUP"); }}
 QComboBox:hover {{ border-color: {t['mut']}; }}
 QComboBox:on {{ border-color: {t['acc']}; }}
-QSpinBox::up-arrow, QDoubleSpinBox::up-arrow {{ image: url(ICON_CHEVRON_ATAS); width: 9px; height: 9px; }}
-QSpinBox::down-arrow, QDoubleSpinBox::down-arrow {{ image: url(ICON_CHEVRON); width: 9px; height: 9px; }}
-QMenu::right-arrow {{ image: url(ICON_CHEVRON_KANAN); width: 12px; height: 12px; }}
+QSpinBox::up-arrow, QDoubleSpinBox::up-arrow {{ image: url("ICON_CHEVRON_ATAS"); width: 9px; height: 9px; }}
+QSpinBox::down-arrow, QDoubleSpinBox::down-arrow {{ image: url("ICON_CHEVRON"); width: 9px; height: 9px; }}
+QMenu::right-arrow {{ image: url("ICON_CHEVRON_KANAN"); width: 12px; height: 12px; }}
 QTreeView::branch:has-children:!has-siblings:closed, QTreeView::branch:closed:has-children:has-siblings {{
-    image: url(ICON_CHEVRON_KANAN); }}
+    image: url("ICON_CHEVRON_KANAN"); }}
 QTreeView::branch:open:has-children:!has-siblings, QTreeView::branch:open:has-children:has-siblings {{
-    image: url(ICON_CHEVRON); }}
+    image: url("ICON_CHEVRON"); }}
 QToolButton::menu-button {{ border: 0; width: 14px; }}
 QComboBox QAbstractItemView {{ background: {t['surf']}; border: 1px solid {t['line']}; selection-background-color: {t['accs']}; selection-color: {t['acct']}; }}
 QSpinBox::up-button, QSpinBox::down-button, QDoubleSpinBox::up-button, QDoubleSpinBox::down-button {{
@@ -133,7 +135,7 @@ QPushButton:checked {{ background: {t['acc']}; color: #ffffff; border-color: {t[
 
 QCheckBox, QRadioButton {{ spacing: 6px; }}
 QCheckBox::indicator, QTreeView::indicator {{ width: 13px; height: 13px; border: 1px solid {t['mut']}; border-radius: 2px; background: {t['surf']}; }}
-QCheckBox::indicator:checked, QTreeView::indicator:checked {{ background: {t['acc']}; border-color: {t['acc']}; image: url(ICON_CHECK); }}
+QCheckBox::indicator:checked, QTreeView::indicator:checked {{ background: {t['acc']}; border-color: {t['acc']}; image: url("ICON_CHECK"); }}
 
 QGroupBox {{ border: 0; border-top: 1px solid {t['line']}; margin-top: 18px; padding-top: 6px; font-weight: 600; }}
 QGroupBox::title {{ subcontrol-origin: margin; left: 8px; top: 2px; color: {t['ink2']}; text-transform: uppercase; }}
@@ -208,6 +210,33 @@ QScrollBar::add-page, QScrollBar::sub-page {{ background: transparent; }}
 QSplitter::handle {{ background: {t['chrome']}; }}
 QWizard, QDialog {{ background: {t['panel']}; }}
 """
+
+
+def qss_berikon(mode, folder, ringkas=False):
+    """qss() dengan penanda ICON_* diganti jalur PNG ikon di `folder` (dirender bila belum ada).
+
+    QSS tidak bisa memakai SVG dalam memori, jadi panah dropdown/spin/submenu dan centang dirender ke berkas.
+    Dipakai jendela utama dan uji mandiri, supaya uji memeriksa stylesheet yang sama persis dengan aplikasi."""
+    from pathlib import Path
+    from . import icons
+    t = TOKEN[mode]
+    folder = Path(folder)
+    cek = folder / f"cek_{mode}.png"
+    if not cek.exists():
+        icons.pixmap("check", "#ffffff", 12, 2).save(str(cek))
+    berkas_ikon = {"ICON_CHECK": cek.as_posix()}
+    for kunci, nama, warna in (("ICON_CHEVRON", "chevron", t["ink2"]),
+                               ("ICON_CHEVRON_REDUP", "chevron", t["mut"]),
+                               ("ICON_CHEVRON_ATAS", "chevron_atas", t["ink2"]),
+                               ("ICON_CHEVRON_KANAN", "chevron_kanan", t["ink2"])):
+        f = folder / f"{nama}_{warna.lstrip('#')}.png"
+        if not f.exists():
+            icons.pixmap(nama, warna, 12, 2).save(str(f))
+        berkas_ikon[kunci] = f.as_posix()
+    teks = qss(mode, ringkas=ringkas)
+    for kunci, jalur in sorted(berkas_ikon.items(), key=lambda x: -len(x[0])):   # nama terpanjang dulu
+        teks = teks.replace(kunci, jalur)
+    return teks
 
 
 def palet(mode):

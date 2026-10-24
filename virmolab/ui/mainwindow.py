@@ -1318,24 +1318,8 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
         self.mode = mode
         t = theme.TOKEN[mode]
         app = QApplication.instance()
-        cek = paths.APPDATA / f"cek_{mode}.png"
-        if not cek.exists():
-            icons.pixmap("check", "#ffffff", 12, 2).save(str(cek))
-        # panah dropdown/spin/submenu: QSS tidak bisa memakai SVG dalam memori, jadi ikonnya dirender ke PNG
-        berkas_ikon = {"ICON_CHECK": cek.as_posix()}
-        for kunci, nama, warna in (("ICON_CHEVRON", "chevron", t["ink2"]),
-                                   ("ICON_CHEVRON_REDUP", "chevron", t["mut"]),
-                                   ("ICON_CHEVRON_ATAS", "chevron_atas", t["ink2"]),
-                                   ("ICON_CHEVRON_KANAN", "chevron_kanan", t["ink2"])):
-            f = paths.APPDATA / f"{nama}_{warna.lstrip('#')}.png"
-            if not f.exists():
-                icons.pixmap(nama, warna, 12, 2).save(str(f))
-            berkas_ikon[kunci] = f.as_posix()
-        qss = theme.qss(mode, ringkas=self.ringkas())
-        for kunci, jalur in sorted(berkas_ikon.items(), key=lambda x: -len(x[0])):   # nama terpanjang dulu
-            qss = qss.replace(kunci, jalur)
         app.setPalette(theme.palet(mode))
-        app.setStyleSheet(qss)
+        app.setStyleSheet(theme.qss_berikon(mode, paths.APPDATA, ringkas=self.ringkas()))
         warna, aktif = t["ink2"], t["acct"]
         for a in self.findChildren(QAction):
             if a.data() and isinstance(a.data(), str) and a.data() in icons.PATH:
