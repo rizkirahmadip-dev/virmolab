@@ -739,6 +739,21 @@ def uji(lapor=None):
         return f"skrip batch benar (LF, symlink); Uni-Dock: {'siap di WSL' if st['ada'] else 'belum terpasang'}"
     cek("Uni-Dock (skrip batch)", unidock_uji)
 
+    def glikosida_uji():
+        """Glikosida dan aglikon: kosmosiin dipotong menjadi apigenin, viteksin (C-glikosida) tidak dipotong."""
+        from rdkit import Chem
+        from . import glikosida
+        h = glikosida.deglikosilasi("C1=CC(=CC=C1C2=CC(=O)C3=C(C=C(C=C3O2)O[C@H]4[C@@H]([C@H]([C@@H]([C@H](O4)CO)O)O)O)O)O")
+        apigenin = Chem.MolToSmiles(Chem.MolFromSmiles("C1=CC(=CC=C1C2=CC(=O)C3=C(C=C(C=C3O2)O)O)O"))
+        if h.status != "ok" or h.smiles_aglikon != apigenin or [g.jenis for g in h.gula] != ["heksosa"]:
+            raise RuntimeError(f"kosmosiin: {h.status} {h.smiles_aglikon} {glikosida.ringkas_gula(h.gula)}")
+        v = glikosida.deglikosilasi("C1=CC(=CC=C1C2=CC(=O)C3=C(O2)C(=C(C=C3O)O)[C@H]4[C@@H]([C@H]([C@@H]([C@H](O4)CO)O)O)O)O")
+        if v.status != "hanya_c":
+            raise RuntimeError(f"viteksin seharusnya C-glikosida, didapat {v.status}")
+        le, fq = glikosida.efisiensi(-8.0, h.atom_berat_aglikon)
+        return f"kosmosiin -> apigenin ({h.atom_berat} -> {h.atom_berat_aglikon} atom); C-glikosida utuh; FQ {fq:.2f}"
+    cek("Glikosida dan aglikon", glikosida_uji)
+
     return hasil
 
 

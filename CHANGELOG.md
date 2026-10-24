@@ -2,6 +2,15 @@
 
 Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x adalah pra-rilis.
 
+## [Belum dirilis]
+
+### Baru
+- **Glikosida dan aglikon** (Analisis › Sifat ligan dan desain › Glikosida dan aglikon…; `core/glikosida.py`, `ui/dialog_glikosida.py`):
+  - Unit gula siklik (piranosa/furanosa, kriteria diadaptasi dari Sugar Removal Utility, Schaub dkk. 2020) dikenali pada ligan proyek dan disorot pada diagram 2D; ikatan O-, N-, S-glikosidik dan ester glikosil diputus pada karbon anomerik dengan heteroatom penghubung tetap pada aglikon, seperti hidrolisis enzimatik. C-glikosida tidak dipotong; oligosakarida, tanin terhidrolisis, dan aglikon < 6 atom berat ditandai.
+  - Aglikon yang belum ada ditambahkan ke proyek dengan satu klik, siap didocking dengan reseptor dan kotak yang sama.
+  - Pasangan glikosida–aglikon hanya dibandingkan bila keduanya didocking dengan reseptor, kotak, dan mesin yang sama: ΔΔG, efisiensi ligan (LE; Hopkins dkk. 2004), Fit Quality (FQ; Reynolds dkk. 2007), sumbangan skor per atom gula, dan kesimpulan ("Unggul karena ukuran" bila tiap atom gula menyumbang lebih kecil daripada LE aglikon). Paragraf metode berikut empat rujukan terverifikasi dan ekspor CSV.
+  - Diuji pada 26 molekul rujukan PubChem (aglikon sama dengan entri PubChem untuk 9 glikosida) dan alur GUI dengan docking Vina sungguhan di 1HSG (`dev/uji_glikosida.py --gui`, ±45 detik, bahasa Indonesia dan Inggris).
+
 ## [1.6.1] - 24 Oktober 2026
 
 Rilis perbaikan: tiga perbaikan QSAR yang dapat membalik kesimpulan (model QSAR berpembagian kerangka dari versi

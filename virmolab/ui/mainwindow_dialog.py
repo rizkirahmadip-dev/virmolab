@@ -228,6 +228,16 @@ class PembukaDialog:
         d.setAttribute(Qt.WA_DeleteOnClose)
         d.show()
 
+    def buka_glikosida(self):
+        if not self.proyek or not self.proyek.ligan:
+            self._galat("Belum ada ligan di dalam proyek.")
+            return
+        from .dialog_glikosida import DialogGlikosida
+        d = DialogGlikosida(self)
+        d.setAttribute(Qt.WA_DeleteOnClose)
+        d.show()
+        return d
+
     def buka_selektivitas(self):
         if not self.proyek:
             self._galat("Belum ada proyek yang terbuka.")

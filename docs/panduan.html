@@ -283,6 +283,15 @@
 <h3 id="mmp">Pasangan molekul berpadanan (MMP)</h3>
 <p>Mencari pasangan ligan yang hanya berbeda satu gugus R (RDKit <code>rdMMPA</code>), lalu memasangkan perbedaan itu dengan perubahan ΔG, QED, dan SAScore. Pasangan dengan |ΔΔG| besar pada struktur sangat mirip ditandai sebagai <i>jurang aktivitas</i> (activity cliff) — justru di situ skor docking paling sering keliru, jadi perlakukan sebagai petunjuk arah substitusi, bukan kesimpulan.</p>
 
+<h3 id="glikosida">Glikosida dan aglikon</h3>
+<p>Banyak senyawa bahan alam berupa glikosida, dan skor docking glikosida hampir selalu lebih negatif daripada aglikonnya hanya karena molekulnya lebih besar. Analisis › Sifat ligan dan desain › <b>Glikosida dan aglikon</b> mengenali unit gula siklik pada ligan proyek (piranosa/furanosa yang terikat lewat ikatan O-, N-, atau S-glikosidik), menyorotnya pada diagram 2D, lalu memotongnya seperti hidrolisis enzimatik: heteroatom penghubung tetap pada aglikon. C-glikosida (misalnya viteksin, mangiferin) tidak dipotong.</p>
+<ol>
+<li>Klik <b>Tambahkan aglikon ke proyek</b>; aglikon yang belum ada disiapkan dan disimpan sebagai ligan baru bernama "&lt;glikosida&gt; (aglikon)".</li>
+<li>Docking aglikon itu dengan reseptor, kotak, dan mesin yang <b>sama</b> dengan glikosidanya, lalu klik <b>Muat ulang</b>. Pasangan hanya dibandingkan bila keduanya didocking pada kondisi yang sama.</li>
+<li>Baca kolom <b>Kesimpulan</b>: "Unggul karena ukuran" berarti glikosida memang berskor lebih kuat, tetapi tiap atom gula menyumbang lebih sedikit daripada efisiensi ligan (LE) aglikonnya. Rincian per baris muncul di bawah tabel; <b>Salin metode</b> menyalin paragraf metode beserta empat rujukannya.</li>
+</ol>
+<p>Contoh pada protease HIV 1HSG (Vina, exhaustiveness 4, dipakai sebagai uji alur, bukan target yang relevan secara biologis): kosmosiin −8,75 vs apigenin −7,82 kkal/mol, tetapi LE 0,282 vs 0,391; arbutin −6,60 vs hidrokuinon −4,56 kkal/mol, LE 0,347 vs 0,570. Keduanya "unggul karena ukuran".</p>
+
 <h3 id="selektivitas">Selektivitas multi-target</h3>
 <p>Membandingkan ligan yang sama pada beberapa proyek target: matriks ligan × target, normalisasi Z-score per target, celah ΔΔG, dan klasifikasi profil (selektif, semi-selektif, promiskuitas). Perbandingan hanya sahih bila semua target didocking dengan mesin, ukuran kotak, dan protokol persiapan yang sama.</p>
 

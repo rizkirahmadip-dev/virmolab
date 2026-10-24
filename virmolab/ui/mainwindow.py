@@ -995,6 +995,9 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
             A("Pasangan molekul berpadanan (MMP)…", "similar", self.buka_mmp, None,
               "Pasangan ligan yang berbeda satu gugus R, jurang aktivitas (activity cliff), dan arah "
               "substitusi yang menaikkan afinitas"),
+            A("Glikosida dan aglikon…", "similar", self.buka_glikosida, None,
+              "Potong unit gula seperti hidrolisis enzimatik, tambahkan aglikon ke proyek, lalu bandingkan ΔG, LE, "
+              "dan FQ pada reseptor dan kotak yang sama"),
             None,
             A("Sunting di kantong (3D)…", "lig", self.buka_sunting3d, None,
               "Tumbuhkan gugus pada pose yang sudah ada dan nilai langsung di tempat dengan Vina lokal; inti ligan "
