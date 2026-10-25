@@ -22,7 +22,18 @@ def siapkan_kimia():
         pass
 
 
+def keluaran_utf8():
+    """Konsol Windows memakai cp1252/cp437: mencetak panah atau huruf beraksen ke sana melempar
+    UnicodeEncodeError dan menghentikan perintah (ditemui pada VirmoLab.exe --uji-mandiri)."""
+    for aliran in (sys.stdout, sys.stderr):
+        try:
+            aliran.reconfigure(encoding="utf-8", errors="replace")
+        except (AttributeError, ValueError, OSError):      # keluaran dialihkan atau tidak ada (mode jendela)
+            pass
+
+
 def main():
+    keluaran_utf8()
     arg = sys.argv[1:]
     if arg[:1] == ["--qc-pekerja"]:      # proses pekerja PoseBusters (core/qc.py), tanpa jendela
         siapkan_kimia()
