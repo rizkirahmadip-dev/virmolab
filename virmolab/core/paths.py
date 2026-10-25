@@ -19,6 +19,8 @@ BIN = AKAR / "bin" if (AKAR / "bin").exists() else AKAR / "vendor" / "bin"
 VIEWER = PAKET / "viewer"
 DOCS = AKAR / "docs"
 KETCHER = AKAR / "ketcher" if (AKAR / "ketcher").exists() else AKAR / "vendor" / "ketcher"
+# skrip pemasang alat Linux (Uni-Dock, OpenFE, GNINA, Boltz) yang dijalankan di WSL dari Alat › Pasang alat lanjutan
+ALAT_WSL = AKAR / "alat_wsl" if (AKAR / "alat_wsl").exists() else AKAR / "build_tools"
 
 PORTABLE = (FOLDER_APP / "portable.flag").exists()
 APPDATA = FOLDER_APP / "data" if PORTABLE else Path(os.environ.get("LOCALAPPDATA", Path.home())) / "VirmoLab"

@@ -228,6 +228,27 @@ class PembukaDialog:
         d.setAttribute(Qt.WA_DeleteOnClose)
         d.show()
 
+    def buka_alat_wsl(self, paket=None):
+        """Dialog pemasang alat WSL; `paket` ('gpu_rbfe' / 'cofolding') bila dibuka dari fitur yang membutuhkannya."""
+        from .dialog_alat_wsl import DialogAlatWsl
+        d = DialogAlatWsl(self, paket_awal=paket if isinstance(paket, str) else None)
+        d.alatBerubah.connect(self._alat_wsl_berubah)
+        d.setAttribute(Qt.WA_DeleteOnClose)
+        d.show()
+        return d
+
+    def _alat_wsl_berubah(self):
+        """Sesudah pemasangan: tombol mesin Uni-Dock dan deteksi perangkat mengikuti status WSL terbaru."""
+        from ..core import unidock
+        ada = unidock.tersedia()
+        if getattr(self, "env", None) is not None:
+            self.env.unidock = ada
+        self.param.atur_unidock(ada)
+        self._gnina_tidak_ada = False              # kolom GNINA dicoba lagi pada pemilihan pose berikutnya
+        if getattr(self, "aktif", None) in getattr(self, "objek", {}):
+            self.pilih_objek(self.aktif)           # panel co-folding membaca status Boltz yang baru
+        self.pesan.tulis("Alat lanjutan WSL diperbarui: Uni-Dock " + ("siap." if ada else "belum terpasang."))
+
     def buka_glikosida(self):
         if not self.proyek or not self.proyek.ligan:
             self._galat("Belum ada ligan di dalam proyek.")

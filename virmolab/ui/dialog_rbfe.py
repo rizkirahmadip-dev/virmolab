@@ -53,8 +53,14 @@ class DialogRbfe(QDialog):
         lay.addWidget(kit.judul("Energi bebas relatif (eksperimental)",
                                 "Susun jaringan perturbasi untuk seri senyawa kongenerik"))
 
+        h = QHBoxLayout()
         self.l_mesin = kit.catatan("Memeriksa OpenFE di WSL…", "muted")
-        lay.addWidget(self.l_mesin)
+        h.addWidget(self.l_mesin, 1)
+        self.b_pasang_openfe = kit.tombol("Pasang OpenFE…", self._pasang_openfe,
+                                          tip="Alat › Pasang alat lanjutan (WSL), paket Docking GPU & RBFE")
+        self.b_pasang_openfe.setVisible(False)
+        h.addWidget(self.b_pasang_openfe, 0, Qt.AlignTop)
+        lay.addLayout(h)
 
         split = QSplitter(Qt.Horizontal, self)
         split.setChildrenCollapsible(False)
@@ -287,15 +293,20 @@ class DialogRbfe(QDialog):
     def _status_wsl(self, st):
         self._wsl = st
         self.l_mesin.setText(st.get("pesan", ""))
-        self.l_mesin.setObjectName("muted" if st.get("ada") else "peringatan")     # gaya kit.catatan
-        self.l_mesin.style().unpolish(self.l_mesin)
-        self.l_mesin.style().polish(self.l_mesin)
+        kit.ganti_jenis(self.l_mesin, "muted" if st.get("ada") else "peringatan")     # gaya kit.catatan
+        self.b_pasang_openfe.setVisible(not st.get("ada") and hasattr(self.jw, "buka_alat_wsl"))
         ada_jaringan = bool((self._jaringan or {}).get("tepi"))
         self.b_jalan.setEnabled(bool(st.get("ada")) and ada_jaringan)
         if not st.get("ada"):
             self.l_sim.setText("Tanpa OpenFE di WSL, simulasi tidak dapat dijalankan di komputer ini. Jaringan dan "
                                "perkiraan beban tetap dapat disusun; hasil OpenFE dari mesin Linux lain dapat dimuat.")
         self._tulis_beban()
+
+    def _pasang_openfe(self):
+        d = self.jw.buka_alat_wsl("gpu_rbfe")
+        d.alatBerubah.connect(lambda: kerja.jalankan(
+            lambda lapor: rbfe_openfe.status(segar=True), selesai=self._status_wsl,
+            galat=lambda g: self._status_wsl({"ada": False, "pesan": g.split("\n")[0]})))
 
     def _folder_rbfe(self):
         pr = self.proyek

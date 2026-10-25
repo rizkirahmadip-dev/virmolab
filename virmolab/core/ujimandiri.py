@@ -749,6 +749,25 @@ def uji(lapor=None):
         return f"skrip batch benar (LF, symlink); Uni-Dock: {'siap di WSL' if st['ada'] else 'belum terpasang'}"
     cek("Uni-Dock (skrip batch)", unidock_uji)
 
+    def skrip_wsl_uji():
+        """Skrip pemasang alat WSL ikut terbundel, berakhiran LF, dan sintaksisnya sah menurut bash (bila WSL ada)."""
+        nama = ("pasang_openfe_unidock_wsl.sh", "pasang_gnina_boltz_wsl.sh", "unduh_bobot_boltz.py")
+        hilang = [n for n in nama if not (paths.ALAT_WSL / n).exists()]
+        if hilang:
+            raise FileNotFoundError(f"tidak ada di {paths.ALAT_WSL}: {', '.join(hilang)}")
+        crlf = [n for n in nama if b"\r\n" in (paths.ALAT_WSL / n).read_bytes()]
+        if crlf:
+            raise RuntimeError(f"berakhiran CRLF (bash menolaknya): {', '.join(crlf)}")
+        try:
+            hasil_bash = [subprocess.run(["wsl", "-e", "bash", "-n"], input=(paths.ALAT_WSL / n).read_bytes(),
+                                         capture_output=True, timeout=60).returncode for n in nama if n.endswith(".sh")]
+        except (FileNotFoundError, subprocess.TimeoutExpired):
+            return "3 berkas ada, LF; WSL tidak tersedia sehingga sintaksis bash tidak diperiksa"
+        if any(hasil_bash):
+            raise RuntimeError(f"bash -n menolak skrip (kode {hasil_bash})")
+        return "3 berkas ada, LF, sintaksis bash sah"
+    cek("Skrip alat WSL", skrip_wsl_uji)
+
     def glikosida_uji():
         """Glikosida dan aglikon: kosmosiin dipotong menjadi apigenin, viteksin (C-glikosida) tidak dipotong."""
         from rdkit import Chem

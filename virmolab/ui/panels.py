@@ -345,6 +345,10 @@ class PanelProperti(QWidget):
         # Status & Tombol Aksi
         self.l_status_boltz = kit.catatan("Boltz-2 belum diperiksa.", "muted")
         kl.addWidget(self.l_status_boltz)
+        self.b_pasang_boltz = kit.tombol("Pasang Boltz-2…", self._pasang_boltz,
+                                         tip="Alat › Pasang alat lanjutan (WSL), paket Co-folding & skor CNN")
+        self.b_pasang_boltz.setVisible(False)
+        kl.addWidget(self.b_pasang_boltz, 0, Qt.AlignLeft)
 
         self.b_jalankan = QPushButton("Jalankan co-folding untuk ligan ini")
         self.b_jalankan.setObjectName("primary")
@@ -420,12 +424,17 @@ class PanelProperti(QWidget):
             vv.setWordWrap(True)
             self.form.addRow(kk, vv)
 
+    def _pasang_boltz(self):
+        self.window().buka_alat_wsl("cofolding")
+
     def muat_kofolding(self, data_kofold=None, status_boltz_info=None, info_pose=None):
         self._pose_aktif = info_pose
         if status_boltz_info:
             pesan = status_boltz_info.get("pesan", "")
             self.l_status_boltz.setText(pesan)
             self.b_jalankan.setEnabled(bool(info_pose and status_boltz_info.get("ada")))
+            self.b_pasang_boltz.setVisible(not status_boltz_info.get("ada")
+                                           and hasattr(self.window(), "buka_alat_wsl"))
         else:
             self.b_jalankan.setEnabled(bool(info_pose))
 

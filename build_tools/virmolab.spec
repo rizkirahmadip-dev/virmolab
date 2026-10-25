@@ -20,6 +20,10 @@ datas = [(str(AKAR / "virmolab" / "viewer"), "virmolab/viewer"),
          (str(AKAR / "LICENSE"), "."),
          (str(AKAR / "CHANGELOG.md"), "."),
          (str(AKAR / "LISENSI_PIHAK_KETIGA.txt"), ".")]
+# skrip pemasang alat WSL (Alat › Pasang alat lanjutan): dibaca aplikasi lalu dikirim ke bash lewat stdin, jadi
+# harus tetap berakhiran LF (.gitattributes: build_tools/*.sh eol=lf)
+datas += [(str(AKAR / "build_tools" / n), "alat_wsl") for n in
+          ("pasang_openfe_unidock_wsl.sh", "pasang_gnina_boltz_wsl.sh", "unduh_bobot_boltz.py")]
 # program mesin & Open Babel (dipanggil sebagai proses terpisah) -> _internal/bin
 for f in (AKAR / "vendor" / "bin").rglob("*"):
     if f.is_file():

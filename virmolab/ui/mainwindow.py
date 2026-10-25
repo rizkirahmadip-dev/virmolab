@@ -1064,7 +1064,11 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
         self.m_buka_di.setToolTipsVisible(True)
         isi(m, (A("Atur lokasi program lain…", None, self.atur_eksternal, None,
                   "Lokasi PyMOL, ChimeraX, Discovery Studio Visualizer"),
-                None, self.a_cek,
+                None,
+                A("Pasang alat lanjutan (WSL)…", "plus", self.buka_alat_wsl, None,
+                  "Uni-Dock, OpenFE, GNINA, dan Boltz-2 untuk docking batch GPU, RBFE, skor CNN, dan co-folding "
+                  "(Linux, lewat WSL; opsional)"),
+                self.a_cek,
                 A("Uji mandiri komponen…", None, self.uji_mandiri, None,
                   "Periksa semua mesin docking dan pustaka kimia berfungsi"),
                 A("Skrip figur publikasi (PyMOL / ChimeraX)…", "report", self.buka_skrip_publikasi, None,
@@ -2997,8 +3001,9 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
             self.pesan.tulis("AutoDock-GPU membutuhkan GPU dengan OpenCL; job dijalankan dengan AutoDock Vina (CPU).")
         if mesin == "unidock":
             if not mesinmod.tersedia("unidock"):
-                self._galat("Uni-Dock belum terdeteksi di WSL. Pasang dengan build_tools/pasang_openfe_unidock_wsl.sh, "
-                            "lalu buka ulang VirmoLab.")
+                kit.tawarkan_pasang_alat(self, "Uni-Dock belum terdeteksi di WSL. Pasang paket Docking GPU & RBFE "
+                                               "lewat Alat › Pasang alat lanjutan (WSL); docking Uni-Dock langsung "
+                                               "aktif sesudahnya.", "gpu_rbfe")
                 return
         elif not mesinmod.tersedia(mesin):
             self._galat(f"{mesinmod.PROGRAM[mesin]} tidak ditemukan di folder bin. Pasang ulang VirmoLab.")
@@ -3566,7 +3571,7 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
             return
         st = kofolding.status_boltz()
         if not st.get("ada"):
-            self._galat("Boltz-2 belum terpasang di WSL.\n\n" + st.get("pesan", ""))
+            kit.tawarkan_pasang_alat(self, st.get("pesan", "Boltz-2 belum terpasang di WSL."), "cofolding")
             return
 
         j = self.pelaksana.cari(info_pose.get("job"))

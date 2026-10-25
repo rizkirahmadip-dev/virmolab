@@ -22,9 +22,36 @@ def cari_program(nama):
     return str(calon) if calon.exists() else ""
 
 
+def distro_wsl():
+    """Distro WSL yang dipakai VirmoLab (pengaturan `wsl_distro`, dipilih di Alat › Pasang alat lanjutan);
+    kosong = distro bawaan WSL."""
+    try:
+        from . import paths
+        return str(paths.settings().value("wsl_distro", "") or "").strip()
+    except Exception:          # noqa: BLE001 - tanpa pengaturan: distro bawaan
+        return ""
+
+
+def awalan_wsl():
+    """Awal argumen setiap pemanggilan wsl.exe: ["wsl"] atau ["wsl", "-d", <distro>]."""
+    d = distro_wsl()
+    return ["wsl", "-d", d] if d else ["wsl"]
+
+
+def teks_wsl(data):
+    """wsl.exe menulis pesannya sendiri (daftar distro, galat) dalam UTF-16LE; keluaran program di dalam WSL
+    tetap UTF-8."""
+    if b"\x00" in data[:200]:
+        try:
+            return data.decode("utf-16-le", "replace").replace("\x00", "")
+        except Exception:      # noqa: BLE001
+            pass
+    return data.decode("utf-8", "replace")
+
+
 def _wsl(perintah, timeout=120):
     try:
-        return subprocess.run(["wsl", "-e", "bash", "-lc", perintah], capture_output=True,
+        return subprocess.run(awalan_wsl() + ["-e", "bash", "-lc", perintah], capture_output=True,
                               text=True, errors="replace", timeout=timeout)
     except subprocess.TimeoutExpired as e:
         raise TimeoutError("Perintah di WSL melewati batas waktu.") from e
@@ -48,7 +75,33 @@ def ke_wsl(jalur):
     return p.stdout.strip()
 
 
-def status_gnina():
+# Status alat dibaca saat pose dipilih (thread UI); hasil "ada" disimpan sampai segarkan_status(), hasil "belum ada"
+# hanya 60 s supaya WSL yang sesaat gagal (ERROR_NO_SYSTEM_RESOURCES) tidak menyembunyikan alat yang sebenarnya ada.
+_STATUS = {}
+_UMUR_TIDAK_ADA = 60
+
+
+def _status_tersimpan(kunci, baca, segar):
+    import time
+    s = _STATUS.get(kunci)
+    if segar or s is None or (not s[1]["ada"] and time.time() - s[0] > _UMUR_TIDAK_ADA):
+        s = _STATUS[kunci] = (time.time(), baca())
+    return dict(s[1])
+
+
+def segarkan_status():
+    _STATUS.clear()
+
+
+def status_gnina(segar=False):
+    return _status_tersimpan("gnina", _status_gnina, segar)
+
+
+def status_boltz(segar=False):
+    return _status_tersimpan("boltz", _status_boltz, segar)
+
+
+def _status_gnina():
     if _wsl_ada(f'test -x {ALAT}/gnina && echo ADA'):
         return {"ada": True, "jalur": "~/virmolab-alat/gnina",
                 "pesan": "GNINA 1.3.3 siap di WSL (skor CNN). "
@@ -59,19 +112,19 @@ def status_gnina():
         return {"ada": True, "jalur": p,
                 "pesan": "GNINA ada di PATH Windows. Skor ulang dari jendela ini memakai salinan WSL."}
     return {"ada": False, "jalur": "",
-            "pesan": "GNINA belum ada di WSL. Pasang dengan build_tools/pasang_gnina_boltz_wsl.sh. "
-                     "Binernya Linux (CUDA 12.8), lisensi GPL-2.0, dan tidak dimasukkan ke installer."}
+            "pesan": "GNINA belum ada di WSL. Pasang lewat Alat › Pasang alat lanjutan (WSL), paket Co-folding & "
+                     "skor CNN. Binernya Linux (CUDA 12.8), lisensi GPL-2.0, dan tidak dimasukkan ke installer."}
 
 
-def status_boltz():
+def _status_boltz():
     if _wsl_ada(f'test -x {ALAT}/boltz/bin/boltz && echo ADA'):
         return {"ada": True, "jalur": "~/virmolab-alat/boltz/bin/boltz",
                 "pesan": "Boltz 2.2.1 siap di WSL (Python 3.12, terpisah dari aplikasi). "
                          "Prediksi memakai GPU bila dipilih. RTX 3060 6 GB sering kehabisan memori; "
                          "bila gagal, jalankan dengan CPU. MSA ColabFold hanya bila kotaknya dicentang."}
     return {"ada": False, "jalur": "",
-            "pesan": "Boltz belum terpasang di WSL. Pasang dengan build_tools/pasang_gnina_boltz_wsl.sh. "
-                     "Paket dan bobotnya berlisensi MIT dan tidak dibundel."}
+            "pesan": "Boltz belum terpasang di WSL. Pasang lewat Alat › Pasang alat lanjutan (WSL), paket "
+                     "Co-folding & skor CNN. Paket dan bobotnya berlisensi MIT dan tidak dibundel."}
 
 
 def _tanpa_jalur(teks):
@@ -227,6 +280,11 @@ def prediksi_boltz(sekuens_rantai, smiles, folder, gpu=True, msa_server=False, p
         "--override",
     ] + (["--use_msa_server"] if msa_server else []))
     p = _wsl(cmd, timeout=14400 if penuh else 7200)
+    # SIGKILL dari OOM killer Linux: wsl.exe keluar 9 (proses langsung) atau 137 (lewat subshell), tanpa pesan Python
+    if p.returncode in (9, 137, -9):
+        raise RuntimeError("Boltz-2 dihentikan sistem karena memori WSL habis. Prediksi ini butuh lebih dari 4 GB RAM "
+                           "di WSL (berjalan pada 8 GB). Tutup aplikasi lain, atau bila RAM laptop 16 GB atau lebih, "
+                           "naikkan memory= di %USERPROFILE%\\.wslconfig, jalankan wsl --shutdown, lalu coba lagi.")
     bersih = _tanpa_jalur((p.stdout or "") + "\n" + (p.stderr or ""))
     struktur = list(keluar.rglob("*.pdb")) + list(keluar.rglob("*.cif")) + list(keluar.rglob("*.mmcif"))
     gagal = p.returncode != 0 or not struktur or "Failed to process" in ((p.stdout or "") + (p.stderr or ""))

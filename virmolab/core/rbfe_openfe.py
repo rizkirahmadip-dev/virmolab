@@ -1,7 +1,7 @@
 """Simulasi energi bebas relatif (RBFE) dengan OpenFE di WSL.
 
 OpenFE (MIT) hanya berjalan di Linux/macOS, jadi VirmoLab menjalankannya di WSL seperti Boltz dan Uni-Dock
-(dipasang build_tools/pasang_openfe_unidock_wsl.sh). Alur satu "run":
+(dipasang dari Alat › Pasang alat lanjutan (WSL), lihat core/alat_wsl.py). Alur satu "run":
 
   1. siapkan_run: ligan (pose docking ber-H), protein, daftar tepi, dan pengaturan ditulis ke folder proyek
      rbfe/<run>/masukan; skrip WSL ikut ditulis.
@@ -111,8 +111,8 @@ def status(segar=False):
             _status.update(diperiksa=True, ada=ada, versi=versi)
     pesan = (f"{_status['versi'] or 'OpenFE'} siap di WSL. Simulasi berjalan di GPU NVIDIA lewat WSL; hasil "
              "disalin ke folder proyek rbfe/." if _status["ada"] else
-             "OpenFE belum terpasang di WSL. Pasang dengan build_tools/pasang_openfe_unidock_wsl.sh "
-             "(conda-forge, ±5 GB). Tanpa itu dialog ini hanya menyusun jaringan dan menganalisis hasil.")
+             "OpenFE belum terpasang di WSL. Pasang lewat Alat › Pasang alat lanjutan (WSL), paket Docking GPU & "
+             "RBFE (conda-forge, ±15 GB). Tanpa itu dialog ini hanya menyusun jaringan dan menganalisis hasil.")
     return {"ada": _status["ada"], "versi": _status["versi"], "pesan": pesan}
 
 
@@ -210,16 +210,18 @@ echo "SEMUA_SELESAI"
 
 
 def perintah_jalan(folder_run):
+    from .lanjutan import awalan_wsl
     from .unidock import jalur_wsl
-    return ["wsl", "-e", "bash", jalur_wsl(Path(folder_run) / "jalankan.sh")]
+    return awalan_wsl() + ["-e", "bash", jalur_wsl(Path(folder_run) / "jalankan.sh")]
 
 
 def perintah_jalan_terlepas(folder_run):
     """Untuk QProcess.startDetached: keluaran ditulis ke rbfe/<run>/jalan.log (dibaca dialog), sehingga run tetap
     berjalan dan terpantau walau dialog atau VirmoLab ditutup."""
+    from .lanjutan import awalan_wsl
     from .unidock import jalur_wsl
     sh, log = jalur_wsl(Path(folder_run) / "jalankan.sh"), jalur_wsl(Path(folder_run) / "jalan.log")
-    return ["wsl", "-e", "bash", "-c", f"bash {shlex.quote(sh)} > {shlex.quote(log)} 2>&1"]
+    return awalan_wsl() + ["-e", "bash", "-c", f"bash {shlex.quote(sh)} > {shlex.quote(log)} 2>&1"]
 
 
 def hentikan(run_id):

@@ -545,4 +545,4 @@ class PanelDocking(QWidget):
         b = self.btn_mesin["unidock"]
         b.setEnabled(bool(ada))
         b.setToolTip("Uni-Dock 1.2 di WSL (GPU NVIDIA, fungsi skor Vina)" if ada else
-                     "Uni-Dock belum terpasang di WSL (build_tools/pasang_openfe_unidock_wsl.sh)")
+                     "Uni-Dock belum terpasang di WSL. Pasang lewat Alat › Pasang alat lanjutan (WSL).")

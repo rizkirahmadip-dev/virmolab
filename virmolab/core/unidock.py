@@ -2,8 +2,8 @@
 
 Uni-Dock 1.2 (Apache-2.0; Yu dkk., J. Chem. Theory Comput. 2023) menjalankan pencarian Monte Carlo dengan
 fungsi skor Vina/Vinardo untuk ratusan ligan bersamaan di GPU NVIDIA. Programnya hanya ada untuk Linux + CUDA,
-jadi VirmoLab memanggilnya di WSL seperti GNINA dan Boltz (dipasang build_tools/pasang_openfe_unidock_wsl.sh,
-tidak ikut installer). Keluarannya PDBQT bergaya Vina dan dibaca dengan pembaca Vina, sehingga tabel hasil,
+jadi VirmoLab memanggilnya di WSL seperti GNINA dan Boltz (dipasang dari Alat › Pasang alat lanjutan (WSL), tidak
+ikut installer). Keluarannya PDBQT bergaya Vina dan dibaca dengan pembaca Vina, sehingga tabel hasil,
 interaksi, PoseBusters, dan RMSD redocking berjalan sama seperti Vina.
 
 Modul ini murni: menyusun skrip batch dan memetakan keluaran; eksekusi (QProcess, progres, batal) ada di antrean.
@@ -39,8 +39,8 @@ def status(segar=False):
             _status.update(diperiksa=True, ada=ada, versi=versi)
     pesan = (f"{_status['versi'] or 'Uni-Dock'} siap di WSL (GPU NVIDIA). Banyak ligan didocking sekaligus; "
              "fungsi skor Vina, jadi ΔG setara Vina." if _status["ada"] else
-             "Uni-Dock belum terpasang di WSL. Pasang dengan build_tools/pasang_openfe_unidock_wsl.sh "
-             "(Linux + CUDA, Apache-2.0, tidak ikut installer).")
+             "Uni-Dock belum terpasang di WSL. Pasang lewat Alat › Pasang alat lanjutan (WSL), paket Docking GPU & "
+             "RBFE (Linux + CUDA, Apache-2.0, tidak ikut installer).")
     return {"ada": _status["ada"], "versi": _status["versi"], "pesan": pesan}
 
 
@@ -98,8 +98,9 @@ def tulis_skrip(reseptor, ligan, keluar, kotak, mode="balance", skor="vina", num
 
 
 def perintah_wsl(skrip):
-    """Argumen QProcess/subprocess: wsl -e bash <skrip>."""
-    return ["wsl", "-e", "bash", jalur_wsl(skrip)]
+    """Argumen QProcess/subprocess: wsl [-d distro] -e bash <skrip>."""
+    from .lanjutan import awalan_wsl
+    return awalan_wsl() + ["-e", "bash", jalur_wsl(skrip)]
 
 
 def keluaran_ligan(folder_keluar, nama_symlink):

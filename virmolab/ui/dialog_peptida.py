@@ -195,7 +195,7 @@ class DialogPeptida(QDialog):
             return
         st = lanjutan.status_boltz()
         if not st.get("ada"):
-            kit.pesan_peringatan(self, st.get("pesan", "Boltz-2 belum terpasang di WSL."))
+            kit.tawarkan_pasang_alat(self, st.get("pesan", "Boltz-2 belum terpasang di WSL."), "cofolding")
             return
         if not self.proyek:
             kit.pesan_peringatan(self, "Buka atau buat proyek dulu supaya hasilnya dapat disimpan.")

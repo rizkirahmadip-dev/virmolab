@@ -550,12 +550,8 @@ class Pelaksana(QObject):
     @staticmethod
     def _teks_keluaran(data):
         """wsl.exe menulis pesan galatnya sendiri dalam UTF-16LE; keluaran program di dalam WSL tetap UTF-8."""
-        if b"\x00" in data[:200]:
-            try:
-                return data.decode("utf-16-le", "replace").replace("\x00", "")
-            except Exception:
-                pass
-        return data.decode("utf-8", "replace")
+        from .lanjutan import teks_wsl
+        return teks_wsl(data)
 
     def _baca(self):
         t = self._teks_keluaran(bytes(self.proc.readAllStandardOutput()))
