@@ -333,9 +333,7 @@ class DialogSunting3D(QDialog):
 
     def _status(self, teks, jenis="muted"):
         self.l_status.setText(teks)
-        self.l_status.setObjectName(jenis if teks else "muted")
-        self.l_status.style().unpolish(self.l_status)
-        self.l_status.style().polish(self.l_status)
+        kit.ganti_jenis(self.l_status, jenis if teks else "muted")
 
     # ================================================================== menjalankan
     def _terpilih(self, daftar):

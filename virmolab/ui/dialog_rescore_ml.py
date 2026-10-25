@@ -79,9 +79,7 @@ class DialogRescoreML(QDialog):
                          nada="warn" if h["kontak_per_atom"] < 1.5 else None)
         self.k_polar.isi(kit.f(h["pangsa_polar"] * 100, 0, "%"), "bagian kontak yang melibatkan N/O kedua sisi")
         self.l_eval.setText(h["evaluasi"])
-        self.l_eval.setObjectName("peringatan" if h["peringatan_false_positive"] else "info")
-        self.l_eval.style().unpolish(self.l_eval)
-        self.l_eval.style().polish(self.l_eval)
+        kit.ganti_jenis(self.l_eval, "peringatan" if h["peringatan_false_positive"] else "info")
         t = self.tabel
         t.setSortingEnabled(False)
         t.setRowCount(len(h["matriks_kontak"]))

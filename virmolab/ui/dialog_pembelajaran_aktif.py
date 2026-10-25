@@ -40,9 +40,7 @@ def _sel_int(v):
 
 def _jenis(label, jenis):
     """Ganti gaya label catatan (muted | info | peringatan) setelah label dibuat."""
-    label.setObjectName(jenis)
-    label.style().unpolish(label)
-    label.style().polish(label)
+    kit.ganti_jenis(label, jenis)
 
 
 def _n(x):

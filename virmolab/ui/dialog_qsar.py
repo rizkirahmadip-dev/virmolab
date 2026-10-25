@@ -653,8 +653,7 @@ class DialogQSAR(QDialog):
                      f"(ambang {ambang}). Prediksinya tidak boleh dipakai untuk memeringkat atau memilih senyawa. "
                      "Latih model dari data yang kerangkanya mirip dengan seri ini.")
             self.l_domain.setObjectName("peringatan")
-        self.l_domain.style().unpolish(self.l_domain)
-        self.l_domain.style().polish(self.l_domain)
+        kit.gaya_ulang(self.l_domain)
         self.l_domain.setText(teks)
         self.l_domain.setVisible(True)
 

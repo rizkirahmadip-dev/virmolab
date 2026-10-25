@@ -2,11 +2,11 @@
 
 Warna selalu dari token tema (terang/gelap), jadi dialog tidak memakai warna tetap.
 """
-from PySide6.QtCore import QByteArray, QRectF, Qt, QTimer
+from PySide6.QtCore import QByteArray, QEvent, QRectF, Qt, QTimer
 from PySide6.QtGui import QColor, QGuiApplication, QPainter, QPalette
 from PySide6.QtSvg import QSvgRenderer
-from PySide6.QtWidgets import (QAbstractItemView, QFrame, QHBoxLayout, QHeaderView, QLabel, QPushButton,
-                               QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QAbstractItemView, QApplication, QFrame, QHBoxLayout, QHeaderView, QLabel,
+                               QPushButton, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget)
 
 from ..core.laporan import id_angka
 from . import theme
@@ -74,10 +74,24 @@ def lencana(teks="", nada="info"):
     return l
 
 
+def gaya_ulang(w):
+    """Terapkan ulang QSS sesudah objectName/properti berubah. Polish ulang saja tidak menghitung ulang padding dan
+    border (contentsMargins tetap 0, teks menempel ke garis tepi); peristiwa StyleChange memaksanya."""
+    w.style().unpolish(w)
+    w.style().polish(w)
+    QApplication.sendEvent(w, QEvent(QEvent.StyleChange))
+    w.updateGeometry()
+
+
+def ganti_jenis(label, jenis):
+    """Ganti gaya label catatan (muted | info | peringatan) sesudah label dibuat."""
+    label.setObjectName(jenis)
+    gaya_ulang(label)
+
+
 def atur_nada(label, nada):
     label.setProperty("nada", nada)
-    label.style().unpolish(label)
-    label.style().polish(label)
+    gaya_ulang(label)
 
 
 class Kartu(QFrame):
@@ -201,6 +215,24 @@ def pesan_peringatan(induk, teks, judul_kotak="Perhatian"):
     """Kotak peringatan seragam. Dipakai dialog yang perlu menahan pengguna sebelum melanjutkan."""
     from PySide6.QtWidgets import QMessageBox
     QMessageBox.warning(induk, judul_kotak, teks)
+
+
+def tawarkan_pasang_alat(induk, pesan, paket):
+    """Alat WSL belum terpasang: jelaskan, lalu tawarkan Alat › Pasang alat lanjutan (WSL) langsung pada paketnya.
+    paket: kunci core.alat_wsl.PAKET. True bila dialog pemasang dibuka."""
+    from PySide6.QtWidgets import QMessageBox
+    from .. import i18n
+    jw = induk
+    while jw is not None and not hasattr(jw, "buka_alat_wsl"):
+        jw = jw.parentWidget()
+    m = QMessageBox(QMessageBox.Information, i18n.t("Alat belum terpasang"), i18n.t(pesan), parent=induk)
+    pasang = m.addButton(i18n.t("Pasang sekarang…"), QMessageBox.AcceptRole) if jw is not None else None
+    m.addButton(i18n.t("Nanti") if pasang else i18n.t("Tutup"), QMessageBox.RejectRole)
+    m.exec()
+    if pasang is not None and m.clickedButton() is pasang:
+        jw.buka_alat_wsl(paket)
+        return True
+    return False
 
 
 def garis():
