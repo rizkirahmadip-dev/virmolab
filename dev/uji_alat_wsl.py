@@ -147,7 +147,7 @@ for kunci in A.PAKET:
         f"{kunci}: skrip rakitan LF, diawali PID & LEWATI, diakhiri PAKET_SELESAI")
     try:
         p = subprocess.run(["wsl", "-e", "bash", "-n"], input=s, capture_output=True, timeout=60)
-        galat = teks_wsl(p.stderr or b"")
+        galat = teks_wsl(p.stderr or b"") + " " + teks_wsl(p.stdout or b"")   # wsl.exe lapor di stdout
         if p.returncode != 0 and "syntax error" not in galat.lower():
             # wsl.exe sendiri gagal start (mis. ERROR_NO_SYSTEM_RESOURCES saat distro lain sedang sibuk)
             print(f"LEWAT {kunci}: WSL tidak dapat dijalankan sekarang ({galat.strip()[:80]})")

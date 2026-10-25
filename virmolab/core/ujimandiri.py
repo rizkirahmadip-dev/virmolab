@@ -759,12 +759,21 @@ def uji(lapor=None):
         if crlf:
             raise RuntimeError(f"berakhiran CRLF (bash menolaknya): {', '.join(crlf)}")
         try:
-            hasil_bash = [subprocess.run(["wsl", "-e", "bash", "-n"], input=(paths.ALAT_WSL / n).read_bytes(),
-                                         capture_output=True, timeout=60).returncode for n in nama if n.endswith(".sh")]
+            jalan = [subprocess.run(["wsl", "-e", "bash", "-n"], input=(paths.ALAT_WSL / n).read_bytes(),
+                                    capture_output=True, timeout=60) for n in nama if n.endswith(".sh")]
         except (FileNotFoundError, subprocess.TimeoutExpired):
             return "3 berkas ada, LF; WSL tidak tersedia sehingga sintaksis bash tidak diperiksa"
-        if any(hasil_bash):
-            raise RuntimeError(f"bash -n menolak skrip (kode {hasil_bash})")
+        from .lanjutan import teks_wsl
+        # wsl.exe menulis galatnya sendiri ke stdout (UTF-16), bash menulis galat sintaksis ke stderr
+        galat = [teks_wsl(p.stderr or b"") + " " + teks_wsl(p.stdout or b"") for p in jalan]
+        # bash menolak skrip -> stderr menyebut "syntax error"; selain itu wsl.exe sendiri yang gagal berjalan
+        # (mis. ERROR_NO_SYSTEM_RESOURCES ketika mesin virtual WSL sedang tidak bisa dihidupkan Windows)
+        tolak = [t for p, t in zip(jalan, galat) if p.returncode and "syntax error" in t.lower()]
+        if tolak:
+            raise RuntimeError("bash -n menolak skrip: " + "; ".join(t.strip()[:120] for t in tolak))
+        if any(p.returncode for p in jalan):
+            sebab = next((t.strip() for p, t in zip(jalan, galat) if p.returncode), "")
+            return f"3 berkas ada, LF; WSL tidak dapat dijalankan sekarang: {sebab[:120]}"
         return "3 berkas ada, LF, sintaksis bash sah"
     cek("Skrip alat WSL", skrip_wsl_uji)
 
