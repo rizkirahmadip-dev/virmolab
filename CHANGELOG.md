@@ -2,7 +2,7 @@
 
 Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x adalah pra-rilis.
 
-## [1.8.0] - belum dirilis
+## [1.8.0] - 25 Oktober 2026
 
 Rilis publik pertama. Alat Linux lanjutan kini dipasang dari dalam aplikasi, dan tidak ada lagi pesan yang menyuruh
 pengguna menjalankan skrip yang tidak ikut installer.
