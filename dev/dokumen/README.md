@@ -12,5 +12,6 @@ tidak perlu membacanya. Panduan untuk pengguna ada di `docs/` dan di menu Bantua
 | `IDE_BARU.md` | daftar gagasan yang belum diputuskan |
 | `RIWAYAT_PEMBERSIHAN.md` | catatan perapian repositori |
 | `TANDA_TANGAN_KODE.md` | cara menandatangani installer (Authenticode) dan pilihan sertifikat |
+| `RENCANA_RILIS_1.8.0.md` | **rencana rilis publik pertama 1.8.0**: keputusan K1–K10, pemasang alat WSL, kebenaran ilmiah, distribusi, uji, publikasi |
 
 Status versi dan peta berkas ada di `../../CATATAN_TAHAP2.md`.
