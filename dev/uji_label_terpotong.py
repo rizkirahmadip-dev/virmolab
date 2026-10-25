@@ -14,6 +14,7 @@ import json
 import re
 import shutil
 import sys
+import time
 import traceback
 from pathlib import Path
 
@@ -82,9 +83,21 @@ sys.excepthook = _tangkap
 DIALOG = ["admet", "mpo", "labplanner", "penapisan", "mmp", "selektivitas", "interpretasi", "ppi", "kantong", "fbdd",
           "skrip_publikasi", "diagnostik", "terowongan", "kinetika", "protac", "metabolisme", "rescore_ml", "tanaman",
           "validasi_protokol", "target_balik", "qsar", "farmakofor", "peptida", "xtb", "generatif", "rbfe",
-          "konsensus", "md", "pembelajaran_aktif", "sunting3d", "glikosida"]
+          "konsensus", "md", "pembelajaran_aktif", "sunting3d", "glikosida", "alat_wsl"]
 if PILIH:
     DIALOG = [d for d in DIALOG if d in PILIH]
+
+
+def _tunggu_latar(d, detik=120):
+    """Dialog alat WSL baru lengkap isinya sesudah pemeriksaan WSL di latar selesai; rinciannya dibuka agar ikut
+    diperiksa."""
+    if not hasattr(d, "b_periksa") or not hasattr(d, "_atur_rincian"):
+        return
+    t0 = time.time()
+    while not (d._pr is not None and d.b_periksa.isEnabled()) and time.time() - t0 < detik:
+        QApplication.processEvents()
+        time.sleep(0.05)
+    d._atur_rincian(True)
 
 
 def _terlihat_sungguh(w, d):
@@ -172,6 +185,7 @@ def hook():
                     print(f"  {nama}: dialog tidak muncul", flush=True)
                     continue
                 d = baru[0]
+                _tunggu_latar(d)
                 bawaan = d.size()
                 minimum = d.minimumSize() if d.minimumSize().width() > 0 else d.minimumSizeHint()
                 n_awal = len(temuan)
