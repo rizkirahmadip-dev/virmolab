@@ -4,8 +4,12 @@
 # Boltz: MIT, lingkungan Python 3.12 terpisah (paket PyPI menolak Python 3.14).
 set -euo pipefail
 ALAT="$HOME/virmolab-alat"
+# VIRMOLAB_LEWATI="gnina": tanpa GPU NVIDIA biner GNINA (CUDA) tidak dipasang; Boltz tetap bisa di CPU.
+LEWATI=" ${VIRMOLAB_LEWATI:-} "
 mkdir -p "$ALAT"
-if [[ ! -x "$ALAT/gnina" ]]; then
+if [[ "$LEWATI" == *" gnina "* ]]; then
+  echo "LEWATI_GNINA"
+elif [[ ! -x "$ALAT/gnina" ]]; then
   echo "UNDUH_GNINA"
   curl -L --retry 3 --fail -o "$ALAT/gnina.part" \
     https://github.com/gnina/gnina/releases/download/v1.3.3/gnina.cuda12.8.static
@@ -31,12 +35,14 @@ if ! "$PY" -c "import boltz" >/dev/null 2>&1; then
   echo "UNDUH_BOLTZ"
   uv pip install --python "$PY" "boltz==2.2.1"
 fi
-echo "BANTUAN_GNINA"
-CUDA_LIBS=$(find "$ALAT/boltz/lib" -type d -name lib -path "*/nvidia/*" 2>/dev/null | paste -sd: || true)
-if [[ -n "${CUDA_LIBS:-}" ]]; then
-  export LD_LIBRARY_PATH="${CUDA_LIBS}${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+if [[ -x "$ALAT/gnina" ]]; then
+  echo "BANTUAN_GNINA"
+  CUDA_LIBS=$(find "$ALAT/boltz/lib" -type d -name lib -path "*/nvidia/*" 2>/dev/null | paste -sd: || true)
+  if [[ -n "${CUDA_LIBS:-}" ]]; then
+    export LD_LIBRARY_PATH="${CUDA_LIBS}${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+  fi
+  "$ALAT/gnina" --help | head -n 8 || true
 fi
-"$ALAT/gnina" --help | head -n 8 || true
 echo "BANTUAN_BOLTZ"
 "$ALAT/boltz/bin/boltz" predict --help || true
 echo PASANG_SELESAI

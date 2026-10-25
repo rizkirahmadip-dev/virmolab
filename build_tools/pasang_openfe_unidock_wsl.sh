@@ -7,12 +7,21 @@ set -euo pipefail
 ALAT="$HOME/virmolab-alat"
 export MAMBA_ROOT_PREFIX="$ALAT/mamba"
 MM="$ALAT/micromamba"
+# VIRMOLAB_LEWATI="unidock": tanpa GPU NVIDIA Uni-Dock (CUDA saja) tidak dipasang; OpenFE tetap bisa di CPU.
+LEWATI=" ${VIRMOLAB_LEWATI:-} "
 mkdir -p "$ALAT"
 if [[ ! -x "$MM" ]]; then
   echo "UNDUH_MICROMAMBA"
   curl -L --retry 3 --fail -o "$ALAT/micromamba.tar.bz2" https://micro.mamba.pm/api/micromamba/linux-64/latest
-  tar -xjf "$ALAT/micromamba.tar.bz2" -C "$ALAT" bin/micromamba
+  # Ubuntu baru di WSL (24.04/26.04) tidak membawa bzip2, dan memasangnya butuh sudo; python3 selalu ada.
+  if command -v bzip2 >/dev/null 2>&1; then
+    tar -xjf "$ALAT/micromamba.tar.bz2" -C "$ALAT" bin/micromamba
+  else
+    python3 -c "import sys, tarfile; tarfile.open(sys.argv[1], 'r:bz2').extract('bin/micromamba', sys.argv[2])" \
+      "$ALAT/micromamba.tar.bz2" "$ALAT"
+  fi
   mv "$ALAT/bin/micromamba" "$MM"
+  chmod +x "$MM"
   rmdir "$ALAT/bin" 2>/dev/null || true
   rm -f "$ALAT/micromamba.tar.bz2"
 fi
@@ -36,7 +45,9 @@ if [[ ! -x "$ALAT/openfe/bin/openfe" ]]; then
   echo "UNDUH_OPENFE"
   buat_env "$ALAT/openfe" openfe "python=3.12" "cuda-version=12"
 fi
-if [[ ! -x "$ALAT/unidock/bin/unidock" ]]; then
+if [[ "$LEWATI" == *" unidock "* ]]; then
+  echo "LEWATI_UNIDOCK"
+elif [[ ! -x "$ALAT/unidock/bin/unidock" ]]; then
   echo "UNDUH_UNIDOCK"
   buat_env "$ALAT/unidock" unidock "cuda-version=12"
 fi
@@ -44,9 +55,16 @@ echo "VERSI_OPENFE"
 "$ALAT/openfe/bin/openfe" --version || true
 "$ALAT/openfe/bin/python" -c "import openmm; print('OpenMM', openmm.__version__); \
 from openmm import Platform; print('Platform:', [Platform.getPlatform(i).getName() for i in range(Platform.getNumPlatforms())])"
-echo "VERSI_UNIDOCK"
-"$ALAT/unidock/bin/unidock" --version || "$ALAT/unidock/bin/unidock" --help | head -n 5 || true
+if [[ -x "$ALAT/unidock/bin/unidock" ]]; then
+  echo "VERSI_UNIDOCK"
+  "$ALAT/unidock/bin/unidock" --version || "$ALAT/unidock/bin/unidock" --help | head -n 5 || true
+fi
 # Catatan versi yang benar-benar terpasang, untuk jejak di laporan metode.
 "$MM" list -p "$ALAT/openfe" --json > "$ALAT/openfe-paket.json" || true
-"$MM" list -p "$ALAT/unidock" --json > "$ALAT/unidock-paket.json" || true
+if [[ -x "$ALAT/unidock/bin/unidock" ]]; then
+  "$MM" list -p "$ALAT/unidock" --json > "$ALAT/unidock-paket.json" || true
+fi
+# Arsip .conda (±4,5 GB) tidak dipakai lagi sesudah diekstrak. Paket hasil ekstraksi tetap disimpan, jadi Pasang ulang
+# tidak mengunduh ulang. Baru dihapus di sini: bila pemasangan putus, arsip yang sudah terunduh dipakai lagi.
+"$MM" clean --tarballs --yes >/dev/null 2>&1 || true
 echo PASANG_SELESAI
