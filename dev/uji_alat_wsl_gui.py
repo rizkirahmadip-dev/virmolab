@@ -200,8 +200,13 @@ def hook():
                 st2.setValue("wsl_distro", DISTRO_LAMA)
             else:
                 st2.remove("wsl_distro")
+            st2.sync()
+            # keluar lewat loop peristiwa, bukan os._exit: mengakhiri proses saat penampil WebEngine masih
+            # hidup kadang menghasilkan access violation sehingga runner regresi menganggap uji ini gagal
+            if s.d is not None:
+                s.d.close()
+            s.close()
             QApplication.quit()
-            os._exit(1 if gagal else 0)
 
     mainwindow.JendelaUtama = Uji
 
@@ -216,4 +221,8 @@ def _pasang_lalu_hook(app):
 
 
 i18n.pasang = _pasang_lalu_hook
-A_app.main()
+try:
+    A_app.main()
+except SystemExit:
+    pass
+sys.exit(1 if gagal else 0)

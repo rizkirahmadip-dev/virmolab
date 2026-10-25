@@ -88,6 +88,43 @@ if PILIH:
     DIALOG = [d for d in DIALOG if d in PILIH]
 
 
+def _prasyarat_tiruan():
+    """Dialog alat WSL diperiksa dengan prasyarat tiruan, bukan WSL sungguhan: hasilnya sama tiap kali dijalankan,
+    memuat satu syarat yang gagal (teks terpanjang) dan catatan paket, dan tidak meninggalkan pemeriksaan WSL yang
+    masih berjalan saat aplikasi ditutup."""
+    from virmolab.core import alat_wsl as A
+
+    def pr_tiruan(distro=None, **_k):
+        pr = A.Prasyarat(distro="Ubuntu", daftar_distro=[{"nama": "Ubuntu", "status": "Running", "versi": 2,
+                                                          "bawaan": True}],
+                         gpu="NVIDIA GeForce RTX 3060 Laptop GPU, 610.74", disk_gb=120, mem_gb=3.8)
+        pr.syarat = [
+            A.Syarat("windows", "Windows 10 versi 2004 atau lebih baru", True, True, "build 19045"),
+            A.Syarat("wsl", "WSL dan distro Linux", True, True, "distro Ubuntu"),
+            A.Syarat("wsl2", "Distro berjalan di WSL 2", True, True, "WSL 2"),
+            A.Syarat("gpu", "GPU NVIDIA terlihat dari WSL", True, False, pr.gpu),
+            A.Syarat("disk", "Ruang disk untuk WSL", True, False, "120 GB bebas di drive disk WSL"),
+            A.Syarat("memori", "Memori untuk WSL", False, False,
+                     "WSL hanya mendapat 3,8 GB RAM. Boltz-2 dihentikan sistem pada 4 GB dan berjalan pada 8 GB; "
+                     "bila RAM laptop 16 GB atau lebih, naikkan memory= di %USERPROFILE%\\.wslconfig lalu jalankan "
+                     "wsl --shutdown."),
+            A.Syarat("alat_dasar", "Alat dasar Linux (curl, tar, python3)", False, True,
+                     "Belum ada: curl, tar. Pasang sekali di terminal Ubuntu (diminta kata sandi Ubuntu).",
+                     aksi="terminal", perintah="sudo apt update && sudo apt install -y curl tar"),
+            A.Syarat("internet", "Internet dari WSL", True, True, "conda-forge terjangkau"),
+            A.Syarat("pengguna", "Pengguna Linux", True, False, "alat dipasang di /home pengguna 'rizki'"),
+        ]
+        A._simpulkan(pr)
+        return pr
+
+    A.periksa_prasyarat = pr_tiruan
+    A.status_paket = lambda: {
+        "gpu_rbfe": {"Uni-Dock": {"ada": True, "pesan": "Uni-Dock v1.2.0 siap di WSL"},
+                     "OpenFE": {"ada": False, "pesan": "OpenFE belum terpasang di WSL"}},
+        "cofolding": {"Boltz-2": {"ada": False, "pesan": "Boltz belum terpasang di WSL"},
+                      "GNINA": {"ada": False, "pesan": "GNINA belum ada di WSL"}}}
+
+
 def _tunggu_latar(d, detik=120):
     """Dialog alat WSL baru lengkap isinya sesudah pemeriksaan WSL di latar selesai; rinciannya dibuka agar ikut
     diperiksa."""
@@ -171,6 +208,7 @@ def hook():
             QTimer.singleShot(3500, s.l3)
 
         def l3(s):
+            _prasyarat_tiruan()
             for nama in DIALOG:
                 sebelum = set(QApplication.topLevelWidgets())
                 try:

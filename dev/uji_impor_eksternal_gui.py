@@ -29,6 +29,11 @@ st.setValue("folder_kerja", str(KERJA))
 st.remove("layout")
 st.remove("sesi_terbuka")
 
+if not (SUMBER / "md").is_dir():
+    print(f"LEWAT: proyek MD contoh belum ada di {SUMBER}. Jalankan dev/uji_md_gui.py dulu "
+          "(dev/regresi.py menjalankannya lebih dulu).")
+    raise SystemExit(0)
+
 import virmolab.app as A                                     # noqa: E402
 from PySide6.QtWidgets import QApplication                  # noqa: E402
 
@@ -45,7 +50,10 @@ def cek(kondisi, pesan):
 def data_docking():
     from rdkit import Chem
     from virmolab.core import impor_docking as I
-    vina = SUMBER / "hasil" / "J20261016_062711_2" / "MK1_out.pdbqt"
+    # nama folder job dibuat dari waktu, jadi jangan dipatok: ambil hasil docking mana pun di proyek MD contoh
+    vina = next((x for x in sorted(SUMBER.glob("hasil/*/*_out.pdbqt"))), None)
+    if vina is None:
+        raise SystemExit(f"LEWAT: belum ada hasil docking di {SUMBER / 'hasil'}; jalankan dev/uji_md_gui.py dulu.")
     shutil.copy(vina, DATA / "MK1_out.pdbqt")
     shutil.copy(SUMBER / "reseptor" / "reseptor.pdbqt", DATA / "1hsg_reseptor.pdbqt")
     d, _ = I.baca_berkas(vina)
@@ -63,7 +71,9 @@ def data_md():
     from openmm import app
     from openmm.app.internal.xtc_utils import xtc_write_frame
     from virmolab.core import impor_md as M
-    d = SUMBER / "md" / "MD20261016_065039" / "MK1_1"
+    d = next((x.parent for x in sorted(SUMBER.glob("md/*/*/topologi.pdb"))), None)
+    if d is None:
+        raise SystemExit(f"LEWAT: belum ada trajektori MD di {SUMBER / 'md'}; jalankan dev/uji_md_gui.py dulu.")
     pdb = app.PDBFile(str(d / "topologi.pdb"))
     r = M.PembacaDCD(d / "trajektori_terlarut.dcd")
     n = r.n_atom

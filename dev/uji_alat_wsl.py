@@ -146,8 +146,13 @@ for kunci in A.PAKET:
         and s.rstrip().endswith(b"echo PAKET_SELESAI"),
         f"{kunci}: skrip rakitan LF, diawali PID & LEWATI, diakhiri PAKET_SELESAI")
     try:
-        kode = subprocess.run(["wsl", "-e", "bash", "-n"], input=s, capture_output=True, timeout=60).returncode
-        cek(kode == 0, f"{kunci}: skrip rakitan sah menurut bash -n")
+        p = subprocess.run(["wsl", "-e", "bash", "-n"], input=s, capture_output=True, timeout=60)
+        galat = teks_wsl(p.stderr or b"")
+        if p.returncode != 0 and "syntax error" not in galat.lower():
+            # wsl.exe sendiri gagal start (mis. ERROR_NO_SYSTEM_RESOURCES saat distro lain sedang sibuk)
+            print(f"LEWAT {kunci}: WSL tidak dapat dijalankan sekarang ({galat.strip()[:80]})")
+        else:
+            cek(p.returncode == 0, f"{kunci}: skrip rakitan sah menurut bash -n ({galat.strip()[:120]})")
     except (FileNotFoundError, subprocess.TimeoutExpired):
         print(f"LEWAT {kunci}: WSL tidak ada, bash -n tidak diperiksa")
 cek(b"VIRMOLAB_PY" in A.skrip_paket("cofolding") and b"download_boltz2" in A.skrip_paket("cofolding"),
