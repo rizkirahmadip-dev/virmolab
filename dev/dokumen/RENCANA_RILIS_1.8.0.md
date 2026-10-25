@@ -236,7 +236,34 @@ Semua langkah keluar (push, tag, release, Zenodo, pengumuman, VirusTotal) **diko
 | Regresi besar di menit akhir | tidak ada perubahan kode setelah RC final kecuali perbaikan kritis; tiap perubahan → D2 ulang |
 | Disk E: sempit untuk build | pindahkan rilis lama ke `C:\VirmoLab-rilis-lama` sebelum build |
 
-## 6. Kalimat pembuka untuk sesi berikutnya
+## 6. Kemajuan (diisi tiap sesi)
+
+**25 Okt 2026 — jalur A SELESAI.** Dialog `Alat › Pasang alat lanjutan (WSL)` + `core/alat_wsl.py` jadi dan diuji
+(`dev/uji_alat_wsl.py` 42 OK; `dev/uji_alat_wsl_gui.py` LULUS; audit label & bahasa 0 temuan). A4 lulus gerbang:
+`git grep "build_tools/pasang" -- virmolab` kosong. A6 (pemasangan sungguhan di distro bersih `VirmoLabUji`)
+membongkar empat bug nyata — `bzip2` tidak ada di Ubuntu 26.04, `~/.boltz` belum dibuat saat mengunduh bobot,
+ukuran paket jauh di atas perkiraan (kini 15/17 GB, puncak 19 GB, arsip `.conda` dihapus sesudah sukses), dan
+**Boltz-2 dihentikan OOM killer pada VM WSL 4 GB** (kini ada prasyarat memori + pesan jelas). Uji fungsi di distro
+uji: Uni-Dock 6 detik (RMSD pose-3 2,12 Å), GNINA 5 detik, OpenFE 1.13 + OpenMM 8.4 melihat CUDA.
+Catatan terbuka: mode pencarian Uni-Dock `detail` memberi hasil identik dengan `balance` — perlu diperiksa.
+
+**25 Okt 2026 — jalur C SELESAI (kecuali langkah keluar).** C1 pemindaian seluruh riwayat (66 commit, 2.055 blob)
+bersih: tidak ada token, kunci, atau data pihak ketiga; yang muncul hanya nama pengembang sendiri dan surel
+`noreply` GitHub. C2 README ditulis ulang; C3 `SECURITY.md` + templat issue; C4 `core/pembaruan.py` sudah
+menunjuk repo rilis dan uji 1.7.0 → 1.8.0 ditambahkan (uji sungguhan baru bisa sesudah rilis terbit);
+C5 tawaran kode sumber GPL menunjuk tag rilis, alat WSL dicatat lisensinya, `dev/cek_lisensi.py` membandingkan
+catatan dengan isi build (bersih; ulangi pada build 1.8.0); C6 `CITATION.cff` memakai nama penulis sebenarnya,
+`url` dihapus (K10) — Zenodo menyusul saat rilis; C7 paragraf privasi di README dan panduan; C8 CHANGELOG 1.8.0
+dan draf catatan rilis `CATATAN_RILIS_1.8.0.md`. Tangkapan layar dokumentasi dibuat ulang dari folder kerja
+netral `C:\VirmoLab-dokumentasi` (sebelumnya memperlihatkan jalur folder pengembangan).
+
+**Jalur B (K7) belum dikerjakan**: suntingan `core/target_balik.gabung()` dihentikan pengklasifikasi keamanan
+dua kali; dikerjakan pengguna sendiri.
+
+**Sebelum publikasi (dikonfirmasi pengguna satu per satu):** jadikan repo publik, aktifkan Discussions (dirujuk
+templat issue), hubungkan Zenodo, push + tag `v1.8.0`, terbitkan Release, lalu perbarui badge DOI.
+
+## 7. Kalimat pembuka untuk sesi berikutnya
 
 > Kerjakan `dev/dokumen/RENCANA_RILIS_1.8.0.md`. Mulai dengan keputusan K1–K10 (tanyakan dengan AskUserQuestion,
 > rekomendasi di urutan pertama), lalu jalur A → B → C → D → E sesuai jadwal, cek gerbang tiap jalur sebelum lanjut.

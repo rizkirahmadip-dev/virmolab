@@ -21,6 +21,9 @@ FFmpeg (via Qt)      7.1.5       LGPL-2.1-or-later (DLL)         licenses/FFmpeg
 PoseBusters          0.6.5       MIT                             licenses/PoseBusters_LICENSE.txt
 pandas               3.0.6       BSD-3-Clause (+ komponen)       licenses/pandas_LICENSE.txt
 PyYAML               6.0.3       MIT                             licenses/PyYAML_LICENSE.txt
+attrs                26.1.0      MIT                             licenses/attrs_LICENSE.txt
+MarkupSafe           3.0.4       BSD-3-Clause                    licenses/MarkupSafe_LICENSE.txt
+tqdm                 4.70.1      MPL-2.0 AND MIT                 licenses/tqdm_LICENSE.txt
 python-dateutil      2.9.0       Apache-2.0 / BSD-3-Clause       licenses/python-dateutil_LICENSE.txt
 six                  1.17.0      MIT                             licenses/six_LICENSE.txt
 tzdata               2026.5      Apache-2.0                      licenses/tzdata_LICENSE.txt, licenses/Apache-2.0.txt
@@ -57,11 +60,33 @@ Kode sumber program GPL (GPL-2.0 pasal 3)
 -----------------------------------------
 Kode sumber lengkap untuk program GPL yang disertakan dapat diperoleh dari:
   AutoDock-GPU  : https://github.com/ccsb-scripps/AutoDock-GPU  (versi yang dibangun VirmoLab beserta
-                  berkas proyek Visual Studio yang dimodifikasi disertakan pada rilis kode sumber VirmoLab)
+                  berkas proyek Visual Studio yang dimodifikasi ada di vendor/adgpu_src/ pada kode sumber VirmoLab)
   AutoDock4.2.6 : https://autodock.scripps.edu/download-autodock4/
   Open Babel    : https://github.com/openbabel/openbabel (tag openbabel-3-1-1)
-Atas permintaan, apt. Rizki Rahmadi Pratama, M. Farm (pengembang VirmoLab) menyediakan salinan kode sumber yang persis sama dengan biner yang
-didistribusikan selama minimal tiga tahun sejak rilis.
+Kode sumber VirmoLab sendiri, termasuk berkas build yang dipakai untuk membuat rilis ini, ada di
+  https://github.com/rizkirahmadip-dev/virmolab
+dan tiap rilis punya arsip kode sumber pada tag yang sama, misalnya untuk 1.8.0:
+  https://github.com/rizkirahmadip-dev/virmolab/archive/refs/tags/v1.8.0.zip
+Atas permintaan, apt. Rizki Rahmadi Pratama, M. Farm (pengembang VirmoLab) juga menyediakan salinan kode sumber
+yang persis sama dengan biner yang didistribusikan selama minimal tiga tahun sejak rilis; mintakan lewat
+halaman Issues repositori di atas.
+
+Alat Linux yang dipasang atas permintaan pengguna (tidak ikut installer)
+------------------------------------------------------------------------
+Alat berikut TIDAK disertakan dalam installer maupun versi portable. Alat › Pasang alat lanjutan (WSL)
+mengunduh dan memasangnya ke dalam WSL hanya bila pengguna menekan Pasang; semuanya berjalan sebagai proses
+terpisah di Linux, bukan tertaut ke dalam VirmoLab.
+Alat                 Lisensi                 Sumber unduhan
+Uni-Dock 1.2         Apache-2.0              conda-forge (paket unidock)
+OpenFE 1.13          MIT                     conda-forge (paket openfe)
+GNINA 1.3.3          GPL-2.0                 https://github.com/gnina/gnina (rilis biner Linux)
+Boltz-2 2.2.1        MIT                     PyPI (paket boltz); bobot model dari Hugging Face
+                                             (boltz-community/boltz-2, MIT)
+micromamba           BSD-3-Clause            https://micro.mamba.pm
+uv                   MIT / Apache-2.0        https://astral.sh/uv
+PyTorch              BSD-3-Clause (+ komponen CUDA NVIDIA, lisensi NVIDIA masing-masing)   PyPI
+Skrip pemasangnya sendiri (build_tools/pasang_*.sh, build_tools/unduh_bobot_boltz.py) adalah bagian dari
+VirmoLab dan berlisensi GPL-3.0-or-later.
 
 Data & layanan
 --------------
@@ -138,7 +163,8 @@ OpenFF Interchange   0.5.5       MIT
 OpenFF Units 0.4.0, OpenFF Utilities 0.1.18   MIT
 OpenFF NAGL          0.6.1       MIT                             https://github.com/openforcefield/openff-nagl
 OpenFF NAGL models   2026.09.0   CC BY 4.0 (model openff-gnn-am1bcc-1.0.0)
-OpenFF Force Fields  2026.09.0   CC BY 4.0 (openff-2.3.0.offxml, "Sage")   https://github.com/openforcefield/openff-forcefields
+OpenFF Force Fields (paket openforcefields)
+                     2026.09.0   CC BY 4.0 (openff-2.3.0.offxml, "Sage")   https://github.com/openforcefield/openff-forcefields
 Parameter Amber ff14SB, ion Li/Merz, air TIP3P: berkas XML bawaan OpenMM (openmm/app/data/amber14).
 lxml 6.1.3 (BSD-3), pint 0.25.3 (BSD-3), pydantic 2.13 + pydantic-core (MIT), python-constraint 1.4.0 (BSD-2),
 cachetools (MIT), xmltodict (MIT), click (BSD-3), platformdirs (MIT), flexcache/flexparser (BSD-3),

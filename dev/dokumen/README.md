@@ -13,5 +13,6 @@ tidak perlu membacanya. Panduan untuk pengguna ada di `docs/` dan di menu Bantua
 | `RIWAYAT_PEMBERSIHAN.md` | catatan perapian repositori |
 | `TANDA_TANGAN_KODE.md` | cara menandatangani installer (Authenticode) dan pilihan sertifikat |
 | `RENCANA_RILIS_1.8.0.md` | **rencana rilis publik pertama 1.8.0**: keputusan K1–K10, pemasang alat WSL, kebenaran ilmiah, distribusi, uji, publikasi |
+| `CATATAN_RILIS_1.8.0.md` | draf teks halaman GitHub Release 1.8.0 (Indonesia + Inggris), siap disalin |
 
 Status versi dan peta berkas ada di `../../CATATAN_TAHAP2.md`.

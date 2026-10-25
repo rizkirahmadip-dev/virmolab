@@ -1,12 +1,12 @@
 <h1>Instalasi</h1>
-<p class="lead">VirmoLab berjalan di Windows 10/11 64-bit tanpa perlu Python, WSL, MGLTools, atau program lain. Semua mesin docking sudah disertakan.</p>
+<p class="lead">VirmoLab berjalan di Windows 10/11 64-bit tanpa perlu Python, WSL, MGLTools, atau program lain. Mesin docking Vina dan AutoDock-GPU sudah disertakan. Alat lanjutan yang hanya ada untuk Linux (Uni-Dock, OpenFE, GNINA, Boltz-2) bersifat opsional dan dipasang dari dalam aplikasi; lihat <a href="#alat-lanjutan">Alat lanjutan</a>.</p>
 
 <h2>Kebutuhan minimum</h2>
 <table>
 <tr><th></th><th>Minimum</th><th>Disarankan</th></tr>
 <tr><td>Sistem</td><td>Windows 10 64-bit</td><td>Windows 10/11 64-bit terbaru</td></tr>
 <tr><td>RAM</td><td>4 GB</td><td>8 GB atau lebih</td></tr>
-<tr><td>Ruang disk</td><td>± 1,2 GB (program) + ruang proyek</td><td>SSD</td></tr>
+<tr><td>Ruang disk</td><td>± 1,8 GB (program) + ruang proyek</td><td>SSD</td></tr>
 <tr><td>GPU</td><td>Tidak wajib (Vina di CPU)</td><td>NVIDIA/AMD/Intel dengan driver OpenCL terbaru (AutoDock-GPU)</td></tr>
 <tr><td>Layar</td><td>1366 × 768</td><td>1920 × 1080, skala 100–200 %</td></tr>
 </table>
@@ -14,7 +14,7 @@
 <h2>Pilihan A — Installer (disarankan)</h2>
 <ol class="langkah">
 <li>Jalankan <code>VirmoLab-Setup-x.y.z.exe</code>. Bila Windows SmartScreen muncul (“Windows protected your PC”), klik <b>More info › Run anyway</b> — installer belum ditandatangani sertifikat berbayar.</li>
-<li>Pilih folder instalasi (bawaan: <code>C:\Program Files\VirmoLab</code>, atau folder pengguna bila tanpa hak admin).</li>
+<li>Pilih untuk siapa VirmoLab dipasang. Bawaannya hanya untuk pengguna ini, di <code>%LOCALAPPDATA%\Programs\VirmoLab</code>, tanpa hak admin. Pilih semua pengguna bila ingin <code>C:\Program Files\VirmoLab</code> (butuh hak admin).</li>
 <li>Pilih tugas tambahan: ikon Desktop, kaitkan berkas <code>.pdbqt</code>/<code>.vmdbackup</code> dengan VirmoLab (opsional).</li>
 <li>Klik <b>Pasang</b>, lalu <b>Selesai</b> untuk membuka VirmoLab.</li>
 </ol>
@@ -35,6 +35,53 @@
 <li><b>Folder kerja</b>: tempat proyek baru disimpan.</li>
 </ol>
 <p>Deteksi GPU dijalankan ulang setiap kali VirmoLab dibuka, jadi setelah pindah laptop atau memperbarui driver tidak perlu mengatur apa pun. Wizard bisa dibuka lagi lewat <b>Alat › Cek sistem dan GPU…</b>.</p>
+
+<h2 id="alat-lanjutan">Alat lanjutan (opsional, lewat WSL)</h2>
+<p>Empat alat hanya ada untuk Linux, sehingga tidak ikut installer. Fitur inti (preparasi, docking Vina dan
+AutoDock-GPU, analisis, laporan) tidak membutuhkannya. Bila diperlukan, pasang dari dalam VirmoLab lewat
+<b>Alat › Pasang alat lanjutan (WSL)…</b>. Alat dipasang di WSL (Windows Subsystem for Linux), di folder rumah
+Linux <code>~/virmolab-alat</code>; tidak ada data proyek yang dikirim.</p>
+<table>
+<tr><th>Paket</th><th>Isi</th><th>Dipakai untuk</th><th>Ruang disk</th><th>Lama (uji 25 Okt 2026)</th></tr>
+<tr><td>Docking GPU &amp; RBFE</td><td>Uni-Dock 1.2, OpenFE 1.13</td><td>Docking batch di GPU NVIDIA; energi bebas
+relatif (RBFE)</td><td>± 15 GB (± 19 GB selama pemasangan)</td><td>± 10 menit</td></tr>
+<tr><td>Co-folding &amp; skor CNN</td><td>Boltz-2 2.2.1 beserta bobotnya, GNINA 1.3.3</td><td>Co-folding
+protein–ligan dan docking peptida; skor ulang CNN</td><td>± 17 GB</td><td>± 14 menit</td></tr>
+</table>
+<p>Lama pemasangan diukur pada koneksi ± 12 MB/s (± 100 Mbps); di koneksi lambat bisa beberapa kali lipat.</p>
+
+<h3>Prasyarat</h3>
+<p>Dialog memeriksa semuanya sebelum tombol <b>Pasang</b> aktif dan menawarkan perbaikan untuk yang belum terpenuhi.</p>
+<ul>
+<li><b>Windows 10 versi 2004 (build 19041) atau lebih baru</b>, atau Windows 11.</li>
+<li><b>WSL 2 dengan distro Linux</b> (Ubuntu). Bila belum ada, tombol <b>Pasang WSL…</b> membuka jendela persetujuan
+administrator Windows. Sesudah itu restart, buka Ubuntu sekali dari menu Start untuk membuat nama pengguna dan
+kata sandi, lalu buka dialog lagi.</li>
+<li><b>GPU NVIDIA</b> dengan driver Windows terbaru untuk Uni-Dock dan GNINA (keduanya hanya CUDA). Tanpa GPU NVIDIA,
+kedua alat itu dilewati; OpenFE dan Boltz-2 tetap terpasang dan berjalan di CPU, tetapi sangat lambat.</li>
+<li><b>Ruang disk</b> di drive Windows tempat disk virtual WSL berada (biasanya C:). Disk virtual itu tumbuh sendiri
+dan tidak mengecil otomatis setelah berkas dihapus.</li>
+<li><b>Internet</b> ke conda-forge, GitHub, PyPI, PyTorch, dan Hugging Face. Di jaringan kampus mungkin perlu proksi
+(variabel <code>HTTPS_PROXY</code> di Ubuntu).</li>
+</ul>
+
+<h3>Memasang</h3>
+<ol class="langkah">
+<li>Buka <b>Alat › Pasang alat lanjutan (WSL)…</b> dan tunggu pemeriksaan prasyarat (beberapa detik).</li>
+<li>Klik <b>Pasang</b> pada paket yang diperlukan. Langkah yang sedang berjalan, waktu, dan log tampil di bagian
+<b>Kemajuan</b>; dialog harus tetap terbuka.</li>
+<li>Selesai: tombol fitur langsung aktif, tanpa membuka ulang VirmoLab.</li>
+</ol>
+<p><b>Hentikan</b> menghentikan semua proses pemasang di dalam WSL. Unduhan yang sudah selesai disimpan, jadi
+klik <b>Pasang</b> lagi untuk melanjutkan, juga setelah koneksi putus. Log lengkap tiap paket ada di
+<code>%LOCALAPPDATA%\VirmoLab\log\alat_wsl_gpu_rbfe.log</code> dan <code>alat_wsl_cofolding.log</code>.</p>
+<p>Bila komputer punya lebih dari satu distro, pilih distronya di bagian <b>Prasyarat</b>; VirmoLab memakai distro
+itu untuk semua alat lanjutan.</p>
+
+<h3>Menghapus</h3>
+<p>Di terminal Ubuntu: <code>rm -rf ~/virmolab-alat ~/.boltz</code>. Ruang di drive C: baru kembali setelah disk
+virtual WSL dipadatkan, misalnya dengan <code>wsl --manage Ubuntu --set-sparse true</code> di PowerShell (WSL 2.0
+ke atas).</p>
 
 <h2>Lokasi berkas</h2>
 <table>

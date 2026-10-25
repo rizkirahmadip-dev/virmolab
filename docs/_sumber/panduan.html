@@ -8,7 +8,7 @@
 <a href="#validasi">Validasi</a> · <a href="#qc">PoseBusters</a> · <a href="#banding">Bandingkan</a> ·
 <a href="#sifat">Sifat ligan</a> · <a href="#statistik">Statistik</a> · <a href="#ekspor">Ekspor &amp; laporan</a> ·
 <a href="#md">MD &amp; MM/GBSA</a> · <a href="#desain">Alat desain &amp; telaah lanjutan</a> · <a href="#cli">Baris perintah</a> ·
-<a href="#proyek">Proyek</a> · <a href="#pintasan">Pintasan</a></nav>
+<a href="#proyek">Proyek</a> · <a href="#privasi">Privasi</a> · <a href="#pintasan">Pintasan</a></nav>
 
 <h2 id="tampilan">Tampilan jendela</h2>
 <figure><img src="gambar/02_impor.png" alt="Jendela utama"><figcaption>Jendela utama setelah protein 1HSG dimuat.</figcaption></figure>
@@ -468,6 +468,17 @@ VirmoLab-cli info</pre>
 <li>Bila VirmoLab tertutup tidak normal (listrik mati), saat dibuka lagi muncul tawaran <i>Pulihkan pekerjaan terakhir</i>.</li>
 <li><b>Alat › Buka folder proyek</b> membuka folder proyek aktif di Explorer.</li>
 </ul>
+
+<h2 id="privasi">Privasi dan koneksi internet</h2>
+<p>VirmoLab tidak mengirim proyek, struktur, atau hasil Anda ke mana pun, dan tidak memuat telemetri. Berkas proyek, log, dan pengaturan tersimpan di komputer Anda saja (<code>Documents\VirmoLab</code>, <code>%LOCALAPPDATA%\VirmoLab</code>, <code>HKCU\Software\VirmoLab</code>; versi portable menyimpan semuanya di dalam foldernya sendiri).</p>
+<p>Yang menghubungi internet hanya:</p>
+<ul>
+<li><b>Unduhan yang Anda minta sendiri</b>: RCSB PDB, AlphaFold DB, PubChem, ChEMBL, COCONUT, LOTUS, STRING, Open Targets. Yang terkirim hanya kode atau kata kunci pencarian yang Anda ketik.</li>
+<li><b>Peladen MSA ColabFold</b> untuk Boltz-2 — hanya bila kotak <i>Minta MSA ke ColabFold</i> dicentang; sekuens protein yang bersangkutan ikut terkirim. Tanpa centang itu, Boltz berjalan satu sekuens, sepenuhnya lokal.</li>
+<li><b>Pemeriksaan pembaruan</b>: satu permintaan GET ke <code>api.github.com</code> paling sering sekali sehari, yang hanya membaca nomor rilis terbaru. Matikan di <b>Alat › Pengaturan</b> bila tidak diinginkan.</li>
+<li><b>Pemasang alat lanjutan (WSL)</b>: unduhan paket dari conda-forge, GitHub, PyPI, PyTorch, dan Hugging Face, hanya saat Anda menekan Pasang.</li>
+</ul>
+<p>Struktur dan ligan yang Anda buka tidak pernah ikut terkirim pada pemeriksaan pembaruan atau pemasangan alat.</p>
 
 <h2 id="pintasan">Pintasan keyboard</h2>
 <p>Daftar lengkap: <b>Bantuan › Pintasan keyboard</b> (<kbd>Ctrl</kbd>+<kbd>/</kbd>). Yang paling sering dipakai:</p>

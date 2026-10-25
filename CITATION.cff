@@ -1,14 +1,15 @@
 cff-version: 1.2.0
 message: "Bila Anda menggunakan VirmoLab dalam penelitian, silakan kutip perangkat lunak ini sesuai metadata berikut."
 title: "VirmoLab: Perangkat Lunak Penambatan Molekuler Terpadu (AutoDock-GPU, Vina, AD4)"
+type: software
 authors:
-  - family-names: "VirmoLab Contributors"
-    given-names: "Tim Pengembang"
-version: 1.7.0
-date-released: "2026-10-24"
+  - family-names: "Pratama"
+    given-names: "Rizki Rahmadi"
+    name-suffix: "apt., M. Farm"
+version: 1.8.0
+date-released: "2026-10-25"
 license: "GPL-3.0-or-later"
 repository-code: "https://github.com/rizkirahmadip-dev/virmolab"
-url: "https://virmolab.org"
 keywords:
   - "molecular docking"
   - "autodock-gpu"

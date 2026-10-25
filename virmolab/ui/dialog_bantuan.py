@@ -87,6 +87,9 @@ class DialogLapor(QDialog):
         self.l_zip.setText(f"Tersimpan: {f} - periksa isinya, lalu lampirkan sendiri saat melapor.")
 
 
+PRANALA_REPO = "https://github.com/rizkirahmadip-dev/virmolab"
+
+
 class DialogLisensi(QDialog):
     def __init__(self, versi, parent=None):
         super().__init__(parent)
@@ -99,6 +102,11 @@ class DialogLisensi(QDialog):
         kutip.setHtml(
             "<h3>Mengutip VirmoLab dan perangkat lunak di dalamnya</h3>"
             f"<p>VirmoLab {versi}. Aplikasi desktop molecular docking (open-source, GPL-3.0-or-later).</p>"
+            "<p>Kutip VirmoLab sendiri seperti ini (sesuaikan gayanya dengan jurnal yang dituju):</p>"
+            f"<blockquote>Pratama RR. VirmoLab (versi {versi}) [perangkat lunak]. 2026. "
+            f"{PRANALA_REPO}</blockquote>"
+            "<p>Metadata lengkapnya ada di berkas <code>CITATION.cff</code> pada repositori; GitHub menyediakan "
+            "tombol <i>Cite this repository</i> yang mengubahnya menjadi BibTeX atau APA.</p>"
             "<p>Kutip juga mesin dan pustaka yang Anda pakai (laporan VirmoLab mencantumkannya otomatis):</p><ol>"
             + "".join(f"<li>{v}</li>" for v in SITASI.values()) + "</ol>"
             "<p>Bila memakai kontrol kualitas pose, sifat ligan, atau BOILED-Egg:</p><ol>"

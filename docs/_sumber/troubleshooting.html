@@ -1,7 +1,7 @@
 <h1>Mengatasi masalah</h1>
 <p class="lead">Masalah umum dan cara mengatasinya. Galat juga selalu dijelaskan di panel <b>Pesan</b> beserta langkah yang disarankan.</p>
 
-<div class="catatan"><b>Langkah pertama:</b> jalankan <b>Alat › Uji mandiri komponen…</b>. VirmoLab memeriksa semua mesin docking, Open Babel, RDKit/Meeko, docking Vina kecil, deteksi GPU, sifat ligan, statistik, PoseBusters, dan ekspor Excel (14 uji), lalu menampilkan mana yang gagal. Dari baris perintah: <code>VirmoLab.exe --uji-mandiri hasil.json</code>.</div>
+<div class="catatan"><b>Langkah pertama:</b> jalankan <b>Alat › Uji mandiri komponen…</b>. VirmoLab memeriksa semua mesin docking, Open Babel, RDKit/Meeko, docking Vina kecil, deteksi GPU, sifat ligan, statistik, PoseBusters, ekspor Excel, tema antarmuka, dan skrip alat WSL (58 butir), lalu menampilkan mana yang gagal. Dari baris perintah: <code>VirmoLab.exe --uji-mandiri hasil.json</code>.</div>
 <table>
 <tr><th style="width:32%">Gejala</th><th>Penyebab &amp; solusi</th></tr>
 <tr><td>Status bar: “OpenCL tidak tersedia — mode CPU”</td><td>Driver GPU lama atau driver bawaan Windows. Perbarui driver (<a href="gpu.html">Setup GPU</a>), restart, buka VirmoLab lagi.</td></tr>
@@ -15,6 +15,11 @@
 <tr><td>Ligan: “tipe atom tidak didukung AutoDock”</td><td>Mengandung unsur seperti B atau Si yang tidak punya parameter AutoDock4. Ganti ligan atau gunakan Vina dengan hati-hati.</td></tr>
 <tr><td>Peringatan grid “melebihi 126 titik”</td><td>Kotak terlalu besar untuk spasi 0,375 Å. Naikkan spasi (mis. 0,5–0,6 Å) atau perkecil kotak. Tombol “Seluruh protein (blind)” mengatur spasi otomatis.</td></tr>
 <tr><td>Validasi redocking RMSD &gt; 2 Å</td><td>Coba: kotak dipusatkan ke ligan asli, run lebih banyak (preset Teliti), atau mesin lain. Bila ligan asli punya ion logam/air penting di situs aktif, pertahankan saat preparasi reseptor.</td></tr>
+<tr><td>Pasang alat lanjutan: “WSL menolak berjalan … ERROR_NO_SYSTEM_RESOURCES”</td><td>Windows sedang kehabisan sumber daya untuk mesin virtual WSL, sering saat aplikasi kamera atau video terbuka. Tutup aplikasi itu, tunggu sebentar, lalu klik <b>Periksa ulang</b>. Menurunkan batas memori WSL tidak menolong.</td></tr>
+<tr><td>Pasang alat lanjutan: “Koneksi internet terputus atau diblokir”</td><td>Klik <b>Pasang</b> lagi; unduhan yang sudah selesai tidak diulang. Di jaringan kampus/kantor, atur proksi di Ubuntu (<code>export HTTPS_PROXY=http://proksi:port</code> di <code>~/.bashrc</code>).</td></tr>
+<tr><td>Pasang alat lanjutan: “Disk WSL penuh” atau ruang disk kurang</td><td>Disk virtual WSL berada di drive C: (biasanya). Kosongkan drive itu, lalu klik <b>Pasang</b> lagi. Paket GPU &amp; RBFE butuh ± 24 GB bebas selama pemasangan, paket co-folding ± 22 GB.</td></tr>
+<tr><td>Pasang alat lanjutan: distro “berjalan di WSL 1”</td><td>Klik <b>Salin perintah</b>, jalankan <code>wsl --set-version &lt;distro&gt; 2</code> di PowerShell, lalu <b>Periksa ulang</b>.</td></tr>
+<tr><td>Tombol Uni-Dock di panel docking tidak aktif</td><td>Uni-Dock belum terpasang, atau komputer tidak punya GPU NVIDIA. Pasang paket Docking GPU &amp; RBFE lewat <b>Alat › Pasang alat lanjutan (WSL)…</b>.</td></tr>
 <tr><td>Docking berhenti saat laptop tidur (sleep)</td><td>Atur Windows agar tidak tidur saat dicolokkan. Job yang terputus berstatus <i>Dijeda</i> dan bisa dilanjutkan.</td></tr>
 <tr><td>Antivirus menghapus/memblokir <code>autodock_gpu.exe</code> atau <code>vina.exe</code></td><td>Program ilmiah tanpa tanda tangan kadang dicurigai. Tambahkan folder VirmoLab ke pengecualian antivirus, lalu pasang ulang.</td></tr>
 <tr><td>Tampilan terlalu kecil/besar</td><td>VirmoLab mengikuti skala Windows (Settings › Display › Scale). Panel bisa disembunyikan lewat <b>Tampilan › Panel</b>; ruang kerja (<kbd>Ctrl</kbd>+<kbd>1</kbd>/<kbd>2</kbd>/<kbd>3</kbd>) menampilkan hanya panel yang perlu; <b>Tampilan › Atur ulang tata letak</b> mengembalikan susunan bawaan.</td></tr>

@@ -46,6 +46,17 @@ cek([a["nama"] for a in h["aset"]] == ["VirmoLab-Setup-1.7.0.exe", "VirmoLab-Por
                                         "SHA256SUMS-1.7.0.txt"], "aset diurutkan Setup, Portable, SHA256SUMS")
 cek(h["tanggal"] == "2026-11-02", "tanggal terbit dipotong ke YYYY-MM-DD")
 cek(P.urai_respons(CONTOH, "1.7.0")["status"] == "terkini", "versi sama -> terkini")
+
+# Jalur rilis publik pertama (C4 rencana 1.8.0): aplikasi 1.7.0 terpasang harus melihat rilis 1.8.0
+RILIS_18 = dict(CONTOH, tag_name="v1.8.0",
+                html_url="https://github.com/rizkirahmadip-dev/virmolab/releases/tag/v1.8.0",
+                assets=[{"name": "VirmoLab-Setup-1.8.0.exe", "browser_download_url": "https://x/e", "size": 530_000_000},
+                        {"name": "SHA256SUMS-1.8.0.txt", "browser_download_url": "https://x/s", "size": 190}])
+h18 = P.urai_respons(RILIS_18, "1.7.0")
+cek(h18["status"] == "baru" and h18["versi"] == "1.8.0" and h18["url"].endswith("/tag/v1.8.0"),
+    "aplikasi 1.7.0 melihat rilis 1.8.0 beserta tautan halamannya")
+cek(P.REPO == "rizkirahmadip-dev/virmolab" and P.API_TERBARU.endswith("/releases/latest"),
+    f"cek pembaruan menunjuk repo rilis ({P.REPO})")
 cek(P.urai_respons({"tag_name": "nightly"}, "1.6.0")["status"] == "galat", "tag bukan versi -> galat")
 cek(P.urai_respons({}, "1.6.0")["status"] == "galat", "respons kosong -> galat")
 cek(P.ukuran_teks(530_000_000) == "505 MB", f"ukuran 530e6 B -> {P.ukuran_teks(530_000_000)}")

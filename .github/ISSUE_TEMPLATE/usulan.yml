@@ -1,0 +1,27 @@
+name: Usulan fitur
+description: Mengusulkan fitur baru atau perbaikan alur kerja
+labels: ["usulan"]
+body:
+  - type: textarea
+    id: masalah
+    attributes:
+      label: Masalah yang ingin dipecahkan
+      description: Apa yang sekarang sulit atau memakan waktu, dan dalam penelitian seperti apa.
+    validations:
+      required: true
+
+  - type: textarea
+    id: usulan
+    attributes:
+      label: Usulan
+      description: Bentuk yang Anda bayangkan di dalam VirmoLab. Sebutkan juga cara lain yang sudah dicoba.
+    validations:
+      required: true
+
+  - type: textarea
+    id: rujukan
+    attributes:
+      label: Rujukan
+      description: >-
+        Untuk metode ilmiah, sertakan makalah atau dokumentasinya (DOI/tautan). Fitur yang mengubah angka
+        hasil hanya ditambahkan bila metodenya dapat dirujuk dan diuji.

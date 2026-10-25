@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Pertanyaan pemakaian
+    url: https://github.com/rizkirahmadip-dev/virmolab/discussions
+    about: Cara memakai VirmoLab, menafsirkan hasil, atau memilih pengaturan — tanyakan di Discussions.
+  - name: Masalah keamanan
+    url: https://github.com/rizkirahmadip-dev/virmolab/security/advisories/new
+    about: Laporkan secara privat lewat Security Advisory, jangan sebagai issue publik.
+  - name: Panduan dan tutorial
+    url: https://github.com/rizkirahmadip-dev/virmolab/tree/main/docs
+    about: Panduan pengguna, instalasi, setup GPU, dan cara mengatasi masalah umum.

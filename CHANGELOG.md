@@ -2,6 +2,34 @@
 
 Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x adalah pra-rilis.
 
+## [1.8.0] - belum dirilis
+
+Rilis publik pertama. Alat Linux lanjutan kini dipasang dari dalam aplikasi, dan tidak ada lagi pesan yang menyuruh
+pengguna menjalankan skrip yang tidak ikut installer.
+
+### Baru
+- **Pasang alat lanjutan (WSL)** (Alat › Pasang alat lanjutan (WSL)…; `core/alat_wsl.py`, `ui/dialog_alat_wsl.py`). Dua paket: *Docking GPU & RBFE* (Uni-Dock 1.2, OpenFE 1.13; ± 15 GB, ± 10 menit) dan *Co-folding & skor CNN* (Boltz-2 2.2.1 beserta bobotnya, GNINA 1.3.3; ± 17 GB, ± 14 menit), diukur pada pemasangan dari nol ke distro Ubuntu 26.04 bersih.
+  - Prasyarat diperiksa dalam satu panggilan WSL: versi Windows, WSL dan distro, WSL 2, WSL dapat berjalan (termasuk `ERROR_NO_SYSTEM_RESOURCES`), GPU NVIDIA, ruang disk di drive Windows tempat disk virtual WSL berada (bukan ukuran virtual ±1 TB yang dilaporkan `df`), curl/tar/python3, internet, dan pengguna Linux. Tiap butir yang gagal punya tombol perbaikan: *Pasang WSL…* lewat persetujuan administrator, *Buka terminal Ubuntu* dengan perintah `apt` sudah tersalin, atau *Salin perintah*. Bila semua lulus, prasyarat diringkas menjadi satu baris.
+  - Tanpa GPU NVIDIA: Uni-Dock dan GNINA (CUDA saja) dilewati, OpenFE dan Boltz-2 tetap dipasang dengan peringatan "sangat lambat". Bila ada lebih dari satu distro, distro dipilih di dialog dan dipakai semua alat lanjutan.
+  - Skrip pemasang dikirim lewat stdin, jadi folder aplikasi berspasi atau ber-huruf non-ASCII tidak masalah. Kemajuan per langkah, waktu, dan log tampil langsung dan disimpan di `log/alat_wsl_<paket>.log`. *Hentikan* mematikan seluruh pohon proses di dalam WSL (diuji: < 1 detik), dan *Pasang* lagi melanjutkan dari unduhan yang tersimpan. Sesudah sukses, tombol fitur langsung aktif tanpa membuka ulang aplikasi.
+  - Uji: `dev/uji_alat_wsl.py` (42 kasus keluaran WSL tiruan, penanda langkah dicocokkan dua arah dengan skrip) dan `dev/uji_alat_wsl_gui.py [--en]` (WSL sungguhan, skrip tiruan: sukses, gagal internet, dan Hentikan).
+- Fitur yang membutuhkan alat WSL yang belum terpasang menawarkan *Pasang sekarang…* (docking Uni-Dock, co-folding, docking peptida) atau tombol *Pasang OpenFE…* / *Pasang Boltz-2…* di dialog RBFE dan panel co-folding.
+- Uji mandiri: butir baru "Skrip alat WSL" (tiga skrip ikut build, berakhiran LF, sintaksis bash sah; 58 butir).
+
+### Diperbaiki
+- **Unduh bobot Boltz-2 gagal di distro baru**: `download_boltz2()` mengandaikan `~/.boltz` sudah ada. Unduhan yang putus juga meninggalkan berkas terpotong yang dianggap lengkap pada percobaan berikutnya. Kini tiap berkas diunduh ke `.part`, ukurannya dicocokkan dengan Content-Length, dicoba ulang hingga empat putaran, dan `mols.tar` diekstrak ke folder sementara.
+- Pemasang OpenFE/Uni-Dock gagal di Ubuntu 26.04 bersih karena `bzip2` tidak ada; micromamba kini diekstrak dengan Python bila perlu. Arsip `.conda` (± 4,5 GB) dihapus sesudah pemasangan sukses.
+- Label keterangan yang berganti gaya (muted → peringatan/info) kehilangan padding sehingga teks menempel ke garis tepinya, di tujuh dialog (alat WSL, glikosida, QSAR, RBFE, rescore ML, sunting 3D, pembelajaran aktif). Polish ulang Qt tidak menghitung ulang margin; kini `kit.gaya_ulang()` mengirim peristiwa StyleChange.
+- Memilih pose memanggil WSL secara sinkron untuk memeriksa Boltz-2 setiap kali. Status GNINA dan Boltz kini disimpan (hasil "belum ada" hanya 60 detik) dan disegarkan sesudah pemasangan.
+
+### Diubah
+- **Siap dirilis ke publik**: README ditulis ulang (unduh dan verifikasi SHA-256, kebutuhan sistem, daftar kemampuan, alat lanjutan, privasi, cara melapor, cara mengutip, ringkasan bahasa Inggris), `SECURITY.md` dan templat issue GitHub ditambahkan, dan tangkapan layar dokumentasi dibuat ulang dari folder kerja netral sehingga tidak lagi memperlihatkan jalur folder pengembangan.
+- **Privasi dinyatakan terbuka**: bagian baru di README dan panduan pengguna (Bantuan › Panduan › Privasi) merinci satu-satunya empat hal yang menghubungi internet — unduhan yang diminta pengguna, peladen MSA ColabFold bila dicentang, pemeriksaan pembaruan (dapat dimatikan), dan pemasang alat WSL — serta tempat penyimpanan proyek, log, dan pengaturan.
+- **Lisensi**: tawaran kode sumber GPL kini menunjuk repositori publik dan arsip kode sumber tiap tag rilis; alat Linux yang diunduh atas permintaan pengguna (Uni-Dock, OpenFE, GNINA, Boltz-2, micromamba, uv, PyTorch) dicatat beserta lisensi dan sumber unduhannya; attrs, MarkupSafe, dan tqdm yang ikut terbundel sebelumnya belum tercatat. Alat baru `dev/cek_lisensi.py` membandingkan catatan lisensi dengan isi build (paket, versi, program, berkas lisensi yang dirujuk) — sekarang bersih.
+- **Sitasi**: `CITATION.cff` memakai nama penulis sebenarnya, versi 1.8.0, dan `url` ke domain yang belum dimiliki dihapus; dialog Bantuan › Lisensi dan cara mengutip menampilkan contoh sitasi VirmoLab yang siap disalin.
+- Enam pesan yang menunjuk `build_tools/pasang_*.sh` (skrip yang tidak ikut installer) kini menunjuk Alat › Pasang alat lanjutan (WSL).
+- Panduan instalasi: bagian baru *Alat lanjutan (opsional, lewat WSL)*; folder bawaan installer dibetulkan (`%LOCALAPPDATA%\Programs\VirmoLab`, per pengguna, tanpa hak admin). Mengatasi masalah: lima gejala pemasangan alat lanjutan.
+
 ## [1.7.0] - 24 Oktober 2026
 
 Rilis fitur untuk penelitian bahan alam: perbandingan glikosida–aglikon yang adil terhadap ukuran molekul, ringkasan

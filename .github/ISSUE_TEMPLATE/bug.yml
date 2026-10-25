@@ -1,0 +1,80 @@
+name: Laporan bug
+description: Ada yang tidak berjalan, hasilnya salah, atau aplikasi berhenti
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Terima kasih sudah melapor. Isi sebisanya — laporan tanpa versi dan log sering tidak dapat ditelusuri.
+
+        **Masalah keamanan jangan dilaporkan di sini**; ikuti [SECURITY.md](../blob/main/SECURITY.md).
+
+  - type: input
+    id: versi
+    attributes:
+      label: Versi VirmoLab
+      description: Ada di Bantuan › Tentang VirmoLab, atau di judul jendela.
+      placeholder: "1.8.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: pemasangan
+    attributes:
+      label: Cara pemasangan
+      options:
+        - Installer (VirmoLab-Setup-*.exe)
+        - Portable (VirmoLab-Portable-*.zip)
+        - Dijalankan dari kode sumber
+    validations:
+      required: true
+
+  - type: input
+    id: windows
+    attributes:
+      label: Versi Windows
+      description: "Tekan Win+R, ketik winver. Contoh: Windows 11 24H2 (build 26100)."
+    validations:
+      required: true
+
+  - type: input
+    id: gpu
+    attributes:
+      label: GPU dan driver
+      description: Ada di bilah status bawah VirmoLab, atau Alat › Pemeriksa kesehatan sistem.
+      placeholder: "NVIDIA GeForce RTX 3060 Laptop GPU · driver 610.74 · OpenCL"
+
+  - type: textarea
+    id: langkah
+    attributes:
+      label: Langkah untuk memunculkannya
+      description: Urutan yang Anda lakukan, lalu apa yang terjadi dan apa yang Anda harapkan.
+      placeholder: |
+        1. Impor 1HSG dari RCSB
+        2. Siapkan reseptor dengan protonasi PROPKA
+        3. Klik Jalankan — yang terjadi: ...; yang diharapkan: ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: log
+    attributes:
+      label: Log
+      description: >-
+        Bantuan › Laporkan masalah menyiapkan berkas log yang sudah dipangkas
+        (%LOCALAPPDATA%\VirmoLab\log, atau data\log pada versi portable). Lampirkan berkasnya atau tempel
+        bagian akhirnya. Periksa dulu agar tidak memuat data yang tidak boleh dibagikan.
+      render: text
+
+  - type: textarea
+    id: ujimandiri
+    attributes:
+      label: Hasil uji mandiri (bila berhubungan dengan mesin docking)
+      description: Alat › Uji mandiri komponen… lalu salin butir yang gagal.
+      render: text
+
+  - type: textarea
+    id: lain
+    attributes:
+      label: Hal lain
+      description: Tangkapan layar, berkas contoh (struktur kecil), atau keterangan tambahan.
