@@ -2,6 +2,7 @@
 
   PYTHONIOENCODING=utf-8 PYTHONPATH=. .venv/Scripts/python.exe dev/buat_screenshot.py
 """
+import atexit
 import shutil
 import sys
 from pathlib import Path
@@ -9,12 +10,20 @@ from pathlib import Path
 from PySide6.QtCore import QSettings, Qt, QTimer
 
 sys.argv = [sys.argv[0]]
-KERJA = Path("dev/uji/kerja_docs").resolve()
+# Folder kerja di luar repo: jalur proyek ikut terlihat di bilah status dan panel Properti, dan tangkapan layar ini
+# dibundel ke installer serta dipakai di README publik — jangan memperlihatkan jalur folder pengembangan.
+KERJA = Path("C:/VirmoLab-dokumentasi").resolve()
 shutil.rmtree(KERJA, ignore_errors=True)
-KERJA.mkdir(parents=True)
+(KERJA / "contoh").mkdir(parents=True)
+SUMBER = KERJA / "contoh" / "1HSG.pdb"          # jalur sumber ikut tampil di panel Properti
+shutil.copyfile(Path("dev/uji/1HSG.pdb"), SUMBER)
 OUT = Path("docs/gambar").resolve()
 OUT.mkdir(parents=True, exist_ok=True)
 st = QSettings("VirmoLab", "VirmoLab")
+KERJA_LAMA = st.value("folder_kerja", "")
+MODE_LAMA = st.value("mode_pengguna", "")
+# Dokumentasi memperlihatkan tampilan bawaan (panel Langkah tampak), bukan mode ahli yang mungkin dipakai pengembang
+st.setValue("mode_pengguna", "pemula")
 for k in ("layout", "layout_v2", "sesi_terbuka", "geometri", "kolom_hasil", "proyek_terakhir"):
     st.remove(k)
 st.setValue("wizard_selesai", True)
@@ -48,21 +57,26 @@ def hook():
     class U(mainwindow.JendelaUtama):
         def __init__(s):
             super().__init__()
-            s.resize(1440, 900)
+            s.resize(1600, 950)          # cukup lebar agar kolom nama ligan di tabel Hasil tidak terpotong
             s.move(30, 30)
             s.n = 0
             s.pelaksana.jobSelesai.connect(s._job)
             QTimer.singleShot(3000, s.l0)
             QTimer.singleShot(600000, lambda: (print("TIMEOUT"), QApplication.quit()))
 
-        def l0(s):
+        def l0(s, sisa=40):
+            if s.env is None:          # deteksi GPU berjalan di thread latar; Wizard butuh hasilnya
+                if sisa:
+                    QTimer.singleShot(500, lambda: s.l0(sisa - 1))
+                    return
+                raise RuntimeError("Deteksi perangkat tidak selesai; tangkapan layar dibatalkan.")
             w = Wizard(s.env, str(KERJA), s)
             w.show()
             QTimer.singleShot(600, lambda: (simpan(w, "01_wizard"), w.reject(),
                                             QTimer.singleShot(800, lambda: (simpan(s, "00_sambutan"), s.l1()))))
 
         def l1(s):
-            s.impor([str(Path("dev/uji/1HSG.pdb").resolve())])
+            s.impor([str(SUMBER)])
             QTimer.singleShot(4000, lambda: (simpan(s, "02_impor"), s.l2()))
 
         def l2(s):
@@ -179,10 +193,27 @@ def hook():
             s.atur_ruang("siapkan")
             s.terapkan_tema("gelap")
             s.tab_tengah.setCurrentWidget(s.w_view)
-            QTimer.singleShot(2500, lambda: (simpan(s, "15_gelap"), s.terapkan_tema("terang"), QApplication.quit()))
+            QTimer.singleShot(2500, lambda: (simpan(s, "15_gelap"), s.terapkan_tema("terang"), pulih(), QApplication.quit()))
 
     mainwindow.JendelaUtama = U
     A.main()
+
+
+def pulih():
+    """Folder kerja pengguna dikembalikan: skrip ini mengubahnya di pengaturan nyata."""
+    st2 = QSettings("VirmoLab", "VirmoLab")
+    if KERJA_LAMA:
+        st2.setValue("folder_kerja", KERJA_LAMA)
+    else:
+        st2.remove("folder_kerja")
+    if MODE_LAMA:
+        st2.setValue("mode_pengguna", MODE_LAMA)
+    else:
+        st2.remove("mode_pengguna")
+    st2.sync()
+
+
+atexit.register(pulih)
 
 
 hook()
