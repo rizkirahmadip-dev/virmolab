@@ -134,7 +134,9 @@ def main():
 
     langkah("SHA-256")
     baris = [f"{sha256(f)}  {f.name}" for f in (setup, portable)]
-    (RILIS / f"SHA256SUMS-{VERSI}.txt").write_text("\n".join(baris) + "\n")
+    # LF tegas: write_text di Windows menulis CRLF, dan `sha256sum -c` di Linux/WSL lantas mencari
+    # berkas bernama "...exe\r" (ditemukan saat memverifikasi unduhan rilis v1.8.0)
+    (RILIS / f"SHA256SUMS-{VERSI}.txt").write_text("\n".join(baris) + "\n", newline="\n")
     for b, f in zip(baris, (setup, portable)):
         print(f"  {f.stat().st_size / 2**20:7.1f} MB  {b}")
 
