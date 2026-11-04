@@ -51,6 +51,9 @@ mulai rilis berikutnya.
   bersih untuk pemasang alat lanjutan. Belum ada laporan dari laptop lain, terutama tanpa GPU NVIDIA atau
   dengan RAM 8 GB. Laporan pengalaman Anda sangat membantu —
   [buka issue](https://github.com/rizkirahmadip-dev/virmolab/issues).
+- **Pemutakhiran dari pemasangan 1.7.0 lama belum teruji** (1.7.0 tidak pernah diedarkan ke publik).
+  Installer membersihkan berkas program versi lama sebelum menyalin; proyek dan pengaturan tidak disentuh.
+  Bila ragu, copot versi lama lebih dulu — proyek di `Documents\VirmoLab` tetap ada.
 - Hasil docking adalah prediksi komputasi, bukan bukti aktivitas biologis.
 - VirmoLab tidak mengirim proyek, struktur, atau hasil Anda ke mana pun. Rinciannya di bagian *Privasi* pada
   README dan Bantuan › Panduan.
@@ -85,5 +88,7 @@ certificate** yet, so SmartScreen will warn — choose *More info › Run anyway
 
 **Please note.** This build was tested on one developer laptop (Windows 10 64-bit, RTX 3060 Laptop, 16 GB RAM)
 and one clean WSL distro for the tool installer; reports from other machines are very welcome via
-[Issues](https://github.com/rizkirahmadip-dev/virmolab/issues). Docking results are computational predictions,
+[Issues](https://github.com/rizkirahmadip-dev/virmolab/issues). Upgrading over an old 1.7.0 install is untested
+(1.7.0 was never distributed publicly); the installer clears the previous program files before copying, and
+projects and settings are left untouched. Docking results are computational predictions,
 not evidence of biological activity. VirmoLab sends no project data anywhere (see *Privasi* in the README).
