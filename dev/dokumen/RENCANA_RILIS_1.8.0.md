@@ -263,6 +263,21 @@ dua kali; dikerjakan pengguna sendiri.
 **Sebelum publikasi (dikonfirmasi pengguna satu per satu):** jadikan repo publik, aktifkan Discussions (dirujuk
 templat issue), hubungkan Zenodo, push + tag `v1.8.0`, terbitkan Release, lalu perbarui badge DOI.
 
+**4 Nov 2026 — jalur D SELESAI (dengan satu celah).** D1: regresi penuh 122/122 (lima kegagalan semu diperbaiki di
+harness), audit label & bahasa 0 temuan. Build 1.8.0 final: Setup 497,4 MB (SHA-256 3701298b…), Portable 719,4 MB
+(f56475b8…), uji mandiri 58/58 di exe, `dev/cek_lisensi.py` bersih. D2 pada artefak final: portable di
+`C:\Uji VirmoLab Rizkí` dengan PATH hanya System32 (58/58), tiruan tanpa OpenCL → mode CPU dengan pesan jelas
+(58/58), installer senyap per-pengguna → 58/58 → copot bersih (folder, entri, ProgID hilang; asosiasi .pdbqt milik
+PyMOL tidak disentuh), tangkapan GUI diperiksa mata (wizard, terang, gelap, English, dialog alat WSL dengan
+prasyarat sungguhan — syarat memori 3,8 GB tampil). Defender: kedua artefak bersih.
+Dua bug NYATA ketemu dan diperbaiki selama D2: (1) `--uji-mandiri` berhenti dengan UnicodeEncodeError di konsol
+cp1252 — PyInstaller 6 memakai konfigurasi isolated sehingga `PYTHONIOENCODING` DIABAIKAN di exe; perbaikan di
+`app.main()` (reconfigure UTF-8). (2) Pemutakhiran meninggalkan berkas `_internal` versi lama (dibuktikan dengan
+berkas tanam); `[InstallDelete]` kini menghapus `{app}\_internal` sebelum menyalin.
+**Celah:** pemutakhiran lintas-versi 1.7.0 → 1.8.0 TIDAK teruji — `C:\VirmoLab-rilis-lama` (artefak 1.7.0) sudah
+dihapus dari laptop. Penggantinya: pasang-ulang 1.8.0 di atas 1.8.0 dengan berkas tanam, lulus. Bila masih ada
+salinan Setup 1.7.0 di tempat lain, jalankan: pasang 1.7.0 → pasang 1.8.0 di atasnya → uji mandiri + proyek tetap.
+
 ## 7. Kalimat pembuka untuk sesi berikutnya
 
 > Kerjakan `dev/dokumen/RENCANA_RILIS_1.8.0.md`. Mulai dengan keputusan K1–K10 (tanyakan dengan AskUserQuestion,
