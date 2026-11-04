@@ -66,6 +66,11 @@ Name: "{autoprograms}\VirmoLab - Panduan"; Filename: "{app}\_internal\docs\pandu
 Name: "{autodesktop}\VirmoLab"; Filename: "{app}\VirmoLab.exe"; Tasks: desktopicon
 
 [InstallDelete]
+; Isi _internal dihapus sebelum menyalin versi baru. Tanpa ini, pemutakhiran menimpa di atas berkas versi lama:
+; modul PyInstaller yang sudah tidak dipakai tetap tertinggal dan bisa termuat bercampur dengan versi baru
+; (ditemukan pada uji pemutakhiran D2 rilis 1.8.0 dengan berkas uji yang ditanam). Pada pemasangan pertama
+; folder ini belum ada sehingga baris ini tidak berpengaruh.
+Type: filesandordirs; Name: "{app}\_internal"
 ; pintasan dari instalasi lama (sebelum 1.2.0)
 Type: files; Name: "{autoprograms}\{#NamaLama}.lnk"
 Type: files; Name: "{autoprograms}\{#NamaLama} - Panduan.lnk"
