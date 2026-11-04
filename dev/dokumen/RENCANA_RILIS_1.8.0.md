@@ -278,6 +278,17 @@ berkas tanam); `[InstallDelete]` kini menghapus `{app}\_internal` sebelum menyal
 dihapus dari laptop. Penggantinya: pasang-ulang 1.8.0 di atas 1.8.0 dengan berkas tanam, lulus. Bila masih ada
 salinan Setup 1.7.0 di tempat lain, jalankan: pasang 1.7.0 → pasang 1.8.0 di atasnya → uji mandiri + proyek tetap.
 
+**4 Nov 2026 — TERBIT.** Atas perintah pengguna ("mulai terbit aja"), rilis diterbitkan TANPA B1 (K7 belum
+dikerjakan; kriteria keyakinan penargetan balik masih "10 besar kedua jalur" — kerjakan di 1.8.1). Langkah keluar,
+semuanya dikonfirmasi: push main + tag v1.8.0; repo DIJADIKAN PUBLIK + Discussions aktif + deskripsi diisi;
+GitHub Release v1.8.0 dengan Setup, Portable, SHA256SUMS. Verifikasi pasca-terbit: unduh ulang dari halaman rilis,
+`sha256sum -c` OK untuk kedua artefak; cek pembaruan HIDUP sebagai aplikasi 1.7.0 melihat status "baru" 1.8.0.
+Bug terakhir ketemu justru saat verifikasi: SHA256SUMS ditulis CRLF sehingga `sha256sum -c` di Linux/WSL gagal —
+rilis.py diperbaiki (newline LF) dan asetnya diganti di halaman rilis (fcdfbd9).
+**Sisa:** (1) B1/K7 → 1.8.1. (2) Zenodo (K8): hubungkan repo di zenodo.org (GitHub → sinkron → aktifkan repo),
+lalu buat rilis kecil (mis. v1.8.0-zenodo atau tunggu 1.8.1) agar DOI terbit, kemudian tambahkan badge DOI ke
+README dan CITATION. (3) Pengumuman ditunda (K9). (4) Sertifikat Certum → tanda tangan mulai rilis berikutnya.
+
 ## 7. Kalimat pembuka untuk sesi berikutnya
 
 > Kerjakan `dev/dokumen/RENCANA_RILIS_1.8.0.md`. Mulai dengan keputusan K1–K10 (tanyakan dengan AskUserQuestion,
