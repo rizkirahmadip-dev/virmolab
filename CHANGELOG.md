@@ -16,6 +16,15 @@ Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x 
   - Keadaan alur disimpan di dalam berkas proyek (kunci `farmakologi` pada `proyek.json`), dan tiap sumber data daring dicatat sebagai jejak sehingga ikut ke paragraf metode dan laporan.
 - Uji mandiri: tiga butir baru — *Diagram Venn*, *Alur farmakologi jaringan* (penyaringan, irisan, nilai MCC yang dihitung tangan, paragraf metode), dan *CTD (pengurai interaksi senyawa-gen)*; seluruhnya tanpa internet.
 
+### Diperbaiki
+Lima hal berikut ketahuan saat alur dijalankan ujung ke ujung dengan jaringan hidup (*Curcuma longa* terhadap *colorectal cancer*, mengikuti contoh modul BBB NET):
+- **"Ambil senyawa" di dialog Senyawa dari tanaman obat selalu gagal** dengan `TypeError: 'Event' object is not callable` begitu takson yang dipilih punya rujukan artikel. `ui/dialog_tanaman.py` mengirim `threading.Event`, sedangkan `core/tanaman.py` memanggilnya seperti fungsi. Keduanya masuk pada commit yang sama, jadi jalur ini belum pernah berhasil sejak 1.8.0. Diperbaiki dengan `tanaman.dibatalkan()` yang menerima Event, fungsi, atau None — pola yang sudah dipakai `core/generatif.py`, `core/xtb.py`, dan `core/farmakofor.py`.
+- **Nama senyawa kembar menyatu dan salah satunya kehilangan target.** Peta target berkunci nama senyawa, padahal LOTUS memulangkan nama yang sama untuk stereoisomer dan tautomer berbeda (kunyit: dua `desmethoxycurcumin`, dua `bisdemethoxycurcumin`). Nama kini dibuat unik dengan akhiran berangka saat ditambahkan.
+- **Sumber senyawa tidak masuk paragraf metode.** Kolom di tahap 1 hanya dibaca saat menyimpan proyek, sehingga paragraf metode memakai teks pengganti "sumber senyawa" walau penggunanya sudah mengisi. Kini dibaca setiap kali ringkasan disegarkan.
+- **Paragraf metode Inggris kemasukan teks Indonesia** pada bagian sumber target ("assigned by kemiripan ligan ChEMBL…"). Sumber target kini disimpan sebagai kunci, bukan kalimat, dan diterjemahkan saat paragraf dirakit.
+- **Daftar gen penyakit terpotong tanpa pemberitahuan.** Open Targets dibatasi 500 gen teratas; bila hasilnya pas sebanyak batas, gen di bawahnya tidak pernah diadu dengan target senyawa sehingga irisannya kehilangan anggota. Batasnya kini dapat diatur dan keadaan terpotong diberitahukan di tempat.
+- Satu nama senyawa panjang (nama IUPAC bahan alam bisa lebih dari 70 huruf) melebarkan kanvas jaringan sehingga seluruh graf mengecil saat dipaskan; label di gambar kini dipotong pada 26 huruf dengan nama utuh tetap di tooltip.
+
 ### Diubah
 - GeneCards sengaja tidak dihubungi otomatis: lisensinya berbayar dan melarang pengambilan otomatis. Jalurnya adalah pengguna mengunduh sendiri lalu mengimpor berkasnya; Open Targets dipakai sebagai sumber gen penyakit yang terbuka.
 

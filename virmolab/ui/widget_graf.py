@@ -26,6 +26,7 @@ WARNA_JENIS = {
     "": "#7b8698",
 }
 LABEL_JENIS = {"senyawa": "Senyawa", "target": "Target", "jalur": "Jalur", "penyakit": "Penyakit"}
+MAKS_LABEL = 26          # huruf; lebih panjang dipotong agar tata letak tidak melar (nama utuh di tooltip)
 
 
 class _Simpul(QGraphicsEllipseItem):
@@ -141,7 +142,10 @@ class TampilanGraf(QGraphicsView):
             s.addItem(item)
             self._simpul[n] = item
 
-            teks = QGraphicsSimpleTextItem(str(d.get("label", n)))
+            # Label dipotong: satu nama panjang (nama IUPAC senyawa bahan alam bisa 70 huruf) melebarkan
+            # sceneRect sehingga seluruh jaringan ikut mengecil saat dipaskan. Nama utuh tetap di tooltip.
+            penuh = str(d.get("label", n))
+            teks = QGraphicsSimpleTextItem(penuh if len(penuh) <= MAKS_LABEL else penuh[:MAKS_LABEL - 1] + "…")
             teks.setFont(font_label)
             teks.setBrush(QBrush(QColor(t["teks"])))
             lebar = teks.boundingRect().width()

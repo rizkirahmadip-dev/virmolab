@@ -575,12 +575,28 @@ def uji(lapor=None):
         if h.get("EGFR") != 3.0 or h.get("SRC") != 1.0 or h.get("TP53") != 2.0:
             raise RuntimeError(f"MCC salah: {h}")
 
+        # Nama kembar harus dibuat unik: peta target berkunci nama, jadi dua struktur bernama sama
+        # akan menyatu dan salah satunya kehilangan target (LOTUS memulangkan nama kembar).
+        kembar = F.senyawa_dari_daftar([{"nama": "kurkumin", "smiles": "CCO"},
+                                        {"nama": "kurkumin", "smiles": "CCC"}])
+        if len({s["nama"] for s in kembar}) != 2:
+            raise RuntimeError(f"nama kembar tidak dibuat unik: {[s['nama'] for s in kembar]}")
+
         k = F.keadaan_baru()
         k.update({"senyawa": sen, "target_senyawa": {"a": ["TP53"]}, "gen_penyakit": [{"gen": "TP53"}],
-                  "irisan": ["TP53"], "tepi_ppi": [["TP53", "AKT1", 0.9]]})
-        for teks in (F.paragraf_metode(k), F.paragraf_metode(k, inggris=True)):
+                  "irisan": ["TP53"], "tepi_ppi": [["TP53", "AKT1", 0.9]],
+                  "tanaman": "Curcuma longa", "sumber_target": ["kemiripan", "ctd"]})
+        id_teks, en_teks = F.paragraf_metode(k), F.paragraf_metode(k, inggris=True)
+        for teks in (id_teks, en_teks):
             if "validasi eksperimental" not in teks and "experimental validation" not in teks:
                 raise RuntimeError("paragraf metode kehilangan peringatan validasi")
+            if "Curcuma longa" not in teks:
+                raise RuntimeError("sumber senyawa tidak masuk paragraf metode")
+        # Paragraf Inggris pernah kemasukan label sumber berbahasa Indonesia.
+        if "kemiripan ligan" in en_teks or "terkurasi" in en_teks:
+            raise RuntimeError(f"paragraf Inggris memuat teks Indonesia: {en_teks[:160]}")
+        if "ligand similarity" not in en_teks or "kemiripan ligan" not in id_teks:
+            raise RuntimeError("label sumber target tidak mengikuti bahasa paragraf")
         if len(F.ringkasan(k)) != 7:
             raise RuntimeError("ringkasan tahap tidak lengkap")
         return f"saring {r['lolos']}/{len(sen)}, irisan 1 gen, MCC & paragraf metode OK"

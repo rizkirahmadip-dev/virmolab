@@ -53,6 +53,29 @@ _PETA_ADMET = {
     "ames_maks": ("AMES", -1),
 }
 
+# Sumber target disimpan sebagai kunci, bukan kalimat, supaya paragraf metode Inggris tidak kemasukan
+# teks Indonesia. Nilai: (label Indonesia, label Inggris).
+SUMBER_TARGET = {
+    "kemiripan": ("kemiripan ligan ChEMBL (ECFP4, pChEMBL ≥ 6)",
+                  "ligand similarity against ChEMBL actives (ECFP4, pChEMBL ≥ 6)"),
+    "ctd": ("interaksi senyawa-gen terkurasi CTD", "curated chemical-gene interactions from CTD"),
+    "impor": ("tabel target yang diimpor pengguna", "a user-supplied target table"),
+    "docking": ("penargetan balik berbasis struktur", "structure-based reverse docking"),
+}
+
+
+def label_sumber(kunci: Sequence[str], inggris: bool = False) -> str:
+    """Gabungkan kunci sumber target menjadi satu frasa dalam bahasa yang diminta."""
+    label = [SUMBER_TARGET[k][1 if inggris else 0] for k in kunci if k in SUMBER_TARGET]
+    sisa = [str(k) for k in kunci if k not in SUMBER_TARGET]      # kunci lama / tak dikenal: apa adanya
+    label += sisa
+    if not label:
+        return SUMBER_TARGET["kemiripan"][1 if inggris else 0]
+    if len(label) == 1:
+        return label[0]
+    return ("; ".join(label[:-1])) + (" and " if inggris else " dan ") + label[-1]
+
+
 LABEL_KRITERIA = {
     "lipinski_maks": "Pelanggaran Lipinski maksimum",
     "hia_min": "Absorpsi usus manusia (HIA) minimum",
@@ -105,17 +128,25 @@ def senyawa_dari_daftar(baris: Iterable[Dict[str, Any]]) -> List[Dict[str, Any]]
 
     Menerima dict dengan kunci nama/smiles dalam berbagai ejaan (nama, name, senyawa, judul; smiles, SMILES).
     """
-    hasil, dilihat = [], set()
+    hasil, dilihat, nama_dipakai = [], set(), set()
     for b in baris:
         nama = str(b.get("nama") or b.get("name") or b.get("senyawa") or b.get("judul") or "").strip()
         smiles = str(b.get("smiles") or b.get("SMILES") or b.get("isomeric_smiles") or "").strip()
         if not smiles:
             continue
-        kunci = smiles
-        if kunci in dilihat:
+        if smiles in dilihat:
             continue
-        dilihat.add(kunci)
-        hasil.append({"nama": nama or f"Senyawa {len(hasil) + 1}", "smiles": smiles,
+        dilihat.add(smiles)
+        # Nama dibuat unik: peta target berkunci nama, jadi dua struktur bernama sama akan menyatu dan
+        # satu kehilangan targetnya. LOTUS memang memulangkan nama kembar untuk stereoisomer/tautomer.
+        nama = nama or f"Senyawa {len(hasil) + 1}"
+        if nama in nama_dipakai:
+            n = 2
+            while f"{nama} ({n})" in nama_dipakai:
+                n += 1
+            nama = f"{nama} ({n})"
+        nama_dipakai.add(nama)
+        hasil.append({"nama": nama, "smiles": smiles,
                       "sumber": str(b.get("sumber") or b.get("source") or "").strip(),
                       "sifat": {}, "admet": {}, "lolos": True, "alasan": []})
     return hasil
@@ -403,9 +434,10 @@ def paragraf_metode(k: Dict[str, Any], inggris: bool = False) -> str:
     ambang = k.get("ambang_string", jaringan.AMBANG_STRING)
     n_jalur = len(k.get("jalur") or [])
     gmt = {"reactome": "Reactome", "go_bp": "Gene Ontology Biological Process"}.get(k.get("gmt"), k.get("gmt") or "")
-    sumber = ", ".join(k.get("sumber_target") or []) or "kemiripan ligan"
-    penyakit = (k.get("penyakit") or {}).get("nama") or "penyakit yang diteliti"
-    tanaman = k.get("tanaman") or "sumber senyawa"
+    sumber = label_sumber(k.get("sumber_target") or [], inggris=inggris)
+    penyakit = (k.get("penyakit") or {}).get("nama") or ("the disease studied" if inggris
+                                                         else "penyakit yang diteliti")
+    tanaman = k.get("tanaman") or ("the compound source" if inggris else "sumber senyawa")
 
     if inggris:
         def j(n, tunggal, jamak=None):
@@ -426,7 +458,7 @@ def paragraf_metode(k: Dict[str, Any], inggris: bool = False) -> str:
     return (
         f"Analisis farmakologi jaringan dikerjakan dengan VirmoLab. Sebanyak {n_senyawa} senyawa dari {tanaman} "
         f"dikumpulkan lalu disaring berdasarkan sifat fisikokimia dan prediksi ADMET, menyisakan {n_lolos} senyawa. "
-        f"Target dugaan ditetapkan melalui {sumber} dan menghasilkan {n_target} simbol gen unik. Gen yang berasosiasi "
+        f"Target dugaan ditetapkan melalui {sumber}, menghasilkan {n_target} simbol gen unik. Gen yang berasosiasi "
         f"dengan {penyakit} sebanyak {n_penyakit} gen diiriskan dengan target senyawa sehingga diperoleh {n_irisan} "
         f"target terapi potensial. Jaringan interaksi protein-protein diambil dari STRING (Homo sapiens, skor gabungan "
         f"≥ {_koma(ambang)}) dan memuat {n_tepi} tepi; protein hub diperingkat dengan Maximal Clique Centrality. "
@@ -443,7 +475,7 @@ def ringkasan(k: Dict[str, Any]) -> List[Dict[str, Any]]:
         {"tahap": "Senyawa", "nilai": len(senyawa), "satuan": "senyawa", "ket": k.get("tanaman") or ""},
         {"tahap": "Lolos ADMET", "nilai": len(yang_lolos(senyawa)), "satuan": "senyawa", "ket": ""},
         {"tahap": "Target senyawa", "nilai": len({g for d in (k.get("target_senyawa") or {}).values() for g in d}),
-         "satuan": "gen", "ket": ", ".join(k.get("sumber_target") or [])},
+         "satuan": "gen", "ket": label_sumber(k.get("sumber_target") or []) if k.get("sumber_target") else ""},
         {"tahap": "Gen penyakit", "nilai": len(k.get("gen_penyakit") or []), "satuan": "gen",
          "ket": (k.get("penyakit") or {}).get("nama") or ""},
         {"tahap": "Irisan", "nilai": len(k.get("irisan") or []), "satuan": "target potensial", "ket": ""},

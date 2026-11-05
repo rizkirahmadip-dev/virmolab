@@ -180,6 +180,15 @@ class DialogFarmakologi(QDialog):
     def _tambah_senyawa(self, baru: List[Dict[str, Any]]):
         ada = {s["smiles"] for s in self.k["senyawa"]}
         tambah = [s for s in baru if s["smiles"] not in ada]
+        # Nama tetap unik walau ditambahkan dari beberapa sumber berurutan (peta target berkunci nama).
+        dipakai = {s["nama"] for s in self.k["senyawa"]}
+        for s in tambah:
+            if s["nama"] in dipakai:
+                n = 2
+                while f"{s['nama']} ({n})" in dipakai:
+                    n += 1
+                s["nama"] = f"{s['nama']} ({n})"
+            dipakai.add(s["nama"])
         self.k["senyawa"].extend(tambah)
         self._isi_tabel_senyawa()
         self._catat(f"{len(tambah)} senyawa baru ditambahkan ({len(baru) - len(tambah)} duplikat dilewati).")
@@ -261,7 +270,7 @@ class DialogFarmakologi(QDialog):
                        progres=lambda i, n, t: self.l_status.setText(f"{t} {i}/{n}…"))
 
     def _saring_selesai(self, hasil):
-        self.k["senyawa"] = self.k["senyawa"]
+        # hitung_sifat() dan saring() menyunting dict senyawa di tempat, jadi tidak ada yang perlu disalin.
         self._isi_tabel_admet()
         self._henti(f"{hasil['lolos']} senyawa lolos, {hasil['gagal']} gugur"
                     + (f"; {hasil['tanpa_admet']} belum punya nilai ADMET." if hasil["tanpa_admet"] else "."))
@@ -365,7 +374,7 @@ class DialogFarmakologi(QDialog):
             jejak: List[Dict[str, Any]] = []
             sumber: List[str] = []
             if pakai_kemiripan:
-                sumber.append("kemiripan ligan ChEMBL (ECFP4, pChEMBL ≥ 6)")
+                sumber.append("kemiripan")
                 for i, s in enumerate(senyawa, 1):
                     if lapor is not None:
                         lapor.progres.emit(i, len(senyawa), f"ChEMBL: {s['nama']}")
@@ -382,7 +391,7 @@ class DialogFarmakologi(QDialog):
                         peta.setdefault(s["nama"], [])
                         peta[s["nama"]] += [g for g in gen if g not in peta[s["nama"]]]
             if pakai_ctd:
-                sumber.append("interaksi terkurasi CTD")
+                sumber.append("ctd")
                 nama = [s["nama"] for s in senyawa if s.get("nama")]
                 try:
                     baris, j = ctd.interaksi_senyawa(nama, lapor=lapor)
@@ -438,7 +447,7 @@ class DialogFarmakologi(QDialog):
             kit.pesan_peringatan(self, "Tidak ada kolom simbol gen yang bisa dibaca dari berkas itu.")
             return
         self.k["target_senyawa"] = peta
-        self.k["sumber_target"] = [f"impor berkas {Path(path).name}"]
+        self.k["sumber_target"] = ["impor"]
         self._isi_tabel_target()
         self._catat(f"{len({g for d in peta.values() for g in d})} gen target diimpor.")
 
@@ -485,6 +494,14 @@ class DialogFarmakologi(QDialog):
         self.sp_skor.setDecimals(2)
         self.sp_skor.setValue(0.10)
         baris.addWidget(self.sp_skor)
+        baris.addWidget(QLabel("Batas gen:"))
+        self.sp_maks_gen = QSpinBox()
+        self.sp_maks_gen.setRange(10, 500)
+        self.sp_maks_gen.setSingleStep(50)
+        self.sp_maks_gen.setValue(500)
+        self.sp_maks_gen.setToolTip("Jumlah gen teratas yang diminta dari Open Targets (batas layanan 500). "
+                                    "Bila hasilnya pas sebanyak ini, daftarnya kemungkinan terpotong.")
+        baris.addWidget(self.sp_maks_gen)
         baris.addWidget(kit.tombol("Ambil gen penyakit", self._ambil_gen_penyakit, utama=True))
         baris.addStretch(1)
         v.addLayout(baris)
@@ -544,10 +561,11 @@ class DialogFarmakologi(QDialog):
             return
         d = it.data(Qt.UserRole)
         ambang = self.sp_skor.value()
+        maks = int(self.sp_maks_gen.value())
         self._mulai(f"Mengambil gen yang berasosiasi dengan {d['nama']}…")
 
         def kerjakan(lapor=None):
-            return jaringan.target_penyakit(d["id"], maks=500, ambang=ambang)
+            return jaringan.target_penyakit(d["id"], maks=maks, ambang=ambang)
 
         def selesai(hasil):
             baris, jejak = hasil
@@ -555,7 +573,18 @@ class DialogFarmakologi(QDialog):
             self.k["penyakit"] = {"id": d["id"], "nama": d["nama"], "sumber": "Open Targets Platform"}
             self.k["gen_penyakit"] = [{"gen": b["gen"], "skor": b["skor"], "sumber": "Open Targets"} for b in baris]
             self._hitung_irisan()
-            self._henti(f"{len(baris)} gen penyakit (skor ≥ {ambang:g}).")
+            pesan = f"{len(baris)} gen penyakit (skor ≥ {ambang:g})."
+            # Open Targets memulangkan daftar terurut skor; bila jumlahnya pas batas, daftarnya terpotong
+            # dan gen di bawah batas itu tidak pernah diadu dengan target senyawa. Diberitahukan di tempat
+            # (bukan kotak dialog) supaya tidak memotong alur kerja saat pengguna memang sengaja membatasi.
+            if len(baris) >= maks:
+                pesan += f" Daftar terpotong di batas {maks}."
+                kit.ganti_jenis(self.l_irisan, "peringatan")
+                self.l_irisan.setText(
+                    f"{self.l_irisan.text()}  Daftar gen penyakit mencapai batas {maks} dan kemungkinan "
+                    f"terpotong: gen dengan skor di bawah yang terakhir diambil tidak ikut diiriskan. "
+                    f"Naikkan 'Batas gen' atau 'Skor asosiasi minimum'.")
+            self._henti(pesan)
 
         kerja.jalankan(kerjakan, selesai=selesai, galat=self._galat)
 
@@ -604,6 +633,7 @@ class DialogFarmakologi(QDialog):
         himpunan = {"Target senyawa": hasil["target"], "Gen penyakit": hasil["penyakit"]}
         self.g_venn.atur_pembuat(lambda l, t_, h=himpunan: venn.svg(h, lebar=max(240, l), tinggi=max(180, t_),
                                                                     mode=kit.mode(), judul="Irisan target"))
+        kit.ganti_jenis(self.l_irisan, "muted")
         self.l_irisan.setText(f"{len(hasil['irisan'])} target terapi potensial dari "
                               f"{len(hasil['target'])} target senyawa dan {len(hasil['penyakit'])} gen penyakit.")
 
@@ -865,6 +895,9 @@ class DialogFarmakologi(QDialog):
         v.addLayout(aksi)
 
     def _segarkan_laporan(self):
+        # Sumber senyawa diketik di tab 1 dan hanya dibaca saat menyimpan; tanpa baris ini paragraf
+        # metode memakai teks pengganti "sumber senyawa" walau penggunanya sudah mengisi kolom itu.
+        self.k["tanaman"] = self.e_tanaman.text().strip()
         for r in F.ringkasan(self.k):
             kartu = self.kartu.get(r["tahap"])
             if kartu is not None:
