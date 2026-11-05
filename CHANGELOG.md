@@ -37,6 +37,15 @@ layanan NCBI dibuat patuh pada pedoman resminya, dan metadata sitasi dilengkapi 
   menjaga daftar itu tetap sepadan dengan host yang benar-benar dihubungi kode; `dev/cek_lisensi.py` hanya
   memeriksa isi build sehingga tidak pernah dapat menangkap celah ini.
 
+### Diperbaiki (dari uji pemasangan)
+- **Bilah status menampilkan "RAM 0 GB" dan nama CPU kosong** pada komputer yang PATH-nya dipangkas
+  (`core/env.py`). `powershell` dipanggil lewat nama telanjang, padahal `powershell.exe` tidak berada di
+  `System32` melainkan di `System32\WindowsPowerShell\v1.0`; deteksi perangkat lalu gagal tanpa pesan.
+  Jalurnya kini disusun mutlak dari `%SystemRoot%`, dan bila tetap gagal alasannya muncul di panel pesan.
+- **Copot pemasangan meninggalkan kunci registri kosong** `HKCU\Software\Classes\.vmdbackup`
+  (`installer/virmolab.iss`). `uninsdeletevalue` hanya menghapus nilai di dalam kunci; kini ditambah
+  `uninsdeletekeyifempty` pada asosiasi `.vmdbackup` dan `.pdbqt`.
+
 ## [1.9.0] - 5 November 2026
 
 Farmakologi jaringan masuk sebagai alur kerja kedua di samping docking. Satu tanaman kini bisa ditelusuri

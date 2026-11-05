@@ -51,8 +51,8 @@ Daftar lengkap: [CHANGELOG.md](../../CHANGELOG.md).
 Get-FileHash .\VirmoLab-Setup-1.9.1.exe -Algorithm SHA256
 ```
 
-Setup: `3f9300bbf8158cb080297dd4244f4e1988dc3973f4325635632ad9bab7462ab4` (497,4 MB)
-Portable: `0cd3362352c23faa9247ecb2e4e153564f269af569324514fb08d14a69016a73` (719,5 MB)
+Setup: `f57b7ddaa2dce756c81829f0223efed526bc2d0aa8417e16382be2860b5d83bb` (497,4 MB)
+Portable: `a88b26078e1ead45da5157f65a562014d95427f07f9554efa8abfe01ac9651b5` (719,5 MB)
 
 Installer belum ditandatangani sertifikat berbayar, jadi Windows SmartScreen menampilkan "Windows protected
 your PC" — klik *More info › Run anyway* setelah sidik jarinya cocok.
