@@ -21,14 +21,14 @@ def estimasi_kinetika(
     suhu_kelvin: float = 310.15,
 ) -> Dict[str, Any]:
     """Hitung perkiraan kinetika pengikatan obat-target.
-    
+
     Args:
         energi_vina: Energi afinitas docking Vina (kcal/mol, misal -9.5)
         jum_hbond_terkubur: Jumlah ikatan hidrogen yang terlindung dari pelarut
         jum_kontak_hidrofobik: Jumlah atom berat ligan yang kontak hidrofobik
         n_rotatable: Jumlah ikatan yang dapat berputar (rotatable bonds)
         suhu_kelvin: Suhu fisiologis (default 310.15 K / 37 °C)
-        
+
     Returns:
         Kamus berisi parameter kinetika lengkap.
     """
@@ -39,7 +39,7 @@ def estimasi_kinetika(
     # Kd = exp(dG / RT) dalam Molar
     dG = min(-1.0, float(energi_vina))
     kd_molar = math.exp(dG / RT)
-    
+
     # 2. Estimasi laju konon asosiasi (k_on)
     # Rerata k_on untuk molekul kecil yang berdifusi ke kantong protein berkisar 10^5 hingga 10^7 M^-1 s^-1
     # Dihambat sedikit oleh tingginya fleksibilitas konformasi ligan
@@ -52,7 +52,7 @@ def estimasi_kinetika(
     # - Kantong hidrofobik tertutup
     faktor_hbond = 1.0 / (1.0 + 1.2 * jum_hbond_terkubur)
     faktor_hidrofobik = 1.0 / (1.0 + 0.08 * jum_kontak_hidrofobik)
-    
+
     # Baseline k_off murni termodinamika
     k_off_dasar = kd_molar * k_on
     # Efek pelambatan disosiasi akibat shielded binding pocket

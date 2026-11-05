@@ -199,7 +199,7 @@ def ringkas_alasan(s):
 
 
 # ------------------------------------------------------------------ BOILED-Egg (SVG)
-from .grafik import FONT, tik as _tik
+from .grafik import FONT, tik as _tik  # noqa: E402 - ditaruh di sini untuk memutus impor melingkar
 
 
 def _fmt(v):

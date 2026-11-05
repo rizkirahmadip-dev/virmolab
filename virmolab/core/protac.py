@@ -130,12 +130,12 @@ def rakit_protac(
     kunci_linker: str = "PEG3",
 ) -> Dict[str, Any]:
     """Rakit molekul PROTAC bivalen dari warhead ligan target, linker, dan E3 binder.
-    
+
     Args:
         smiles_warhead: SMILES ligan penarget (jika mengandung [*:1] gunakan itu, jika tidak sambung di atom polar/ujung)
         kunci_e3: Kunci dari E3_BINDERS
         kunci_linker: Kunci dari LINKER_PRESETS
-        
+
     Returns:
         Kamus data PROTAC lengkap:
  - smiles_protac: str

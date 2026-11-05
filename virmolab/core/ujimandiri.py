@@ -18,12 +18,18 @@ def _jalan(cmd, timeout=60):
     return p.returncode, (p.stdout + p.stderr).decode("utf-8", "replace")
 
 
+_APP = None      # QApplication milik proses uji; lihat uji()
+
+
 def uji(lapor=None):
     hasil = []
     # Satu QApplication untuk seluruh uji: butir tema butuh widget, sedangkan butir video membuat QCoreApplication
     # bila belum ada, dan satu proses hanya boleh punya satu aplikasi Qt.
     from PySide6.QtWidgets import QApplication
-    _app = QApplication.instance() or QApplication(["VirmoLab"])          # noqa: F841 - dijaga hidup selama uji
+    global _APP
+    # Disimpan di tingkat modul, bukan sebagai variabel lokal: objeknya harus tetap hidup selama proses,
+    # dan pyflakes (tidak seperti ruff) tidak mengenal penanda noqa untuk variabel lokal yang tak terpakai.
+    _APP = QApplication.instance() or QApplication(["VirmoLab"])
 
     def cek(nama, fn):
         t = time.time()

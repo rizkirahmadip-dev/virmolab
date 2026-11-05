@@ -113,7 +113,8 @@ def per_atom(teks_reseptor, teks_ligan):
     g1 = np.exp(-(d / 0.5) ** 2)
     g2 = np.exp(-((d - 3.0) / 2.0) ** 2)
     rep = np.where(d < 0, d * d, 0.0)
-    b = lambda daftar, k: np.array([t[k] for t in daftar], dtype=bool)
+    def b(daftar, k):
+        return np.array([t[k] for t in daftar], dtype=bool)
     hl = b(tl, 2)[:, None] & b(tr, 2)[None, :]
     hf = np.where(d < 0.5, 1.0, np.where(d < 1.5, 1.5 - d, 0.0)) * hl
     dl, al, dr, ar = b(tl, 3), b(tl, 4), b(tr, 3), b(tr, 4)

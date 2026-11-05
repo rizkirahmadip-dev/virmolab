@@ -57,11 +57,7 @@ def _evaluasi_molekul(mol: Chem.Mol, nama: str, modifikasi: str) -> Dict[str, An
     sa_val = round(sascore.hitung_sascore(mol) or 3.0, 2)
 
     # Lipinski rule
-    lip_pelanggaran = 0
-    if mw > 500: lip_pelanggaran += 1
-    if wlogp > 5: lip_pelanggaran += 1
-    if hbd > 5: lip_pelanggaran += 1
-    if hba > 10: lip_pelanggaran += 1
+    lip_pelanggaran = sum((mw > 500, wlogp > 5, hbd > 5, hba > 10))
 
     return {
         "nama": nama,
