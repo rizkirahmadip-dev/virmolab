@@ -19,8 +19,8 @@ from typing import Any, Dict, List
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (QAbstractItemView, QCheckBox, QComboBox, QDialog, QDoubleSpinBox, QFileDialog,
                                QFormLayout, QGroupBox, QHBoxLayout, QLabel, QLineEdit, QListWidget,
-                               QListWidgetItem, QProgressBar, QSpinBox, QSplitter, QTabWidget, QVBoxLayout,
-                               QWidget)
+                               QListWidgetItem, QMessageBox, QProgressBar, QSpinBox, QSplitter, QTabWidget,
+                               QVBoxLayout, QWidget)
 
 from ..core import ctd, farmakologi as F, graf as M_graf, jaringan, venn
 from . import kerja, kit
@@ -366,6 +366,21 @@ class DialogFarmakologi(QDialog):
             return
         pakai_kemiripan, pakai_ctd = self.cb_kemiripan.isChecked(), self.cb_ctd.isChecked()
         k_atas = self.sp_k.value()
+
+        # Jalur kemiripan memakai beberapa permintaan ChEMBL per senyawa (kemiripan, aktivitas, target),
+        # sekitar 9 detik per senyawa saat cache dingin. Untuk daftar panjang — satu tanaman mudah
+        # memberi ratusan senyawa — perkiraannya ditunjukkan dulu supaya tidak terlanjur menunggu lama.
+        if pakai_kemiripan and len(senyawa) > 20:
+            menit = max(1, round(len(senyawa) * 9 / 60))
+            jawab = QMessageBox.question(
+                self, "Daftar senyawa panjang",
+                f"{len(senyawa)} senyawa akan ditanyakan ke ChEMBL satu per satu, perkiraan sekitar "
+                f"{menit} menit saat pertama kali (berikutnya lebih cepat karena ada cache).\n\n"
+                f"Banyak alur farmakologi jaringan cukup memakai senyawa utama saja. Lanjutkan?",
+                QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+            if jawab != QMessageBox.Yes:
+                return
+
         self._mulai(f"Mencari target untuk {len(senyawa)} senyawa…")
 
         def kerjakan(lapor=None):
