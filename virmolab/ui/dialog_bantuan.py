@@ -88,6 +88,9 @@ class DialogLapor(QDialog):
 
 
 PRANALA_REPO = "https://github.com/rizkirahmadip-dev/virmolab"
+# DOI konsep Zenodo: satu nomor tetap yang selalu menunjuk versi VirmoLab terbaru. Tiap rilis juga
+# mendapat DOI versinya sendiri; nomornya hanya ada di halaman arsip rilis itu, bukan di dalam kode.
+DOI_KONSEP = "10.5281/zenodo.23978036"
 
 
 class DialogLisensi(QDialog):
@@ -104,7 +107,10 @@ class DialogLisensi(QDialog):
             f"<p>VirmoLab {versi}. Aplikasi desktop molecular docking (open-source, GPL-3.0-or-later).</p>"
             "<p>Kutip VirmoLab sendiri seperti ini (sesuaikan gayanya dengan jurnal yang dituju):</p>"
             f"<blockquote>Pratama RR. VirmoLab (versi {versi}) [perangkat lunak]. 2026. "
-            f"{PRANALA_REPO}</blockquote>"
+            f"doi:{DOI_KONSEP}</blockquote>"
+            "<p>DOI itu DOI konsep: ia selalu menunjuk versi terbaru. Bila jurnal meminta versi yang "
+            "benar-benar Anda pakai, ambil DOI versi tersebut dari halaman arsipnya di Zenodo.</p>"
+            f'<p>Repositori: <a href="{PRANALA_REPO}">{PRANALA_REPO}</a></p>'
             "<p>Metadata lengkapnya ada di berkas <code>CITATION.cff</code> pada repositori; GitHub menyediakan "
             "tombol <i>Cite this repository</i> yang mengubahnya menjadi BibTeX atau APA.</p>"
             "<p>Kutip juga mesin dan pustaka yang Anda pakai (laporan VirmoLab mencantumkannya otomatis):</p><ol>"

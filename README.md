@@ -4,6 +4,7 @@
   <a href="LICENSE"><img alt="Lisensi: GPL-3.0-or-later" src="https://img.shields.io/badge/lisensi-GPL--3.0--or--later-blue"></a>
   <img alt="Platform: Windows 10/11 64-bit" src="https://img.shields.io/badge/platform-Windows%2010%2F11%20x64-lightgrey">
   <a href="https://github.com/rizkirahmadip-dev/virmolab/releases/latest"><img alt="Rilis terbaru" src="https://img.shields.io/github/v/release/rizkirahmadip-dev/virmolab?label=rilis"></a>
+  <a href="https://doi.org/10.5281/zenodo.23978036"><img alt="DOI" src="https://zenodo.org/badge/DOI/10.5281/zenodo.23978036.svg"></a>
 </p>
 
 # VirmoLab
@@ -112,9 +113,18 @@ tersedia; sertakan versi VirmoLab, versi Windows, GPU, langkah yang dilakukan, d
 
 ## Cara mengutip
 
-Metadata sitasi ada di [`CITATION.cff`](CITATION.cff) (tombol *Cite this repository* di GitHub).
-Dalam publikasi, kutip juga mesin dan pustaka yang dipakai — daftarnya ada di
-**Bantuan › Lisensi & cara mengutip** dan ikut tercetak di laporan PDF.
+Tiap rilis diarsipkan di Zenodo dan punya DOI. Kutip seperti ini (sesuaikan gayanya dengan jurnal
+yang dituju):
+
+> Pratama RR. VirmoLab (versi 1.9.0) [perangkat lunak]. 2026. doi:10.5281/zenodo.23978036
+
+DOI di atas adalah **DOI konsep**: ia selalu menunjuk versi terbaru. Bila jurnal meminta versi yang
+benar-benar dipakai, kutip DOI versi itu sendiri — untuk 1.9.0:
+[10.5281/zenodo.23978037](https://doi.org/10.5281/zenodo.23978037).
+
+Metadata sitasi lengkapnya ada di [`CITATION.cff`](CITATION.cff) (tombol *Cite this repository* di
+GitHub mengubahnya menjadi BibTeX atau APA). Dalam publikasi, kutip juga mesin dan pustaka yang
+dipakai — daftarnya ada di **Bantuan › Lisensi & cara mengutip** dan ikut tercetak di laporan PDF.
 
 ## Baris perintah
 
@@ -215,8 +225,10 @@ Download the installer or the portable build from the
 [GitHub Issues](https://github.com/rizkirahmadip-dev/virmolab/issues); security reports:
 [`SECURITY.md`](SECURITY.md). VirmoLab sends no project data anywhere — see *Privasi* above.
 
-To cite VirmoLab, use [`CITATION.cff`](CITATION.cff) and also cite the engines and libraries you used
-(listed under Help › Licenses & how to cite).
+Every release is archived on Zenodo with a DOI — cite the concept DOI
+[10.5281/zenodo.23978036](https://doi.org/10.5281/zenodo.23978036) for the software in general, or a
+version DOI for the exact build you used. Full metadata is in [`CITATION.cff`](CITATION.cff); also
+cite the engines and libraries you used (listed under Help › Licenses & how to cite).
 
 ---
 

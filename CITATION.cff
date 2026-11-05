@@ -6,10 +6,19 @@ authors:
   - family-names: "Pratama"
     given-names: "Rizki Rahmadi"
     name-suffix: "apt., M. Farm"
+    orcid: "https://orcid.org/0000-0002-5275-7211"
 version: 1.9.0
 date-released: "2026-11-05"
 license: "GPL-3.0-or-later"
 repository-code: "https://github.com/rizkirahmadip-dev/virmolab"
+doi: "10.5281/zenodo.23978036"
+identifiers:
+  - type: doi
+    value: "10.5281/zenodo.23978036"
+    description: "DOI konsep: selalu menunjuk versi VirmoLab terbaru."
+  - type: doi
+    value: "10.5281/zenodo.23978037"
+    description: "DOI arsip versi 1.9.0."
 keywords:
   - "molecular docking"
   - "autodock-gpu"
