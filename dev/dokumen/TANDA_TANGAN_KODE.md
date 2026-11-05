@@ -41,17 +41,53 @@ $env:VIRMOLAB_TANDA_TSA = "http://time.certum.pl"
 Periksa hasil: `Get-AuthenticodeSignature rilis\VirmoLab-Setup-<versi>.exe` harus berstatus `Valid` dengan
 sertifikat sungguhan.
 
-## Memperoleh sertifikat (keadaan per Oktober 2026)
+## Memperoleh sertifikat (diperiksa ulang 5 November 2026)
 
 | Pilihan | Untuk perorangan di Indonesia | Biaya | Catatan |
 |---|---|---|---|
-| **Certum Open Source Code Signing** | Ya | ± €25–69/tahun (laporan pihak ketiga; cek toko Certum) | Paling realistis. Kunci di kartu pintar atau SimplySign (cloud); pakai opsi B. Tidak bisa diperpanjang, beli baru tiap tahun. |
-| **SignPath Foundation** | Ya (proyek, bukan orang) | Gratis | Syarat: semua komponen berlisensi OSI, kebijakan tanda tangan di halaman proyek, dan **build otomatis dari repositori** (CI, mis. GitHub Actions). VirmoLab kini dibangun lokal dengan biner `vendor/` di luar git, jadi perlu pipeline CI dulu. Penerbit yang tertera: SignPath Foundation. |
+| **Certum Open Source Code Signing (SimplySign/cloud)** | Ya | dari €49 (harga tertera di toko Certum) | Paling realistis dari Indonesia: tidak ada kartu fisik dan pembaca kartu yang harus dikirim. Kunci di kartu kripto virtual; pakai opsi B. Batas 5.000 tanda tangan/bulan. |
+| Certum Open Source Code Signing (set kartu) | Ya, tetapi perlu kiriman fisik | dari €69 | Berisi sertifikat + pembaca kartu + kartu kripto Certum. Perlu proCertum CardManager dan driver pembaca kartu. |
+| **SignPath Foundation** | Ya (proyek, bukan orang) | Gratis | Syarat: semua komponen berlisensi OSI, kebijakan tanda tangan di halaman proyek, dan **build otomatis dari repositori**. Terhalang untuk VirmoLab: `vendor/innosetup`, `vendor/bin/jre`, `vendor/bin/p2rank`, `vendor/opencl`, dan `vendor/ketcher` di-gitignore, dan `.github/workflows` sendiri sudah mencatat bahwa pelari CI tidak bisa menirukan lingkungan build. Penerbit yang tertera: SignPath Foundation. |
 | Azure Artifact Signing (dulu Trusted Signing) | **Tidak** | US$9,99/bulan | Perorangan hanya Amerika Serikat dan Kanada. |
 | Sertifikat OV/EV komersial | Ya | ± US$100–400/tahun | Mahal untuk proyek gratis. |
 
+### Langkah Certum SimplySign
+
+1. Siapkan tiga hal yang diminta halaman resminya:
+   - Foto diri sedang memegang dokumen identitas (KTP, paspor, SIM, atau kartu izin tinggal tetap).
+     *"Photos should present the complete document (both sides)."* Dokumen harus masih berlaku pada hari
+     sertifikat diterbitkan.
+   - Tagihan utilitas atas nama sendiri (listrik, air, gas, atau telepon).
+   - Alamat proyek open source yang sedang berjalan. *"The project must be publicly available and indicate
+     clearly the subscriber's relationship with the project. If Certum is unable to identify the project based
+     on publicly available information, the certificate will not be issued."* Untuk VirmoLab, nama pengembang
+     sudah tertera di README, `CITATION.cff`, dan baris hak cipta.
+2. Beli di toko Certum (lihat tabel di atas).
+3. Unggah dokumen lewat akun Certum Store, bukan email atau faks: *"The fastest and recommended way to submit
+   documents is to upload them directly through your Certum Store account."* Jalurnya: masuk akun ›
+   *Data security products* › pilih sertifikatnya › unggah.
+4. Pilih *automatic identity verification* yang ditandai "(recommended)". Pilihan lain (titik registrasi fisik,
+   konfirmasi notaris) tidak praktis dari Indonesia.
+5. Pasang *SimplySign Desktop* di PC dan aplikasi *SimplySign* di ponsel Android/iOS (pembangkit kode akses).
+   Akun SimplySign dibuat saat aktivasi sertifikat.
+6. Ambil sidik jari SHA-1 sertifikat, lalu jalankan rilis dengan opsi B di bagian "Cara memakai" di atas.
+
+### Yang belum pasti — tanyakan ke Certum sebelum membayar
+
+- **Masa berlaku sertifikat tidak disebut** di kedua halaman produk. Catatan versi lama dokumen ini menulis
+  "beli baru tiap tahun"; itu tidak terbukti dari sumber resmi. Angka "1 year / 2 years" di halaman kartu
+  adalah garansi perangkat keras, bukan masa berlaku sertifikat.
+- **Lama penerbitan** setelah dokumen lengkap juga tidak dinyatakan di halaman mana pun.
+- **Stok**: 5 November 2026 halaman SimplySign memuat *"Product is out of stock"*, dan halaman kartu memuat
+  "out of stock" sekaligus "In stock".
+- **Hanya non-komersial**, dan klausulnya bergigi: *"If Certum determines that the certificate is being used to
+  sign software distributed commercially, the certificate will be revoked."* VirmoLab gratis dan GPL, jadi
+  memenuhi syarat — tetapi ini mengunci model distribusinya.
+
 Sumber: [SignPath Foundation](https://signpath.org/), [SignPath untuk open source](https://about.signpath.io/product/open-source),
-[Certum Code Signing](https://shop.certum.eu/code-signing.html),
+[Certum Open Source Code Signing di SimplySign](https://shop.certum.eu/open-source-code-signing-on-simplysign.html),
+[Certum Open Source Code Signing (set kartu)](https://shop.certum.eu/open-source-code-signing.html),
+[Certum – dokumen yang diperlukan](https://support.certum.eu/en/code-signing-required-documents/),
 [Microsoft – pilihan code signing](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/code-signing-options).
 
 ## Batasan yang perlu diketahui
