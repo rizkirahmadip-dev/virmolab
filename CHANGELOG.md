@@ -2,12 +2,22 @@
 
 Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x adalah pra-rilis.
 
-## [Belum dirilis]
+## [1.9.0] - 5 November 2026
+
+Farmakologi jaringan masuk sebagai alur kerja kedua di samping docking. Satu tanaman kini bisa ditelusuri
+dari daftar senyawanya sampai jalur biologis dan penyakit tanpa berpindah-pindah antara KNApSAcK, PubChem,
+ADMETLab, SwissTargetPrediction, CTD, GeneCards, jvenn, dan STRING — delapan tahap yang sebelumnya
+dikerjakan manual lewat tujuh laman web dan Excel. Docking tetap ada di belakangnya sebagai pemeriksaan
+struktural atas pasangan senyawa-target yang sudah terpilih.
+
+Selain itu: grid box docking sepenuhnya dapat diatur, tampilan jaringan menjadi yang pertama bisa
+ditelusuri di VirmoLab, dan satu cacat lama diperbaiki — pengambilan senyawa tanaman obat yang belum pernah
+berhasil sejak 1.8.0.
 
 ### Baru
 - **Farmakologi jaringan** sebagai alur kerja tersendiri, dengan menu **Jaringan** di bilah menu (Ctrl+Shift+J) dan pilihan *Farmakologi Jaringan* di pemilih alur panel Langkah. Seluruh rantai senyawa › target › jalur › penyakit dikerjakan dalam satu jendela tujuh tahap (`ui/dialog_farmakologi.py`, `core/farmakologi.py`), tanpa lagi berpindah-pindah antara tujuh laman web dan Excel.
   - **1 Senyawa**: dari takson tanaman obat (LOTUS/Wikidata, COCONUT), dari ligan proyek, atau impor CSV/TSV berisi kolom SMILES — mis. ekspor KNApSAcK yang sudah dilengkapi SMILES dari PubChem. Pemisah kolom dan nama kolom dikenali otomatis.
-  - **2 Saring ADMET**: aturan Lipinski dan peringatan PAINS dari RDKit, ditambah ambang HIA, bioavailabilitas oral, DILI, hERG, dan Ames bila ADMET-AI terpasang. Senyawa yang nilai ADMET-nya belum ada tidak digugurkan karena itu; alasannya dicatat per senyawa.
+  - **2 Saring ADMET**: aturan Lipinski dan peringatan PAINS dari RDKit, ditambah ambang HIA, bioavailabilitas oral, DILI, hERG, dan Ames bila ADMET-AI terpasang. Senyawa yang belum punya nilai ADMET tidak digugurkan karena alasan itu; alasannya dicatat untuk tiap senyawa.
   - **3 Target senyawa**: kemiripan ligan ChEMBL (ECFP4, pChEMBL ≥ 6) dan/atau interaksi senyawa–gen terkurasi literatur dari CTD (`core/ctd.py`, Batch Query, kolom dibaca berdasarkan nama sehingga tahan perubahan skema). Tabel target juga bisa diimpor dari berkas.
   - **4 Gen penyakit dan irisan**: pencarian penyakit dan gen terasosiasi lewat Open Targets Platform (`jaringan.cari_penyakit`, `jaringan.target_penyakit`), atau impor CSV ekspor GeneCards/DisGeNET/OMIM milik pengguna sendiri. Irisannya digambar sebagai diagram Venn (`core/venn.py`, SVG 2 dan 3 himpunan, palet aman buta warna).
   - **5 Jaringan PPI**: tepi STRING pada ambang yang dapat diatur, tampilan jaringan **interaktif** pertama di VirmoLab (`ui/widget_graf.py`: geser, perbesar, klik simpul untuk menyorot tetangganya), dan peringkat protein hub memakai Maximal Clique Centrality cytoHubba di samping derajat, betweenness, dan closeness. Ekspor GraphML (Cytoscape/Gephi), CSV tepi, dan PNG.
