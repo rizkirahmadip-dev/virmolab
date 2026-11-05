@@ -30,10 +30,10 @@ Installer dan versi portable ada di halaman
 Periksa unduhan sebelum dijalankan (PowerShell, di folder unduhan):
 
 ```powershell
-Get-FileHash .\VirmoLab-Setup-1.9.0.exe -Algorithm SHA256
+Get-FileHash .\VirmoLab-Setup-1.9.1.exe -Algorithm SHA256
 ```
 
-Cocokkan hasilnya dengan baris di `SHA256SUMS-1.9.0.txt`. Installer **belum ditandatangani sertifikat
+Cocokkan hasilnya dengan baris di `SHA256SUMS-1.9.1.txt`. Installer **belum ditandatangani sertifikat
 berbayar**, jadi Windows SmartScreen menampilkan "Windows protected your PC" — klik *More info › Run anyway*
 setelah sidik jarinya cocok.
 
@@ -116,11 +116,11 @@ tersedia; sertakan versi VirmoLab, versi Windows, GPU, langkah yang dilakukan, d
 Tiap rilis diarsipkan di Zenodo dan punya DOI. Kutip seperti ini (sesuaikan gayanya dengan jurnal
 yang dituju):
 
-> Pratama RR. VirmoLab (versi 1.9.0) [perangkat lunak]. 2026. doi:10.5281/zenodo.23978036
+> Pratama RR. VirmoLab (versi 1.9.1) [perangkat lunak]. 2026. doi:10.5281/zenodo.23978036
 
 DOI di atas adalah **DOI konsep**: ia selalu menunjuk versi terbaru. Bila jurnal meminta versi yang
-benar-benar dipakai, kutip DOI versi itu sendiri — untuk 1.9.0:
-[10.5281/zenodo.23978037](https://doi.org/10.5281/zenodo.23978037).
+benar-benar dipakai, kutip DOI versi itu sendiri — nomornya tercantum di halaman arsip tiap rilis,
+dari [daftar versi di Zenodo](https://doi.org/10.5281/zenodo.23978036).
 
 Metadata sitasi lengkapnya ada di [`CITATION.cff`](CITATION.cff) (tombol *Cite this repository* di
 GitHub mengubahnya menjadi BibTeX atau APA). Dalam publikasi, kutip juga mesin dan pustaka yang

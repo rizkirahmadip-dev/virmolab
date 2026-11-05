@@ -2,6 +2,41 @@
 
 Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x adalah pra-rilis.
 
+## [1.9.1] - 5 November 2026
+
+Rilis perbaikan. Satu kriteria ilmiah yang dapat menyesatkan pembacaan hasil diperbaiki, pemakaian
+layanan NCBI dibuat patuh pada pedoman resminya, dan metadata sitasi dilengkapi DOI.
+
+### Diperbaiki
+- **Keyakinan konsensus penargetan balik memakai ambang mutlak, bukan peringkat** (`core/target_balik.py`).
+  Syarat lama "10 besar kedua jalur" tidak bermakna pada panel yang memang kecil: panel antibakteri berisi
+  9 target dan antiinflamasi 8, sehingga setiap target otomatis memenuhinya dan dilabeli berkeyakinan
+  **tinggi** — termasuk target dengan z-skor −0,4 dan kemiripan Tanimoto 0,17. Label itu juga dipakai untuk
+  memilih target yang dikirim ke tab Jaringan & jalur, jadi kesalahannya merambat ke analisis berikutnya.
+  Keyakinan kini dinilai pada besaran yang benar-benar diukur: **tinggi** bila target mencapai z ≤ −2
+  sekaligus 3 besar jalur struktur *dan* kemiripan Tanimoto ≥ 0,40 pada jalur ligan, **sedang** bila hanya
+  satu jalur memenuhi, **rendah** bila tidak satu pun. Ambangnya sama dengan yang dipakai pada analisis
+  terbit. Paragraf metode Indonesia dan Inggris menyebutkan ambang itu beserta alasan pemilihannya, dirakit
+  dari konstanta yang sama sehingga tidak dapat menyimpang dari kodenya.
+  **Hasil penargetan balik dari versi sebelumnya perlu dibaca ulang:** sebagian label "tinggi" akan turun.
+- **Pemakaian API BLAST NCBI dibuat patuh** (`core/konservasi.py`). Satu pekerjaan diperiksa tiap 12 detik,
+  padahal NCBI meminta tidak lebih sering dari sekali semenit, dan pemeriksaan pertama langsung menyusul
+  pengiriman. Pemanggil yang melanggar dipindahkan ke antrean lambat atau diblokir — artinya konservasi
+  kantong berhenti bekerja. Kini jeda 10 detik sebelum pemeriksaan pertama, 60 detik antar pemeriksaan
+  (jeda yang lebih kecil dinaikkan), dan tiap permintaan menyebut `tool=VirmoLab` sesuai pedoman NCBI.
+  Akibatnya pencarian homolog terasa lebih lambat; itu harga kepatuhan, bukan kemunduran.
+
+### Diubah
+- **Metadata sitasi memuat DOI.** Tiap rilis kini diarsipkan di Zenodo. `CITATION.cff` memuat DOI konsep
+  10.5281/zenodo.23978036 (selalu menunjuk versi terbaru) dan ORCID penulis; dialog **Bantuan › Lisensi dan
+  cara mengutip** menampilkan DOI itu di contoh sitasinya, lengkap dengan penjelasan beda DOI konsep dan DOI
+  versi. README memperoleh badge DOI.
+- **Catatan lisensi melengkapi layanan daring yang dipanggil aplikasi.** CTD (interaksi senyawa-gen, baru di
+  1.9.0), Wikidata/LOTUS, dan NCBI BLAST kini tercatat di `LISENSI_PIHAK_KETIGA.txt` beserta lisensi dan
+  sitasinya — termasuk syarat CTD yang membatasi pemakaian komersial. Skrip baru `dev/cek_sumber_daring.py`
+  menjaga daftar itu tetap sepadan dengan host yang benar-benar dihubungi kode; `dev/cek_lisensi.py` hanya
+  memeriksa isi build sehingga tidak pernah dapat menangkap celah ini.
+
 ## [1.9.0] - 5 November 2026
 
 Farmakologi jaringan masuk sebagai alur kerja kedua di samping docking. Satu tanaman kini bisa ditelusuri
