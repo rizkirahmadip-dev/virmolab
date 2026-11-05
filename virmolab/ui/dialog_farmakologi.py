@@ -50,6 +50,7 @@ class DialogFarmakologi(QDialog):
         self._jejak: List[Dict[str, Any]] = []
         self._graf = None
         self._sibuk = False
+        self._sudah_ingatkan_proyek = False
         self._hasil_cari_penyakit: List[Dict[str, Any]] = []
 
         self._bangun_ui()
@@ -114,6 +115,37 @@ class DialogFarmakologi(QDialog):
         self.l_status.setText(teks)
         if self.jw is not None and hasattr(self.jw, "log"):
             self.jw.log.tulis(f"Farmakologi jaringan: {teks}")
+
+    def _simpan_diam(self):
+        """Titipkan keadaan alur ke proyek tanpa pesan apa pun, lalu minta jendela utama menyimpan.
+
+        Dipanggil di akhir tiap tahap. Seluruh VirmoLab menyimpan sendiri (JendelaUtama.minta_simpan
+        menunda satu detik, ditambah simpan otomatis tiap tiga menit); tanpa ini dialog inilah
+        satu-satunya tempat yang membuang pekerjaan diam-diam saat ditutup — dan tahap target bisa
+        memakan belasan menit sebelum hasilnya ada.
+        """
+        if self.proyek is None:
+            # Tanpa proyek tidak ada tempat menyimpan. Diberitahukan sekali saja supaya pengguna tahu
+            # sebelum menghabiskan belasan menit di tahap target, bukan sesudahnya.
+            if not self._sudah_ingatkan_proyek:
+                self._sudah_ingatkan_proyek = True
+                kit.pesan_peringatan(self, "Belum ada proyek yang terbuka, jadi hasil alur ini belum "
+                                           "bisa disimpan dan akan hilang saat aplikasi ditutup. "
+                                           "Buat atau buka proyek lebih dulu lewat Berkas › Proyek baru.",
+                                     "Hasil belum tersimpan")
+            return
+        self.k["tanaman"] = self.e_tanaman.text().strip()
+        self.proyek.farmakologi = self.k
+        for j in self._jejak:
+            try:
+                self.proyek.catat_jejak(j)
+            except Exception:
+                pass
+        self._jejak = []
+        if self.jw is not None and hasattr(self.jw, "minta_simpan"):
+            self.jw.minta_simpan()
+        if self.jw is not None and hasattr(self.jw, "segarkan_langkah"):
+            self.jw.segarkan_langkah()
 
     # ================================================================ 1. senyawa
     def _tab_senyawa(self, w):
@@ -192,6 +224,7 @@ class DialogFarmakologi(QDialog):
             dipakai.add(s["nama"])
         self.k["senyawa"].extend(tambah)
         self._isi_tabel_senyawa()
+        self._simpan_diam()
         self._catat(f"{len(tambah)} senyawa baru ditambahkan ({len(baru) - len(tambah)} duplikat dilewati).")
 
     def _kosongkan_senyawa(self):
@@ -273,6 +306,7 @@ class DialogFarmakologi(QDialog):
     def _saring_selesai(self, hasil):
         # hitung_sifat() dan saring() menyunting dict senyawa di tempat, jadi tidak ada yang perlu disalin.
         self._isi_tabel_admet()
+        self._simpan_diam()
         self._henti(f"{hasil['lolos']} senyawa lolos, {hasil['gagal']} gugur"
                     + (f"; {hasil['tanpa_admet']} belum punya nilai ADMET." if hasil["tanpa_admet"] else "."))
 
@@ -300,6 +334,7 @@ class DialogFarmakologi(QDialog):
                     s["admet"] = n or {}
             F.saring(self.k["senyawa"], self._kriteria())
             self._isi_tabel_admet()
+            self._simpan_diam()
             self._henti("Prediksi ADMET selesai.")
 
         kerja.jalankan(kerjakan, selesai=selesai, galat=self._galat, log=self.l_status.setText)
@@ -428,6 +463,7 @@ class DialogFarmakologi(QDialog):
             self.k["sumber_target"] = sumber
             self._jejak += jejak
             self._isi_tabel_target()
+            self._simpan_diam()
             n = len({g for d in peta.values() for g in d})
             self._henti(f"{n} gen target unik dari {len(peta)} senyawa."
                         if n else "Tidak ada target yang ditemukan untuk senyawa ini.")
@@ -466,6 +502,7 @@ class DialogFarmakologi(QDialog):
         self.k["target_senyawa"] = peta
         self.k["sumber_target"] = ["impor"]
         self._isi_tabel_target()
+        self._simpan_diam()
         self._catat(f"{len({g for d in peta.values() for g in d})} gen target diimpor.")
 
     def _isi_tabel_target(self):
@@ -590,6 +627,7 @@ class DialogFarmakologi(QDialog):
             self.k["penyakit"] = {"id": d["id"], "nama": d["nama"], "sumber": "Open Targets Platform"}
             self.k["gen_penyakit"] = [{"gen": b["gen"], "skor": b["skor"], "sumber": "Open Targets"} for b in baris]
             self._hitung_irisan()
+            self._simpan_diam()
             pesan = f"{len(baris)} gen penyakit (skor ≥ {ambang:g})."
             # Open Targets memulangkan daftar terurut skor; bila jumlahnya pas batas, daftarnya terpotong
             # dan gen di bawah batas itu tidak pernah diadu dengan target senyawa. Diberitahukan di tempat
@@ -621,6 +659,7 @@ class DialogFarmakologi(QDialog):
             self.k["penyakit"] = {"id": "", "nama": self.e_penyakit.text().strip() or "penyakit yang diteliti",
                                   "sumber": Path(path).name}
         self._hitung_irisan()
+        self._simpan_diam()
         self._catat(f"{len(baris)} gen penyakit diimpor dari {Path(path).name}.")
 
     def _hitung_irisan(self):
@@ -745,6 +784,7 @@ class DialogFarmakologi(QDialog):
                           f"({', '.join(sendiri[:6])}{'…' if len(sendiri) > 6 else ''}) "
                           f"— turunkan ambang bila ingin menyertakannya.")
             self.l_jaringan.setText(pesan)
+            self._simpan_diam()
             self._henti(f"Jaringan dibangun: {len(tepi)} tepi PPI.")
 
         kerja.jalankan(kerjakan, selesai=selesai, galat=self._galat)
@@ -860,6 +900,7 @@ class DialogFarmakologi(QDialog):
             self.k["jalur"] = baris
             self.k["gmt"] = nama_gmt
             self._isi_tabel_jalur()
+            self._simpan_diam()
             self._henti(f"{len(baris)} jalur dilaporkan." if baris else "Tidak ada jalur yang lolos ambang q.")
 
         kerja.jalankan(kerjakan, selesai=selesai, galat=self._galat)
