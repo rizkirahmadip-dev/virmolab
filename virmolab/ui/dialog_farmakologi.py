@@ -22,9 +22,9 @@ from PySide6.QtWidgets import (QAbstractItemView, QCheckBox, QComboBox, QDialog,
                                QListWidgetItem, QMessageBox, QProgressBar, QSpinBox, QSplitter, QTabWidget,
                                QVBoxLayout, QWidget)
 
-from ..core import ctd, farmakologi as F, graf as M_graf, jaringan, venn
+from ..core import ctd, farmakologi as F, figur_jaringan as FG, graf as M_graf, jaringan, venn
 from . import kerja, kit
-from .widget_graf import TampilanGraf
+from .widget_graf import WARNA_JENIS, TampilanGraf
 
 PERINGATAN = ("Hasil farmakologi jaringan adalah hipotesis komputasi hasil penambangan basis data, bukan bukti "
               "aktivitas biologis. Tepi STRING memuat bukti penambangan teks dan ko-ekspresi — bukan hanya "
@@ -73,7 +73,8 @@ class DialogFarmakologi(QDialog):
                               (kit.amp("4 · Gen penyakit & irisan"), self._tab_penyakit),
                               ("5 · Jaringan PPI", self._tab_jaringan),
                               ("6 · Jalur", self._tab_jalur),
-                              ("7 · Laporan", self._tab_laporan)):
+                              ("7 · Figur", self._tab_figur),
+                              ("8 · Laporan", self._tab_laporan)):
             w = QWidget()
             bangun(w)
             self.tabs.addTab(w, judul)
@@ -732,10 +733,18 @@ class DialogFarmakologi(QDialog):
                 G = F.graf_ppi(gen, tepi)
             self._graf = G
             self.graf.set_graf(G, mode=kit.mode(), tampilkan_label=self.cb_label.isChecked())
-            self.k["hub"] = F.hub(F.graf_ppi(gen, tepi), n=30)
+            G_ppi = F.graf_ppi(gen, tepi)
+            self.k["hub"] = F.hub(G_ppi, n=30)
+            sendiri = F.terpencil(G_ppi)
             self._isi_tabel_hub()
-            self.l_jaringan.setText(f"{G.number_of_nodes()} simpul, {G.number_of_edges()} tepi "
-                                    f"(STRING ≥ {ambang:g}).")
+            pesan = f"{G.number_of_nodes()} simpul, {G.number_of_edges()} tepi (STRING ≥ {ambang:g})."
+            if sendiri:
+                # Dilaporkan, bukan disembunyikan: tanpa tepi belum tentu tidak berperan — bisa jadi
+                # ambang STRING-nya yang terlalu tinggi untuk pasangan itu.
+                pesan += (f" {len(sendiri)} target tanpa tepi PPI pada ambang ini "
+                          f"({', '.join(sendiri[:6])}{'…' if len(sendiri) > 6 else ''}) "
+                          f"— turunkan ambang bila ingin menyertakannya.")
+            self.l_jaringan.setText(pesan)
             self._henti(f"Jaringan dibangun: {len(tepi)} tepi PPI.")
 
         kerja.jalankan(kerjakan, selesai=selesai, galat=self._galat)
@@ -880,7 +889,172 @@ class DialogFarmakologi(QDialog):
                                            gelap=(kit.mode() == "gelap"),
                                            judul="Jumlah gen per jalur (15 teratas)"))
 
-    # ================================================================ 7. laporan
+    # ================================================================ 7. figur
+    def _tab_figur(self, w):
+        v = QVBoxLayout(w)
+        v.setSpacing(8)
+        pisah = QSplitter(Qt.Horizontal)
+
+        kiri = QWidget()
+        kv = QVBoxLayout(kiri)
+        kv.setContentsMargins(0, 0, 0, 0)
+        kv.addWidget(QLabel("Pilih figur"))
+        self.lw_figur = QListWidget()
+        for d in FG.daftar():
+            it = QListWidgetItem(d["nama"])
+            it.setData(Qt.UserRole, d["kunci"])
+            it.setToolTip(d["ket"])
+            self.lw_figur.addItem(it)
+        self.lw_figur.setCurrentRow(0)
+        self.lw_figur.currentRowChanged.connect(lambda _=0: self._segarkan_figur())
+        kv.addWidget(self.lw_figur, 1)
+        self.l_figur_ket = kit.catatan("")
+        kv.addWidget(self.l_figur_ket)
+        pisah.addWidget(kiri)
+
+        kanan = QWidget()
+        kn = QVBoxLayout(kanan)
+        kn.setContentsMargins(0, 0, 0, 0)
+        self.g_figur = kit.GambarSvg()
+        kn.addWidget(self.g_figur, 1)
+        pisah.addWidget(kanan)
+        pisah.setSizes([300, 820])
+        v.addWidget(pisah, 1)
+
+        aksi = QHBoxLayout()
+        aksi.addWidget(QLabel("Jumlah butir:"))
+        self.sp_figur_n = QSpinBox()
+        self.sp_figur_n.setRange(3, 40)
+        self.sp_figur_n.setValue(10)
+        self.sp_figur_n.setToolTip("Berapa protein hub atau jalur yang digambar")
+        self.sp_figur_n.valueChanged.connect(lambda _=0: self._segarkan_figur())
+        aksi.addWidget(self.sp_figur_n)
+        aksi.addWidget(kit.tombol("Segarkan", self._segarkan_figur))
+        aksi.addStretch(1)
+        aksi.addWidget(QLabel("DPI:"))
+        self.sp_dpi = QSpinBox()
+        self.sp_dpi.setRange(96, 1200)
+        self.sp_dpi.setSingleStep(100)
+        self.sp_dpi.setValue(600)
+        self.sp_dpi.setToolTip("Resolusi ekspor raster; kebanyakan jurnal meminta 300–600 dpi")
+        aksi.addWidget(self.sp_dpi)
+        aksi.addWidget(kit.tombol("Simpan SVG/PNG…", self._simpan_figur, utama=True))
+        aksi.addWidget(kit.tombol("Simpan semua…", self._simpan_semua_figur,
+                                  tip="Tulis seluruh figur yang datanya sudah ada ke satu folder"))
+        v.addLayout(aksi)
+
+    def _svg_figur(self, kunci: str, lebar: int = 860, tinggi: int = 600) -> str:
+        """Bangun SVG satu figur dari keadaan alur saat ini. Kembalikan "" bila datanya belum ada."""
+        gelap = kit.mode() == "gelap"
+        n = self.sp_figur_n.value()
+        if kunci == "venn":
+            hasil = F.irisan(self.k.get("target_senyawa") or {}, self.k.get("gen_penyakit") or [])
+            if not (hasil["target"] or hasil["penyakit"]):
+                return ""
+            return venn.svg({"Target senyawa": hasil["target"], "Gen penyakit": hasil["penyakit"]},
+                            lebar=lebar, tinggi=tinggi, mode=kit.mode(), judul="Irisan target")
+        if kunci == "jaringan":
+            if self._graf is None or self._graf.number_of_nodes() == 0:
+                return ""
+            warna_simpul = {nd: WARNA_JENIS.get(d.get("jenis", ""), WARNA_JENIS[""])
+                            for nd, d in self._graf.nodes(data=True)}
+            label = {nd: d.get("label", nd) for nd, d in self._graf.nodes(data=True)}
+            return M_graf.svg_graf(self._graf, warna_simpul=warna_simpul, label=label,
+                                   lebar=lebar, tinggi=tinggi, tema=kit.mode())
+        if kunci == "hub":
+            if not self.k.get("hub"):
+                return ""
+            return FG.lingkar_hub(self.k["hub"], [tuple(t) for t in (self.k.get("tepi_ppi") or [])],
+                                  n=n, lebar=min(lebar, 680), tinggi=tinggi, gelap=gelap,
+                                  judul=f"Protein paling sentral ({min(n, len(self.k['hub']))} teratas, MCC)")
+        if kunci == "gelembung":
+            if not self.k.get("jalur"):
+                return ""
+            return FG.gelembung_jalur(self.k["jalur"], n=n, lebar=lebar, tinggi=tinggi, gelap=gelap,
+                                      judul="Pengayaan jalur")
+        if kunci == "batang":
+            if not self.k.get("jalur"):
+                return ""
+            return FG.batang_jalur(self.k["jalur"], n=n, lebar=lebar, tinggi=tinggi, gelap=gelap,
+                                   judul="Jumlah gen per jalur")
+        return ""
+
+    def _segarkan_figur(self):
+        it = self.lw_figur.currentItem() if hasattr(self, "lw_figur") else None
+        if it is None:
+            return
+        kunci = it.data(Qt.UserRole)
+        ket = next((d["ket"] for d in FG.daftar() if d["kunci"] == kunci), "")
+        contoh = self._svg_figur(kunci)
+        if not contoh:
+            self.l_figur_ket.setText(f"{ket}  Datanya belum ada — selesaikan tahap yang bersangkutan dulu.")
+            self.g_figur.atur_pembuat(lambda l, t: "")
+            self.g_figur.update()
+            return
+        self.l_figur_ket.setText(ket)
+        self.g_figur.atur_pembuat(
+            lambda l, t, k=kunci: self._svg_figur(k, lebar=max(360, l), tinggi=max(260, t)) or "")
+
+    def _simpan_figur(self):
+        it = self.lw_figur.currentItem()
+        if it is None:
+            return
+        kunci = it.data(Qt.UserRole)
+        svg = self._svg_figur(kunci, lebar=900, tinggi=640)
+        if not svg:
+            kit.pesan_peringatan(self, "Figur ini belum punya data.")
+            return
+        path, _ = QFileDialog.getSaveFileName(self, "Simpan figur", f"figur_{kunci}.svg",
+                                              "SVG (*.svg);;PNG (*.png);;TIFF (*.tif)")
+        if path:
+            self._tulis_figur(svg, path)
+            self._catat(f"Figur disimpan: {path}")
+
+    def _simpan_semua_figur(self):
+        folder = QFileDialog.getExistingDirectory(self, "Pilih folder untuk seluruh figur")
+        if not folder:
+            return
+        from pathlib import Path
+        ditulis, dilewati = [], []
+        for d in FG.daftar():
+            svg = self._svg_figur(d["kunci"], lebar=900, tinggi=640)
+            if not svg:
+                dilewati.append(d["nama"])
+                continue
+            for akhiran in (".svg", ".png"):
+                p = Path(folder) / f"figur_{d['kunci']}{akhiran}"
+                self._tulis_figur(svg, str(p))
+            ditulis.append(d["kunci"])
+        pesan = f"{len(ditulis)} figur ditulis (SVG + PNG {self.sp_dpi.value()} dpi) ke {folder}."
+        if dilewati:
+            pesan += f" Dilewati karena datanya belum ada: {', '.join(dilewati)}."
+        self._catat(pesan)
+
+    def _tulis_figur(self, svg: str, path: str):
+        """Tulis SVG apa adanya, atau render ke raster pada DPI yang diminta."""
+        from pathlib import Path
+        p = Path(path)
+        if p.suffix.lower() == ".svg":
+            p.write_text(svg, encoding="utf-8")
+            return
+        from PySide6.QtCore import QByteArray
+        from PySide6.QtGui import QImage, QPainter
+        from PySide6.QtSvg import QSvgRenderer
+        r = QSvgRenderer(QByteArray(svg.encode("utf-8")))
+        ukuran = r.defaultSize()
+        # SVG di sini digambar pada 96 dpi semu, jadi skalanya rasio dpi yang diminta terhadap 96.
+        skala = max(1.0, self.sp_dpi.value() / 96.0)
+        img = QImage(int(ukuran.width() * skala), int(ukuran.height() * skala), QImage.Format_ARGB32)
+        img.fill(Qt.transparent if p.suffix.lower() == ".png" else Qt.white)
+        pen = QPainter(img)
+        pen.setRenderHints(QPainter.Antialiasing | QPainter.TextAntialiasing)
+        r.render(pen)
+        pen.end()
+        img.setDotsPerMeterX(int(self.sp_dpi.value() / 0.0254))
+        img.setDotsPerMeterY(int(self.sp_dpi.value() / 0.0254))
+        img.save(str(p))
+
+    # ================================================================ 8. laporan
     def _tab_laporan(self, w):
         v = QVBoxLayout(w)
         v.setSpacing(8)
@@ -947,6 +1121,7 @@ class DialogFarmakologi(QDialog):
             self._hitung_irisan()
         self._isi_tabel_hub()
         self._isi_tabel_jalur()
+        self._segarkan_figur()
         self._segarkan_laporan()
 
     def _simpan(self):

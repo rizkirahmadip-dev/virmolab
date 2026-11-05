@@ -451,7 +451,8 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
                      "np_senyawa": lambda: self.buka_farmakologi(0), "np_admet": lambda: self.buka_farmakologi(1),
                      "np_target": lambda: self.buka_farmakologi(2), "np_penyakit": lambda: self.buka_farmakologi(3),
                      "np_jaringan": lambda: self.buka_farmakologi(4), "np_jalur": lambda: self.buka_farmakologi(5),
-                     "np_laporan": lambda: self.buka_farmakologi(6)}
+                     "np_figur": lambda: self.buka_farmakologi(6),
+                     "np_laporan": lambda: self.buka_farmakologi(7)}
         if k in aksi_peta:
             aksi_peta[k]()
 
@@ -1108,7 +1109,10 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
               "Tepi STRING antar target, graf interaktif, dan peringkat protein hub (MCC)"),
             A("6 · Pengayaan jalur…", "chart", lambda: self.buka_farmakologi(5), None,
               "Reactome / GO-BP dengan uji hipergeometrik dan koreksi Benjamini-Hochberg"),
-            A("7 · Ringkasan && metode…", "report", lambda: self.buka_farmakologi(6), None,
+            A("7 · Figur siap publikasi…", "palette", lambda: self.buka_farmakologi(6), None,
+              "Venn, jaringan berlapis, hub melingkar, bubble plot jalur, dan batang jalur — "
+              "SVG vektor atau raster ber-DPI"),
+            A("8 · Ringkasan && metode…", "report", lambda: self.buka_farmakologi(7), None,
               "Angka tiap tahap dan paragraf metode siap tempel (Indonesia/Inggris)")))
         m.addSeparator()
         self._judul_menu(m, "LANJUTAN")

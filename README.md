@@ -68,7 +68,9 @@ Setelah terpasang, jalankan **Alat › Uji mandiri komponen…** untuk memastika
   sampai jalur biologis — kumpulkan senyawa (LOTUS/COCONUT/PubChem atau impor CSV), saring ADMET dan Lipinski,
   cari target (kemiripan ChEMBL dan interaksi terkurasi CTD), iriskan dengan gen penyakit (Open Targets atau
   impor CSV) sebagai diagram Venn, bangun jaringan PPI STRING yang bisa ditelusuri, peringkat protein hub (MCC
-  cytoHubba), pengayaan jalur Reactome/GO-BP, lalu paragraf metode siap tempel. Ekspor GraphML untuk Cytoscape.
+  cytoHubba), pengayaan jalur Reactome/GO-BP, lalu paragraf metode siap tempel. Tab **Figur** menghasilkan lima
+  gambar siap publikasi — Venn, jaringan berlapis, hub melingkar, bubble plot jalur, batang jalur — sebagai SVG
+  vektor atau raster ber-DPI. Ekspor GraphML untuk Cytoscape.
 - **Penelitian lanjutan**: penargetan balik, pengayaan jalur dan jaringan (STRING, Reactome, GO),
   konservasi residu kantong, selektivitas, penapisan bertahap (pembelajaran aktif), validasi protokol.
 - **Ekspor**: gambar 3D/2D ber-DPI (PNG/TIFF/SVG/PDF), kompleks PDB, SDF, CSV, XLSX, laporan PDF, naskah Word.

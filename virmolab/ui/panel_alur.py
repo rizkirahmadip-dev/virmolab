@@ -525,6 +525,9 @@ class PanelLangkah(QStackedWidget):
 
         isi_np4 = _kolom(A("np_jalur", _tombol("Pengayaan jalur…", True, ikon="chart",
                                                tip="Reactome / GO-BP, uji hipergeometrik + Benjamini-Hochberg")),
+                         A("np_figur", _tombol("Figur siap publikasi…", ikon="palette",
+                                               tip="Venn, jaringan, hub melingkar, bubble plot, batang — "
+                                                   "SVG vektor atau raster ber-DPI")),
                          A("np_laporan", _tombol("Ringkasan && paragraf metode", ikon="report")),
                          8,
                          A("ligan", _tombol("Siapkan ligan untuk docking", ikon="lig",

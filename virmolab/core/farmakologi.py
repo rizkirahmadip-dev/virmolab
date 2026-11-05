@@ -371,11 +371,15 @@ def mcc(G: nx.Graph, batas_simpul: int = 400) -> Dict[str, float]:
     return nilai
 
 
-def hub(G: nx.Graph, n: int = 20, hanya_target: bool = True) -> List[Dict[str, Any]]:
+def hub(G: nx.Graph, n: int = 20, hanya_target: bool = True, min_derajat: int = 1) -> List[Dict[str, Any]]:
     """Peringkat hub protein: derajat, betweenness, closeness, dan MCC.
 
     Urutan utama memakai MCC (cytoHubba memakainya sebagai metode dengan ketepatan terbaik pada
     protein esensial), dengan derajat sebagai pemecah seri.
+
+    min_derajat: protein tanpa tepi PPI sama sekali dibuang dari peringkat. Protein terpencil
+    bukan hub menurut definisi apa pun, dan menampilkannya dengan nilai nol memenuhi tabel dengan
+    baris yang tidak berarti. Jumlahnya dilaporkan terpisah lewat `terpencil()`.
     """
     if len(G) == 0:
         return []
@@ -385,11 +389,23 @@ def hub(G: nx.Graph, n: int = 20, hanya_target: bool = True) -> List[Dict[str, A
     for b in baris:
         if hanya_target and b["jenis"] != "target":
             continue
+        if b["derajat"] < min_derajat:
+            continue
         hasil.append({"gen": b["label"], "simpul": b["simpul"], "derajat": b["derajat"],
                       "betweenness": b["betweenness"], "closeness": b["closeness"],
                       "mcc": round(nilai_mcc.get(b["simpul"], 0.0), 2)})
     hasil.sort(key=lambda b: (-b["mcc"], -b["derajat"], b["gen"]))
     return hasil[:n] if n else hasil
+
+
+def terpencil(G: nx.Graph, hanya_target: bool = True) -> List[str]:
+    """Simbol gen yang tidak punya satu pun tepi PPI pada ambang yang dipakai.
+
+    Berguna dilaporkan apa adanya: ketiadaan tepi bisa berarti ambang STRING terlalu tinggi,
+    bukan berarti proteinnya tidak berperan.
+    """
+    return sorted(d.get("label", n) for n, d in G.nodes(data=True)
+                  if G.degree(n) == 0 and (not hanya_target or d.get("jenis") == "target"))
 
 
 def graf_ppi(gen: Sequence[str], tepi: Sequence) -> nx.Graph:

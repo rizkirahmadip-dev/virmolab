@@ -624,6 +624,37 @@ def uji(lapor=None):
         return "pengurai TSV CTD OK (2 baris manusia, 2 gen)"
     cek("CTD (pengurai interaksi senyawa-gen)", ctd_uji)
 
+    def figur_jaringan_uji():
+        """Tiga figur publikasi terbentuk utuh, dan ramp berurutannya makin gelap menurut peringkat."""
+        from . import figur_jaringan as FG
+        hub = [{"gen": g, "mcc": m, "derajat": d} for g, m, d in
+               [("TP53", 9.0, 6), ("JUN", 8.0, 5), ("MAPK1", 4.0, 3), ("ESR2", 3.0, 3), ("ABL1", 2.0, 2)]]
+        tepi = [("TP53", "JUN", 0.99), ("TP53", "MAPK1", 0.9), ("JUN", "ESR2", 0.8)]
+        jalur = [{"jalur": f"R-{i}", "nama": n, "n_overlap": c, "n_set": 200, "n_kueri": 40,
+                  "p": 1e-6, "q": q, "gen": []} for i, (n, c, q) in
+                 enumerate([("Apoptosis", 12, 1e-9), ("MAPK signaling", 9, 4e-7), ("Cell cycle", 6, 2e-5)])]
+        gambar = {"hub": FG.lingkar_hub(hub, tepi, judul="uji"),
+                  "gelembung": FG.gelembung_jalur(jalur, judul="uji"),
+                  "batang": FG.batang_jalur(jalur, judul="uji")}
+        for nama, svg in gambar.items():
+            if not svg.startswith("<svg") or not svg.rstrip().endswith("</svg>"):
+                raise RuntimeError(f"SVG {nama} tidak utuh")
+        if "TP53" not in gambar["hub"] or "Apoptosis" not in gambar["gelembung"]:
+            raise RuntimeError("isi figur tidak lengkap")
+        # Peringkat 1 harus memakai langkah ramp paling gelap, peringkat terakhir yang paling terang.
+        if FG._langkah(0, 5) <= FG._langkah(4, 5):
+            raise RuntimeError("arah ramp peringkat terbalik")
+        if FG.RAMP_BIRU[FG._langkah(0, 5)] != FG.RAMP_BIRU[-1]:
+            raise RuntimeError("peringkat teratas bukan langkah tergelap")
+        # Figur tanpa data tetap menghasilkan SVG sah, bukan galat.
+        for svg in (FG.lingkar_hub([], []), FG.gelembung_jalur([]), FG.batang_jalur([])):
+            if not svg.rstrip().endswith("</svg>"):
+                raise RuntimeError("figur kosong tidak menghasilkan SVG sah")
+        if len(FG.daftar()) < 5:
+            raise RuntimeError("daftar figur tidak lengkap")
+        return f"{len(gambar)} figur + 3 keadaan kosong OK, {len(FG.daftar())} jenis terdaftar"
+    cek("Figur publikasi jaringan", figur_jaringan_uji)
+
     def qsar_uji():
         """Pipeline QSAR berjalan utuh pada data kecil berhubungan: model harus menemukan hubungan dan menandai domain."""
         from rdkit import Chem

@@ -16,7 +16,18 @@ Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x 
   - Keadaan alur disimpan di dalam berkas proyek (kunci `farmakologi` pada `proyek.json`), dan tiap sumber data daring dicatat sebagai jejak sehingga ikut ke paragraf metode dan laporan.
 - Uji mandiri: tiga butir baru — *Diagram Venn*, *Alur farmakologi jaringan* (penyaringan, irisan, nilai MCC yang dihitung tangan, paragraf metode), dan *CTD (pengurai interaksi senyawa-gen)*; seluruhnya tanpa internet.
 
+- **Tab Figur** (tahap 7): lima gambar siap publikasi dari keadaan alur, dengan pratinjau dan ekspor SVG vektor atau raster ber-DPI (96–1200), satu per satu atau seluruhnya sekaligus ke satu folder.
+  - *Hub melingkar* (`core/figur_jaringan.lingkar_hub`) — protein paling sentral disusun melingkar dan diwarnai menurut peringkat MCC, padanan terbuka untuk gambar cytoHubba yang lazim di naskah farmakologi jaringan.
+  - *Bubble plot jalur* (`gelembung_jalur`) — sumbu x rasio gen, ukuran titik jumlah gen, warna −log₁₀(q), lengkap dengan dua keterangan dan angka di samping tiap titik agar tetap terbaca saat dicetak hitam-putih.
+  - *Batang jalur* (`batang_jalur`), *diagram Venn*, dan *jaringan berlapis* memakai modul yang sudah ada.
+  - Besaran berurutan memakai satu rona terang-ke-gelap dari ramp biru yang sudah divalidasi (pita terang, lantai kroma, pemisahan buta warna, kontras terhadap latar), bukan pelangi; peringkat teratas selalu yang tergelap.
+
 ### Diperbaiki
+- **Tampilan jaringan tidak terbaca karena label diborong dan ikut diperbesar.** Tiga pembetulan: label kini berukuran tetap di layar (`ItemIgnoresTransformations`) sehingga jaringan kecil tidak lagi menghasilkan tulisan raksasa; label diberikan secara terpilih menurut prioritas (simpul terpilih dan tetangganya, lalu derajat tertinggi) dengan yang bertabrakan disembunyikan dan dihitung ulang tiap kali perbesaran berubah; dan tiap label memakai bayangan warna latar di belakangnya agar tetap terbaca saat melintasi tepi. Nama lengkap selalu tersedia di tooltip.
+- Keterangan warna (legenda) kini selalu ada di pojok tampilan jaringan bila ada lebih dari satu jenis simpul — identitas tidak boleh bergantung pada pencocokan warna saja.
+- Tata letak jaringan memakai Kamada-Kawai untuk graf sampai 60 simpul (persilangan tepi lebih sedikit, jarak lebih merata) dan jarak antar simpul kini naik seiring jumlahnya, bukan makin rapat.
+- **Protein tanpa tepi PPI muncul di tabel hub dengan nilai nol.** Protein terpencil bukan hub menurut definisi apa pun; kini dibuang dari peringkat dan jumlahnya dilaporkan terpisah beserta namanya, karena ketiadaan tepi bisa berarti ambang STRING-nya yang terlalu tinggi.
+
 Lima hal berikut ketahuan saat alur dijalankan ujung ke ujung dengan jaringan hidup (*Curcuma longa* terhadap *colorectal cancer*, mengikuti contoh modul BBB NET):
 - **"Ambil senyawa" di dialog Senyawa dari tanaman obat selalu gagal** dengan `TypeError: 'Event' object is not callable` begitu takson yang dipilih punya rujukan artikel. `ui/dialog_tanaman.py` mengirim `threading.Event`, sedangkan `core/tanaman.py` memanggilnya seperti fungsi. Keduanya masuk pada commit yang sama, jadi jalur ini belum pernah berhasil sejak 1.8.0. Diperbaiki dengan `tanaman.dibatalkan()` yang menerima Event, fungsi, atau None — pola yang sudah dipakai `core/generatif.py`, `core/xtb.py`, dan `core/farmakofor.py`.
 - **Nama senyawa kembar menyatu dan salah satunya kehilangan target.** Peta target berkunci nama senyawa, padahal LOTUS memulangkan nama yang sama untuk stereoisomer dan tautomer berbeda (kunyit: dua `desmethoxycurcumin`, dua `bisdemethoxycurcumin`). Nama kini dibuat unik dengan akhiran berangka saat ditambahkan.

@@ -481,7 +481,19 @@
 <h3 id="np-jalur">6 · Jalur</h3>
 <p>Pengayaan jalur memakai uji hipergeometrik satu sisi: seberapa tidak mungkin sejumlah gen Anda jatuh pada satu jalur hanya karena kebetulan. Karena ribuan jalur diuji sekaligus, nilai <i>p</i> dikoreksi dengan metode Benjamini-Hochberg menjadi nilai <i>q</i>; pakai <i>q</i>, bukan <i>p</i>, untuk memutuskan jalur mana yang dilaporkan. Dua set gen tersedia luring: Reactome dan Gene Ontology Biological Process. Latar belakangnya adalah gabungan seluruh gen pada set yang dipilih.</p>
 
-<h3 id="np-laporan">7 · Laporan</h3>
+<h3 id="np-figur">7 · Figur</h3>
+<p>Lima gambar siap publikasi dirakit dari keadaan alur, dipilih di daftar sebelah kiri dan langsung terlihat di pratinjau kanan. <b>Jumlah butir</b> mengatur berapa protein hub atau jalur yang digambar; <b>DPI</b> hanya berlaku untuk keluaran raster.</p>
+<ul>
+<li><b>Diagram Venn irisan</b> — target senyawa berbanding gen penyakit.</li>
+<li><b>Jaringan berlapis</b> — senyawa, target, jalur, dan penyakit dalam satu gambar bertata letak gaya pegas.</li>
+<li><b>Hub melingkar</b> — protein paling sentral disusun melingkar, diwarnai menurut peringkat MCC. Susunan melingkar dipakai karena yang dibaca adalah peringkat dan kerapatan hubungan antar hub; tata letak gaya pegas justru menyembunyikan peringkat itu. Ini padanan terbuka untuk gambar cytoHubba yang lazim dipakai di naskah farmakologi jaringan.</li>
+<li><b>Bubble plot jalur</b> — bentuk baku pengayaan jalur: sumbu x rasio gen (gen kueri yang jatuh pada jalur dibagi seluruh gen kueri), ukuran titik jumlah gen, warna −log₁₀(q). Angkanya ditulis di samping tiap titik sehingga figurnya tetap terbaca saat dicetak hitam-putih.</li>
+<li><b>Batang jalur</b> — bentuk paling ringkas, jumlah gen per jalur.</li>
+</ul>
+<p>Besaran berurutan (peringkat hub, nilai q) digambar dengan <i>satu rona terang ke gelap</i>, bukan pelangi, dan rampnya sudah diperiksa untuk keterbacaan buta warna serta kontras terhadap latar. Artinya gambarnya tetap benar terbaca saat dicetak abu-abu: yang lebih gelap selalu berarti lebih tinggi.</p>
+<p><b>Simpan SVG/PNG…</b> menulis figur yang sedang tampil; <b>Simpan semua…</b> menulis setiap figur yang datanya sudah ada ke satu folder, masing-masing dalam SVG dan PNG. Pakai SVG bila jurnalnya menerima vektor — ukurannya kecil dan tidak pernah pecah saat diperbesar.</p>
+
+<h3 id="np-laporan">8 · Laporan</h3>
 <p>Kartu ringkasan menunjukkan angka tiap tahap, dan kotak di bawahnya memuat <b>paragraf metode</b> siap tempel dalam Bahasa Indonesia maupun Inggris, lengkap dengan ambang yang benar-benar Anda pakai. <b>Ekspor JSON…</b> menyimpan seluruh keadaan alur untuk lampiran suplemen.</p>
 <p>Saat menulis laporan, jelaskan <i>mengapa</i> tiap tahap dikerjakan, bukan hanya menempelkan tabel: dari mana gen diperoleh, ambang apa yang dipakai, dan dibandingkan dengan apa. Sertakan bagian <b>Keterbatasan</b> yang menyatakan bahwa analisis ini pendekatan komputasi untuk penapisan awal. Lima hal yang perlu disebut: hasilnya bergantung pada kelengkapan basis data publik; dosis tidak diperhitungkan sehingga hubungan dosis–respons tidak diprediksi; senyawa dianggap utuh padahal pencernaan dan metabolisme lintas pertama mengubahnya; interaksinya kualitatif, tidak membedakan penghambat dari pengaktif; dan tubuh diperlakukan seperti gambar diam, tanpa dimensi waktu maupun perbedaan antar organ.</p>
 <p>Langkah lanjutan yang masuk akal sesudah tahap ini: bawa pasangan senyawa–target hub yang paling menarik ke alur <b>Docking Molekuler</b> untuk memeriksa apakah ikatannya masuk akal secara struktural, lalu ke <b>MD &amp; MM/GBSA</b> bila pose-nya perlu diuji kestabilannya.</p>
