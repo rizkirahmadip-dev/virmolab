@@ -367,11 +367,12 @@ class DialogFarmakologi(QDialog):
         pakai_kemiripan, pakai_ctd = self.cb_kemiripan.isChecked(), self.cb_ctd.isChecked()
         k_atas = self.sp_k.value()
 
-        # Jalur kemiripan memakai beberapa permintaan ChEMBL per senyawa (kemiripan, aktivitas, target),
-        # sekitar 9 detik per senyawa saat cache dingin. Untuk daftar panjang — satu tanaman mudah
-        # memberi ratusan senyawa — perkiraannya ditunjukkan dulu supaya tidak terlanjur menunggu lama.
+        # Jalur kemiripan memakai beberapa permintaan ChEMBL per senyawa (kemiripan, aktivitas, target):
+        # rata-rata 2,8 permintaan dan 5,9 detik per senyawa saat cache dingin, diukur pada 108 senyawa
+        # Curcuma zedoaria. Untuk daftar panjang — satu takson mudah memberi ratusan senyawa —
+        # perkiraannya ditunjukkan dulu supaya pengguna tidak terlanjur menunggu belasan menit.
         if pakai_kemiripan and len(senyawa) > 20:
-            menit = max(1, round(len(senyawa) * 9 / 60))
+            menit = max(1, round(len(senyawa) * 6 / 60))
             jawab = QMessageBox.question(
                 self, "Daftar senyawa panjang",
                 f"{len(senyawa)} senyawa akan ditanyakan ke ChEMBL satu per satu, perkiraan sekitar "
