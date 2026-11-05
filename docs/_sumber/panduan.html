@@ -447,6 +447,45 @@
 <li>Nilai afinitas Boltz-2 adalah perkiraan model, bukan hasil pengukuran, dan tetap memerlukan uji laboratorium.</li>
 </ul>
 
+<h2 id="farmakologi">Farmakologi jaringan</h2>
+<p>Alur ini menjawab pertanyaan yang berbeda dari docking. Docking bertanya <i>seberapa kuat satu senyawa menempel pada satu protein</i>; farmakologi jaringan bertanya <i>lewat protein dan jalur mana saja sekumpulan senyawa mungkin bekerja pada suatu penyakit</i>. Pergeseran cara pandangnya dari <i>satu obat › satu target › satu penyakit</i> menjadi <i>banyak senyawa › banyak target › banyak jalur</i>.</p>
+<p>Buka lewat menu <b>Jaringan › Buka alur farmakologi jaringan…</b> (Ctrl+Shift+J), atau pilih <b>Farmakologi Jaringan</b> pada pemilih alur di panel <b>Langkah</b>. Jendelanya punya tujuh tab yang dikerjakan berurutan dari kiri ke kanan; keadaannya tersimpan di dalam berkas proyek, jadi pekerjaan bisa ditinggal dan dilanjutkan nanti.</p>
+
+<h3 id="np-senyawa">1 · Senyawa</h3>
+<p>Susun daftar senyawa beserta SMILES-nya. Tiga jalur masuk: <b>Senyawa tanaman obat…</b> (mencari dari takson tanaman lewat LOTUS/Wikidata dan COCONUT), <b>Ambil ligan proyek</b> (memakai ligan yang sudah ada di proyek docking ini), dan <b>Impor CSV/TSV…</b> untuk daftar yang Anda susun sendiri — misalnya hasil unduhan KNApSAcK yang sudah dilengkapi kolom SMILES dari PubChem. Pemisah kolom dan nama kolom dikenali otomatis; kolom SMILES boleh bernama <code>SMILES</code>, <code>Isomeric SMILES</code>, atau <code>Canonical SMILES</code>. Bila tersedia keduanya, pakailah isomeric SMILES karena memuat informasi stereokimia, dan jangan mencampur kedua jenis dalam satu kumpulan data: prediksi targetnya jadi tidak sebanding.</p>
+<p>Isi kotak <b>Sumber senyawa</b> dengan nama tanaman atau koleksi yang dipakai. Teks itu masuk ke paragraf metode di tab terakhir.</p>
+
+<h3 id="np-admet">2 · Saring ADMET</h3>
+<p>Dari ratusan senyawa dalam satu tanaman, tidak semuanya layak dibawa ke tahap berikutnya. Penyaringan ini memakai dua lapis. Lapis pertama selalu tersedia: jumlah pelanggaran aturan lima Lipinski dan peringatan PAINS, keduanya dihitung RDKit di komputer Anda. Lapis kedua memakai prediksi ADMET-AI bila terpasang — absorpsi usus (HIA), bioavailabilitas oral, risiko cedera hati (DILI), penghambatan hERG, dan mutagenisitas Ames — dan dijalankan lewat tombol <b>Prediksi ADMET (ADMET-AI)…</b>.</p>
+<p>Ambang bawaan di dialog adalah titik awal yang lazim, bukan aturan baku: sesuaikan dengan jumlah data dan tujuan penelitian Anda, lalu laporkan ambang yang benar-benar dipakai. Senyawa yang nilai ADMET-nya belum ada <i>tidak</i> digugurkan karena itu — ketiadaan data bukan bukti buruk — tetapi alasannya dicatat di kolom <b>Alasan</b> agar Anda sadar penyaringannya belum lengkap. Hasil penyaringan ini prediksi, bukan kebenaran final.</p>
+
+<h3 id="np-target">3 · Target senyawa</h3>
+<p>Dua sumber target yang saling melengkapi, boleh dipakai bersamaan:</p>
+<ul>
+<li><b>Kemiripan ligan ChEMBL</b> — mencari senyawa berstruktur mirip (sidik jari ECFP4) yang aktivitasnya sudah diukur (pChEMBL ≥ 6), lalu mengambil target yang diikatnya. Ini memberi target yang <i>mungkin</i> terikat berdasarkan kemiripan struktur, prinsip yang sama dengan SwissTargetPrediction.</li>
+<li><b>Interaksi terkurasi CTD</b> — hubungan senyawa–gen yang dibaca dan dikurasi kurator dari publikasi toksikologi dan biomedis. Ini memberi target yang <i>pernah dilaporkan</i>, dicari berdasarkan nama senyawa, jadi pastikan penamaannya baku.</li>
+</ul>
+<p>Bila Anda lebih suka memakai laman tool-nya sendiri, tombol <b>Impor CSV target…</b> menerima tabel berisi kolom nama senyawa dan simbol gen. Untuk jalur berbasis struktur — docking senyawa terhadap panel target terkurasi — pakai <b>Jaringan › Penargetan balik</b>.</p>
+
+<h3 id="np-penyakit">4 · Gen penyakit &amp; irisan</h3>
+<p>Ketik nama penyakit lalu <b>Cari di Open Targets</b>, pilih entri yang tepat dari daftar, dan tekan <b>Ambil gen penyakit</b>. Skor asosiasi Open Targets bernilai 0–1 dan memadukan bukti genetik, literatur, jalur, serta obat; ambang bawaan 0,10 longgar, naikkan bila gennya terlalu banyak.</p>
+<p>VirmoLab tidak menghubungi GeneCards secara otomatis karena lisensinya berbayar dan melarang pengambilan otomatis. Bila Anda punya akses, unduh sendiri hasilnya lalu pakai <b>Impor CSV gen…</b>; berkas ekspor DisGeNET, OMIM, dan CTD juga diterima selama ada kolom simbol gen. Saring dulu ke <i>protein coding</i> di laman sumbernya.</p>
+<p>Irisan antara target senyawa dan gen penyakit inilah yang disebut <b>potential therapeutic target</b>, dan digambar sebagai diagram Venn di sisi kanan. Angka di tiap wilayah adalah jumlah gen; lingkarannya berukuran tetap, bukan proporsional, karena Venn proporsional tidak selalu punya solusi geometris dan luas wilayah yang dipaksakan justru menyesatkan.</p>
+
+<h3 id="np-jaringan">5 · Jaringan PPI</h3>
+<p>Tepi interaksi protein–protein diambil dari STRING untuk gen hasil irisan. <b>Skor gabungan</b> adalah ambang kepercayaan: 0,40 medium, 0,70 high — yang lazim dipakai publikasi network pharmacology — dan 0,90 highest. Di bawah 0,40 rawan positif palsu.</p>
+<p>Perlu diingat bahwa tepi STRING tidak selalu berarti dua protein bersentuhan secara fisik. STRING memadukan beberapa saluran bukti: eksperimen, basis data terkurasi (KEGG, Reactome, Biocarta), penambangan teks dari jutaan abstrak, ko-ekspresi, kedekatan lokasi gen, fusi gen, dan ko-kemunculan. Asosiasi fungsional — dua protein bekerja di jalur yang sama tanpa pernah bersentuhan — juga menghasilkan tepi.</p>
+<p>Jaringannya bisa ditelusuri: roda tetikus memperbesar, seret menggeser, klik satu simpul untuk menyorot simpul itu beserta tetangganya, dan klik dua kali untuk mengembalikan tampilan penuh. Tabel di sebelah kanan memeringkat <b>protein hub</b> — protein dengan koneksi terbanyak, karena itu dianggap paling berperan. Urutan utamanya memakai <b>MCC</b> (Maximal Clique Centrality, metode cytoHubba), dengan derajat, betweenness, dan closeness sebagai pembanding. Memilih baris di tabel menyorot simpulnya di gambar.</p>
+<p>Jangan membaca jaringan sekadar sebagai kumpulan titik dan garis. Yang dicari adalah protein hub dan kekuatan buktinya, bukan tampilan jaringannya. Untuk analisis lanjutan, <b>Ekspor GraphML</b> membuka jaringan ini di Cytoscape atau Gephi.</p>
+
+<h3 id="np-jalur">6 · Jalur</h3>
+<p>Pengayaan jalur memakai uji hipergeometrik satu sisi: seberapa tidak mungkin sejumlah gen Anda jatuh pada satu jalur hanya karena kebetulan. Karena ribuan jalur diuji sekaligus, nilai <i>p</i> dikoreksi dengan metode Benjamini-Hochberg menjadi nilai <i>q</i>; pakai <i>q</i>, bukan <i>p</i>, untuk memutuskan jalur mana yang dilaporkan. Dua set gen tersedia luring: Reactome dan Gene Ontology Biological Process. Latar belakangnya adalah gabungan seluruh gen pada set yang dipilih.</p>
+
+<h3 id="np-laporan">7 · Laporan</h3>
+<p>Kartu ringkasan menunjukkan angka tiap tahap, dan kotak di bawahnya memuat <b>paragraf metode</b> siap tempel dalam Bahasa Indonesia maupun Inggris, lengkap dengan ambang yang benar-benar Anda pakai. <b>Ekspor JSON…</b> menyimpan seluruh keadaan alur untuk lampiran suplemen.</p>
+<p>Saat menulis laporan, jelaskan <i>mengapa</i> tiap tahap dikerjakan, bukan hanya menempelkan tabel: dari mana gen diperoleh, ambang apa yang dipakai, dan dibandingkan dengan apa. Sertakan bagian <b>Keterbatasan</b> yang menyatakan bahwa analisis ini pendekatan komputasi untuk penapisan awal. Lima hal yang perlu disebut: hasilnya bergantung pada kelengkapan basis data publik; dosis tidak diperhitungkan sehingga hubungan dosis–respons tidak diprediksi; senyawa dianggap utuh padahal pencernaan dan metabolisme lintas pertama mengubahnya; interaksinya kualitatif, tidak membedakan penghambat dari pengaktif; dan tubuh diperlakukan seperti gambar diam, tanpa dimensi waktu maupun perbedaan antar organ.</p>
+<p>Langkah lanjutan yang masuk akal sesudah tahap ini: bawa pasangan senyawa–target hub yang paling menarik ke alur <b>Docking Molekuler</b> untuk memeriksa apakah ikatannya masuk akal secara struktural, lalu ke <b>MD &amp; MM/GBSA</b> bila pose-nya perlu diuji kestabilannya.</p>
+
 <h2 id="cli">Baris perintah (VirmoLab-cli)</h2>
 <p><code>VirmoLab-cli.exe</code> ada di folder instalasi VirmoLab. Buka Command Prompt di folder itu (atau tulis jalur lengkapnya), lalu misalnya:</p>
 <pre>VirmoLab-cli dock -r 1HSG -l kandidat.smi --acuan auto -o hasil_1hsg

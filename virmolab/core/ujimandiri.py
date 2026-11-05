@@ -511,6 +511,85 @@ def uji(lapor=None):
         return f"{G.number_of_nodes()} simpul, {G.number_of_edges()} tepi, metrik OK"
     cek("Jaringan farmakologi", jaringan_uji)
 
+    def venn_uji():
+        """Pembagian wilayah Venn benar dan SVG-nya utuh untuk 2 maupun 3 himpunan."""
+        from . import venn
+        w2 = venn.hitung2(["TP53", "AKT1", "egfr"], ["TP53", "NFKB1"])
+        if w2["AB"] != ["TP53"] or w2["A"] != ["AKT1", "EGFR"] or w2["B"] != ["NFKB1"]:
+            raise RuntimeError(f"wilayah Venn 2 himpunan salah: {w2}")
+        w3 = venn.hitung3(["A", "B"], ["B", "C"], ["C", "A"])
+        if w3["ABC"] or sorted(w3["AB"] + w3["AC"] + w3["BC"]) != ["A", "B", "C"]:
+            raise RuntimeError(f"wilayah Venn 3 himpunan salah: {w3}")
+        s2 = venn.svg({"Target": ["TP53", "AKT1"], "Penyakit": ["TP53"]}, judul="uji")
+        s3 = venn.svg({"A": ["1"], "B": ["2"], "C": ["3"]}, mode="gelap")
+        if s2.count("<circle") != 2 or s3.count("<circle") != 3 or not s2.rstrip().endswith("</svg>"):
+            raise RuntimeError("SVG Venn tidak utuh")
+        return "Venn 2 & 3 himpunan OK"
+    cek("Diagram Venn", venn_uji)
+
+    def farmakologi_uji():
+        """Alur farmakologi jaringan: penyaringan, irisan, MCC, dan paragraf metode (tanpa internet)."""
+        from . import farmakologi as F
+        sen = F.senyawa_dari_daftar([{"nama": "kurkumin", "smiles": "COc1cc(/C=C/C(=O)CC(=O)/C=C/c2ccc(O)c(OC)c2)ccc1O"},
+                                     {"nama": "aspirin", "smiles": "CC(=O)Oc1ccccc1C(=O)O"},
+                                     {"nama": "rusak", "smiles": "bukan-smiles"}])
+        if len(sen) != 3:
+            raise RuntimeError(f"{len(sen)} senyawa dinormalkan, seharusnya 3")
+        F.hitung_sifat(sen)
+        sen[1]["admet"] = {"DILI": 0.95}
+        r = F.saring(sen)
+        if sen[2]["lolos"]:
+            raise RuntimeError("SMILES rusak seharusnya gugur")
+        if sen[1]["lolos"]:
+            raise RuntimeError("DILI 0,95 di atas ambang seharusnya gugur")
+        if r["lolos"] != 1:
+            raise RuntimeError(f"{r['lolos']} senyawa lolos, seharusnya 1")
+
+        ir = F.irisan({"a": ["TP53", "AKT1"], "b": ["EGFR"]}, [{"gen": "TP53"}, {"gen": "MYC"}])
+        if ir["irisan"] != ["TP53"]:
+            raise RuntimeError(f"irisan salah: {ir['irisan']}")
+
+        # Segitiga TP53-AKT1-EGFR (klik maksimal 3) + ekor EGFR-SRC (klik maksimal 2):
+        # MCC(EGFR) = (3-1)! + (2-1)! = 3; MCC(SRC) = 1.
+        G = F.graf_ppi(["TP53", "AKT1", "EGFR", "SRC"],
+                       [("TP53", "AKT1", 0.9), ("TP53", "EGFR", 0.8), ("AKT1", "EGFR", 0.75), ("EGFR", "SRC", 0.7)])
+        h = {b["gen"]: b["mcc"] for b in F.hub(G, 10)}
+        if h.get("EGFR") != 3.0 or h.get("SRC") != 1.0 or h.get("TP53") != 2.0:
+            raise RuntimeError(f"MCC salah: {h}")
+
+        k = F.keadaan_baru()
+        k.update({"senyawa": sen, "target_senyawa": {"a": ["TP53"]}, "gen_penyakit": [{"gen": "TP53"}],
+                  "irisan": ["TP53"], "tepi_ppi": [["TP53", "AKT1", 0.9]]})
+        for teks in (F.paragraf_metode(k), F.paragraf_metode(k, inggris=True)):
+            if "validasi eksperimental" not in teks and "experimental validation" not in teks:
+                raise RuntimeError("paragraf metode kehilangan peringatan validasi")
+        if len(F.ringkasan(k)) != 7:
+            raise RuntimeError("ringkasan tahap tidak lengkap")
+        return f"saring {r['lolos']}/{len(sen)}, irisan 1 gen, MCC & paragraf metode OK"
+    cek("Alur farmakologi jaringan", farmakologi_uji)
+
+    def ctd_uji():
+        """Pengurai TSV CTD membaca kolom berdasarkan nama dan menyaring spesies (tanpa internet)."""
+        from . import ctd
+        teks = ("# Batch Query\n"
+                "#Input\tChemicalName\tChemicalID\tGeneSymbol\tGeneID\tOrganism\tOrganism ID\t"
+                "Interaction Actions\tPubMed IDs\n"
+                "curcumin\tCurcumin\tD003474\tPTGS2\t5743\tHomo sapiens\t9606\tdecreases^expression\t111|222\n"
+                "curcumin\tCurcumin\tD003474\tTp53\t22059\tMus musculus\t10090\tincreases^expression\t333\n"
+                "curcumin\tCurcumin\tD003474\tTP53\t7157\tHomo sapiens\t9606\tincreases^expression\t444\n")
+        baris = ctd.urai_tsv(teks)
+        if len(baris) != 2:
+            raise RuntimeError(f"{len(baris)} baris manusia, seharusnya 2 (baris tikus harus dibuang)")
+        if baris[0]["gen"] != "PTGS2" or baris[0]["n_pubmed"] != 2:
+            raise RuntimeError(f"kolom salah dibaca: {baris[0]}")
+        if ctd.gen_unik(baris) != ["PTGS2", "TP53"]:
+            raise RuntimeError("daftar gen unik salah")
+        peta = ctd.per_senyawa(baris)
+        if peta.get("curcumin") != ["PTGS2", "TP53"]:
+            raise RuntimeError(f"pengelompokan per senyawa salah: {peta}")
+        return "pengurai TSV CTD OK (2 baris manusia, 2 gen)"
+    cek("CTD (pengurai interaksi senyawa-gen)", ctd_uji)
+
     def qsar_uji():
         """Pipeline QSAR berjalan utuh pada data kecil berhubungan: model harus menemukan hubungan dan menandai domain."""
         from rdkit import Chem

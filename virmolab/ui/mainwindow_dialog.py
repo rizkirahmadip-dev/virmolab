@@ -461,6 +461,24 @@ class PembukaDialog:
         d.setAttribute(Qt.WA_DeleteOnClose)
         d.show()
 
+    def buka_farmakologi(self, tab=0):
+        """Alur farmakologi jaringan. `tab` membuka langsung tahap tertentu (0 = Senyawa … 6 = Laporan)."""
+        from .dialog_farmakologi import DialogFarmakologi
+        d = getattr(self, "_d_farmakologi", None)
+        if d is not None and d.isVisible():
+            # Satu alur per jendela: kalau sudah terbuka, angkat yang ada supaya keadaannya tidak bercabang.
+            d.tabs.setCurrentIndex(max(0, min(int(tab), d.tabs.count() - 1)))
+            d.raise_()
+            d.activateWindow()
+            return
+        d = DialogFarmakologi(self, proyek=self.proyek)
+        d.setAttribute(Qt.WA_DeleteOnClose)
+        d.tabs.setCurrentIndex(max(0, min(int(tab), d.tabs.count() - 1)))
+        d.keadaanBerubah.connect(lambda _k: self.segarkan_langkah())
+        d.destroyed.connect(lambda *_: setattr(self, "_d_farmakologi", None))
+        self._d_farmakologi = d
+        d.show()
+
     def buka_farmakofor(self):
         from .dialog_farmakofor import DialogFarmakofor
         d = DialogFarmakofor(self)

@@ -2,6 +2,23 @@
 
 Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x adalah pra-rilis.
 
+## [Belum dirilis]
+
+### Baru
+- **Farmakologi jaringan** sebagai alur kerja tersendiri, dengan menu **Jaringan** di bilah menu (Ctrl+Shift+J) dan pilihan *Farmakologi Jaringan* di pemilih alur panel Langkah. Seluruh rantai senyawa › target › jalur › penyakit dikerjakan dalam satu jendela tujuh tahap (`ui/dialog_farmakologi.py`, `core/farmakologi.py`), tanpa lagi berpindah-pindah antara tujuh laman web dan Excel.
+  - **1 Senyawa**: dari takson tanaman obat (LOTUS/Wikidata, COCONUT), dari ligan proyek, atau impor CSV/TSV berisi kolom SMILES — mis. ekspor KNApSAcK yang sudah dilengkapi SMILES dari PubChem. Pemisah kolom dan nama kolom dikenali otomatis.
+  - **2 Saring ADMET**: aturan Lipinski dan peringatan PAINS dari RDKit, ditambah ambang HIA, bioavailabilitas oral, DILI, hERG, dan Ames bila ADMET-AI terpasang. Senyawa yang nilai ADMET-nya belum ada tidak digugurkan karena itu; alasannya dicatat per senyawa.
+  - **3 Target senyawa**: kemiripan ligan ChEMBL (ECFP4, pChEMBL ≥ 6) dan/atau interaksi senyawa-gen terkurasi literatur dari CTD (`core/ctd.py`, Batch Query, kolom dibaca berdasarkan nama sehingga tahan perubahan skema). Tabel target juga bisa diimpor dari berkas.
+  - **4 Gen penyakit dan irisan**: pencarian penyakit dan gen terasosiasi lewat Open Targets Platform (`jaringan.cari_penyakit`, `jaringan.target_penyakit`), atau impor CSV ekspor GeneCards/DisGeNET/OMIM milik pengguna sendiri. Irisannya digambar sebagai diagram Venn (`core/venn.py`, SVG 2 dan 3 himpunan, palet aman buta warna).
+  - **5 Jaringan PPI**: tepi STRING pada ambang yang dapat diatur, tampilan jaringan **interaktif** pertama di VirmoLab (`ui/widget_graf.py`: geser, perbesar, klik simpul untuk menyorot tetangganya), dan peringkat protein hub memakai Maximal Clique Centrality cytoHubba di samping derajat, betweenness, dan closeness. Ekspor GraphML (Cytoscape/Gephi), CSV tepi, dan PNG.
+  - **6 Jalur**: pengayaan Reactome atau GO-BP dengan uji hipergeometrik satu sisi dan koreksi Benjamini-Hochberg, lengkap dengan grafik batang 15 jalur teratas.
+  - **7 Laporan**: kartu ringkasan tiap tahap, paragraf metode siap tempel dalam Bahasa Indonesia dan Inggris, serta ekspor seluruh keadaan alur ke JSON untuk lampiran suplemen.
+  - Keadaan alur disimpan di dalam berkas proyek (kunci `farmakologi` pada `proyek.json`), dan tiap sumber data daring dicatat sebagai jejak sehingga ikut ke paragraf metode dan laporan.
+- Uji mandiri: tiga butir baru — *Diagram Venn*, *Alur farmakologi jaringan* (penyaringan, irisan, nilai MCC yang dihitung tangan, paragraf metode), dan *CTD (pengurai interaksi senyawa-gen)*; seluruhnya tanpa internet.
+
+### Diubah
+- GeneCards sengaja tidak dihubungi otomatis: lisensinya berbayar dan melarang pengambilan otomatis. Jalurnya adalah pengguna mengunduh sendiri lalu mengimpor berkasnya; Open Targets dipakai sebagai sumber gen penyakit yang terbuka.
+
 ## [1.8.0] - 25 Oktober 2026
 
 Rilis publik pertama. Alat Linux lanjutan kini dipasang dari dalam aplikasi, dan tidak ada lagi pesan yang menyuruh
