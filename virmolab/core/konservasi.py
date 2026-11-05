@@ -222,6 +222,14 @@ def unduh_fasta(kueri, n=12, timeout=25):
 
 
 _BLAST = "https://blast.ncbi.nlm.nih.gov/Blast.cgi"
+# NCBI meminta tiap pemanggil otomatis menyebut dirinya: "Use the URL parameter email and tool, so that
+# the NCBI can contact you if there is a problem." Alamat surel pengguna tidak ikut dikirim tanpa diminta.
+_IDENT = {"tool": "VirmoLab"}
+# Pedoman NCBI yang lain: jangan menghubungi server lebih sering dari sekali per 10 detik, dan jangan
+# memeriksa satu RID lebih sering dari sekali semenit. Pemanggil yang melanggar dipindahkan ke antrean
+# lambat atau diblokir, jadi kedua angka ini adalah lantai, bukan anjuran.
+JEDA_SERVER = 10
+JEDA_RID = 60
 
 
 def _minta(url, data=None, timeout=45):
@@ -236,7 +244,7 @@ def kirim_blast(sekuens, basis="swissprot", timeout=45):
     if len(seq) < 10:
         raise ValueError("Sekuens terlalu pendek untuk BLAST.")
     data = urllib.parse.urlencode({
-        "CMD": "Put", "PROGRAM": "blastp", "DATABASE": basis,
+        **_IDENT, "CMD": "Put", "PROGRAM": "blastp", "DATABASE": basis,
         "QUERY": seq, "HITLIST_SIZE": "12", "EXPECT": "0.001",
     }).encode()
     teks = _minta(_BLAST, data, timeout)
@@ -248,14 +256,14 @@ def kirim_blast(sekuens, basis="swissprot", timeout=45):
 
 def status_blast(rid, timeout=45):
     """WAITING, READY, FAILED, atau UNKNOWN."""
-    q = urllib.parse.urlencode({"CMD": "Get", "FORMAT_OBJECT": "SearchInfo", "RID": rid})
+    q = urllib.parse.urlencode({**_IDENT, "CMD": "Get", "FORMAT_OBJECT": "SearchInfo", "RID": rid})
     teks = _minta(_BLAST + "?" + q, timeout=timeout)
     m = re.search(r"Status=(\w+)", teks)
     return m.group(1) if m else "UNKNOWN"
 
 
 def ambil_blast_xml(rid, timeout=90):
-    q = urllib.parse.urlencode({"CMD": "Get", "FORMAT_TYPE": "XML", "RID": rid})
+    q = urllib.parse.urlencode({**_IDENT, "CMD": "Get", "FORMAT_TYPE": "XML", "RID": rid})
     return _minta(_BLAST + "?" + q, timeout=timeout)
 
 
@@ -528,10 +536,16 @@ def uniprot_blast_fasta(sekuens, tunggu=180, jeda=5):
     raise TimeoutError(f"BLAST UniProt masih berjalan. Nomor {job}.")
 
 
-def blast_fasta(sekuens, tunggu=240, jeda=12, basis="swissprot"):
-    """Tunggu BLAST NCBI. (rid, [(judul, sekuens)]). TimeoutError menyertakan RID."""
+def blast_fasta(sekuens, tunggu=300, jeda=JEDA_RID, basis="swissprot"):
+    """Tunggu BLAST NCBI. (rid, [(judul, sekuens)]). TimeoutError menyertakan RID.
+
+    Jeda mengikuti pedoman NCBI: pemeriksaan pertama tidak langsung menyusul pengiriman, dan satu RID
+    tidak diperiksa lebih sering dari sekali semenit. Jeda yang lebih kecil dari pemanggil dinaikkan.
+    """
     rid = kirim_blast(sekuens, basis=basis)
+    jeda = max(jeda, JEDA_RID)
     batas = time.time() + tunggu
+    time.sleep(min(JEDA_SERVER, max(0.0, batas - time.time())))
     while time.time() < batas:
         st = status_blast(rid)
         if st == "READY":
