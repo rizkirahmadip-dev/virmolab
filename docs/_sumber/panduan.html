@@ -494,9 +494,20 @@
 <p><b>Simpan SVG/PNG…</b> menulis figur yang sedang tampil; <b>Simpan semua…</b> menulis setiap figur yang datanya sudah ada ke satu folder, masing-masing dalam SVG dan PNG. Pakai SVG bila jurnalnya menerima vektor — ukurannya kecil dan tidak pernah pecah saat diperbesar.</p>
 
 <h3 id="np-laporan">8 · Laporan</h3>
-<p>Kartu ringkasan menunjukkan angka tiap tahap, dan kotak di bawahnya memuat <b>paragraf metode</b> siap tempel dalam Bahasa Indonesia maupun Inggris, lengkap dengan ambang yang benar-benar Anda pakai. <b>Ekspor JSON…</b> menyimpan seluruh keadaan alur untuk lampiran suplemen.</p>
-<p>Saat menulis laporan, jelaskan <i>mengapa</i> tiap tahap dikerjakan, bukan hanya menempelkan tabel: dari mana gen diperoleh, ambang apa yang dipakai, dan dibandingkan dengan apa. Sertakan bagian <b>Keterbatasan</b> yang menyatakan bahwa analisis ini pendekatan komputasi untuk penapisan awal. Lima hal yang perlu disebut: hasilnya bergantung pada kelengkapan basis data publik; dosis tidak diperhitungkan sehingga hubungan dosis–respons tidak diprediksi; senyawa dianggap utuh padahal pencernaan dan metabolisme lintas pertama mengubahnya; interaksinya kualitatif, tidak membedakan penghambat dari pengaktif; dan tubuh diperlakukan seperti gambar diam, tanpa dimensi waktu maupun perbedaan antar organ.</p>
-<p>Langkah lanjutan yang masuk akal sesudah tahap ini: bawa pasangan senyawa–target hub yang paling menarik ke alur <b>Docking Molekuler</b> untuk memeriksa apakah ikatannya masuk akal secara struktural, lalu ke <b>MD &amp; MM/GBSA</b> bila pose-nya perlu diuji kestabilannya.</p>
+<p>Kartu ringkasan menunjukkan angka tiap tahap, dan di bawahnya laporan lengkap dirakit ulang setiap kali ada tahap yang selesai — tidak perlu menekan apa pun. Isinya sepuluh bagian: ringkasan, metode, daftar senyawa, hasil penyaringan beserta alasan pengguguran, target per senyawa, gen penyakit dan irisannya, topologi jaringan dan tabel protein hub, tabel jalur, Keterbatasan, dan tabel sumber data beserta versi serta lisensinya.</p>
+<p>Laporan ini bisa disimpan sebagai <b>PDF</b>, <b>Word</b>, atau <b>HTML</b>. <b>Ekspor JSON…</b> menyimpan seluruh keadaan alur untuk lampiran suplemen, dan tombol salin memberi paragraf metode saja dalam Bahasa Indonesia atau Inggris.</p>
+
+<h4>Statistik yang disertakan</h4>
+<p>Dua hal diuji dengan mesin statistik VirmoLab yang sama dengan tab Uji &amp; Grafik, sehingga pemilihan uji dan pemeriksaan asumsinya konsisten.</p>
+<ul>
+<li><b>Sifat senyawa lolos berbanding gugur</b> — massa molekul, WLOGP, TPSA, QED, dan SA Score dibandingkan antara kedua kelompok. Ujinya dipilih otomatis: Welch bila sebarannya normal menurut Shapiro-Wilk, Mann-Whitney bila tidak. Gunanya menjawab pertanyaan yang wajar ditanyakan pembaca: penyaringan ADMET itu sebenarnya membuang apa? Bila tidak ada satu pun sifat yang berbeda bermakna, penyaringannya bekerja lewat kriteria prediksi toksisitas, bukan lewat ukuran atau lipofilisitas molekulnya — dan laporan menuliskan kesimpulan itu apa adanya.</li>
+<li><b>Topologi jaringan</b> — kerapatan, sebaran derajat (rata-rata, SD, median, tertinggi), koefisien klaster, jumlah komponen terhubung, dan jumlah protein terpencil, disertai paragraf pembacaannya. Bila derajat tertinggi jauh melampaui median, laporan menyebutkan pola itu: sedikit protein memegang sebagian besar hubungan, ciri yang lazim pada jaringan biologis.</li>
+</ul>
+<p>Bagian <b>Keterbatasan</b> selalu ikut tercetak dan tidak bisa dihilangkan, memuat enam hal: ketergantungan pada kelengkapan basis data publik, dosis yang tidak diperhitungkan, pencernaan dan metabolisme yang diabaikan, arah interaksi yang tidak diketahui, waktu dan lokasi di tubuh yang diabaikan, serta sifat tepi STRING yang bukan hanya interaksi fisik.</p>
+
+<h4>Melanjutkan ke docking</h4>
+<p>Tombol di pojok kanan bawah mengikuti tahap yang sedang dibuka: selama alurnya belum selesai ia berbunyi <b>Lanjut: &lt;tahap berikutnya&gt;</b> dan mati bila tahap sekarang belum ada isinya. Di tab Laporan ia berubah menjadi <b>Bawa ke docking molekuler…</b>.</p>
+<p>Tombol itu memilih hanya senyawa yang lolos penyaringan <i>dan</i> mengenai salah satu dari sepuluh target hub teratas, lalu membuka dialog impor dengan daftar SMILES-nya sudah terisi dan memindahkan panel Langkah ke alur Docking Molekuler. Di sinilah struktur 3D baru dibuat — bukan di awal — karena pada titik ini sudah jelas senyawa mana yang pantas diuji dan terhadap protein apa. Sesudah docking, <b>MD &amp; MM/GBSA</b> bisa dipakai bila kestabilan pose-nya perlu diperiksa.</p>
 
 <h2 id="cli">Baris perintah (VirmoLab-cli)</h2>
 <p><code>VirmoLab-cli.exe</code> ada di folder instalasi VirmoLab. Buka Command Prompt di folder itu (atau tulis jalur lengkapnya), lalu misalnya:</p>

@@ -1971,9 +1971,16 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
         self.statusBar().showMessage("Mengimpor…", 3000)
         kerja.jalankan(kerjakan, selesai=self.tambah_objek, galat=self._galat, log=self.log.tulis)
 
-    def ambil(self, tab):
+    def ambil(self, tab, isi_awal=""):
+        """Dialog impor dari basis data. `isi_awal` mengisi kotak SMILES lebih dulu.
+
+        Dipakai alur farmakologi jaringan untuk menyerahkan senyawa terpilihnya ke docking: daftarnya
+        sudah terisi, pengguna tinggal memeriksa lalu menekan tombolnya.
+        """
         from .dialogs import DialogAmbil, DialogProgresUnduh
         d = DialogAmbil(self, tab)
+        if isi_awal and hasattr(d, "smiles"):
+            d.smiles.setPlainText(isi_awal)
         if not d.exec():
             return
         req = d.permintaan()

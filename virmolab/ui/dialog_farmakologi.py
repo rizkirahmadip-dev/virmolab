@@ -91,9 +91,101 @@ class DialogFarmakologi(QDialog):
         self.l_status.setObjectName("subjudul")
         self.l_status.setWordWrap(True)
         lay.addWidget(self.l_status)
+        self.b_lanjut = kit.tombol("Lanjut", self._lanjut, utama=True)
         lay.addLayout(kit.bar_bawah(self, kiri=(self.l_status,),
-                                    kanan=(kit.tombol("Simpan ke proyek", self._simpan, utama=True,
-                                                      tip="Simpan keadaan alur ini ke dalam berkas proyek"),)))
+                                    kanan=(kit.tombol("Simpan ke proyek", self._simpan,
+                                                      tip="Keadaan alur sebenarnya sudah disimpan sendiri "
+                                                          "tiap tahap; tombol ini memaksa simpan sekarang"),
+                                           self.b_lanjut)))
+        self.tabs.currentChanged.connect(lambda _=0: self._perbarui_lanjut())
+
+    # ---------------------------------------------------------------- tombol Lanjut
+    def _keadaan_tahap(self) -> List[Dict[str, Any]]:
+        """Apa yang sudah ada di tiap tahap, dipakai tombol Lanjut dan ringkasan laporan."""
+        sen = self.k.get("senyawa") or []
+        return [
+            {"nama": "Senyawa", "ada": bool(sen), "kurang": "kumpulkan senyawa dulu"},
+            {"nama": "Saring ADMET", "ada": any(s.get("sifat") for s in sen),
+             "kurang": "hitung sifat dan saring dulu"},
+            {"nama": "Target senyawa", "ada": bool(self.k.get("target_senyawa")),
+             "kurang": "cari target senyawa dulu"},
+            {"nama": "Gen penyakit", "ada": bool(self.k.get("gen_penyakit")),
+             "kurang": "ambil atau impor gen penyakit dulu"},
+            {"nama": "Jaringan PPI", "ada": bool(self.k.get("tepi_ppi")),
+             "kurang": "bangun jaringan PPI dulu"},
+            {"nama": "Jalur", "ada": bool(self.k.get("jalur")), "kurang": "hitung pengayaan jalur dulu"},
+            {"nama": "Figur", "ada": bool(self.k.get("jalur") or self.k.get("tepi_ppi")),
+             "kurang": "selesaikan tahap jaringan atau jalur dulu"},
+            {"nama": "Laporan", "ada": bool(self.k.get("irisan")), "kurang": "selesaikan tahap irisan dulu"},
+        ]
+
+    def _perbarui_lanjut(self):
+        """Tombol Lanjut menunjuk tahap berikutnya yang masuk akal, bukan sekadar tab di sebelah.
+
+        Di tahap terakhir tombolnya berubah menjadi pintu ke docking: urutan farmakologi jaringan
+        memang menempatkan docking di belakang, sebagai pemeriksaan struktural atas pasangan
+        senyawa-target yang sudah terpilih — bukan di depan.
+        """
+        if not hasattr(self, "b_lanjut"):
+            return
+        i = self.tabs.currentIndex()
+        tahap = self._keadaan_tahap()
+        if i >= self.tabs.count() - 1:
+            bisa = bool(self.k.get("irisan") or self.k.get("hub"))
+            self.b_lanjut.setText("Bawa ke docking molekuler…")
+            self.b_lanjut.setEnabled(bisa)
+            self.b_lanjut.setToolTip(
+                "Siapkan senyawa yang mengenai target hub sebagai ligan docking, lalu pindah ke alur "
+                "Docking Molekuler" if bisa else "Selesaikan dulu irisan target dan jaringannya")
+            return
+        kini = tahap[i]
+        berikut = tahap[i + 1]
+        self.b_lanjut.setText(f"Lanjut: {berikut['nama']} ›")
+        self.b_lanjut.setEnabled(bool(kini["ada"]))
+        self.b_lanjut.setToolTip("" if kini["ada"] else f"Tahap ini belum ada isinya — {kini['kurang']}.")
+
+    def _lanjut(self):
+        i = self.tabs.currentIndex()
+        if i >= self.tabs.count() - 1:
+            self._ke_docking()
+            return
+        self.tabs.setCurrentIndex(i + 1)
+
+    def _ke_docking(self):
+        """Serahkan hasil jaringan ke alur docking: ligan disiapkan, alur jendela utama diganti.
+
+        Baru di sini struktur 3D dibuat, dan hanya untuk senyawa yang benar-benar mengenai target
+        hub — bukan untuk seluruh isi tanaman.
+        """
+        if self.jw is None:
+            return
+        hub_gen = {b["gen"] for b in (self.k.get("hub") or [])[:10]} or set(self.k.get("irisan") or [])
+        if not hub_gen:
+            kit.pesan_peringatan(self, "Belum ada target hub atau irisan untuk ditindaklanjuti.")
+            return
+        pilih = [s for s in F.yang_lolos(self.k.get("senyawa") or [])
+                 if hub_gen & {g.upper() for g in (self.k.get("target_senyawa") or {}).get(s["nama"], [])}]
+        if not pilih:
+            kit.pesan_peringatan(self, "Tidak ada senyawa lolos saring yang mengenai target hub. "
+                                       "Turunkan ambang penyaringan atau perluas pencarian target.")
+            return
+        jawab = QMessageBox.question(
+            self, "Bawa ke docking",
+            f"{len(pilih)} senyawa mengenai {len(hub_gen)} target teratas:\n\n"
+            + ", ".join(s["nama"] for s in pilih[:12]) + ("…" if len(pilih) > 12 else "")
+            + "\n\nSiapkan senyawa ini sebagai ligan docking dan pindah ke alur Docking Molekuler? "
+              "Struktur 3D-nya baru dibuat sekarang.",
+            QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
+        if jawab != QMessageBox.Yes:
+            return
+        teks = "\n".join(f"{s['smiles']} {s['nama']}" for s in pilih)
+        if hasattr(self.jw, "langkah"):
+            self.jw.langkah.ganti_alur("docking")
+        self._catat(f"{len(pilih)} senyawa dibawa ke alur docking.")
+        self.close()
+        # Dialog impor dibuka dengan daftarnya sudah terisi: pengguna memeriksa lalu menjalankan,
+        # jadi pembuatan struktur 3D tetap langkah yang disadari, bukan yang terjadi diam-diam.
+        self.jw.ambil(2, isi_awal=teks)
 
     def _mulai(self, teks: str):
         self._sibuk = True
@@ -146,6 +238,9 @@ class DialogFarmakologi(QDialog):
             self.jw.minta_simpan()
         if self.jw is not None and hasattr(self.jw, "segarkan_langkah"):
             self.jw.segarkan_langkah()
+        self._perbarui_lanjut()
+        if hasattr(self, "tb_laporan"):
+            self._segarkan_laporan()
 
     # ================================================================ 1. senyawa
     def _tab_senyawa(self, w):
@@ -176,7 +271,12 @@ class DialogFarmakologi(QDialog):
         v.addWidget(self.l_senyawa)
 
     def _dari_tanaman(self):
-        """Pinjam dialog senyawa tanaman yang sudah ada; hasilnya masuk ke daftar alur ini."""
+        """Pinjam dialog senyawa tanaman, dalam mode yang hanya memulangkan nama dan SMILES.
+
+        Sengaja tidak memakai jalur impor ligan: alur ini belum memerlukan struktur 3D, dan satu
+        takson bisa memberi ratusan senyawa yang akan memenuhi panel Objek serta memakan waktu lama
+        untuk dibuatkan konformasi. Docking baru masuk setelah targetnya diketahui.
+        """
         if self.jw is None:
             return
         try:
@@ -184,10 +284,9 @@ class DialogFarmakologi(QDialog):
         except Exception as e:
             kit.pesan_peringatan(self, f"Dialog senyawa tanaman tidak bisa dibuka: {e}")
             return
-        d = DialogTanaman(self.jw)
-        # DialogTanaman menambahkan senyawa terpilih ke proyek; setelah ditutup, ambil dari proyek.
+        d = DialogTanaman(self.jw, mode="senyawa")
+        d.senyawaDipilih.connect(lambda daftar: self._tambah_senyawa(F.senyawa_dari_daftar(daftar)))
         d.exec()
-        self._dari_proyek()
 
     def _dari_proyek(self):
         baris = []
@@ -1108,22 +1207,82 @@ class DialogFarmakologi(QDialog):
         v.addLayout(kit.baris_kartu(*baris1))
         v.addLayout(kit.baris_kartu(*baris2))
 
-        v.addWidget(QLabel("Paragraf metode (siap tempel ke naskah)"))
         from PySide6.QtWidgets import QTextBrowser
-        self.tb_metode = QTextBrowser()
-        self.tb_metode.setMinimumHeight(170)
-        v.addWidget(self.tb_metode, 1)
+        self.tb_laporan = QTextBrowser()
+        self.tb_laporan.setOpenExternalLinks(True)
+        self.tb_laporan.setMinimumHeight(240)
+        v.addWidget(self.tb_laporan, 1)
 
         aksi = QHBoxLayout()
         aksi.addWidget(kit.tombol("Segarkan", self._segarkan_laporan))
+        aksi.addWidget(kit.tombol("Simpan PDF…", lambda: self._ekspor_laporan("pdf"), utama=True,
+                                  tip="Laporan lengkap: ringkasan, metode, tiap tahap, statistik, "
+                                      "keterbatasan, dan sumber data"))
+        aksi.addWidget(kit.tombol("Simpan Word…", lambda: self._ekspor_laporan("docx")))
+        aksi.addWidget(kit.tombol("Simpan HTML…", lambda: self._ekspor_laporan("html")))
+        aksi.addStretch(1)
         aksi.addWidget(kit.tombol("Salin metode (ID)",
                                   lambda: kit.salin(F.paragraf_metode(self.k), self.l_status)))
         aksi.addWidget(kit.tombol("Salin metode (EN)",
                                   lambda: kit.salin(F.paragraf_metode(self.k, inggris=True), self.l_status)))
         aksi.addWidget(kit.tombol("Ekspor JSON…", self._ekspor_json,
                                   tip="Seluruh keadaan alur untuk lampiran suplemen"))
-        aksi.addStretch(1)
         v.addLayout(aksi)
+
+    def _html_laporan(self) -> str:
+        from datetime import datetime
+        from ..core import laporan_jaringan as LJ
+        jejak = list(self._jejak)
+        if self.proyek is not None:
+            jejak = list(getattr(self.proyek, "jejak", []) or []) + jejak
+        return LJ.html(self.k, G=self._graf,
+                       info={"tanggal": datetime.now().strftime("%d %B %Y"), "jejak": jejak})
+
+    def _ekspor_laporan(self, fmt: str):
+        if not (self.k.get("senyawa") or self.k.get("target_senyawa")):
+            kit.pesan_peringatan(self, "Belum ada yang bisa dilaporkan. Jalankan tahapnya dulu.")
+            return
+        saring = {"pdf": "PDF (*.pdf)", "docx": "Word (*.docx)", "html": "HTML (*.html)"}[fmt]
+        nama = f"laporan_farmakologi_jaringan.{fmt}"
+        path, _ = QFileDialog.getSaveFileName(self, "Simpan laporan", nama, saring)
+        if not path:
+            return
+        html = self._html_laporan()
+        judul = f"Farmakologi jaringan — {self.k.get('tanaman') or 'laporan'}"
+        try:
+            if fmt == "html":
+                from pathlib import Path
+                Path(path).write_text(
+                    f'<!doctype html><html lang="id"><head><meta charset="utf-8"><title>{judul}</title>'
+                    f'<style>body{{font-family:Segoe UI,Arial,sans-serif;max-width:900px;margin:32px auto;'
+                    f'line-height:1.5;color:#1b2430}}</style></head><body>{html}</body></html>',
+                    encoding="utf-8")
+            elif fmt == "docx":
+                from ..core import docx_ringan
+                penulis = ""
+                if self.jw is not None and hasattr(self.jw, "st"):
+                    penulis = self.jw.st.value("penulis", "") or ""
+                docx_ringan.simpan(html, path, judul=judul, penulis=penulis)
+            else:
+                self._tulis_pdf(html, path, judul)
+        except Exception as e:
+            kit.pesan_peringatan(self, f"Laporan gagal ditulis: {e}")
+            return
+        self._catat(f"Laporan disimpan: {path}")
+
+    def _tulis_pdf(self, html: str, path: str, judul: str):
+        """Cetak laporan ke PDF lewat QTextDocument, jalur yang sama dengan laporan docking."""
+        from PySide6.QtGui import QPageSize, QPdfWriter, QTextDocument
+        from PySide6.QtCore import QMarginsF, QSizeF
+        penulis = QPdfWriter(path)
+        penulis.setPageSize(QPageSize(QPageSize.A4))
+        penulis.setPageMargins(QMarginsF(18, 16, 18, 16))
+        penulis.setResolution(300)
+        penulis.setTitle(judul)
+        dok = QTextDocument()
+        dok.setHtml(html)
+        dok.setPageSize(QSizeF(penulis.width(), penulis.height()))
+        dok.print_(penulis)
 
     def _segarkan_laporan(self):
         # Sumber senyawa diketik di tab 1 dan hanya dibaca saat menyimpan; tanpa baris ini paragraf
@@ -1133,7 +1292,10 @@ class DialogFarmakologi(QDialog):
             kartu = self.kartu.get(r["tahap"])
             if kartu is not None:
                 kartu.isi(str(r["nilai"]), r["ket"] or r["satuan"])
-        self.tb_metode.setPlainText(F.paragraf_metode(self.k))
+        if hasattr(self, "tb_laporan"):
+            # Laporan dirakit ulang tiap kali, bukan ditunggu tombol: isinya memang turunan murni
+            # dari keadaan alur, jadi tidak ada alasan menampilkan versi lama.
+            self.tb_laporan.setHtml(self._html_laporan())
 
     def _ekspor_json(self):
         path, _ = QFileDialog.getSaveFileName(self, "Simpan keadaan alur", "farmakologi_jaringan.json",
@@ -1164,6 +1326,7 @@ class DialogFarmakologi(QDialog):
         self._isi_tabel_jalur()
         self._segarkan_figur()
         self._segarkan_laporan()
+        self._perbarui_lanjut()
 
     def _simpan(self):
         self.k["tanaman"] = self.e_tanaman.text().strip()

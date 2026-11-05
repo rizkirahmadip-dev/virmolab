@@ -655,6 +655,58 @@ def uji(lapor=None):
         return f"{len(gambar)} figur + 3 keadaan kosong OK, {len(FG.daftar())} jenis terdaftar"
     cek("Figur publikasi jaringan", figur_jaringan_uji)
 
+    def laporan_jaringan_uji():
+        """Statistik pendukung dan laporan lengkap farmakologi jaringan terbentuk benar (tanpa internet)."""
+        from . import farmakologi as F, laporan_jaringan as LJ
+        from rdkit import Chem
+        # Dua kelompok yang sengaja berbeda ukuran molekulnya supaya ujinya punya sesuatu untuk dideteksi.
+        kecil = ["CCO", "CCC", "CCCC", "CCCCC", "CCN", "CCCO"]
+        besar = ["c1ccccc1" * 3, "C(=O)Oc1ccccc1C(=O)O" + "C" * 10, "CCCCCCCCCCCCCCCCCC(=O)O",
+                 "c1ccc2c(c1)ccc1ccccc12", "CCCCCCCCCCCCCCCC", "c1ccc(cc1)c1ccc(cc1)c1ccccc1"]
+        sen = F.senyawa_dari_daftar([{"nama": f"k{i}", "smiles": s} for i, s in enumerate(kecil)]
+                                    + [{"nama": f"b{i}", "smiles": s} for i, s in enumerate(besar)])
+        sen = [s for s in sen if Chem.MolFromSmiles(s["smiles"]) is not None]
+        F.hitung_sifat(sen)
+        for s in sen:
+            s["lolos"] = s["nama"].startswith("k")
+        stat = LJ.statistik_sifat(sen)
+        if not stat:
+            raise RuntimeError("statistik sifat kosong padahal kedua kelompok cukup besar")
+        mw = next((r for r in stat if r["sifat"].startswith("Massa")), None)
+        if mw is None or not mw.get("nama_uji") or mw["p"] > 0.05:
+            raise RuntimeError(f"massa molekul seharusnya berbeda bermakna: {mw}")
+
+        G = F.graf_ppi(["TP53", "JUN", "MAPK1", "SRC"],
+                       [("TP53", "JUN", 0.9), ("TP53", "MAPK1", 0.8), ("JUN", "MAPK1", 0.75)])
+        t = LJ.topologi(G)
+        if t["simpul"] != 4 or t["tepi"] != 3 or t["terpencil"] != 1:
+            raise RuntimeError(f"topologi salah: {t}")
+        if t["komponen"] != 2:
+            raise RuntimeError(f"SRC terpencil seharusnya jadi komponen sendiri: {t['komponen']}")
+        if "kerapatan" not in t or not LJ.teks_topologi(t):
+            raise RuntimeError("ringkasan topologi kosong")
+
+        k = F.keadaan_baru()
+        k.update({"senyawa": sen, "tanaman": "Curcuma longa", "sumber_target": ["kemiripan"],
+                  "target_senyawa": {"k0": ["TP53", "JUN"]}, "gen_penyakit": [{"gen": "TP53", "skor": 0.9}],
+                  "irisan": ["TP53"], "tepi_ppi": [["TP53", "JUN", 0.9]],
+                  "hub": F.hub(G, 10),
+                  "jalur": [{"jalur": "R-1", "nama": "Apoptosis", "n_overlap": 2, "n_set": 100,
+                             "n_kueri": 2, "p": 1e-4, "q": 1e-3, "gen": ["TP53", "JUN"]}]})
+        h = LJ.html(k, G=G, info={"tanggal": "5 November 2026", "jejak": [{"sumber": "STRING", "versi": "v12"}]})
+        wajib = ["Ringkasan", "Metode", "Penyaringan ADMET", "Target senyawa", "Protein hub",
+                 "Pengayaan jalur", "Keterbatasan", "Curcuma longa", "Sumber data"]
+        hilang = [x for x in wajib if x not in h]
+        if hilang:
+            raise RuntimeError(f"bagian laporan hilang: {hilang}")
+        if h.count("<h2") < 8:
+            raise RuntimeError(f"laporan hanya {h.count('<h2')} bagian")
+        # Laporan harus tetap terbentuk walau alurnya baru sebagian.
+        if "Keterbatasan" not in LJ.html(F.keadaan_baru()):
+            raise RuntimeError("laporan keadaan kosong kehilangan bagian keterbatasan")
+        return f"{len(stat)} sifat diuji, topologi OK, laporan {h.count('<h2')} bagian"
+    cek("Laporan & statistik jaringan", laporan_jaringan_uji)
+
     def qsar_uji():
         """Pipeline QSAR berjalan utuh pada data kecil berhubungan: model harus menemukan hubungan dan menandai domain."""
         from rdkit import Chem
