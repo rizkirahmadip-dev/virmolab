@@ -1,8 +1,8 @@
 # Catatan rilis 1.9.1 (draf untuk halaman GitHub Release)
 
-Teks di bawah siap disalin ke halaman rilis. Ganti `<SHA-SETUP>` dan `<SHA-PORTABLE>` dengan sidik jari
-dari `SHA256SUMS-1.9.1.txt` sebelum diterbitkan. Badge DOI tidak perlu ditambahkan tangan: webhook Zenodo
-sudah aktif, jadi rilis ini terarsip sendiri dan mendapat DOI versinya begitu diterbitkan.
+Teks di bawah siap disalin ke halaman rilis. Sidik jari sudah diisi dari `SHA256SUMS-1.9.1.txt` hasil build
+5 November 2026. Badge DOI tidak perlu ditambahkan tangan: webhook Zenodo sudah aktif, jadi rilis ini
+terarsip sendiri dan mendapat DOI versinya begitu diterbitkan.
 
 ---
 
@@ -51,8 +51,8 @@ Daftar lengkap: [CHANGELOG.md](../../CHANGELOG.md).
 Get-FileHash .\VirmoLab-Setup-1.9.1.exe -Algorithm SHA256
 ```
 
-Setup: `<SHA-SETUP>`
-Portable: `<SHA-PORTABLE>`
+Setup: `3f9300bbf8158cb080297dd4244f4e1988dc3973f4325635632ad9bab7462ab4` (497,4 MB)
+Portable: `0cd3362352c23faa9247ecb2e4e153564f269af569324514fb08d14a69016a73` (719,5 MB)
 
 Installer belum ditandatangani sertifikat berbayar, jadi Windows SmartScreen menampilkan "Windows protected
 your PC" — klik *More info › Run anyway* setelah sidik jarinya cocok.
