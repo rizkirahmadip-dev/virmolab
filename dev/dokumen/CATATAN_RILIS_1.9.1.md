@@ -37,6 +37,11 @@ menyesatkan pembacaan hasil, kepatuhan pada pedoman layanan NCBI, dan kelengkapa
 - **Catatan lisensi melengkapi layanan daring yang dipanggil aplikasi**: CTD, Wikidata/LOTUS, dan NCBI
   BLAST, beserta lisensi dan sitasinya — termasuk syarat CTD yang membatasi pemakaian komersial.
 
+- **Dua perbaikan dari uji pemasangan sebelum rilis ini.** Bilah status bisa menampilkan `RAM 0 GB` dengan
+  nama CPU kosong pada komputer yang variabel `PATH`-nya dipangkas; penyebabnya pemanggilan `powershell`
+  yang bergantung pada `PATH`, kini memakai jalur mutlak. Dan mencopot pemasangan meninggalkan satu kunci
+  registri kosong (`.vmdbackup`), kini ikut terhapus.
+
 Daftar lengkap: [CHANGELOG.md](../../CHANGELOG.md).
 
 ### Unduh dan periksa
@@ -84,3 +89,7 @@ how results are read, compliance with NCBI's service guidelines, and completenes
 
 - **Third-party notices now cover the online services the application calls**: CTD, Wikidata/LOTUS and NCBI
   BLAST, with their licences and citations — including CTD's restriction on commercial use.
+
+- **Two fixes from the pre-release installation test.** The status bar could show `RAM 0 GB` with an empty
+  CPU name on machines with a trimmed `PATH`, because `powershell` was invoked through `PATH`; it now uses
+  an absolute path. And uninstalling left one empty registry key (`.vmdbackup`) behind, which is now removed.
