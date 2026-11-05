@@ -81,11 +81,13 @@ Type: files; Name: "{autodesktop}\{#NamaLama}.lnk"
 Root: HKA; Subkey: "Software\Classes\{#NamaLama}.Cadangan"; ValueType: none; Flags: deletekey
 Root: HKA; Subkey: "Software\Classes\{#NamaLama}.Struktur"; ValueType: none; Flags: deletekey
 Root: HKA; Subkey: "Software\Classes\.pdbqt\OpenWithProgids"; ValueType: none; ValueName: "{#NamaLama}.Struktur"; Flags: deletevalue
-Root: HKA; Subkey: "Software\Classes\.vmdbackup"; ValueType: string; ValueName: ""; ValueData: "VirmoLab.Cadangan"; Flags: uninsdeletevalue; Tasks: assocbackup
+; uninsdeletevalue saja menghapus nilainya tetapi meninggalkan kunci ekstensi yang kosong; tambahan
+; uninsdeletekeyifempty membuangnya juga, dan aman bila aplikasi lain ikut memakai kunci itu.
+Root: HKA; Subkey: "Software\Classes\.vmdbackup"; ValueType: string; ValueName: ""; ValueData: "VirmoLab.Cadangan"; Flags: uninsdeletevalue uninsdeletekeyifempty; Tasks: assocbackup
 Root: HKA; Subkey: "Software\Classes\VirmoLab.Cadangan"; ValueType: string; ValueName: ""; ValueData: "Cadangan VirmoLab"; Flags: uninsdeletekey; Tasks: assocbackup
 Root: HKA; Subkey: "Software\Classes\VirmoLab.Cadangan\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\VirmoLab.exe,0"; Tasks: assocbackup
 Root: HKA; Subkey: "Software\Classes\VirmoLab.Cadangan\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\VirmoLab.exe"" ""%1"""; Tasks: assocbackup
-Root: HKA; Subkey: "Software\Classes\.pdbqt\OpenWithProgids"; ValueType: string; ValueName: "VirmoLab.Struktur"; ValueData: ""; Flags: uninsdeletevalue; Tasks: assocpdbqt
+Root: HKA; Subkey: "Software\Classes\.pdbqt\OpenWithProgids"; ValueType: string; ValueName: "VirmoLab.Struktur"; ValueData: ""; Flags: uninsdeletevalue uninsdeletekeyifempty; Tasks: assocpdbqt
 Root: HKA; Subkey: "Software\Classes\VirmoLab.Struktur"; ValueType: string; ValueName: ""; ValueData: "Struktur molekul (VirmoLab)"; Flags: uninsdeletekey; Tasks: assocpdbqt
 Root: HKA; Subkey: "Software\Classes\VirmoLab.Struktur\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\VirmoLab.exe,0"; Tasks: assocpdbqt
 Root: HKA; Subkey: "Software\Classes\VirmoLab.Struktur\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\VirmoLab.exe"" ""%1"""; Tasks: assocpdbqt
