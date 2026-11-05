@@ -33,8 +33,17 @@ jobs:
         run: |
           python -m ruff check virmolab
 
-  uji-mandiri:
-    name: Uji Mandiri Komponen
+  # Uji mandiri 64 butir TIDAK dijalankan di sini. Butir-butirnya memerlukan mesin docking terbundel
+  # di vendor/bin serta belasan paket ilmiah (scipy, scikit-learn, gemmi, meeko, PoseBusters, OpenMM,
+  # ADMET-AI, CReM, pymbar); sebagian tidak ada di PyPI dan seluruhnya berukuran beberapa gigabita,
+  # sehingga pelari CI tidak bisa menirukan lingkungannya. Gerbang sesungguhnya tetap ada dan wajib
+  # dilewati: build_tools/rilis.py menjalankan seluruh 64 butir pada aplikasi yang sudah dibangun dan
+  # menghentikan rilis bila satu saja gagal.
+  #
+  # Yang diperiksa di sini adalah hal yang memang bisa diperiksa tanpa lingkungan itu: seluruh berkas
+  # dapat diurai oleh versi Python yang didukung, dan modul inti yang bebas Qt benar-benar dapat diimpor.
+  sintaksis:
+    name: Sintaksis & Impor Modul Inti
     runs-on: windows-latest
     needs: lint
     steps:
@@ -46,11 +55,19 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Pasang dependensi pengujian dasar
+      - name: Pasang dependensi ringan
         run: |
           python -m pip install --upgrade pip
-          python -m pip install PySide6 rdkit numpy pandas
+          python -m pip install numpy scipy networkx
 
-      - name: Jalankan Uji Mandiri CLI & Sintaksis
+      - name: Periksa sintaksis seluruh paket
         run: |
-          python -m virmolab --uji-mandiri
+          python -m compileall -q virmolab
+
+      - name: Periksa modul inti dapat diimpor
+        run: |
+          python -c "from virmolab.core import venn, pengayaan, jaringan, graf, grafik, uji, sumber_data, ctd, farmakologi, figur_jaringan, laporan_jaringan; print('impor modul inti OK')"
+
+      - name: Periksa nomor versi terbaca
+        run: |
+          python -c "import virmolab; print('VirmoLab', virmolab.__version__)"
