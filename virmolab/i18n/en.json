@@ -4911,6 +4911,7 @@
   "tidak terbaca": "not readable",
   "Boltz-2 dihentikan sistem karena memori WSL habis. Prediksi ini butuh lebih dari 4 GB RAM di WSL (berjalan pada 8 GB). Tutup aplikasi lain, atau bila RAM laptop 16 GB atau lebih, naikkan memory= di %USERPROFILE%\\.wslconfig, jalankan wsl --shutdown, lalu coba lagi.": "Boltz-2 was stopped by the system because WSL ran out of memory. This prediction needs more than 4 GB of RAM in WSL (it runs with 8 GB). Close other apps, or if the laptop has 16 GB of RAM or more, raise memory= in %USERPROFILE%\\.wslconfig, run wsl --shutdown, and try again.",
   "Kutip VirmoLab sendiri seperti ini (sesuaikan gayanya dengan jurnal yang dituju):": "Cite VirmoLab itself like this (adjust the style to the target journal):",
+  "Nama CPU dan ukuran RAM tidak terbaca (PowerShell tidak dapat dijalankan); bilah status menampilkan 0 GB. Docking tetap berjalan normal.": "The CPU name and RAM size could not be read (PowerShell could not be run); the status bar shows 0 GB. Docking still works normally.",
   "DOI itu DOI konsep: ia selalu menunjuk versi terbaru. Bila jurnal meminta versi yang benar-benar Anda pakai, ambil DOI versi tersebut dari halaman arsipnya di Zenodo.": "That DOI is a concept DOI: it always points to the latest version. If the journal asks for the exact version you used, take that version's own DOI from its Zenodo archive page.",
   "Repositori: ": "Repository: ",
   "Metadata lengkapnya ada di berkas ": "The full metadata is in the ",

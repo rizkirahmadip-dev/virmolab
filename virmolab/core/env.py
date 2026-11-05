@@ -64,11 +64,23 @@ class Lingkungan:
         return d
 
 
+def powershell_exe():
+    """Jalur mutlak powershell.exe.
+
+    Memanggilnya lewat nama telanjang bergantung pada PATH pengguna. Pada PATH yang dipangkas,
+    C:\\Windows\\System32 ada tetapi subfolder WindowsPowerShell\\v1.0 tidak, sehingga deteksi
+    perangkat diam-diam gagal dan bilah status menampilkan "RAM 0 GB".
+    """
+    akar = os.environ.get("SystemRoot") or r"C:\Windows"
+    p = Path(akar) / "System32" / "WindowsPowerShell" / "v1.0" / "powershell.exe"
+    return str(p) if p.exists() else "powershell"
+
+
 def _wmi_gpu():
     """Nama, vendor, driver, VRAM semua adaptor grafis lewat CIM (tanpa WSL)."""
     ps = ("Get-CimInstance Win32_VideoController | Select-Object Name,AdapterCompatibility,"
           "DriverVersion,AdapterRAM | ConvertTo-Json -Compress")
-    kode, out, _ = jalankan(["powershell", "-NoProfile", "-Command", ps], timeout=30)
+    kode, out, _ = jalankan([powershell_exe(), "-NoProfile", "-Command", ps], timeout=30)
     if kode != 0 or not out.strip():
         return []
     data = json.loads(out)
@@ -136,7 +148,7 @@ def _opencl(gpus, env):
 
 def _cpu(env):
     env.inti = os.cpu_count() or 1
-    kode, out, _ = jalankan(["powershell", "-NoProfile", "-Command",
+    kode, out, _ = jalankan([powershell_exe(), "-NoProfile", "-Command",
                              "(Get-CimInstance Win32_Processor | Select-Object -First 1).Name;"
                              "[math]::Round((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory/1GB,1)"], timeout=30)
     baris = [b.strip() for b in out.splitlines() if b.strip()]
@@ -147,6 +159,9 @@ def _cpu(env):
             env.ram_gb = float(baris[1].replace(",", "."))
         except ValueError:
             pass
+    if not env.ram_gb:
+        env.catatan.append("Nama CPU dan ukuran RAM tidak terbaca (PowerShell tidak dapat dijalankan); "
+                           "bilah status menampilkan 0 GB. Docking tetap berjalan normal.")
 
 
 EKSTERNAL = {
