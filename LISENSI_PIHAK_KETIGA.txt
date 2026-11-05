@@ -188,4 +188,29 @@ Boltz                2.2.1       MIT (kode dan bobot)            https://github.
   Lingkungan Python 3.12 terpisah. PyTorch yang menyertainya: BSD-3-Clause.
   Skrip pemasangan: build_tools/pasang_gnina_boltz_wsl.sh
 
+Layanan daring yang dipanggil langsung oleh aplikasi
+------------------------------------------------------
+Ketiganya dihubungi sendiri oleh kode, bukan sekadar ditautkan untuk dibuka pengguna di peramban.
+(Situs yang hanya dibuka di peramban pengguna — KNApSAcK, ClusPro — tidak melahirkan kewajiban di sini.)
+Layanan daring lain tercatat di bagian versinya masing-masing di atas; pencocokan daftar ini dengan
+host yang benar-benar dipanggil kode dijaga oleh dev/cek_sumber_daring.py.
+
+CTD (Comparative Toxicogenomics Database)   https://ctdbase.org/about/legal.jsp
+  Interaksi senyawa-gen terkurasi literatur lewat Batch Query (virmolab/core/ctd.py, sejak 1.9.0).
+  Gratis untuk penelitian akademik dengan kewajiban sitasi; pemakaian komersial memerlukan izin CTD.
+  Halaman syarat resminya kini berada di balik pemeriksaan captcha sehingga tidak dapat dikutip di sini —
+  bukalah sendiri di peramban sebelum memakai hasilnya di luar penelitian akademik.
+  Kutip: Davis dkk. 2025, Nucleic Acids Res 53(D1):D1328-D1334. doi:10.1093/nar/gkae883
+Wikidata, termasuk LOTUS   CC0 1.0   https://www.wikidata.org/wiki/Wikidata:Licensing
+  Takson tanaman obat dan senyawa bahan alam lewat SPARQL (virmolab/core/tanaman.py). Wikidata menyatakan
+  "All structured data (i.e. the main, Property, Lexeme, and EntitySchema namespaces) is released into the
+  public domain under Creative Commons Zero", jadi tidak ada kewajiban atribusi. Sitasi LOTUS tetap pantas:
+  Rutz dkk. 2022, eLife 11:e70780. doi:10.7554/eLife.70780
+NCBI BLAST (URL API)   domain publik   https://blast.ncbi.nlm.nih.gov/doc/blast-help/developerinfo.html
+  Pencarian homolog untuk konservasi kantong (virmolab/core/konservasi.py). NCBI menyatakan "BLAST is public
+  domain software" dan "NCBI itself places no restrictions on the use or distribution of the data contained
+  therein". Pedoman pemakaian API-nya meminta jeda sekurangnya 10 detik antar permintaan, polling satu RID
+  tidak lebih sering dari sekali semenit, parameter tool dan email agar NCBI dapat menghubungi pemanggil,
+  dan permintaan besar (>50 pencarian) dijalankan akhir pekan atau pukul 21.00-05.00 waktu Timur AS.
+
 Catatan: ini ringkasan teknis, bukan nasihat hukum.
