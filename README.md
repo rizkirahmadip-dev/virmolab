@@ -29,15 +29,15 @@ Installer dan versi portable ada di halaman
 Periksa unduhan sebelum dijalankan (PowerShell, di folder unduhan):
 
 ```powershell
-Get-FileHash .\VirmoLab-Setup-1.8.0.exe -Algorithm SHA256
+Get-FileHash .\VirmoLab-Setup-1.9.0.exe -Algorithm SHA256
 ```
 
-Cocokkan hasilnya dengan baris di `SHA256SUMS-1.8.0.txt`. Installer **belum ditandatangani sertifikat
+Cocokkan hasilnya dengan baris di `SHA256SUMS-1.9.0.txt`. Installer **belum ditandatangani sertifikat
 berbayar**, jadi Windows SmartScreen menampilkan "Windows protected your PC" — klik *More info › Run anyway*
 setelah sidik jarinya cocok.
 
 Setelah terpasang, jalankan **Alat › Uji mandiri komponen…** untuk memastikan semua mesin berfungsi
-(58 butir), dan ikuti tutorial 1HSG di **Bantuan › Tutorial**.
+(64 butir), dan ikuti tutorial 1HSG di **Bantuan › Tutorial**.
 
 ## Kebutuhan sistem
 
