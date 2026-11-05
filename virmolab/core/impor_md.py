@@ -506,7 +506,7 @@ class PembacaDCD(Pembaca):
                 raise GalatImporMD("Bukan berkas DCD (tanda CORD tidak ada).")
             icntrl = struct.unpack(e + "20i", blok[4:84])
             versi_charmm = icntrl[19]
-            n_set, _istart, nsavc = icntrl[0], icntrl[1], icntrl[2]
+            n_set, nsavc = icntrl[0], icntrl[2]
             self.namnf = icntrl[8]
             delta = struct.unpack(e + "f", blok[40:44])[0] if versi_charmm else struct.unpack(e + "d", blok[40:48])[0]
             self.sel = bool(icntrl[10]) if versi_charmm else False
@@ -527,7 +527,8 @@ class PembacaDCD(Pembaca):
                     raise GalatImporMD("Daftar atom bebas DCD tidak konsisten.")
             self.awal_data = f.tell()
             ukuran = os.path.getsize(self.path)
-        rek = lambda n: 4 * n + 8
+        def rek(n):
+            return 4 * n + 8
         self.panjang_pertama = (56 if self.sel else 0) + 3 * rek(self.n_atom) + (rek(self.n_atom) if self.empat_d else 0)
         n_lain = self.n_atom - self.namnf if self.namnf else self.n_atom
         self.panjang_lain = (56 if self.sel else 0) + 3 * rek(n_lain) + (rek(n_lain) if self.empat_d else 0)
@@ -556,7 +557,6 @@ class PembacaDCD(Pembaca):
         return kotak_dari_parameter(a / 10, b / 10, c / 10, *sudut)
 
     def baca(self, indeks, atom):
-        e = self.e
         atom = np.asarray(atom)
         penuh = None
         with open(self.path, "rb") as f:

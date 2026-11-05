@@ -2,6 +2,64 @@
 
 Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x adalah pra-rilis.
 
+## [1.9.0] - 5 November 2026
+
+Farmakologi jaringan masuk sebagai alur kerja kedua di samping docking. Satu tanaman kini bisa ditelusuri
+dari daftar senyawanya sampai jalur biologis dan penyakit tanpa berpindah-pindah antara KNApSAcK, PubChem,
+ADMETLab, SwissTargetPrediction, CTD, GeneCards, jvenn, dan STRING — delapan tahap yang sebelumnya
+dikerjakan manual lewat tujuh laman web dan Excel. Docking tetap ada di belakangnya sebagai pemeriksaan
+struktural atas pasangan senyawa-target yang sudah terpilih.
+
+Selain itu: grid box docking sepenuhnya dapat diatur, tampilan jaringan menjadi yang pertama bisa
+ditelusuri di VirmoLab, dan satu cacat lama diperbaiki — pengambilan senyawa tanaman obat yang belum pernah
+berhasil sejak 1.8.0.
+
+### Baru
+- **Farmakologi jaringan** sebagai alur kerja tersendiri, dengan menu **Jaringan** di bilah menu (Ctrl+Shift+J) dan pilihan *Farmakologi Jaringan* di pemilih alur panel Langkah. Seluruh rantai senyawa › target › jalur › penyakit dikerjakan dalam satu jendela tujuh tahap (`ui/dialog_farmakologi.py`, `core/farmakologi.py`), tanpa lagi berpindah-pindah antara tujuh laman web dan Excel.
+  - **1 Senyawa**: dari takson tanaman obat (LOTUS/Wikidata, COCONUT), dari ligan proyek, atau impor CSV/TSV berisi kolom SMILES — mis. ekspor KNApSAcK yang sudah dilengkapi SMILES dari PubChem. Pemisah kolom dan nama kolom dikenali otomatis.
+  - **2 Saring ADMET**: aturan Lipinski dan peringatan PAINS dari RDKit, ditambah ambang HIA, bioavailabilitas oral, DILI, hERG, dan Ames bila ADMET-AI terpasang. Senyawa yang belum punya nilai ADMET tidak digugurkan karena alasan itu; alasannya dicatat untuk tiap senyawa.
+  - **3 Target senyawa**: kemiripan ligan ChEMBL (ECFP4, pChEMBL ≥ 6) dan/atau interaksi senyawa–gen terkurasi literatur dari CTD (`core/ctd.py`, Batch Query, kolom dibaca berdasarkan nama sehingga tahan perubahan skema). Tabel target juga bisa diimpor dari berkas.
+  - **4 Gen penyakit dan irisan**: pencarian penyakit dan gen terasosiasi lewat Open Targets Platform (`jaringan.cari_penyakit`, `jaringan.target_penyakit`), atau impor CSV ekspor GeneCards/DisGeNET/OMIM milik pengguna sendiri. Irisannya digambar sebagai diagram Venn (`core/venn.py`, SVG 2 dan 3 himpunan, palet aman buta warna).
+  - **5 Jaringan PPI**: tepi STRING pada ambang yang dapat diatur, tampilan jaringan **interaktif** pertama di VirmoLab (`ui/widget_graf.py`: geser, perbesar, klik simpul untuk menyorot tetangganya), dan peringkat protein hub memakai Maximal Clique Centrality cytoHubba di samping derajat, betweenness, dan closeness. Ekspor GraphML (Cytoscape/Gephi), CSV tepi, dan PNG.
+  - **6 Jalur**: pengayaan Reactome atau GO-BP dengan uji hipergeometrik satu sisi dan koreksi Benjamini-Hochberg, lengkap dengan grafik batang 15 jalur teratas.
+  - **7 Laporan**: kartu ringkasan tiap tahap, paragraf metode siap tempel dalam Bahasa Indonesia dan Inggris, serta ekspor seluruh keadaan alur ke JSON untuk lampiran suplemen.
+  - Keadaan alur disimpan di dalam berkas proyek (kunci `farmakologi` pada `proyek.json`), dan tiap sumber data daring dicatat sebagai jejak sehingga ikut ke paragraf metode dan laporan.
+- Uji mandiri: tiga butir baru — *Diagram Venn*, *Alur farmakologi jaringan* (penyaringan, irisan, nilai MCC yang dihitung tangan, paragraf metode), dan *CTD (pengurai interaksi senyawa–gen)*; seluruhnya tanpa internet.
+
+- **Laporan lengkap otomatis** (tahap 8, `core/laporan_jaringan.py`): sepuluh bagian yang dirakit ulang tiap kali ada tahap selesai — ringkasan angka, paragraf metode, daftar senyawa, hasil penyaringan beserta alasan pengguguran, target per senyawa, gen penyakit dan irisannya, topologi jaringan dan tabel protein hub, tabel jalur, Keterbatasan enam butir, serta tabel sumber data beserta versi dan lisensinya. Diekspor ke PDF, Word, atau HTML.
+- **Statistik memakai mesin uji yang sudah ada** (`core.uji`), bukan hitungan sendiri, sehingga pemilihan uji, pemeriksaan asumsi, ukuran efek, dan kalimat metodenya sama dengan bagian aplikasi yang lain:
+  - Perbandingan sifat fisikokimia senyawa yang lolos penyaringan dengan yang gugur (Welch atau Mann-Whitney, dipilih otomatis dari uji normalitas) untuk lima sifat: massa molekul, WLOGP, TPSA, QED, SA Score. Menjawab pertanyaan "penyaringan ini sebenarnya membuang apa".
+  - Ringkasan topologi jaringan PPI: kerapatan, sebaran derajat, koefisien klaster, jumlah komponen, dan protein terpencil — lengkap dengan paragraf pembacaannya, bukan sekadar daftar angka.
+- **Tombol Lanjut yang mengerti tahapnya**: menunjuk tahap berikutnya dan mati bila tahap sekarang belum ada isinya, dengan alasan di tooltip. Di tahap terakhir berubah menjadi **Bawa ke docking molekuler…**, yang menyiapkan hanya senyawa yang mengenai target hub sebagai ligan lalu memindahkan jendela utama ke alur docking — urutan farmakologi jaringan memang menempatkan docking di belakang, sebagai pemeriksaan struktural atas pasangan yang sudah terpilih.
+- **Tab Figur** (tahap 7): lima gambar siap publikasi dari keadaan alur, dengan pratinjau dan ekspor SVG vektor atau raster ber-DPI (96–1200), satu per satu atau seluruhnya sekaligus ke satu folder.
+  - *Hub melingkar* (`core/figur_jaringan.lingkar_hub`) — protein paling sentral disusun melingkar dan diwarnai menurut peringkat MCC, padanan terbuka untuk gambar cytoHubba yang lazim di naskah farmakologi jaringan.
+  - *Bubble plot jalur* (`gelembung_jalur`) — sumbu x rasio gen, ukuran titik jumlah gen, warna −log₁₀(q), lengkap dengan dua keterangan dan angka di samping tiap titik agar tetap terbaca saat dicetak hitam-putih.
+  - *Batang jalur* (`batang_jalur`), *diagram Venn*, dan *jaringan berlapis* memakai modul yang sudah ada.
+  - Besaran berurutan memakai satu rona terang-ke-gelap dari ramp biru yang sudah divalidasi (pita terang, lantai kroma, pemisahan buta warna, kontras terhadap latar), bukan pelangi; peringkat teratas selalu yang tergelap.
+
+### Diubah
+- **Grid box docking lebih rinci dan sepenuhnya dapat diatur.** Kolom **Tepi di sekeliling ligan (Å)** menggantikan angka yang dulu dipatok di dalam kode (8 Å untuk *Sesuaikan ke ligan terpilih*, 10 Å untuk *Pusat di ligan asli*); label tombolnya ikut menampilkan angka yang sedang berlaku. Centang **Samakan ketiga sisi** menjaga kotak tetap kubus saat satu sisi diubah. Di bawah kotak isian kini tertulis **batas kotak** (rentang minimum–maksimum tiap sumbu) dan **volume**, untuk mencocokkan kotak dengan kantong di viewport dan memperkirakan lama pencarian. Spasi grid dan tiap kendali lain mendapat keterangan yang menjelaskan akibat perubahannya.
+- Angka di panel Area kini memakai koma desimal dan tanda minus yang benar, seragam dengan bagian aplikasi yang lain.
+
+### Diperbaiki
+- **Senyawa tanaman untuk farmakologi jaringan ikut masuk sebagai ligan docking.** Tombol *Senyawa tanaman obat…* memakai jalur impor ligan, sehingga satu takson memasukkan ratusan objek ke panel Objek, membuatkan konformasi 3D untuk semuanya, dan memenuhi proyek dengan ligan yang belum tentu akan didocking (*Curcuma zedoaria*: 108 objek, 4096 atom). Dialog senyawa tanaman kini punya mode kedua yang hanya memulangkan nama dan SMILES; struktur 3D baru dibuat saat senyawanya benar-benar dibawa ke docking.
+- **Keadaan alur hilang saat jendela ditutup.** Seluruh VirmoLab menyimpan sendiri, tetapi keadaan alur hanya ditulis saat tombol ditekan — satu-satunya tempat yang membuang pekerjaan diam-diam, dan tahap target bisa memakan belasan menit. Kini tiap tahap yang selesai menyimpan sendiri; bila belum ada proyek terbuka, pengguna diberi tahu di tahap pertama yang menghasilkan sesuatu.
+- **Tampilan jaringan tidak terbaca karena label diborong dan ikut diperbesar.** Tiga pembetulan: label kini berukuran tetap di layar (`ItemIgnoresTransformations`) sehingga jaringan kecil tidak lagi menghasilkan tulisan raksasa; label diberikan secara terpilih menurut prioritas (simpul terpilih dan tetangganya, lalu derajat tertinggi) dengan yang bertabrakan disembunyikan dan dihitung ulang tiap kali perbesaran berubah; dan tiap label memakai bayangan warna latar di belakangnya agar tetap terbaca saat melintasi tepi. Nama lengkap selalu tersedia di tooltip.
+- Keterangan warna (legenda) kini selalu ada di pojok tampilan jaringan bila ada lebih dari satu jenis simpul — identitas tidak boleh bergantung pada pencocokan warna saja.
+- Tata letak jaringan memakai Kamada-Kawai untuk graf sampai 60 simpul (persilangan tepi lebih sedikit, jarak lebih merata) dan jarak antarsimpul kini naik seiring jumlahnya, bukan makin rapat.
+- **Protein tanpa tepi PPI muncul di tabel hub dengan nilai nol.** Protein terpencil bukan hub menurut definisi apa pun; kini dibuang dari peringkat dan jumlahnya dilaporkan terpisah beserta namanya, karena ketiadaan tepi bisa berarti ambang STRING-nya yang terlalu tinggi.
+
+Lima hal berikut ketahuan saat alur dijalankan ujung ke ujung dengan jaringan hidup (*Curcuma longa* terhadap *colorectal cancer*, mengikuti contoh modul BBB NET):
+- **"Ambil senyawa" di dialog Senyawa dari tanaman obat selalu gagal** dengan `TypeError: 'Event' object is not callable` begitu takson yang dipilih punya rujukan artikel. `ui/dialog_tanaman.py` mengirim `threading.Event`, sedangkan `core/tanaman.py` memanggilnya seperti fungsi. Keduanya masuk pada commit yang sama, jadi jalur ini belum pernah berhasil sejak 1.8.0. Diperbaiki dengan `tanaman.dibatalkan()` yang menerima Event, fungsi, atau None — pola yang sudah dipakai `core/generatif.py`, `core/xtb.py`, dan `core/farmakofor.py`.
+- **Nama senyawa kembar menyatu dan salah satunya kehilangan target.** Peta target berkunci nama senyawa, padahal LOTUS memulangkan nama yang sama untuk stereoisomer dan tautomer berbeda (kunyit: dua `desmethoxycurcumin`, dua `bisdemethoxycurcumin`). Nama kini dibuat unik dengan akhiran berangka saat ditambahkan.
+- **Sumber senyawa tidak masuk paragraf metode.** Kolom di tahap 1 hanya dibaca saat menyimpan proyek, sehingga paragraf metode memakai teks pengganti "sumber senyawa" walau penggunanya sudah mengisi. Kini dibaca setiap kali ringkasan disegarkan.
+- **Paragraf metode Inggris kemasukan teks Indonesia** pada bagian sumber target ("assigned by kemiripan ligan ChEMBL…"). Sumber target kini disimpan sebagai kunci, bukan kalimat, dan diterjemahkan saat paragraf dirakit.
+- **Daftar gen penyakit terpotong tanpa pemberitahuan.** Open Targets dibatasi 500 gen teratas; bila hasilnya pas sebanyak batas, gen di bawahnya tidak pernah diadu dengan target senyawa sehingga irisannya kehilangan anggota. Batasnya kini dapat diatur dan keadaan terpotong diberitahukan di tempat.
+- Satu nama senyawa panjang (nama IUPAC bahan alam bisa lebih dari 70 huruf) melebarkan kanvas jaringan sehingga seluruh graf mengecil saat dipaskan; label di gambar kini dipotong pada 26 huruf dengan nama utuh tetap di tooltip.
+
+### Diubah
+- GeneCards sengaja tidak dihubungi otomatis: lisensinya berbayar dan melarang pengambilan otomatis. Jalurnya adalah pengguna mengunduh sendiri lalu mengimpor berkasnya; Open Targets dipakai sebagai sumber gen penyakit yang terbuka.
+
 ## [1.8.0] - 25 Oktober 2026
 
 Rilis publik pertama. Alat Linux lanjutan kini dipasang dari dalam aplikasi, dan tidak ada lagi pesan yang menyuruh

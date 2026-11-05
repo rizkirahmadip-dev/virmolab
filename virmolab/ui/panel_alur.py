@@ -53,6 +53,16 @@ SKEMA_ALUR = {
             ("evaluasi", "Evaluasi Kompleks", "table"),
         ],
     },
+    "netpharm": {
+        "nama": "Farmakologi Jaringan",
+        "langkah": [
+            ("senyawa_np", "Senyawa", "lig"),
+            ("saring_np", "Saring ADMET", "sliders"),
+            ("target_np", "Target & penyakit", "target"),
+            ("jaringan_np", "Jaringan PPI", "link"),
+            ("jalur_np", "Jalur & laporan", "chart"),
+        ],
+    },
     "fbdd": {
         "nama": "Desain Fragmen (FBDD)",
         "langkah": [
@@ -282,7 +292,7 @@ class PanelLangkah(QStackedWidget):
         super().__init__()
         A = self._A
         self._alur_kini = "docking"
-        self.halaman = {"docking": [], "md": [], "screening": [], "ppi": [], "fbdd": []}
+        self.halaman = {"docking": [], "md": [], "screening": [], "ppi": [], "fbdd": [], "netpharm": []}
 
         # ========================================================= 1. ALUR DOCKING
         self.s_protein = _status()
@@ -468,6 +478,67 @@ class PanelLangkah(QStackedWidget):
                                                          "Simpan senyawa baru langsung ke proyek untuk pengujian docking.",
                                                          isi_fb4, None, 0))
 
+        # ========================================================= 6. ALUR FARMAKOLOGI JARINGAN
+        # Semua tombol membuka dialog Farmakologi jaringan pada tab yang sesuai; alur ini tidak
+        # memakai viewport 3D, jadi panel kerja hanya menjadi pintu masuk tiap tahap.
+        self.s_netpharm = _status()
+        isi_np0 = _kolom(A("np_senyawa", _tombol("Kumpulkan senyawa…", True, ikon="lig",
+                                                 tip="Senyawa tanaman obat, ligan proyek, atau impor CSV berisi SMILES")),
+                         A("tanaman", _tombol("Senyawa tanaman obat…", ikon="lig",
+                                              tip="Cari senyawa bahan alam dari takson tanaman (LOTUS, COCONUT)")),
+                         8, self.s_netpharm)
+        self.halaman["netpharm"].append(self._tambah_ke_alur(
+            "netpharm", "Senyawa",
+            "Susun daftar senyawa beserta SMILES-nya; inilah titik awal rantai senyawa › target › jalur › penyakit.",
+            isi_np0, "Berikutnya: Saring ADMET ›", 1))
+
+        isi_np1 = _kolom(A("np_admet", _tombol("Saring ADMET && Lipinski…", True, ikon="sliders",
+                                               tip="Buang kandidat yang sifat fisikokimia dan prediksi ADMET-nya "
+                                                   "tidak memenuhi syarat")),
+                         A("tab_sifat", _tombol("Sifat ligan && BOILED-Egg", ikon="lig")))
+        self.halaman["netpharm"].append(self._tambah_ke_alur(
+            "netpharm", "Saring ADMET",
+            "Penapisan awal: hanya senyawa yang masuk akal diserap tubuh dibawa ke tahap berikutnya.",
+            isi_np1, "Berikutnya: Target & penyakit ›", 2))
+
+        isi_np2 = _kolom(A("np_target", _tombol("Cari target senyawa…", True, ikon="target",
+                                                tip="Kemiripan ligan ChEMBL dan/atau interaksi terkurasi CTD")),
+                         A("np_penyakit", _tombol("Gen penyakit && irisan…", ikon="search",
+                                                  tip="Gen penyakit dari Open Targets atau impor CSV, lalu "
+                                                      "diagram Venn irisannya")),
+                         A("target", _tombol("Penargetan balik (docking panel)…", ikon="target",
+                                             tip="Jalur berbasis struktur: docking terhadap panel target terkurasi")))
+        self.halaman["netpharm"].append(self._tambah_ke_alur(
+            "netpharm", "Target & penyakit",
+            "Target dugaan tiap senyawa diiriskan dengan gen penyakit; hasilnya adalah target terapi potensial.",
+            isi_np2, "Berikutnya: Jaringan PPI ›", 3))
+
+        isi_np3 = _kolom(A("np_jaringan", _tombol("Bangun jaringan PPI…", True, ikon="link",
+                                                  tip="Tepi STRING antartarget hasil irisan, graf interaktif, "
+                                                      "dan peringkat protein hub")),
+                         A("ppi", _tombol("Analisis antarmuka protein–protein…", ikon="box",
+                                          tip="Bila ingin memeriksa satu pasangan protein secara struktural")))
+        self.halaman["netpharm"].append(self._tambah_ke_alur(
+            "netpharm", "Jaringan PPI",
+            "Protein dengan koneksi terbanyak (hub) dianggap paling berperan dalam jaringan.",
+            isi_np3, "Berikutnya: Jalur & laporan ›", 4))
+
+        isi_np4 = _kolom(A("np_jalur", _tombol("Pengayaan jalur…", True, ikon="chart",
+                                               tip="Reactome / GO-BP, uji hipergeometrik + Benjamini-Hochberg")),
+                         A("np_figur", _tombol("Figur siap publikasi…", ikon="palette",
+                                               tip="Venn, jaringan, hub melingkar, bubble plot, batang — "
+                                                   "SVG vektor atau raster ber-DPI")),
+                         A("np_laporan", _tombol("Ringkasan && paragraf metode", ikon="report")),
+                         8,
+                         A("ligan", _tombol("Siapkan ligan untuk docking", ikon="lig",
+                                            tip="Lanjutkan ke docking molekuler untuk memvalidasi pasangan "
+                                                "senyawa-target hasil jaringan")),
+                         A("laporan", _tombol("Buat laporan proyek…", ikon="report")))
+        self.halaman["netpharm"].append(self._tambah_ke_alur(
+            "netpharm", "Jalur & laporan",
+            "Cari jalur biologis yang terwakili berlebih, lalu rangkum seluruhnya menjadi laporan.",
+            isi_np4, None, 0))
+
         # Tampilkan langkah awal docking
         self.setCurrentWidget(self.halaman["docking"][0])
 
@@ -519,7 +590,9 @@ class PanelLangkah(QStackedWidget):
             obj.setIcon(icons.ikon(nama, sorot if e.type() == QEvent.Enter else diam))
         return super().eventFilter(obj, e)
 
-    def set_status(self, protein="", ligan="", hasil=""):
+    def set_status(self, protein="", ligan="", hasil="", netpharm=None):
         self.s_protein.setText(protein)
         self.s_ligan.setText(ligan)
         self.s_hasil.setText(hasil)
+        if netpharm is not None:
+            self.s_netpharm.setText(netpharm)

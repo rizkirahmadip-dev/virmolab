@@ -229,6 +229,23 @@ def proses_hasil_lotus(bindings_atau_data: list | dict) -> list[dict]:
     return daftar
 
 
+def dibatalkan(batal) -> bool:
+    """True bila pemanggil meminta pekerjaan dihentikan.
+
+    `batal` boleh berupa threading.Event (dipakai dialog, punya is_set()), fungsi yang mengembalikan
+    bool, atau None. Dulu modul ini mengandaikan hanya fungsi, sehingga Event dari ui/dialog_tanaman.py
+    memicu TypeError: 'Event' object is not callable begitu takson punya rujukan artikel.
+    """
+    if batal is None:
+        return False
+    cek = getattr(batal, "is_set", None)
+    if callable(cek):
+        return bool(cek())
+    if callable(batal):
+        return bool(batal())
+    return bool(batal)
+
+
 def senyawa_takson(qid: str, turunan: bool = False, batas: int = 5000,
                    batal=None) -> tuple[list[dict], Jejak]:
     """Ambil senyawa dari takson tanaman via SPARQL LOTUS (Wikidata)."""
@@ -239,7 +256,7 @@ def senyawa_takson(qid: str, turunan: bool = False, batas: int = 5000,
     )
     daftar = proses_hasil_lotus(bindings)
     qids = sorted({a for d in daftar for a in d.get("artikel", [])})
-    if qids and not (batal and batal()):
+    if qids and not dibatalkan(batal):
         try:
             peta, _ = rincian_artikel(qids, batal=batal)
             gabung_rincian(daftar, peta)
@@ -259,7 +276,7 @@ def rincian_artikel(qids: list[str], per_kueri: int = 150, batal=None) -> tuple[
     """
     peta, jejak = {}, None
     for i in range(0, len(qids), per_kueri):
-        if batal and batal():
+        if dibatalkan(batal):
             break
         nilai = " ".join(f"wd:{q}" for q in qids[i:i + per_kueri])
         kueri = (f"SELECT ?artikel ?doi ?tgl ?judul WHERE {{ VALUES ?artikel {{ {nilai} }} "

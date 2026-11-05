@@ -9,6 +9,9 @@ openpyxl==3.1.5
 pillow==12.3.0
 openbabel-wheel==3.1.1.23
 posebusters==0.6.5
+# networkx dipakai langsung core/jaringan.py, core/graf.py, dan core/farmakologi.py; sebelumnya
+# hanya ikut sebagai dependensi posebusters, jadi versinya tidak pernah ditentukan sendiri.
+networkx==3.7
 pandas==3.0.6
 pyyaml==6.0.3
 dimorphite-dl==2.1.0

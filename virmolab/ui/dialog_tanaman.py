@@ -6,7 +6,7 @@ import csv
 import threading
 from urllib.parse import quote
 
-from PySide6.QtCore import Qt, QUrl
+from PySide6.QtCore import Qt, QUrl, Signal
 from PySide6.QtGui import QDesktopServices, QPixmap, QPainter
 from PySide6.QtSvg import QSvgRenderer
 from PySide6.QtWidgets import (
@@ -56,11 +56,22 @@ def _kunci(s: dict) -> str:
 
 
 class DialogTanaman(QDialog):
-    """Dialog pencarian senyawa bahan alam dari tanaman obat Indonesia."""
+    """Dialog pencarian senyawa bahan alam dari tanaman obat Indonesia.
 
-    def __init__(self, jw=None):
+    Dua mode. `mode="docking"` (bawaan) mengimpor senyawa terpilih ke proyek sebagai ligan: struktur 3D
+    dibuat, objek viewer ditambahkan, dan senyawanya siap disiapkan untuk docking. `mode="senyawa"`
+    hanya memulangkan nama dan SMILES lewat sinyal `senyawaDipilih` — dipakai alur farmakologi jaringan,
+    yang bekerja atas daftar senyawa dan belum memerlukan struktur 3D sama sekali. Satu takson bisa
+    memberi ratusan senyawa; membuat konformasi 3D untuk semuanya memakan waktu lama dan memenuhi
+    panel Objek dengan ligan yang belum tentu akan didocking.
+    """
+
+    senyawaDipilih = Signal(list)      # [{nama, smiles, sumber}] pada mode "senyawa"
+
+    def __init__(self, jw=None, mode: str = "docking"):
         super().__init__(jw)
         self.jw = jw
+        self.mode = mode if mode in ("docking", "senyawa") else "docking"
         self.setWindowTitle("Senyawa dari tanaman obat")
         self.setMinimumSize(1000, 650)
         self.resize(1180, 720)
@@ -235,7 +246,12 @@ class DialogTanaman(QDialog):
         b_ekspor = QPushButton("Ekspor CSV…")
         b_ekspor.clicked.connect(self.ekspor_csv)
 
-        self.b_impor = kit.tombol("Impor ke proyek", self.impor_ke_proyek, utama=True)
+        if self.mode == "senyawa":
+            self.b_impor = kit.tombol("Pakai untuk farmakologi jaringan", self.kirim_senyawa, utama=True,
+                                      tip="Ambil nama dan SMILES-nya saja; struktur 3D baru dibuat nanti "
+                                          "bila senyawanya dibawa ke docking")
+        else:
+            self.b_impor = kit.tombol("Impor ke proyek", self.impor_ke_proyek, utama=True)
         lay.addLayout(kit.bar_bawah(
             self,
             kiri=[b_semua, b_kosong, b_ekspor],
@@ -452,7 +468,10 @@ class DialogTanaman(QDialog):
                 dipilih += 1
         total = len(self.senyawa_tersaring)
         self.l_info_tabel.setText(f"{total} senyawa · {dipilih} dipilih")
-        self.b_impor.setText(f"Impor {dipilih} ke proyek" if dipilih else "Impor ke proyek")
+        if self.mode == "senyawa":
+            self.b_impor.setText(f"Pakai {dipilih} senyawa" if dipilih else "Pakai untuk farmakologi jaringan")
+        else:
+            self.b_impor.setText(f"Impor {dipilih} ke proyek" if dipilih else "Impor ke proyek")
 
     def _tabel_dipilih(self):
         r = self.tabel.currentRow()
@@ -558,7 +577,7 @@ class DialogTanaman(QDialog):
                 ])
         QMessageBox.information(self, "Ekspor CSV", f"Berhasil mengekspor {len(self.senyawa_tersaring)} senyawa.")
 
-    def impor_ke_proyek(self):
+    def _senyawa_dicentang(self) -> list:
         dipilih = []
         for r in range(self.tabel.rowCount()):
             it = self.tabel.item(r, 0)
@@ -566,6 +585,27 @@ class DialogTanaman(QDialog):
                 idx = it.data(Qt.UserRole)
                 if idx is not None and idx < len(self.senyawa_tersaring):
                     dipilih.append(self.senyawa_tersaring[idx])
+        return dipilih
+
+    def kirim_senyawa(self):
+        """Mode "senyawa": pulangkan nama dan SMILES terpilih tanpa menyentuh proyek maupun viewer."""
+        dipilih = self._senyawa_dicentang()
+        if not dipilih:
+            QMessageBox.information(self, "Senyawa", "Centang minimal satu senyawa.")
+            return
+        takson = (self.c_takson.currentData() or {}).get("nama_ilmiah", "")
+        hasil = []
+        for s in dipilih:
+            smi = s.get("smiles_std") or s.get("smiles") or ""
+            if not smi:
+                continue
+            hasil.append({"nama": s.get("nama") or s.get("qid") or "Senyawa", "smiles": smi,
+                          "sumber": takson or "LOTUS"})
+        self.senyawaDipilih.emit(hasil)
+        self.accept()
+
+    def impor_ke_proyek(self):
+        dipilih = self._senyawa_dicentang()
 
         if not dipilih:
             QMessageBox.information(self, "Impor ligan", "Centang minimal satu senyawa untuk diimpor.")

@@ -18,12 +18,18 @@ def _jalan(cmd, timeout=60):
     return p.returncode, (p.stdout + p.stderr).decode("utf-8", "replace")
 
 
+_APP = None      # QApplication milik proses uji; lihat uji()
+
+
 def uji(lapor=None):
     hasil = []
     # Satu QApplication untuk seluruh uji: butir tema butuh widget, sedangkan butir video membuat QCoreApplication
     # bila belum ada, dan satu proses hanya boleh punya satu aplikasi Qt.
     from PySide6.QtWidgets import QApplication
-    _app = QApplication.instance() or QApplication(["VirmoLab"])          # noqa: F841 - dijaga hidup selama uji
+    global _APP
+    # Disimpan di tingkat modul, bukan sebagai variabel lokal: objeknya harus tetap hidup selama proses,
+    # dan pyflakes (tidak seperti ruff) tidak mengenal penanda noqa untuk variabel lokal yang tak terpakai.
+    _APP = QApplication.instance() or QApplication(["VirmoLab"])
 
     def cek(nama, fn):
         t = time.time()
@@ -334,6 +340,24 @@ def uji(lapor=None):
         return f"{n} obat disetujui; COCONUT {'terpasang' if pustaka.coconut_ada() else 'belum diunduh'}"
     cek("Pustaka ligan", pustaka_uji)
 
+    def batal_tanaman_uji():
+        """Bendera pembatalan menerima Event maupun fungsi.
+
+        Regresi: ui/dialog_tanaman.py mengirim threading.Event sedangkan core/tanaman.py memanggilnya
+        seperti fungsi, sehingga "Ambil senyawa" gagal dengan TypeError: 'Event' object is not callable
+        begitu takson punya rujukan artikel (sejak 1.8.0, ketahuan pada Curcuma zedoaria).
+        """
+        import threading
+        from . import tanaman
+        e = threading.Event()
+        if tanaman.dibatalkan(e) or tanaman.dibatalkan(None) or tanaman.dibatalkan(lambda: False):
+            raise RuntimeError("bendera belum di-set tetapi dibaca sebagai batal")
+        e.set()
+        if not (tanaman.dibatalkan(e) and tanaman.dibatalkan(lambda: True)):
+            raise RuntimeError("bendera sudah di-set tetapi tidak dibaca sebagai batal")
+        return "Event, fungsi, dan None diterima"
+    cek("Pembatalan pengambilan senyawa tanaman", batal_tanaman_uji)
+
     def ketcher_uji():
         f = paths.KETCHER / "index.html"
         js = list((paths.KETCHER / "static" / "js").glob("609.*.js"))
@@ -510,6 +534,184 @@ def uji(lapor=None):
             raise RuntimeError(f"derajat PTGS2 = {m.get('T:PTGS2')}, seharusnya 4")
         return f"{G.number_of_nodes()} simpul, {G.number_of_edges()} tepi, metrik OK"
     cek("Jaringan farmakologi", jaringan_uji)
+
+    def venn_uji():
+        """Pembagian wilayah Venn benar dan SVG-nya utuh untuk 2 maupun 3 himpunan."""
+        from . import venn
+        w2 = venn.hitung2(["TP53", "AKT1", "egfr"], ["TP53", "NFKB1"])
+        if w2["AB"] != ["TP53"] or w2["A"] != ["AKT1", "EGFR"] or w2["B"] != ["NFKB1"]:
+            raise RuntimeError(f"wilayah Venn 2 himpunan salah: {w2}")
+        w3 = venn.hitung3(["A", "B"], ["B", "C"], ["C", "A"])
+        if w3["ABC"] or sorted(w3["AB"] + w3["AC"] + w3["BC"]) != ["A", "B", "C"]:
+            raise RuntimeError(f"wilayah Venn 3 himpunan salah: {w3}")
+        s2 = venn.svg({"Target": ["TP53", "AKT1"], "Penyakit": ["TP53"]}, judul="uji")
+        s3 = venn.svg({"A": ["1"], "B": ["2"], "C": ["3"]}, mode="gelap")
+        if s2.count("<circle") != 2 or s3.count("<circle") != 3 or not s2.rstrip().endswith("</svg>"):
+            raise RuntimeError("SVG Venn tidak utuh")
+        return "Venn 2 & 3 himpunan OK"
+    cek("Diagram Venn", venn_uji)
+
+    def farmakologi_uji():
+        """Alur farmakologi jaringan: penyaringan, irisan, MCC, dan paragraf metode (tanpa internet)."""
+        from . import farmakologi as F
+        sen = F.senyawa_dari_daftar([{"nama": "kurkumin", "smiles": "COc1cc(/C=C/C(=O)CC(=O)/C=C/c2ccc(O)c(OC)c2)ccc1O"},
+                                     {"nama": "aspirin", "smiles": "CC(=O)Oc1ccccc1C(=O)O"},
+                                     {"nama": "rusak", "smiles": "bukan-smiles"}])
+        if len(sen) != 3:
+            raise RuntimeError(f"{len(sen)} senyawa dinormalkan, seharusnya 3")
+        F.hitung_sifat(sen)
+        sen[1]["admet"] = {"DILI": 0.95}
+        r = F.saring(sen)
+        if sen[2]["lolos"]:
+            raise RuntimeError("SMILES rusak seharusnya gugur")
+        if sen[1]["lolos"]:
+            raise RuntimeError("DILI 0,95 di atas ambang seharusnya gugur")
+        if r["lolos"] != 1:
+            raise RuntimeError(f"{r['lolos']} senyawa lolos, seharusnya 1")
+
+        ir = F.irisan({"a": ["TP53", "AKT1"], "b": ["EGFR"]}, [{"gen": "TP53"}, {"gen": "MYC"}])
+        if ir["irisan"] != ["TP53"]:
+            raise RuntimeError(f"irisan salah: {ir['irisan']}")
+
+        # Segitiga TP53-AKT1-EGFR (klik maksimal 3) + ekor EGFR-SRC (klik maksimal 2):
+        # MCC(EGFR) = (3-1)! + (2-1)! = 3; MCC(SRC) = 1.
+        G = F.graf_ppi(["TP53", "AKT1", "EGFR", "SRC"],
+                       [("TP53", "AKT1", 0.9), ("TP53", "EGFR", 0.8), ("AKT1", "EGFR", 0.75), ("EGFR", "SRC", 0.7)])
+        h = {b["gen"]: b["mcc"] for b in F.hub(G, 10)}
+        if h.get("EGFR") != 3.0 or h.get("SRC") != 1.0 or h.get("TP53") != 2.0:
+            raise RuntimeError(f"MCC salah: {h}")
+
+        # Nama kembar harus dibuat unik: peta target berkunci nama, jadi dua struktur bernama sama
+        # akan menyatu dan salah satunya kehilangan target (LOTUS memulangkan nama kembar).
+        kembar = F.senyawa_dari_daftar([{"nama": "kurkumin", "smiles": "CCO"},
+                                        {"nama": "kurkumin", "smiles": "CCC"}])
+        if len({s["nama"] for s in kembar}) != 2:
+            raise RuntimeError(f"nama kembar tidak dibuat unik: {[s['nama'] for s in kembar]}")
+
+        k = F.keadaan_baru()
+        k.update({"senyawa": sen, "target_senyawa": {"a": ["TP53"]}, "gen_penyakit": [{"gen": "TP53"}],
+                  "irisan": ["TP53"], "tepi_ppi": [["TP53", "AKT1", 0.9]],
+                  "tanaman": "Curcuma longa", "sumber_target": ["kemiripan", "ctd"]})
+        id_teks, en_teks = F.paragraf_metode(k), F.paragraf_metode(k, inggris=True)
+        for teks in (id_teks, en_teks):
+            if "validasi eksperimental" not in teks and "experimental validation" not in teks:
+                raise RuntimeError("paragraf metode kehilangan peringatan validasi")
+            if "Curcuma longa" not in teks:
+                raise RuntimeError("sumber senyawa tidak masuk paragraf metode")
+        # Paragraf Inggris pernah kemasukan label sumber berbahasa Indonesia.
+        if "kemiripan ligan" in en_teks or "terkurasi" in en_teks:
+            raise RuntimeError(f"paragraf Inggris memuat teks Indonesia: {en_teks[:160]}")
+        if "ligand similarity" not in en_teks or "kemiripan ligan" not in id_teks:
+            raise RuntimeError("label sumber target tidak mengikuti bahasa paragraf")
+        if len(F.ringkasan(k)) != 7:
+            raise RuntimeError("ringkasan tahap tidak lengkap")
+        return f"saring {r['lolos']}/{len(sen)}, irisan 1 gen, MCC & paragraf metode OK"
+    cek("Alur farmakologi jaringan", farmakologi_uji)
+
+    def ctd_uji():
+        """Pengurai TSV CTD membaca kolom berdasarkan nama dan menyaring spesies (tanpa internet)."""
+        from . import ctd
+        teks = ("# Batch Query\n"
+                "#Input\tChemicalName\tChemicalID\tGeneSymbol\tGeneID\tOrganism\tOrganism ID\t"
+                "Interaction Actions\tPubMed IDs\n"
+                "curcumin\tCurcumin\tD003474\tPTGS2\t5743\tHomo sapiens\t9606\tdecreases^expression\t111|222\n"
+                "curcumin\tCurcumin\tD003474\tTp53\t22059\tMus musculus\t10090\tincreases^expression\t333\n"
+                "curcumin\tCurcumin\tD003474\tTP53\t7157\tHomo sapiens\t9606\tincreases^expression\t444\n")
+        baris = ctd.urai_tsv(teks)
+        if len(baris) != 2:
+            raise RuntimeError(f"{len(baris)} baris manusia, seharusnya 2 (baris tikus harus dibuang)")
+        if baris[0]["gen"] != "PTGS2" or baris[0]["n_pubmed"] != 2:
+            raise RuntimeError(f"kolom salah dibaca: {baris[0]}")
+        if ctd.gen_unik(baris) != ["PTGS2", "TP53"]:
+            raise RuntimeError("daftar gen unik salah")
+        peta = ctd.per_senyawa(baris)
+        if peta.get("curcumin") != ["PTGS2", "TP53"]:
+            raise RuntimeError(f"pengelompokan per senyawa salah: {peta}")
+        return "pengurai TSV CTD OK (2 baris manusia, 2 gen)"
+    cek("CTD (pengurai interaksi senyawa-gen)", ctd_uji)
+
+    def figur_jaringan_uji():
+        """Tiga figur publikasi terbentuk utuh, dan ramp berurutannya makin gelap menurut peringkat."""
+        from . import figur_jaringan as FG
+        hub = [{"gen": g, "mcc": m, "derajat": d} for g, m, d in
+               [("TP53", 9.0, 6), ("JUN", 8.0, 5), ("MAPK1", 4.0, 3), ("ESR2", 3.0, 3), ("ABL1", 2.0, 2)]]
+        tepi = [("TP53", "JUN", 0.99), ("TP53", "MAPK1", 0.9), ("JUN", "ESR2", 0.8)]
+        jalur = [{"jalur": f"R-{i}", "nama": n, "n_overlap": c, "n_set": 200, "n_kueri": 40,
+                  "p": 1e-6, "q": q, "gen": []} for i, (n, c, q) in
+                 enumerate([("Apoptosis", 12, 1e-9), ("MAPK signaling", 9, 4e-7), ("Cell cycle", 6, 2e-5)])]
+        gambar = {"hub": FG.lingkar_hub(hub, tepi, judul="uji"),
+                  "gelembung": FG.gelembung_jalur(jalur, judul="uji"),
+                  "batang": FG.batang_jalur(jalur, judul="uji")}
+        for nama, svg in gambar.items():
+            if not svg.startswith("<svg") or not svg.rstrip().endswith("</svg>"):
+                raise RuntimeError(f"SVG {nama} tidak utuh")
+        if "TP53" not in gambar["hub"] or "Apoptosis" not in gambar["gelembung"]:
+            raise RuntimeError("isi figur tidak lengkap")
+        # Peringkat 1 harus memakai langkah ramp paling gelap, peringkat terakhir yang paling terang.
+        if FG._langkah(0, 5) <= FG._langkah(4, 5):
+            raise RuntimeError("arah ramp peringkat terbalik")
+        if FG.RAMP_BIRU[FG._langkah(0, 5)] != FG.RAMP_BIRU[-1]:
+            raise RuntimeError("peringkat teratas bukan langkah tergelap")
+        # Figur tanpa data tetap menghasilkan SVG sah, bukan galat.
+        for svg in (FG.lingkar_hub([], []), FG.gelembung_jalur([]), FG.batang_jalur([])):
+            if not svg.rstrip().endswith("</svg>"):
+                raise RuntimeError("figur kosong tidak menghasilkan SVG sah")
+        if len(FG.daftar()) < 5:
+            raise RuntimeError("daftar figur tidak lengkap")
+        return f"{len(gambar)} figur + 3 keadaan kosong OK, {len(FG.daftar())} jenis terdaftar"
+    cek("Figur publikasi jaringan", figur_jaringan_uji)
+
+    def laporan_jaringan_uji():
+        """Statistik pendukung dan laporan lengkap farmakologi jaringan terbentuk benar (tanpa internet)."""
+        from . import farmakologi as F, laporan_jaringan as LJ
+        from rdkit import Chem
+        # Dua kelompok yang sengaja berbeda ukuran molekulnya supaya ujinya punya sesuatu untuk dideteksi.
+        kecil = ["CCO", "CCC", "CCCC", "CCCCC", "CCN", "CCCO"]
+        besar = ["c1ccccc1" * 3, "C(=O)Oc1ccccc1C(=O)O" + "C" * 10, "CCCCCCCCCCCCCCCCCC(=O)O",
+                 "c1ccc2c(c1)ccc1ccccc12", "CCCCCCCCCCCCCCCC", "c1ccc(cc1)c1ccc(cc1)c1ccccc1"]
+        sen = F.senyawa_dari_daftar([{"nama": f"k{i}", "smiles": s} for i, s in enumerate(kecil)]
+                                    + [{"nama": f"b{i}", "smiles": s} for i, s in enumerate(besar)])
+        sen = [s for s in sen if Chem.MolFromSmiles(s["smiles"]) is not None]
+        F.hitung_sifat(sen)
+        for s in sen:
+            s["lolos"] = s["nama"].startswith("k")
+        stat = LJ.statistik_sifat(sen)
+        if not stat:
+            raise RuntimeError("statistik sifat kosong padahal kedua kelompok cukup besar")
+        mw = next((r for r in stat if r["sifat"].startswith("Massa")), None)
+        if mw is None or not mw.get("nama_uji") or mw["p"] > 0.05:
+            raise RuntimeError(f"massa molekul seharusnya berbeda bermakna: {mw}")
+
+        G = F.graf_ppi(["TP53", "JUN", "MAPK1", "SRC"],
+                       [("TP53", "JUN", 0.9), ("TP53", "MAPK1", 0.8), ("JUN", "MAPK1", 0.75)])
+        t = LJ.topologi(G)
+        if t["simpul"] != 4 or t["tepi"] != 3 or t["terpencil"] != 1:
+            raise RuntimeError(f"topologi salah: {t}")
+        if t["komponen"] != 2:
+            raise RuntimeError(f"SRC terpencil seharusnya jadi komponen sendiri: {t['komponen']}")
+        if "kerapatan" not in t or not LJ.teks_topologi(t):
+            raise RuntimeError("ringkasan topologi kosong")
+
+        k = F.keadaan_baru()
+        k.update({"senyawa": sen, "tanaman": "Curcuma longa", "sumber_target": ["kemiripan"],
+                  "target_senyawa": {"k0": ["TP53", "JUN"]}, "gen_penyakit": [{"gen": "TP53", "skor": 0.9}],
+                  "irisan": ["TP53"], "tepi_ppi": [["TP53", "JUN", 0.9]],
+                  "hub": F.hub(G, 10),
+                  "jalur": [{"jalur": "R-1", "nama": "Apoptosis", "n_overlap": 2, "n_set": 100,
+                             "n_kueri": 2, "p": 1e-4, "q": 1e-3, "gen": ["TP53", "JUN"]}]})
+        h = LJ.html(k, G=G, info={"tanggal": "5 November 2026", "jejak": [{"sumber": "STRING", "versi": "v12"}]})
+        wajib = ["Ringkasan", "Metode", "Penyaringan ADMET", "Target senyawa", "Protein hub",
+                 "Pengayaan jalur", "Keterbatasan", "Curcuma longa", "Sumber data"]
+        hilang = [x for x in wajib if x not in h]
+        if hilang:
+            raise RuntimeError(f"bagian laporan hilang: {hilang}")
+        if h.count("<h2") < 8:
+            raise RuntimeError(f"laporan hanya {h.count('<h2')} bagian")
+        # Laporan harus tetap terbentuk walau alurnya baru sebagian.
+        if "Keterbatasan" not in LJ.html(F.keadaan_baru()):
+            raise RuntimeError("laporan keadaan kosong kehilangan bagian keterbatasan")
+        return f"{len(stat)} sifat diuji, topologi OK, laporan {h.count('<h2')} bagian"
+    cek("Laporan & statistik jaringan", laporan_jaringan_uji)
 
     def qsar_uji():
         """Pipeline QSAR berjalan utuh pada data kecil berhubungan: model harus menemukan hubungan dan menandai domain."""

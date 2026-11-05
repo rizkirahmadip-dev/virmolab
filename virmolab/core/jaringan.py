@@ -30,7 +30,7 @@ def _jejak(j) -> Dict[str, Any]:
 
 
 def tepi_string(gen: Sequence[str], ambang: float = AMBANG_STRING, spesies: int = SPESIES_STRING) -> tuple:
-    """Tepi protein-protein STRING antar gen yang diberikan. Kembalikan ([(a, b, skor)], jejak).
+    """Tepi protein-protein STRING antargen yang diberikan. Kembalikan ([(a, b, skor)], jejak).
 
     ambang: skor gabungan STRING 0-1 (0,4 rendah; 0,7 tinggi; 0,9 sangat tinggi).
     """
@@ -102,6 +102,43 @@ def tepi_penyakit(gen: Sequence[str], ambang: float = AMBANG_PENYAKIT, maks_per_
             if float(r.get("score") or 0) >= ambang:
                 hasil.append((g, r["disease"]["id"], r["disease"]["name"], float(r["score"])))
     return hasil, jejak
+
+
+def cari_penyakit(nama: str, maks: int = 10) -> tuple:
+    """Cari penyakit di Open Targets dari kata kunci bebas. Kembalikan ([{id, nama, keterangan}], jejak).
+
+    `id` adalah EFO/MONDO ID yang dipakai `target_penyakit`.
+    """
+    q = """query($s:String!,$n:Int!){ search(queryString:$s, entityNames:["disease"], page:{index:0,size:$n}){
+        hits { id name description } } }"""
+    d, j = _ot(q, {"s": nama, "n": maks})
+    hits = (d.get("search") or {}).get("hits") or []
+    return [{"id": h.get("id", ""), "nama": h.get("name", ""),
+             "keterangan": (h.get("description") or "")[:300]} for h in hits if h.get("id")], [j]
+
+
+def target_penyakit(efo_id: str, maks: int = 300, ambang: float = 0.1) -> tuple:
+    """Gen yang berasosiasi dengan satu penyakit (arah penyakit -> target). Kembalikan ([{gen, skor}], jejak).
+
+    Skor asosiasi keseluruhan Open Targets 0-1; gabungan bukti genetik, literatur, jalur, obat, dan lainnya.
+    Ini padanan terbuka untuk langkah "disease-associated genes" yang di banyak tutorial dikerjakan lewat
+    GeneCards. GeneCards berlisensi berbayar dan melarang pengambilan otomatis, jadi tidak diakses dari sini;
+    ekspor CSV-nya tetap bisa diimpor lewat core.farmakologi.impor_gen_penyakit().
+    """
+    q = """query($e:String!,$n:Int!){ disease(efoId:$e){ id name
+        associatedTargets(page:{index:0,size:$n}){ count rows { score target { approvedSymbol } } } } }"""
+    d, j = _ot(q, {"e": efo_id, "n": max(1, min(int(maks), 500))})
+    pen = d.get("disease") or {}
+    if not pen:
+        raise GalatJaringan(f"Penyakit '{efo_id}' tidak ditemukan di Open Targets.")
+    baris = []
+    for r in ((pen.get("associatedTargets") or {}).get("rows") or []):
+        gen = ((r.get("target") or {}).get("approvedSymbol") or "").upper()
+        skor = float(r.get("score") or 0)
+        if gen and skor >= ambang:
+            baris.append({"gen": gen, "skor": round(skor, 4)})
+    baris.sort(key=lambda b: (-b["skor"], b["gen"]))
+    return baris, [j]
 
 
 def bangun(senyawa: Dict[str, Sequence[str]], jalur: Optional[List[Dict]] = None,

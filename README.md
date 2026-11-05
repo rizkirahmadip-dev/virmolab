@@ -29,15 +29,15 @@ Installer dan versi portable ada di halaman
 Periksa unduhan sebelum dijalankan (PowerShell, di folder unduhan):
 
 ```powershell
-Get-FileHash .\VirmoLab-Setup-1.8.0.exe -Algorithm SHA256
+Get-FileHash .\VirmoLab-Setup-1.9.0.exe -Algorithm SHA256
 ```
 
-Cocokkan hasilnya dengan baris di `SHA256SUMS-1.8.0.txt`. Installer **belum ditandatangani sertifikat
+Cocokkan hasilnya dengan baris di `SHA256SUMS-1.9.0.txt`. Installer **belum ditandatangani sertifikat
 berbayar**, jadi Windows SmartScreen menampilkan "Windows protected your PC" — klik *More info › Run anyway*
 setelah sidik jarinya cocok.
 
 Setelah terpasang, jalankan **Alat › Uji mandiri komponen…** untuk memastikan semua mesin berfungsi
-(58 butir), dan ikuti tutorial 1HSG di **Bantuan › Tutorial**.
+(64 butir), dan ikuti tutorial 1HSG di **Bantuan › Tutorial**.
 
 ## Kebutuhan sistem
 
@@ -64,6 +64,13 @@ Setelah terpasang, jalankan **Alat › Uji mandiri komponen…** untuk memastika
 - **Simulasi**: MD dan MM/GBSA dengan OpenMM (ff14SB + OpenFF Sage/NAGL, pelarut implisit OBC2 atau air
   eksplisit), xTB, energi bebas relatif (RBFE, OpenFE), co-folding dan docking peptida (Boltz-2),
   skor ulang CNN (GNINA).
+- **Farmakologi jaringan** (menu **Jaringan**, Ctrl+Shift+J): satu alur tujuh tahap dari senyawa tanaman
+  sampai jalur biologis — kumpulkan senyawa (LOTUS/COCONUT/PubChem atau impor CSV), saring ADMET dan Lipinski,
+  cari target (kemiripan ChEMBL dan interaksi terkurasi CTD), iriskan dengan gen penyakit (Open Targets atau
+  impor CSV) sebagai diagram Venn, bangun jaringan PPI STRING yang bisa ditelusuri, peringkat protein hub (MCC
+  cytoHubba), pengayaan jalur Reactome/GO-BP, lalu paragraf metode siap tempel. Tab **Figur** menghasilkan lima
+  gambar siap publikasi — Venn, jaringan berlapis, hub melingkar, bubble plot jalur, batang jalur — sebagai SVG
+  vektor atau raster ber-DPI. Ekspor GraphML untuk Cytoscape.
 - **Penelitian lanjutan**: penargetan balik, pengayaan jalur dan jaringan (STRING, Reactome, GO),
   konservasi residu kantong, selektivitas, penapisan bertahap (pembelajaran aktif), validasi protokol.
 - **Ekspor**: gambar 3D/2D ber-DPI (PNG/TIFF/SVG/PDF), kompleks PDB, SDF, CSV, XLSX, laporan PDF, naskah Word.
@@ -85,7 +92,7 @@ Rinciannya di [`docs/instalasi.html`](docs/instalasi.html#alat-lanjutan).
 VirmoLab tidak mengirim proyek, struktur, atau hasil Anda ke mana pun, dan tidak memuat telemetri.
 Yang menghubungi internet hanya:
 
-- unduhan yang Anda minta sendiri (RCSB PDB, AlphaFold DB, PubChem, ChEMBL, COCONUT, LOTUS, STRING,
+- unduhan yang Anda minta sendiri (RCSB PDB, AlphaFold DB, PubChem, ChEMBL, COCONUT, LOTUS, STRING, CTD,
   Open Targets, dan — bila kotaknya dicentang — peladen MSA ColabFold untuk Boltz-2, yang menerima sekuens
   protein yang bersangkutan);
 - pemeriksaan pembaruan: satu permintaan GET ke `api.github.com` yang hanya membaca nomor rilis terbaru,

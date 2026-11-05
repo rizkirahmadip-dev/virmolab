@@ -13,7 +13,7 @@ FORMAT = {"mp4": "Video MP4 H.264 (kualitas terbaik, Full HD-4K)", "gif": "GIF a
 
 
 def simpan(bingkai, f, fmt, fps, lapor=None, ukuran=None):
-    """bingkai: list bytes PNG. f: berkas (gif/webp) atau folder (png). ukuran: (lebar, tinggi) akhir - 
+    """bingkai: list bytes PNG. f: berkas (gif/webp) atau folder (png). ukuran: (lebar, tinggi) akhir -
     bingkai yang dirender lebih besar (layar HiDPI) diperkecil LANCZOS = antialias tambahan.
     Kembalikan jalur keluaran."""
     from PIL import Image

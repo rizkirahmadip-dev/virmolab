@@ -367,6 +367,11 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
             ruang = "siapkan" if i <= 1 else "analisis"
             if ruang != self._ruang_aktif:
                 self.atur_ruang(ruang, dari_langkah=True)
+        elif alur == "netpharm":
+            # Alur ini bekerja di dialognya sendiri, bukan di viewport; ruang Analisis paling cocok
+            # karena tabel dan grafik yang relevan ada di sana.
+            if self._ruang_aktif != "analisis":
+                self.atur_ruang("analisis", dari_langkah=True)
         else:
             self._ke_langkah_docking(i)
 
@@ -389,6 +394,9 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
             self.statusBar().showMessage("Alur PPI: Siapkan makromolekul reseptor & protein mitra interaksi.", 5000)
         elif alur == "fbdd":
             self.statusBar().showMessage("Alur FBDD: Deteksi kantong pengikatan lalu buka rekayasa fragmen.", 5000)
+        elif alur == "netpharm":
+            self.statusBar().showMessage("Alur Farmakologi Jaringan: kumpulkan senyawa, saring ADMET, "
+                                         "lalu telusuri target › jaringan › jalur.", 5000)
 
     def atur_ruang(self, ruang, dari_langkah=False):
         """Siapkan / Docking / Analisis: tab tengah dan panel yang relevan saja."""
@@ -439,7 +447,12 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
                      "fbdd": self.buka_fbdd, "kantong": self.buka_kantong,
                      "target_balik": self.buka_target_balik, "qsar": self.buka_qsar,
                      "pembelajaran_aktif": self.buka_pembelajaran_aktif, "sunting3d": self.buka_sunting3d,
-                     "farmakofor": self.buka_farmakofor}
+                     "farmakofor": self.buka_farmakofor,
+                     "np_senyawa": lambda: self.buka_farmakologi(0), "np_admet": lambda: self.buka_farmakologi(1),
+                     "np_target": lambda: self.buka_farmakologi(2), "np_penyakit": lambda: self.buka_farmakologi(3),
+                     "np_jaringan": lambda: self.buka_farmakologi(4), "np_jalur": lambda: self.buka_farmakologi(5),
+                     "np_figur": lambda: self.buka_farmakologi(6),
+                     "np_laporan": lambda: self.buka_farmakologi(7)}
         if k in aksi_peta:
             aksi_peta[k]()
 
@@ -545,10 +558,30 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
                 ("selesai" if siap else "belum", "QED & SAScore" if siap else "belum ada"),
                 ("selesai" if siap else "belum", "siap diuji" if siap else "belum ada"),
             ]
+        elif alur == "netpharm":
+            fk = (getattr(pr, "farmakologi", None) or {}) if pr else {}
+            n_sen = len(fk.get("senyawa") or [])
+            n_lolos = sum(1 for s in (fk.get("senyawa") or []) if s.get("lolos"))
+            n_tgt = len({g for d in (fk.get("target_senyawa") or {}).values() for g in d})
+            n_iris = len(fk.get("irisan") or [])
+            n_tepi = len(fk.get("tepi_ppi") or [])
+            n_jalur = len(fk.get("jalur") or [])
+            ada_saring = any(s.get("sifat") for s in (fk.get("senyawa") or []))
+            self._status_langkah = [
+                ("selesai" if n_sen else "belum", f"{n_sen} senyawa" if n_sen else "belum ada"),
+                ("selesai" if ada_saring else "belum", f"{n_lolos} lolos" if ada_saring else "belum disaring"),
+                ("selesai" if n_iris else ("selesai" if n_tgt else "belum"),
+                 f"{n_iris} target potensial" if n_iris else (f"{n_tgt} target" if n_tgt else "belum ada")),
+                ("selesai" if n_tepi else "belum", f"{n_tepi} tepi PPI" if n_tepi else "belum dibangun"),
+                ("selesai" if n_jalur else "belum", f"{n_jalur} jalur" if n_jalur else "belum dihitung"),
+            ]
+            t_np = (ok(f"{n_sen} senyawa · {n_lolos} lolos saring") if n_sen
+                    else "Belum ada senyawa. Mulai dari tombol di bawah.")
         else:
             self._status_langkah = [s1, s2, s3, s4, s5]
         self.langkah.set_status(self._status_langkah)
-        self.p_langkah.set_status(t1, t2, t5)
+        self.p_langkah.set_status(t1, t2, t5,
+                                  netpharm=(t_np if alur == "netpharm" else None))
         self.param.set_ringkasan(f"{rec.get('nama', '')} · {rec.get('atom', 0)} atom" if rec else None, len(siap),
                                  n_war, s3[1] if self.box.get("pusat") else "")
         siap_jalan = bool(rec and siap and self.box.get("pusat"))
@@ -704,8 +737,8 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
                               "Kotak di kantong tempat ligan kristal terikat (disarankan)")
         self.a_kotak_res = A("Pusat di residu terpilih", None, lambda: self.aksi_kotak("residu"), None,
                              "Pilih residu di panel Objek atau klik atom di viewport dulu")
-        self.a_kotak_sesuai = A("Sesuaikan ke ligan terpilih +8 Å", None, lambda: self.aksi_kotak("sesuai"), None,
-                                "Ukuran kotak = rentang ligan terpilih + 8 Å tiap sisi")
+        self.a_kotak_sesuai = A("Sesuaikan ke ligan terpilih", None, lambda: self.aksi_kotak("sesuai"), None,
+                                "Ukuran kotak = rentang ligan terpilih ditambah tepi yang diatur di panel Area")
         self.a_kotak_blind = A("Seluruh protein (blind docking)", None, lambda: self.aksi_kotak("blind"), None,
                                "Kotak menutupi seluruh protein; lebih lama")
         self.a_kotak_kantong = A("Deteksi kantong (P2Rank)…", "search", lambda: self.aksi_kotak("kantong"), None,
@@ -1054,6 +1087,41 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
         isi(m, (A("Interpretasi hasil docking…", "chart", self.buka_interpretasi, None,
                   "Draf ringkasan dan Bab Hasil & Pembahasan dari angka proyek; memakai Ollama di komputer "
                   "sendiri bila terpasang, selain itu mesin pakar VirmoLab"),))
+
+        # ---------------------------------------------------------------- Farmakologi jaringan
+        # Menu tersendiri karena alurnya berdiri sendiri: tidak memerlukan struktur 3D maupun docking,
+        # dan urutan tahapnya tetap (senyawa → saring → target → jaringan → jalur → laporan).
+        m = menu("&Jaringan")
+        self._judul_menu(m, "ALUR LENGKAP")
+        isi(m, (A("Buka alur farmakologi jaringan…", "link", lambda: self.buka_farmakologi(0), "Ctrl+Shift+J",
+                  "Satu jendela untuk seluruh rantai senyawa › target › jalur › penyakit"),))
+        self._judul_menu(m, "PER TAHAP")
+        isi(m, (
+            A("1 · Senyawa…", "lig", lambda: self.buka_farmakologi(0), None,
+              "Kumpulkan senyawa beserta SMILES dari tanaman obat, ligan proyek, atau berkas"),
+            A("2 · Saring ADMET…", "sliders", lambda: self.buka_farmakologi(1), None,
+              "Aturan Lipinski, peringatan PAINS, dan prediksi HIA/bioavailabilitas/DILI/hERG/Ames"),
+            A("3 · Target senyawa…", "target", lambda: self.buka_farmakologi(2), None,
+              "Target dugaan dari kemiripan ligan ChEMBL dan interaksi terkurasi CTD"),
+            A("4 · Gen penyakit && irisan…", "search", lambda: self.buka_farmakologi(3), None,
+              "Gen penyakit dari Open Targets atau impor CSV, lalu diagram Venn target terapi potensial"),
+            A("5 · Jaringan PPI && hub…", "link", lambda: self.buka_farmakologi(4), None,
+              "Tepi STRING antartarget, graf interaktif, dan peringkat protein hub (MCC)"),
+            A("6 · Pengayaan jalur…", "chart", lambda: self.buka_farmakologi(5), None,
+              "Reactome / GO-BP dengan uji hipergeometrik dan koreksi Benjamini-Hochberg"),
+            A("7 · Figur siap publikasi…", "palette", lambda: self.buka_farmakologi(6), None,
+              "Venn, jaringan berlapis, hub melingkar, bubble plot jalur, dan batang jalur — "
+              "SVG vektor atau raster ber-DPI"),
+            A("8 · Laporan lengkap…", "report", lambda: self.buka_farmakologi(7), None,
+              "Ringkasan tiap tahap, statistik pendukung, keterbatasan, dan paragraf metode siap "
+              "tempel; dapat disimpan sebagai PDF, Word, atau HTML")))
+        m.addSeparator()
+        self._judul_menu(m, "LANJUTAN")
+        isi(m, (
+            A("Penargetan balik (docking panel target)…", "target", self.buka_target_balik, None,
+              "Jalur berbasis struktur: docking senyawa terhadap panel target terkurasi"),
+            A("Analisis antarmuka protein–protein…", "box", self.buka_ppi, None,
+              "Periksa satu pasangan protein secara struktural (SASA, residu antarmuka)")))
 
         # ---------------------------------------------------------------- Alat
         m = menu("A&lat")
@@ -1904,9 +1972,16 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
         self.statusBar().showMessage("Mengimpor…", 3000)
         kerja.jalankan(kerjakan, selesai=self.tambah_objek, galat=self._galat, log=self.log.tulis)
 
-    def ambil(self, tab):
+    def ambil(self, tab, isi_awal=""):
+        """Dialog impor dari basis data. `isi_awal` mengisi kotak SMILES lebih dulu.
+
+        Dipakai alur farmakologi jaringan untuk menyerahkan senyawa terpilihnya ke docking: daftarnya
+        sudah terisi, pengguna tinggal memeriksa lalu menekan tombolnya.
+        """
         from .dialogs import DialogAmbil, DialogProgresUnduh
         d = DialogAmbil(self, tab)
+        if isi_awal and hasattr(d, "smiles"):
+            d.smiles.setPlainText(isi_awal)
         if not d.exec():
             return
         req = d.permintaan()
@@ -2088,14 +2163,24 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
             self.pesan.tulis(teks + " - keyakinan model AlphaFold di area docking rendah; pose dan ΔG kurang andal. "
                              "Pertimbangkan kantong lain, struktur eksperimen, atau validasi dengan ligan pembanding.")
 
-    def box_ke_objek(self, o, tepi=None):
+    def box_ke_objek(self, o, tepi=None, minimal=None):
+        """Pusatkan grid box pada satu objek. `tepi` = jarak tambahan tiap sisi (Å).
+
+        Bila tepi tidak diberikan, dipakai nilai dari kolom Tepi di panel Area, sehingga angka yang
+        dilihat pengguna itulah yang benar-benar berlaku.
+        """
         xs = self._koordinat(o)
         if not xs:
             return
+        if tepi is None:
+            tepi = self.param.tepi() if hasattr(self.param, "tepi") else 5.0
         c = [sum(p[i] for p in xs) / len(xs) for i in range(3)]
         ext = [max(p[i] for p in xs) - min(p[i] for p in xs) for i in range(3)]
-        uk = [max(20.0, e + 10) for e in ext] if tepi is None else [e + 2 * tepi for e in ext]
-        self._atur_kotak(c, uk, sumber=f"dipusatkan pada {o.nama}")
+        uk = [e + 2 * tepi for e in ext]
+        if minimal:
+            uk = [max(minimal, u) for u in uk]
+        angka = f"{tepi:g}".replace(".", ",")
+        self._atur_kotak(c, uk, sumber=f"dipusatkan pada {o.nama} (tepi {angka} Å)")
 
     def aksi_kotak(self, k):
         if k == "ligan_asli":
@@ -2106,7 +2191,7 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
                 self._galat("Tidak ada ligan asli kristal. Impor struktur PDB yang berisi ligan, atau pakai "
                             "'Pusat ke residu terpilih'.")
                 return
-            self.box_ke_objek(o)
+            self.box_ke_objek(o, minimal=20.0)
         elif k == "residu":
             oid, res = self.residu_terpilih
             o = self.objek.get(oid)
@@ -2122,7 +2207,7 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
             if not o or o.jenis not in ("ligan", "pose"):
                 self._galat("Pilih ligan di panel Objek dulu.")
                 return
-            self.box_ke_objek(o, tepi=8.0)
+            self.box_ke_objek(o)
         elif k == "fleksibel":
             self.atur_fleksibel()
         elif k == "kovalen":

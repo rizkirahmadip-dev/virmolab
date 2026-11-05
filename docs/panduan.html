@@ -1,4 +1,4 @@
-<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Panduan pengguna · VirmoLab</title><link rel="stylesheet" href="gaya.css"><link rel="icon" href="gambar/ikon.png"></head><body><header><img src="gambar/logo_putih.svg" alt="VirmoLab" style="height:30px;margin-right:6px"><span style="color:#9fb4d3;font-size:13px;margin-right:10px">1.8.0</span><a href="panduan.html" class="aktif">Panduan pengguna</a><a href="instalasi.html">Instalasi</a><a href="pindah_laptop.html">Pindah laptop</a><a href="gpu.html">Setup GPU</a><a href="troubleshooting.html">Mengatasi masalah</a><a href="metode.html">Metode &amp; kriteria</a><a href="validasi.html">Validasi</a></header><main><h1>Panduan pengguna</h1>
+<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Panduan pengguna · VirmoLab</title><link rel="stylesheet" href="gaya.css"><link rel="icon" href="gambar/ikon.png"></head><body><header><img src="gambar/logo_putih.svg" alt="VirmoLab" style="height:30px;margin-right:6px"><span style="color:#9fb4d3;font-size:13px;margin-right:10px">1.9.0</span><a href="panduan.html" class="aktif">Panduan pengguna</a><a href="instalasi.html">Instalasi</a><a href="pindah_laptop.html">Pindah laptop</a><a href="gpu.html">Setup GPU</a><a href="troubleshooting.html">Mengatasi masalah</a><a href="metode.html">Metode &amp; kriteria</a><a href="validasi.html">Validasi</a></header><main><h1>Panduan pengguna</h1>
 <p class="lead">Alur lengkap docking di VirmoLab, dari mengimpor protein sampai laporan (PDF, Word, atau HTML interaktif) — semuanya di dalam satu aplikasi, dipandu lima langkah.</p>
 
 <nav class="isi"><b>Isi:</b>
@@ -65,11 +65,15 @@
 <figure><img src="gambar/06_parameter_gridbox.png" alt="Area docking"><figcaption>Kotak biru di viewport; tombol penentuan dan angka ukuran di Panel kerja.</figcaption></figure>
 <ul>
 <li>Bila struktur berisi ligan asli, kotak dipusatkan otomatis padanya (aditif kristalisasi seperti GOL, EDO, SO4 diabaikan).</li>
-<li>Tombol: <b>Pusat di ligan asli (disarankan)</b>, <b>Pusat di residu terpilih</b> (klik atom atau pilih residu di Objek, <kbd>Ctrl</kbd>+klik untuk banyak), <b>Sesuaikan ke ligan terpilih +8 Å</b>, <b>Deteksi kantong (P2Rank)…</b>, <b>Seluruh protein (blind docking)</b>. Semua juga ada di menu <b>Siapkan</b>.</li>
+<li>Tombol: <b>Pusat di ligan asli (disarankan)</b>, <b>Pusat di residu terpilih</b> (klik atom atau pilih residu di Objek, <kbd>Ctrl</kbd>+klik untuk banyak), <b>Sesuaikan ke ligan terpilih</b>, <b>Deteksi kantong (P2Rank)…</b>, <b>Seluruh protein (blind docking)</b>. Semua juga ada di menu <b>Siapkan</b>.</li>
 <li><b>Deteksi kantong (P2Rank)</b>: untuk protein tanpa ligan asli (mis. model AlphaFold atau struktur apo). P2Rank (pembelajaran mesin) mencari kantong pengikatan dalam ±5–30 detik; kantong ditandai bola oranye bernomor di viewport dan dicantumkan dalam tabel (skor, probabilitas, residu). Pilih satu lalu <i>Pakai kantong ini</i>: kotak dipusatkan di kantong, ukuran = sebaran residu kantong + 4 Å (16–30 Å). Pada 1HSG, kantong #1 berjarak 0,8 Å dari pusat indinavir kristal.</li>
 <li id="fleksibel"><b>Residu fleksibel…</b> (menu Siapkan, atau <i>Atur…</i> di langkah 4): centang 2–6 rantai samping kantong yang boleh berotasi selama docking (calon diurutkan menurut jarak ke ligan asli; Gly/Ala/Pro tidak ditawarkan; maksimal 8). Tombol <i>Pilih 6 terdekat</i> mencentang enam rantai samping terdekat sekaligus (batas praktis: tiap rantai samping menambah 1&ndash;4 torsi pada ruang pencarian), <i>Kosongkan</i> membatalkan semua. Berlaku untuk AutoDock-GPU dan Vina (bukan AutoDock4). Rantai samping pada tiap pose tampil sebagai objek <i>Pose n · residu fleksibel</i>, dan interaksi dihitung dengan posisi itu. ΔG dengan residu fleksibel tidak sebanding langsung dengan docking kaku — bandingkan ligan dalam pengaturan yang sama. <i>Kembali ke reseptor kaku</i> mematikannya; menyiapkan ulang reseptor juga mematikannya.</li>
 <li id="kovalen"><b>Docking kovalen…</b> (menu Siapkan, atau <i>Atur…</i> di langkah 4): pilih satu residu nukleofil (Cys, Ser, atau Lys) yang atom nukleofilnya berada di dalam grid box. Ligan yang punya gugus reaktif (<i>warhead</i>) diikat secara kimia ke rantai samping residu itu, lalu di-docking sebagai satu aduk residu + ligan dengan metode <i>tethered</i> (AutoDock-GPU <code>--flexres</code>; reseptor dipakai tanpa rantai samping residu sasaran). Gugus reaktif yang dikenali: akseptor Michael (akrilamida, enon, vinil sulfon), alkuna teraktivasi, α-haloketon/haloasetamida, sulfonil fluorida, nitril, dan aldehida — kecocokan tergantung residu (dialog menampilkan deteksi per ligan). Ligan tanpa gugus reaktif yang cocok dilewati. <b>Skor yang dilaporkan adalah energi aduk–reseptor, bukan ΔG ikatan</b>: Ki dan efisiensi ligan tidak ditampilkan, dan skor hanya dibandingkan antar-ligan kovalen pada residu sasaran yang sama. Hanya AutoDock-GPU; tidak bisa dipakai bersamaan dengan residu fleksibel. <i>Matikan (docking biasa)</i> mengembalikannya; menyiapkan ulang reseptor juga mematikannya.</li>
-<li><b>Ukuran dan posisi</b>: pusat X/Y/Z, ukuran, spasi, jumlah titik grid. Peringatan muncul bila &gt; 126 titik per sumbu atau &gt; 30 Å.</li>
+<li><b>Tepi di sekeliling ligan (Å)</b>: jarak tambahan pada tiap sisi ligan yang dipakai dua tombol teratas, bawaan 8 Å. Inilah angka yang paling sering perlu disesuaikan: kantong dangkal dan tertutup cukup 4&ndash;5 Å, sedangkan ligan lentur atau kantong bercabang butuh lebih lebar. Terlalu sempit membuat pose terpotong di tepi kotak; terlalu lebar memperlambat pencarian tanpa menambah ketelitian. Label tombol ikut menampilkan angka yang sedang berlaku.</li>
+<li><b>Ukuran dan posisi</b>: pusat X/Y/Z, ukuran tiap sumbu, spasi grid, dan jumlah titik grid. Di bawahnya tertulis <b>batas kotak</b> (rentang minimum&ndash;maksimum tiap sumbu) dan <b>volume</b> &mdash; batas untuk mencocokkan kotak dengan kantong yang terlihat di viewport, volume untuk memperkirakan lama pencarian. Peringatan muncul bila melebihi 126 titik per sumbu atau 30 Å.</li>
+<li><b>Samakan ketiga sisi</b>: selama dicentang, mengubah satu sisi langsung menyamakan dua sisi lainnya sehingga kotaknya tetap kubus. Berguna untuk <i>blind docking</i> dan untuk membandingkan beberapa target dengan kotak berukuran sama.</li>
+<li><b>Spasi grid</b> menentukan kerapatan titik: makin rapat makin teliti dan makin lambat. Nilai baku AutoDock adalah 0,375 Å; menaikkannya adalah cara termudah mengatasi peringatan 126 titik tanpa memperkecil kotak.</li>
+<li>Setiap perubahan kotak masuk riwayat <kbd>Ctrl</kbd>+<kbd>Z</kbd>, jadi mencoba-coba ukuran aman: kotak sebelumnya selalu bisa dikembalikan.</li>
 <li>Dengan mouse di viewport: <kbd>Shift</kbd>+seret = geser kotak; <kbd>Shift</kbd>+gulir = ukuran; <kbd>Alt</kbd>+gulir = satu sumbu (pilih sumbu dengan <kbd>X</kbd>/<kbd>Y</kbd>/<kbd>Z</kbd>). <kbd>G</kbd> menampilkan/menyembunyikan kotak.</li>
 </ul>
 
@@ -129,10 +133,10 @@
 <h2 id="banding">Bandingkan ligan &amp; peta interaksi</h2>
 <figure><img src="gambar/12_bandingkan.png" alt="Bandingkan"><figcaption>Centang 2–4 ligan di tab Hasil lalu Analisis › Bandingkan ligan dicentang.</figcaption></figure>
 <p>Viewport berdampingan (tombol <i>Samakan sudut pandang</i>), daftar residu yang berinteraksi dengan semua ligan, dan peta panas residu × ligan. <b>Analisis › Peta interaksi residu × ligan</b> menampilkan peta untuk semua hasil.</p>
-<p><b>Sidik jari interaksi (IFP)</b>: tiap pose terbaik diringkas sebagai himpunan “residu × jenis interaksi” (tanpa vdW). Kolom <b>IFP vs kristal</b> di tab Hasil = kemiripan Tanimoto terhadap pose kristal ligan asli (1 = pola interaksi sama persis; berguna untuk memilih ligan yang meniru ligan asli). Tab Statistik › <i>Kemiripan interaksi (IFP)</i> menampilkan matriks kemiripan antar ligan; Excel berisi lembar <i>Sidik jari interaksi</i> (0/1 per residu × jenis).</p>
+<p><b>Sidik jari interaksi (IFP)</b>: tiap pose terbaik diringkas sebagai himpunan “residu × jenis interaksi” (tanpa vdW). Kolom <b>IFP vs kristal</b> di tab Hasil = kemiripan Tanimoto terhadap pose kristal ligan asli (1 = pola interaksi sama persis; berguna untuk memilih ligan yang meniru ligan asli). Tab Statistik › <i>Kemiripan interaksi (IFP)</i> menampilkan matriks kemiripan antarligan; Excel berisi lembar <i>Sidik jari interaksi</i> (0/1 per residu × jenis).</p>
 
 <h2 id="konsensus">Konsensus skor</h2>
-<p><b>Analisis › Konsensus skor…</b> menggabungkan beberapa fungsi skor agar peringkat ligan tidak bergantung pada satu mesin saja. Centang kolom skor: job dengan mesin berbeda (mis. AutoDock-GPU dan Vina) dan/atau <b>rescoring</b> pose terbaik dengan fungsi skor <b>Vina</b> dan <b>Vinardo</b> (cepat, tanpa docking ulang; hasilnya disimpan di proyek). Tabel menampilkan ΔG dan peringkat tiap kolom, rata-rata peringkat (urutan konsensus), z-score rata-rata, dan tanda ✓ untuk ligan yang <b>konsisten</b> berada di persentil teratas (bawaan 20 %) di semua kolom. Kesepakatan antar fungsi skor dinilai dengan <b>Kendall W</b> (≥ 0,7 kuat; &lt; 0,5 lemah — tafsirkan hati-hati) dan korelasi Spearman. Tersedia ekspor CSV dan paragraf metode siap tempel.</p>
+<p><b>Analisis › Konsensus skor…</b> menggabungkan beberapa fungsi skor agar peringkat ligan tidak bergantung pada satu mesin saja. Centang kolom skor: job dengan mesin berbeda (mis. AutoDock-GPU dan Vina) dan/atau <b>rescoring</b> pose terbaik dengan fungsi skor <b>Vina</b> dan <b>Vinardo</b> (cepat, tanpa docking ulang; hasilnya disimpan di proyek). Tabel menampilkan ΔG dan peringkat tiap kolom, rata-rata peringkat (urutan konsensus), z-score rata-rata, dan tanda ✓ untuk ligan yang <b>konsisten</b> berada di persentil teratas (bawaan 20 %) di semua kolom. Kesepakatan antarfungsi skor dinilai dengan <b>Kendall W</b> (≥ 0,7 kuat; &lt; 0,5 lemah — tafsirkan hati-hati) dan korelasi Spearman. Tersedia ekspor CSV dan paragraf metode siap tempel.</p>
 
 <h2 id="sifat">Sifat ligan &amp; BOILED-Egg</h2>
 <figure><img src="gambar/16_sifat.png" alt="Sifat ligan"><figcaption>Tab Sifat Ligan.</figcaption></figure>
@@ -140,7 +144,7 @@
 
 <h2 id="statistik">Statistik &amp; grafik</h2>
 <figure><img src="gambar/17_statistik.png" alt="Statistik"><figcaption>Tab Statistik.</figcaption></figure>
-<p><b>Analisis › Statistik dan grafik</b>: histogram ΔG, diagram sebar dengan regresi dan korelasi Pearson/Spearman (beserta p), batang ΔG teratas, matriks korelasi antar variabel (ΔG, LE, pKi, interaksi, sifat ligan). Pilih job tertentu atau “Semua job”. Ekspor grafik dan data.</p>
+<p><b>Analisis › Statistik dan grafik</b>: histogram ΔG, diagram sebar dengan regresi dan korelasi Pearson/Spearman (beserta p), batang ΔG teratas, matriks korelasi antarvariabel (ΔG, LE, pKi, interaksi, sifat ligan). Pilih job tertentu atau “Semua job”. Ekspor grafik dan data.</p>
 
 <h2 id="uji">Uji statistik &amp; grafik publikasi</h2>
 <p>Tab <b>Uji &amp; Grafik</b> (<b>Analisis › Uji statistik dan grafik publikasi</b>) untuk data penelitian Anda sendiri, mis. hasil uji in vitro. Alurnya: lembar data → analisis → grafik, semuanya diperbarui otomatis saat data diubah dan tersimpan di proyek.</p>
@@ -152,7 +156,7 @@
 <li><b>Data XY dosis–respons</b>: kolom pertama konsentrasi, kolom berikutnya ulangan respons. Regresi nonlinear 4 parameter (log[inhibitor] vs respons, kemiringan bebas) → IC₅₀/EC₅₀ dengan CI 95%, Hill slope, R²; grafik sumbu x logaritmik.</li>
 <li><b>Berpasangan ≥ 3 kolom</b> (centang <i>Berpasangan</i>; baris = subjek yang sama): ANOVA pengukuran berulang dengan koreksi Greenhouse–Geisser, atau Friedman bila data tidak normal; uji lanjut t berpasangan / Wilcoxon.</li>
 <li><b>Koreksi perbandingan ganda</b> dapat dipilih: Holm (bawaan), Bonferroni, Šidák, atau Benjamini–Hochberg (FDR) — dipakai Dunn, uji lanjut berpasangan, dan ANOVA dua arah.</li>
-<li><b>Data Dua faktor</b> (ANOVA dua arah): kolom pertama = level faktor A (diulang untuk tiap ulangan), judul kolom berikutnya = level faktor B. Hasil: efek A, B, dan interaksi (jumlah kuadrat tipe III, η²ₚ), perbandingan antar level A di tiap level B, grafik batang berkelompok dengan legenda.</li>
+<li><b>Data Dua faktor</b> (ANOVA dua arah): kolom pertama = level faktor A (diulang untuk tiap ulangan), judul kolom berikutnya = level faktor B. Hasil: efek A, B, dan interaksi (jumlah kuadrat tipe III, η²ₚ), perbandingan antarlevel A di tiap level B, grafik batang berkelompok dengan legenda.</li>
 <li><b>Cek asumsi</b>: tabel deskriptif kini memuat D'Agostino–Pearson (n ≥ 8) selain Shapiro–Wilk; pilih grafik <i>Q–Q plot</i> untuk memeriksa normalitas secara visual; kemungkinan pencilan dilaporkan dengan uji Grubbs (tidak dibuang otomatis).</li>
 <li><b>Model dosis–respons</b>: <i>Otomatis</i> membandingkan 4PL (kemiringan bebas) dengan 3PL (Hill = 1) memakai uji F extra sum-of-squares dan AICc, lalu memakai model yang lebih sesuai; bisa juga dipaksa 4PL atau 3PL.</li>
 <li><b>Data ROC</b>: kolom 1 = skor kelompok negatif (decoy/kontrol), kolom 2 = skor kelompok positif (aktif/kasus). Untuk ΔG docking pilih <i>Skor rendah = positif</i>. Hasil: AUC dengan CI 95% (DeLong), p, titik potong optimal (indeks Youden) beserta sensitivitas &amp; spesifisitas, faktor pengayaan EF1%/5%/10%, <b>BEDROC</b> dan <b>logAUC</b> (pengayaan dini) dengan CI bootstrap — cocok untuk validasi penapisan virtual aktif vs decoy. Pilih tampilan: ROC, ROC semilog, atau kurva pengayaan.</li>
@@ -169,8 +173,8 @@
 <figure><img src="gambar/19_komposer.png" alt="Komposer figur" style="max-width:760px"><figcaption>Grafik uji (A) dan gambar 3D (B) disusun menjadi satu figur 174 mm.</figcaption></figure>
 <p><b>Analisis › Komposer figur</b> (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd>) menggabungkan beberapa gambar menjadi satu figur jurnal berlabel A, B, C. Tambahkan panel dari <i>＋ Tambah ▾</i>: grafik Uji &amp; Grafik, grafik Statistik, diagram interaksi 2D, BOILED-Egg, gambar viewport 3D, atau berkas gambar (PNG/JPG/SVG). Urutkan dengan menyeret atau tombol ↑ ↓; centang <i>Lebar penuh</i> agar panel (mis. gambar 3D) memakai satu baris sendiri.</p>
 <ul>
-<li>Atur jumlah kolom, jarak antar panel, gaya label (A / a / (A) / (a) / A.), ukuran label, dan lebar cetak (85 / 120 / 174 mm).</li>
-<li><i>Samakan skala huruf antar grafik</i> (bawaan) memperkecil semua grafik dengan faktor yang sama sehingga ukuran huruf seragam di seluruh figur.</li>
+<li>Atur jumlah kolom, jarak antarpanel, gaya label (A / a / (A) / (a) / A.), ukuran label, dan lebar cetak (85 / 120 / 174 mm).</li>
+<li><i>Samakan skala huruf antargrafik</i> (bawaan) memperkecil semua grafik dengan faktor yang sama sehingga ukuran huruf seragam di seluruh figur.</li>
 <li>Simpan sebagai PDF/SVG vektor atau TIFF/PNG 600 dpi, atau salin ke clipboard. Isi komposer tersimpan di proyek.</li>
 </ul>
 
@@ -331,7 +335,7 @@
 <p>Tab <b>Jaringan &amp; jalur</b> pada dialog yang sama merangkai target terpilih menjadi jaringan farmakologi. Tekan <b>Kirim target terpilih ke Jaringan</b> di tab penargetan balik (baris yang disorot, atau target berkeyakinan tinggi bila tidak ada yang disorot), lalu <b>Bangun jaringan</b>.</p>
 <ul>
 <li><b>Pengayaan jalur:</b> uji hipergeometrik satu sisi terhadap set gen Reactome atau Gene Ontology (proses biologis) yang ikut dalam paket, dengan koreksi Benjamini-Hochberg. Latar adalah seluruh gen beranotasi pada berkas tersebut dan jumlahnya disebut di paragraf metode.</li>
-<li><b>Interaksi protein (STRING):</b> tepi antar target dengan skor gabungan di atas ambang pilihan (0,4 / 0,7 / 0,9). Skor STRING mencakup bukti ko-ekspresi dan penambangan teks, bukan hanya interaksi fisik.</li>
+<li><b>Interaksi protein (STRING):</b> tepi antartarget dengan skor gabungan di atas ambang pilihan (0,4 / 0,7 / 0,9). Skor STRING mencakup bukti ko-ekspresi dan penambangan teks, bukan hanya interaksi fisik.</li>
 <li><b>Asosiasi penyakit (Open Targets):</b> lima penyakit teratas per target dengan skor asosiasi di atas ambang pilihan.</li>
 <li><b>Uji sensitivitas:</b> jaringan dibangun ulang pada ambang STRING 0,4/0,7/0,9 dan 5/10/20 target teratas. Gen yang tetap berderajat tinggi pada setidaknya 80&nbsp;% kombinasi ditandai sebagai simpul inti stabil (bertepi tebal pada graf).</li>
 <li>Graf dapat diperbesar dengan gulir dan digeser dengan seret. Hasil diekspor sebagai GraphML (Cytoscape, Gephi), CSV tepi, atau dikirim ke Komposer Figur. Tombol <b>Salin paragraf metode</b> menuliskan basis data, versi, ambang, hasil uji sensitivitas, dan latar pengayaan.</li>
@@ -447,6 +451,68 @@
 <li>Nilai afinitas Boltz-2 adalah perkiraan model, bukan hasil pengukuran, dan tetap memerlukan uji laboratorium.</li>
 </ul>
 
+<h2 id="farmakologi">Farmakologi jaringan</h2>
+<p>Alur ini menjawab pertanyaan yang berbeda dari docking. Docking bertanya <i>seberapa kuat satu senyawa menempel pada satu protein</i>; farmakologi jaringan bertanya <i>lewat protein dan jalur mana saja sekumpulan senyawa mungkin bekerja pada suatu penyakit</i>. Pergeseran cara pandangnya dari <i>satu obat › satu target › satu penyakit</i> menjadi <i>banyak senyawa › banyak target › banyak jalur</i>.</p>
+<p>Buka lewat menu <b>Jaringan › Buka alur farmakologi jaringan…</b> (Ctrl+Shift+J), atau pilih <b>Farmakologi Jaringan</b> pada pemilih alur di panel <b>Langkah</b>. Jendelanya punya tujuh tab yang dikerjakan berurutan dari kiri ke kanan; keadaannya tersimpan di dalam berkas proyek, jadi pekerjaan bisa ditinggal dan dilanjutkan nanti.</p>
+
+<h3 id="np-senyawa">1 · Senyawa</h3>
+<p>Susun daftar senyawa beserta SMILES-nya. Tiga jalur masuk: <b>Senyawa tanaman obat…</b> (mencari dari takson tanaman lewat LOTUS/Wikidata dan COCONUT), <b>Ambil ligan proyek</b> (memakai ligan yang sudah ada di proyek docking ini), dan <b>Impor CSV/TSV…</b> untuk daftar yang Anda susun sendiri — misalnya hasil unduhan KNApSAcK yang sudah dilengkapi kolom SMILES dari PubChem. Pemisah kolom dan nama kolom dikenali otomatis; kolom SMILES boleh bernama <code>SMILES</code>, <code>Isomeric SMILES</code>, atau <code>Canonical SMILES</code>. Bila tersedia keduanya, pakailah isomeric SMILES karena memuat informasi stereokimia, dan jangan mencampur kedua jenis dalam satu kumpulan data: prediksi targetnya jadi tidak sebanding.</p>
+<p>Isi kotak <b>Sumber senyawa</b> dengan nama tanaman atau koleksi yang dipakai. Teks itu masuk ke paragraf metode di tab terakhir.</p>
+
+<h3 id="np-admet">2 · Saring ADMET</h3>
+<p>Dari ratusan senyawa dalam satu tanaman, tidak semuanya layak dibawa ke tahap berikutnya. Penyaringan ini memakai dua lapis. Lapis pertama selalu tersedia: jumlah pelanggaran aturan lima Lipinski dan peringatan PAINS, keduanya dihitung RDKit di komputer Anda. Lapis kedua memakai prediksi ADMET-AI bila terpasang — absorpsi usus (HIA), bioavailabilitas oral, risiko cedera hati (DILI), penghambatan hERG, dan mutagenisitas Ames — dan dijalankan lewat tombol <b>Prediksi ADMET (ADMET-AI)…</b>.</p>
+<p>Ambang bawaan di dialog adalah titik awal yang lazim, bukan aturan baku: sesuaikan dengan jumlah data dan tujuan penelitian Anda, lalu laporkan ambang yang benar-benar dipakai. Senyawa yang nilai ADMET-nya belum ada <i>tidak</i> digugurkan karena itu — ketiadaan data bukan bukti buruk — tetapi alasannya dicatat di kolom <b>Alasan</b> agar Anda sadar penyaringannya belum lengkap. Hasil penyaringan ini prediksi, bukan kebenaran final.</p>
+
+<h3 id="np-target">3 · Target senyawa</h3>
+<p>Dua sumber target yang saling melengkapi, boleh dipakai bersamaan:</p>
+<ul>
+<li><b>Kemiripan ligan ChEMBL</b> — mencari senyawa berstruktur mirip (sidik jari ECFP4) yang aktivitasnya sudah diukur (pChEMBL ≥ 6), lalu mengambil target yang diikatnya. Ini memberi target yang <i>mungkin</i> terikat berdasarkan kemiripan struktur, prinsip yang sama dengan SwissTargetPrediction.</li>
+<li><b>Interaksi terkurasi CTD</b> — hubungan senyawa–gen yang dibaca dan dikurasi kurator dari publikasi toksikologi dan biomedis. Ini memberi target yang <i>pernah dilaporkan</i>, dicari berdasarkan nama senyawa, jadi pastikan penamaannya baku.</li>
+</ul>
+<p>Bila Anda lebih suka memakai laman tool-nya sendiri, tombol <b>Impor CSV target…</b> menerima tabel berisi kolom nama senyawa dan simbol gen. Untuk jalur berbasis struktur — docking senyawa terhadap panel target terkurasi — pakai <b>Jaringan › Penargetan balik</b>.</p>
+
+<h3 id="np-penyakit">4 · Gen penyakit &amp; irisan</h3>
+<p>Ketik nama penyakit lalu <b>Cari di Open Targets</b>, pilih entri yang tepat dari daftar, dan tekan <b>Ambil gen penyakit</b>. Skor asosiasi Open Targets bernilai 0–1 dan memadukan bukti genetik, literatur, jalur, serta obat; ambang bawaan 0,10 longgar, naikkan bila gennya terlalu banyak.</p>
+<p>VirmoLab tidak menghubungi GeneCards secara otomatis karena lisensinya berbayar dan melarang pengambilan otomatis. Bila Anda punya akses, unduh sendiri hasilnya lalu pakai <b>Impor CSV gen…</b>; berkas ekspor DisGeNET, OMIM, dan CTD juga diterima selama ada kolom simbol gen. Saring dulu ke <i>protein coding</i> di laman sumbernya.</p>
+<p>Irisan antara target senyawa dan gen penyakit inilah yang disebut <b>potential therapeutic target</b>, dan digambar sebagai diagram Venn di sisi kanan. Angka di tiap wilayah adalah jumlah gen; lingkarannya berukuran tetap, bukan proporsional, karena Venn proporsional tidak selalu punya solusi geometris dan luas wilayah yang dipaksakan justru menyesatkan.</p>
+
+<h3 id="np-jaringan">5 · Jaringan PPI</h3>
+<p>Tepi interaksi protein–protein diambil dari STRING untuk gen hasil irisan. <b>Skor gabungan</b> adalah ambang kepercayaan: 0,40 medium, 0,70 high — yang lazim dipakai publikasi network pharmacology — dan 0,90 highest. Di bawah 0,40 rawan positif palsu.</p>
+<p>Perlu diingat bahwa tepi STRING tidak selalu berarti dua protein bersentuhan secara fisik. STRING memadukan beberapa saluran bukti: eksperimen, basis data terkurasi (KEGG, Reactome, Biocarta), penambangan teks dari jutaan abstrak, ko-ekspresi, kedekatan lokasi gen, fusi gen, dan ko-kemunculan. Asosiasi fungsional — dua protein bekerja di jalur yang sama tanpa pernah bersentuhan — juga menghasilkan tepi.</p>
+<p>Jaringannya bisa ditelusuri: roda tetikus memperbesar, seret menggeser, klik satu simpul untuk menyorot simpul itu beserta tetangganya, dan klik dua kali untuk mengembalikan tampilan penuh. Tabel di sebelah kanan memeringkat <b>protein hub</b> — protein dengan koneksi terbanyak, karena itu dianggap paling berperan. Urutan utamanya memakai <b>MCC</b> (Maximal Clique Centrality, metode cytoHubba), dengan derajat, betweenness, dan closeness sebagai pembanding. Memilih baris di tabel menyorot simpulnya di gambar.</p>
+<p>Jangan membaca jaringan sekadar sebagai kumpulan titik dan garis. Yang dicari adalah protein hub dan kekuatan buktinya, bukan tampilan jaringannya. Untuk analisis lanjutan, <b>Ekspor GraphML</b> membuka jaringan ini di Cytoscape atau Gephi.</p>
+
+<h3 id="np-jalur">6 · Jalur</h3>
+<p>Pengayaan jalur memakai uji hipergeometrik satu sisi: seberapa tidak mungkin sejumlah gen Anda jatuh pada satu jalur hanya karena kebetulan. Karena ribuan jalur diuji sekaligus, nilai <i>p</i> dikoreksi dengan metode Benjamini-Hochberg menjadi nilai <i>q</i>; pakai <i>q</i>, bukan <i>p</i>, untuk memutuskan jalur mana yang dilaporkan. Dua set gen tersedia luring: Reactome dan Gene Ontology Biological Process. Latar belakangnya adalah gabungan seluruh gen pada set yang dipilih.</p>
+
+<h3 id="np-figur">7 · Figur</h3>
+<p>Lima gambar siap publikasi dirakit dari keadaan alur, dipilih di daftar sebelah kiri dan langsung terlihat di pratinjau kanan. <b>Jumlah butir</b> mengatur berapa protein hub atau jalur yang digambar; <b>DPI</b> hanya berlaku untuk keluaran raster.</p>
+<ul>
+<li><b>Diagram Venn irisan</b> — target senyawa berbanding gen penyakit.</li>
+<li><b>Jaringan berlapis</b> — senyawa, target, jalur, dan penyakit dalam satu gambar bertata letak gaya pegas.</li>
+<li><b>Hub melingkar</b> — protein paling sentral disusun melingkar, diwarnai menurut peringkat MCC. Susunan melingkar dipakai karena yang dibaca adalah peringkat dan kerapatan hubungan antarhub; tata letak gaya pegas justru menyembunyikan peringkat itu. Ini padanan terbuka untuk gambar cytoHubba yang lazim dipakai di naskah farmakologi jaringan.</li>
+<li><b>Bubble plot jalur</b> — bentuk baku pengayaan jalur: sumbu x rasio gen (gen kueri yang jatuh pada jalur dibagi seluruh gen kueri), ukuran titik jumlah gen, warna −log₁₀(q). Angkanya ditulis di samping tiap titik sehingga figurnya tetap terbaca saat dicetak hitam-putih.</li>
+<li><b>Batang jalur</b> — bentuk paling ringkas, jumlah gen per jalur.</li>
+</ul>
+<p>Besaran berurutan (peringkat hub, nilai q) digambar dengan <i>satu rona terang ke gelap</i>, bukan pelangi, dan rampnya sudah diperiksa untuk keterbacaan buta warna serta kontras terhadap latar. Artinya gambarnya tetap benar terbaca saat dicetak abu-abu: yang lebih gelap selalu berarti lebih tinggi.</p>
+<p><b>Simpan SVG/PNG…</b> menulis figur yang sedang tampil; <b>Simpan semua…</b> menulis setiap figur yang datanya sudah ada ke satu folder, masing-masing dalam SVG dan PNG. Pakai SVG bila jurnalnya menerima vektor — ukurannya kecil dan tidak pernah pecah saat diperbesar.</p>
+
+<h3 id="np-laporan">8 · Laporan</h3>
+<p>Kartu ringkasan menunjukkan angka tiap tahap, dan di bawahnya laporan lengkap dirakit ulang setiap kali ada tahap yang selesai — tidak perlu menekan apa pun. Isinya sepuluh bagian: ringkasan, metode, daftar senyawa, hasil penyaringan beserta alasan pengguguran, target per senyawa, gen penyakit dan irisannya, topologi jaringan dan tabel protein hub, tabel jalur, Keterbatasan, dan tabel sumber data beserta versi serta lisensinya.</p>
+<p>Laporan ini bisa disimpan sebagai <b>PDF</b>, <b>Word</b>, atau <b>HTML</b>. <b>Ekspor JSON…</b> menyimpan seluruh keadaan alur untuk lampiran suplemen, dan tombol salin memberi paragraf metode saja dalam Bahasa Indonesia atau Inggris.</p>
+
+<h4>Statistik yang disertakan</h4>
+<p>Dua hal diuji dengan mesin statistik VirmoLab yang sama dengan tab Uji &amp; Grafik, sehingga pemilihan uji dan pemeriksaan asumsinya konsisten.</p>
+<ul>
+<li><b>Sifat senyawa lolos berbanding gugur</b> — massa molekul, WLOGP, TPSA, QED, dan SA Score dibandingkan antara kedua kelompok. Ujinya dipilih otomatis: Welch bila sebarannya normal menurut Shapiro-Wilk, Mann-Whitney bila tidak. Gunanya menjawab pertanyaan yang wajar ditanyakan pembaca: penyaringan ADMET itu sebenarnya membuang apa? Bila tidak ada satu pun sifat yang berbeda bermakna, penyaringannya bekerja lewat kriteria prediksi toksisitas, bukan lewat ukuran atau lipofilisitas molekulnya — dan laporan menuliskan kesimpulan itu apa adanya.</li>
+<li><b>Topologi jaringan</b> — kerapatan, sebaran derajat (rata-rata, SD, median, tertinggi), koefisien klaster, jumlah komponen terhubung, dan jumlah protein terpencil, disertai paragraf pembacaannya. Bila derajat tertinggi jauh melampaui median, laporan menyebutkan pola itu: sedikit protein memegang sebagian besar hubungan, ciri yang lazim pada jaringan biologis.</li>
+</ul>
+<p>Bagian <b>Keterbatasan</b> selalu ikut tercetak dan tidak bisa dihilangkan, memuat enam hal: ketergantungan pada kelengkapan basis data publik, dosis yang tidak diperhitungkan, pencernaan dan metabolisme yang diabaikan, arah interaksi yang tidak diketahui, waktu dan lokasi di tubuh yang diabaikan, serta sifat tepi STRING yang bukan hanya interaksi fisik.</p>
+
+<h4>Melanjutkan ke docking</h4>
+<p>Tombol di pojok kanan bawah mengikuti tahap yang sedang dibuka: selama alurnya belum selesai ia berbunyi <b>Lanjut: &lt;tahap berikutnya&gt;</b> dan mati bila tahap sekarang belum ada isinya. Di tab Laporan ia berubah menjadi <b>Bawa ke docking molekuler…</b>.</p>
+<p>Tombol itu memilih hanya senyawa yang lolos penyaringan <i>dan</i> mengenai salah satu dari sepuluh target hub teratas, lalu membuka dialog impor dengan daftar SMILES-nya sudah terisi dan memindahkan panel Langkah ke alur Docking Molekuler. Di sinilah struktur 3D baru dibuat — bukan di awal — karena pada titik ini sudah jelas senyawa mana yang pantas diuji dan terhadap protein apa. Sesudah docking, <b>MD &amp; MM/GBSA</b> bisa dipakai bila kestabilan pose-nya perlu diperiksa.</p>
+
 <h2 id="cli">Baris perintah (VirmoLab-cli)</h2>
 <p><code>VirmoLab-cli.exe</code> ada di folder instalasi VirmoLab. Buka Command Prompt di folder itu (atau tulis jalur lengkapnya), lalu misalnya:</p>
 <pre>VirmoLab-cli dock -r 1HSG -l kandidat.smi --acuan auto -o hasil_1hsg
@@ -498,4 +564,4 @@ VirmoLab-cli info</pre>
 <tr><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd></td><td>Komposer figur</td><td></td><td></td></tr>
 </table>
 <div class="peringatan">Hasil docking adalah prediksi komputasi, bukan bukti aktivitas biologis; konfirmasi dengan uji eksperimen. Ki dihitung dari ΔG sebagai perkiraan.</div>
-<footer>VirmoLab 1.8.0 · dokumentasi offline · GPL-3.0-or-later</footer></main></body></html>
+<footer>VirmoLab 1.9.0 · dokumentasi offline · GPL-3.0-or-later</footer></main></body></html>

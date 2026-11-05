@@ -6,8 +6,8 @@ authors:
   - family-names: "Pratama"
     given-names: "Rizki Rahmadi"
     name-suffix: "apt., M. Farm"
-version: 1.8.0
-date-released: "2026-10-25"
+version: 1.9.0
+date-released: "2026-11-05"
 license: "GPL-3.0-or-later"
 repository-code: "https://github.com/rizkirahmadip-dev/virmolab"
 keywords:

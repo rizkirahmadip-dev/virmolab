@@ -64,6 +64,7 @@ def migrasi_proyek(data: dict) -> dict:
     data.setdefault("peptida", [])
     data.setdefault("xtb", {})
     data.setdefault("pembelajaran_aktif", [])
+    data.setdefault("farmakologi", {})
     return data
 
 
@@ -92,6 +93,7 @@ class Proyek:
         self.peptida = []             # docking peptida: [{sekuens, rantai_peptida, plddt, mmgbsa, antarmuka}]
         self.xtb = {}                 # sifat elektronik GFN2-xTB per ligan: {nama: {homo_ev, celah_ev, fukui, ...}}
         self.pembelajaran_aktif = []  # penapisan bertahap: [{id, nama, pustaka, ringkasan_pustaka, kampanye, status, job}]
+        self.farmakologi = {}         # alur farmakologi jaringan (lihat core/farmakologi.py: keadaan_baru())
 
     def catat_jejak(self, jejak):
         """Catat jejak sumber data internet (objek Jejak atau dict) tanpa duplikat (kunci sumber+kueri)."""
@@ -129,7 +131,8 @@ class Proyek:
                 "blast": self.blast, "syarat_jarak": self.syarat_jarak,
                 "eksperimen": self.eksperimen, "md": self.md, "templat": self.templat,
                 "jejak": self.jejak, "target_balik": self.target_balik, "peptida": self.peptida,
-                "xtb": self.xtb, "pembelajaran_aktif": self.pembelajaran_aktif}
+                "xtb": self.xtb, "pembelajaran_aktif": self.pembelajaran_aktif,
+                "farmakologi": self.farmakologi}
 
     def simpan(self):
         self.siapkan_folder()
@@ -184,6 +187,7 @@ class Proyek:
         pr.peptida = d.get("peptida") or []
         pr.xtb = d.get("xtb") or {}
         pr.pembelajaran_aktif = d.get("pembelajaran_aktif") or []
+        pr.farmakologi = d.get("farmakologi") or {}
         # job yang terputus (aplikasi ditutup/crash) bisa dilanjutkan
         for j in pr.job:
             if j.get("status") in ("berjalan", "menunggu"):

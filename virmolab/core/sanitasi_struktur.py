@@ -105,7 +105,7 @@ def validasi_sanitasi_pdbqt(
             tipe_atom = ""
             if len(b) >= 77:
                 tipe_atom = b[77:79].strip()
-            
+
             # Jika tipe atom kosong, tebak dari nama atom
             if not tipe_atom:
                 nama_atom = b[12:16].strip()
