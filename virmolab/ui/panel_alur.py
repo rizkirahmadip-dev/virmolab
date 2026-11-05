@@ -489,7 +489,7 @@ class PanelLangkah(QStackedWidget):
                          8, self.s_netpharm)
         self.halaman["netpharm"].append(self._tambah_ke_alur(
             "netpharm", "Senyawa",
-            "Susun daftar senyawa beserta SMILES-nya — titik awal rantai senyawa › target › jalur › penyakit.",
+            "Susun daftar senyawa beserta SMILES-nya; inilah titik awal rantai senyawa › target › jalur › penyakit.",
             isi_np0, "Berikutnya: Saring ADMET ›", 1))
 
         isi_np1 = _kolom(A("np_admet", _tombol("Saring ADMET && Lipinski…", True, ikon="sliders",
@@ -520,7 +520,7 @@ class PanelLangkah(QStackedWidget):
                                           tip="Bila ingin memeriksa satu pasangan protein secara struktural")))
         self.halaman["netpharm"].append(self._tambah_ke_alur(
             "netpharm", "Jaringan PPI",
-            "Protein dengan koneksi terbanyak (hub) adalah kandidat paling berperan dalam jaringan.",
+            "Protein dengan koneksi terbanyak (hub) dianggap paling berperan dalam jaringan.",
             isi_np3, "Berikutnya: Jalur & laporan ›", 4))
 
         isi_np4 = _kolom(A("np_jalur", _tombol("Pengayaan jalur…", True, ikon="chart",
@@ -536,7 +536,7 @@ class PanelLangkah(QStackedWidget):
                          A("laporan", _tombol("Buat laporan proyek…", ikon="report")))
         self.halaman["netpharm"].append(self._tambah_ke_alur(
             "netpharm", "Jalur & laporan",
-            "Jalur biologis yang terwakili berlebih, lalu rangkum semuanya menjadi laporan.",
+            "Cari jalur biologis yang terwakili berlebih, lalu rangkum seluruhnya menjadi laporan.",
             isi_np4, None, 0))
 
         # Tampilkan langkah awal docking

@@ -737,8 +737,8 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
                               "Kotak di kantong tempat ligan kristal terikat (disarankan)")
         self.a_kotak_res = A("Pusat di residu terpilih", None, lambda: self.aksi_kotak("residu"), None,
                              "Pilih residu di panel Objek atau klik atom di viewport dulu")
-        self.a_kotak_sesuai = A("Sesuaikan ke ligan terpilih +8 Å", None, lambda: self.aksi_kotak("sesuai"), None,
-                                "Ukuran kotak = rentang ligan terpilih + 8 Å tiap sisi")
+        self.a_kotak_sesuai = A("Sesuaikan ke ligan terpilih", None, lambda: self.aksi_kotak("sesuai"), None,
+                                "Ukuran kotak = rentang ligan terpilih ditambah tepi yang diatur di panel Area")
         self.a_kotak_blind = A("Seluruh protein (blind docking)", None, lambda: self.aksi_kotak("blind"), None,
                                "Kotak menutupi seluruh protein; lebih lama")
         self.a_kotak_kantong = A("Deteksi kantong (P2Rank)…", "search", lambda: self.aksi_kotak("kantong"), None,
@@ -2163,14 +2163,24 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
             self.pesan.tulis(teks + " - keyakinan model AlphaFold di area docking rendah; pose dan ΔG kurang andal. "
                              "Pertimbangkan kantong lain, struktur eksperimen, atau validasi dengan ligan pembanding.")
 
-    def box_ke_objek(self, o, tepi=None):
+    def box_ke_objek(self, o, tepi=None, minimal=None):
+        """Pusatkan grid box pada satu objek. `tepi` = jarak tambahan tiap sisi (Å).
+
+        Bila tepi tidak diberikan, dipakai nilai dari kolom Tepi di panel Area, sehingga angka yang
+        dilihat pengguna itulah yang benar-benar berlaku.
+        """
         xs = self._koordinat(o)
         if not xs:
             return
+        if tepi is None:
+            tepi = self.param.tepi() if hasattr(self.param, "tepi") else 5.0
         c = [sum(p[i] for p in xs) / len(xs) for i in range(3)]
         ext = [max(p[i] for p in xs) - min(p[i] for p in xs) for i in range(3)]
-        uk = [max(20.0, e + 10) for e in ext] if tepi is None else [e + 2 * tepi for e in ext]
-        self._atur_kotak(c, uk, sumber=f"dipusatkan pada {o.nama}")
+        uk = [e + 2 * tepi for e in ext]
+        if minimal:
+            uk = [max(minimal, u) for u in uk]
+        angka = f"{tepi:g}".replace(".", ",")
+        self._atur_kotak(c, uk, sumber=f"dipusatkan pada {o.nama} (tepi {angka} Å)")
 
     def aksi_kotak(self, k):
         if k == "ligan_asli":
@@ -2181,7 +2191,7 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
                 self._galat("Tidak ada ligan asli kristal. Impor struktur PDB yang berisi ligan, atau pakai "
                             "'Pusat ke residu terpilih'.")
                 return
-            self.box_ke_objek(o)
+            self.box_ke_objek(o, minimal=20.0)
         elif k == "residu":
             oid, res = self.residu_terpilih
             o = self.objek.get(oid)
@@ -2197,7 +2207,7 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
             if not o or o.jenis not in ("ligan", "pose"):
                 self._galat("Pilih ligan di panel Objek dulu.")
                 return
-            self.box_ke_objek(o, tepi=8.0)
+            self.box_ke_objek(o)
         elif k == "fleksibel":
             self.atur_fleksibel()
         elif k == "kovalen":

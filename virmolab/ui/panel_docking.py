@@ -272,9 +272,9 @@ class PanelDocking(QWidget):
         self.btn_kotak = {}
         for k, t, tip in (
                 ("ligan_asli", "Pusat di ligan asli (disarankan)",
-                 "Kantong tempat ligan kristal terikat (ukuran = ligan + 10 Å, min 20 Å)"),
-                ("residu", "Pusat di residu terpilih", "Pilih residu di Objek atau klik atom di viewport dulu"),
-                ("sesuai", "Sesuaikan ke ligan terpilih +8 Å", "Ukuran = rentang ligan terpilih + 8 Å tiap sisi"),
+                 "Kantong tempat ligan kristal terikat; ukuran = rentang ligan + tepi, minimal 20 Å"),
+                ("residu", "Pusat di residu terpilih", "Pilih residu di Objek atau klik atom di viewport lebih dulu"),
+                ("sesuai", "Sesuaikan ke ligan terpilih", "Ukuran = rentang ligan terpilih + tepi pada tiap sisi"),
                 ("kantong", "Deteksi kantong (P2Rank)…",
                  "Cari kantong pengikatan otomatis dengan P2Rank (tanpa ligan asli); pilih kantong untuk grid box"),
                 ("blind", "Seluruh protein (blind docking)", "Kotak menutupi seluruh protein; lebih lama")):
@@ -285,6 +285,21 @@ class PanelDocking(QWidget):
             b.clicked.connect(lambda _=False, k=k: self.aksiKotak.emit(k))
             bk.addWidget(b)
             self.btn_kotak[k] = b
+
+        # Tepi di sekeliling ligan: dulu dipatok 8 Å (atau 10 Å untuk ligan asli) di dalam kode, padahal
+        # inilah angka yang paling sering perlu disesuaikan — kantong dangkal cukup 4-5 Å, sedangkan
+        # ligan lentur atau kantong bercabang butuh lebih lebar.
+        ht = QHBoxLayout()
+        ht.setContentsMargins(0, 2, 0, 0)
+        ht.setSpacing(6)
+        ht.addWidget(self._m("Tepi di sekeliling ligan (Å)"))
+        self.sp_tepi = _spin(0.0, 25.0, 8.0, 0.5, 1)
+        self.sp_tepi.setToolTip("Jarak tambahan di tiap sisi ligan saat memakai dua tombol teratas. "
+                                "Terlalu sempit membuat pose terpotong, terlalu lebar memperlambat pencarian.")
+        self.sp_tepi.valueChanged.connect(self._tepi_ubah)
+        ht.addWidget(self.sp_tepi)
+        ht.addStretch(1)
+        bk.addLayout(ht)
         lay.addLayout(bk)
         lay.addWidget(judul_seksi("Ukuran dan posisi"))
         gb = QWidget()
@@ -310,12 +325,24 @@ class PanelDocking(QWidget):
             self.sp_ukuran.append(u)
         g.addWidget(self._m("Spasi (Å)"), 3, 0)
         self.sp_spasi = _spin(0.2, 1.0, 0.375, 0.025, 3)
+        self.sp_spasi.setToolTip("Jarak antartitik grid. Makin rapat makin teliti dan makin lambat; "
+                                 "0,375 Å adalah nilai baku AutoDock.")
         self.sp_spasi.valueChanged.connect(self._kotak_ubah)
         g.addWidget(self.sp_spasi, 3, 1)
         self.l_npts = QLabel("")
         self.l_npts.setObjectName("mono")
         g.addWidget(self.l_npts, 3, 2, 1, 2)
+        self.c_kubus = QCheckBox("Samakan ketiga sisi")
+        self.c_kubus.setToolTip("Mengubah satu sisi langsung menyamakan dua sisi lainnya, sehingga kotaknya "
+                                "tetap kubus")
+        self.c_kubus.toggled.connect(self._kubus_ubah)
+        g.addWidget(self.c_kubus, 4, 1, 1, 3)
         lay.addWidget(gb)
+        self.l_batas = QLabel("")
+        self.l_batas.setObjectName("muted")
+        self.l_batas.setWordWrap(True)
+        self.l_batas.setContentsMargins(10, 0, 10, 2)
+        lay.addWidget(self.l_batas)
         self.l_kotak = QLabel("")
         self.l_kotak.setWordWrap(True)
         self.l_kotak.setContentsMargins(10, 0, 10, 4)
@@ -343,6 +370,7 @@ class PanelDocking(QWidget):
         self._t_kotak.setInterval(100)
         self._t_kotak.timeout.connect(lambda: self.kotakBerubah.emit(self.kotak()))
         self.btn_mesin["adgpu" if M.tersedia("adgpu") else "vina"].setChecked(True)
+        self._tepi_ubah()
         self._info_kotak()
 
     def _m(self, t):
@@ -512,8 +540,34 @@ class PanelDocking(QWidget):
         self._diam = False
         self._info_kotak()
 
+    def tepi(self):
+        """Tepi (Å) yang ditambahkan di tiap sisi ligan oleh tombol penempatan kotak."""
+        return round(self.sp_tepi.value(), 2)
+
+    def _tepi_ubah(self, *_):
+        """Label tombol ikut berubah supaya angka yang berlaku terlihat tanpa membuka tooltip."""
+        t = self.tepi()
+        angka = f"{t:g}".replace(".", ",")
+        self.btn_kotak["sesuai"].setText(f"Sesuaikan ke ligan terpilih + {angka} Å")
+
+    def _kubus_ubah(self, on):
+        if on and self.sp_ukuran:
+            self._samakan_sisi(self.sp_ukuran[0].value())
+
+    def _samakan_sisi(self, nilai):
+        self._diam = True
+        for s in self.sp_ukuran:
+            s.blockSignals(True)
+            s.setValue(nilai)
+            s.blockSignals(False)
+        self._diam = False
+
     def _kotak_ubah(self, *_):
         self._pusat_diatur = True
+        if self.c_kubus.isChecked():
+            pengirim = self.sender()
+            if pengirim in self.sp_ukuran:
+                self._samakan_sisi(pengirim.value())
         self._info_kotak()
         if not self._diam:
             self._t_kotak.start()
@@ -522,11 +576,21 @@ class PanelDocking(QWidget):
         k = M.Kotak(**self.kotak())
         n = k.npts()
         self.l_npts.setText(f"{n[0]}×{n[1]}×{n[2]} titik")
+        # Batas dan volume ditulis apa adanya: itu yang dicocokkan pengguna dengan kantong di viewport,
+        # dan volume yang menentukan berapa lama pencariannya.
+        volume = k.ukuran[0] * k.ukuran[1] * k.ukuran[2]
+        def ang(v):
+            return f"{v:.1f}".replace("-", "−").replace(".", ",")
+        batas = " · ".join(f"{sb} {ang(k.pusat[i] - k.ukuran[i] / 2)} … {ang(k.pusat[i] + k.ukuran[i] / 2)}"
+                           for i, sb in enumerate("XYZ"))
+        volume_teks = f"{volume:,.0f}".replace(",", ".")
+        self.l_batas.setText(f"Batas (Å): {batas}  ·  Volume {volume_teks} Å³")
         pesan = []
         if not getattr(self, "_pusat_diatur", False):
             pesan.append("⚠️ Pusat grid box belum ditentukan. Klik salah satu tombol di atas (mis. 'Pusat di ligan asli' atau 'Pusat di residu') untuk menempatkan grid box di binding site.")
         else:
-            pesan.append(f"✓ Grid box aktif pada pusat ({k.pusat[0]:.1f}, {k.pusat[1]:.1f}, {k.pusat[2]:.1f}) Å")
+            pesan.append(f"✓ Grid box aktif pada pusat ({ang(k.pusat[0])}, {ang(k.pusat[1])}, "
+                         f"{ang(k.pusat[2])}) Å")
         if k.terpotong():
             sp = max(u / 126 for u in k.ukuran)
             pesan.append(f"Melebihi 126 titik grid per sumbu: AutoGrid memotong kotak. "

@@ -27,6 +27,10 @@ Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x 
   - *Batang jalur* (`batang_jalur`), *diagram Venn*, dan *jaringan berlapis* memakai modul yang sudah ada.
   - Besaran berurutan memakai satu rona terang-ke-gelap dari ramp biru yang sudah divalidasi (pita terang, lantai kroma, pemisahan buta warna, kontras terhadap latar), bukan pelangi; peringkat teratas selalu yang tergelap.
 
+### Diubah
+- **Grid box docking lebih rinci dan sepenuhnya dapat diatur.** Kolom **Tepi di sekeliling ligan (Å)** menggantikan angka yang dulu dipatok di dalam kode (8 Å untuk *Sesuaikan ke ligan terpilih*, 10 Å untuk *Pusat di ligan asli*); label tombolnya ikut menampilkan angka yang sedang berlaku. Centang **Samakan ketiga sisi** menjaga kotak tetap kubus saat satu sisi diubah. Di bawah kotak isian kini tertulis **batas kotak** (rentang minimum–maksimum tiap sumbu) dan **volume**, untuk mencocokkan kotak dengan kantong di viewport dan memperkirakan lama pencarian. Spasi grid dan tiap kendali lain mendapat keterangan yang menjelaskan akibat perubahannya.
+- Angka di panel Area kini memakai koma desimal dan tanda minus yang benar, seragam dengan bagian aplikasi yang lain.
+
 ### Diperbaiki
 - **Senyawa tanaman untuk farmakologi jaringan ikut masuk sebagai ligan docking.** Tombol *Senyawa tanaman obat…* memakai jalur impor ligan, sehingga satu takson memasukkan ratusan objek ke panel Objek, membuatkan konformasi 3D untuk semuanya, dan memenuhi proyek dengan ligan yang belum tentu akan didocking (*Curcuma zedoaria*: 108 objek, 4096 atom). Dialog senyawa tanaman kini punya mode kedua yang hanya memulangkan nama dan SMILES; struktur 3D baru dibuat saat senyawanya benar-benar dibawa ke docking.
 - **Keadaan alur hilang saat jendela ditutup.** Seluruh VirmoLab menyimpan sendiri, tetapi keadaan alur hanya ditulis saat tombol ditekan — satu-satunya tempat yang membuang pekerjaan diam-diam, dan tahap target bisa memakan belasan menit. Kini tiap tahap yang selesai menyimpan sendiri; bila belum ada proyek terbuka, pengguna diberi tahu di tahap pertama yang menghasilkan sesuatu.
