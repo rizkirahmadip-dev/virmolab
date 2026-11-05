@@ -1,7 +1,7 @@
-"""Comparative Toxicogenomics Database (CTD) — interaksi senyawa-gen yang dikurasi dari literatur.
+"""Comparative Toxicogenomics Database (CTD) — interaksi senyawa–gen yang dikurasi dari literatur.
 
 Berbeda dengan prediksi berbasis kemiripan struktur (lihat core.target_balik), CTD berisi hubungan
-senyawa-gen yang dibaca dan dikurasi kurator dari publikasi toksikologi dan biomedis. Keduanya saling
+senyawa–gen yang dibaca dan dikurasi kurator dari publikasi toksikologi dan biomedis. Keduanya saling
 melengkapi: kemiripan memberi target yang *mungkin* terikat, CTD memberi target yang *pernah dilaporkan*.
 
 Dipakai lewat Batch Query (http://ctdbase.org/tools/batchQuery.go) dengan laporan `genes_curated`.
@@ -35,7 +35,7 @@ def _jejak(j) -> Dict[str, Any]:
 
 
 def _kolom(baris: Dict[str, str], *nama: str) -> str:
-    """Ambil nilai kolom pertama yang ada (nama kolom CTD pernah berubah antar versi)."""
+    """Ambil nilai kolom pertama yang ada (nama kolom CTD pernah berubah antarversi)."""
     for n in nama:
         for k, v in baris.items():
             if (k or "").strip().lstrip("#").strip().lower() == n.lower():
@@ -92,7 +92,7 @@ def urai_tsv(teks: str, spesies: str = SPESIES_MANUSIA) -> List[Dict[str, Any]]:
 
 def interaksi_senyawa(nama: Sequence[str], spesies: str = SPESIES_MANUSIA,
                       min_pubmed: int = 1, lapor=None) -> tuple:
-    """Interaksi senyawa-gen terkurasi dari CTD. Kembalikan ([baris], [jejak]).
+    """Interaksi senyawa–gen terkurasi dari CTD. Kembalikan ([baris], [jejak]).
 
     nama: nama senyawa (CTD mencari berdasarkan nama/sinonim, bukan SMILES).
     min_pubmed: buang baris yang jumlah rujukan PubMed-nya di bawah ini (0 = jangan saring).
@@ -128,7 +128,7 @@ def interaksi_senyawa(nama: Sequence[str], spesies: str = SPESIES_MANUSIA,
     if min_pubmed > 0:
         baris = [b for b in baris if b["n_pubmed"] >= min_pubmed or not b["pubmed"]]
     if lapor is not None:
-        lapor.log.emit(f"CTD: {len(baris)} interaksi senyawa-gen diterima.")
+        lapor.log.emit(f"CTD: {len(baris)} interaksi senyawa–gen diterima.")
     return baris, [_jejak(j)]
 
 

@@ -498,7 +498,7 @@ class PanelLangkah(QStackedWidget):
                          A("tab_sifat", _tombol("Sifat ligan && BOILED-Egg", ikon="lig")))
         self.halaman["netpharm"].append(self._tambah_ke_alur(
             "netpharm", "Saring ADMET",
-            "Penapisan awal: hanya senyawa yang masuk akal diserap tubuh yang dibawa ke tahap berikutnya.",
+            "Penapisan awal: hanya senyawa yang masuk akal diserap tubuh dibawa ke tahap berikutnya.",
             isi_np1, "Berikutnya: Target & penyakit ›", 2))
 
         isi_np2 = _kolom(A("np_target", _tombol("Cari target senyawa…", True, ikon="target",
@@ -510,13 +510,13 @@ class PanelLangkah(QStackedWidget):
                                              tip="Jalur berbasis struktur: docking terhadap panel target terkurasi")))
         self.halaman["netpharm"].append(self._tambah_ke_alur(
             "netpharm", "Target & penyakit",
-            "Target dugaan tiap senyawa diiriskan dengan gen penyakit; hasilnya target terapi potensial.",
+            "Target dugaan tiap senyawa diiriskan dengan gen penyakit; hasilnya adalah target terapi potensial.",
             isi_np2, "Berikutnya: Jaringan PPI ›", 3))
 
         isi_np3 = _kolom(A("np_jaringan", _tombol("Bangun jaringan PPI…", True, ikon="link",
-                                                  tip="Tepi STRING antar target irisan, graf interaktif, "
+                                                  tip="Tepi STRING antartarget hasil irisan, graf interaktif, "
                                                       "dan peringkat protein hub")),
-                         A("ppi", _tombol("Analisis antarmuka protein-protein…", ikon="box",
+                         A("ppi", _tombol("Analisis antarmuka protein–protein…", ikon="box",
                                           tip="Bila ingin memeriksa satu pasangan protein secara struktural")))
         self.halaman["netpharm"].append(self._tambah_ke_alur(
             "netpharm", "Jaringan PPI",

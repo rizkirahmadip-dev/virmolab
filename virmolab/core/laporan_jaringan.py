@@ -115,7 +115,7 @@ def teks_topologi(t: Dict[str, Any]) -> str:
         bagian.append("Seluruh simpul berada dalam satu komponen terhubung.")
     if t.get("terpencil"):
         bagian.append(f"{t['terpencil']} protein tidak punya tepi pada ambang ini; ketiadaan tepi bisa berarti "
-                      f"ambangnya terlalu tinggi, bukan bahwa proteinnya tidak berperan.")
+                      f"ambangnya terlalu tinggi, bukan berarti proteinnya tidak berperan.")
     return " ".join(bagian)
 
 
@@ -174,7 +174,7 @@ def html(k: Dict[str, Any], G=None, info: Optional[Dict[str, Any]] = None) -> st
     # 3. Senyawa
     o.append(_judul(3, "Senyawa yang dianalisis"))
     o.append(f"<p>Sebanyak {len(sen)} senyawa dikumpulkan dari {H.escape(tanaman)}. "
-             f"Sepuluh pertama ditampilkan; daftar lengkapnya ada pada lampiran JSON.</p>")
+             f"Sepuluh pertama ditampilkan di sini; daftar lengkapnya ada pada lampiran JSON.</p>")
     o.append(_tabel(["Senyawa", "MW", "WLOGP", "TPSA", "Lipinski", "Status"],
                     [[s["nama"], _a((s.get("sifat") or {}).get("mw"), 1),
                       _a((s.get("sifat") or {}).get("wlogp")), _a((s.get("sifat") or {}).get("tpsa"), 1),
@@ -185,17 +185,23 @@ def html(k: Dict[str, Any], G=None, info: Optional[Dict[str, Any]] = None) -> st
     # 4. Penyaringan + statistik
     o.append(_judul(4, "Penyaringan ADMET"))
     n_gugur = len(sen) - len(lolos)
-    o.append(f"<p>{len(lolos)} dari {len(sen)} senyawa lolos penyaringan; {n_gugur} gugur. "
-             f"Alasan pengguguran dicatat per senyawa.</p>")
+    o.append(f"<p>Sebanyak {len(lolos)} dari {len(sen)} senyawa lolos penyaringan, sedangkan {n_gugur} lainnya "
+             f"gugur. Alasan pengguguran dicatat untuk tiap senyawa.</p>")
+    # Dikelompokkan menurut kode kriteria yang ditulis saring(), bukan menurut potongan kalimatnya:
+    # "DILI 0,85 > 0,70" dan "DILI 0,91 > 0,70" adalah alasan yang sama dan harus dihitung bersama.
     alasan: Dict[str, int] = {}
     for s in sen:
-        for a in (s.get("alasan") or []):
-            pokok = a.split(" ")[0] if a[0].islower() else a
-            alasan[pokok] = alasan.get(pokok, 0) + 1
+        for kd in dict.fromkeys(s.get("alasan_kode") or []):
+            label = F.LABEL_ALASAN.get(kd, kd)
+            alasan[label] = alasan.get(label, 0) + 1
     if alasan:
-        o.append(_tabel(["Alasan pengguguran", "Jumlah senyawa"],
-                        sorted(([a, n] for a, n in alasan.items()), key=lambda r: -r[1])[:10],
-                        rata_kanan=(1,)))
+        o.append("<h3>Alasan pengguguran</h3>")
+        o.append(_tabel(["Alasan", "Jumlah senyawa", "Persen dari yang gugur"],
+                        [[a, n, _a(100 * n / max(n_gugur, 1), 1) + " %"]
+                         for a, n in sorted(alasan.items(), key=lambda r: -r[1])],
+                        rata_kanan=(1, 2)))
+        o.append("<p>Satu senyawa dapat gugur karena lebih dari satu alasan, sehingga jumlah pada "
+                 "tabel ini bisa melampaui jumlah senyawa yang gugur.</p>")
     stat = statistik_sifat(sen)
     if stat:
         o.append("<h3>Perbandingan sifat: lolos berbanding gugur</h3>")
@@ -211,7 +217,8 @@ def html(k: Dict[str, Any], G=None, info: Optional[Dict[str, Any]] = None) -> st
     # 5. Target
     o.append(_judul(5, "Target senyawa"))
     o.append(f"<p>Target dugaan ditetapkan melalui {H.escape(F.label_sumber(k.get('sumber_target') or []))}, "
-             f"menghasilkan {len(gen_target)} simbol gen unik dari {len(target)} senyawa yang memberi hasil.</p>")
+             f"menghasilkan {len(gen_target)} simbol gen unik dari {len(target)} senyawa yang memberikan hasil "
+             f"pencarian.</p>")
     o.append(_tabel(["Senyawa", "Jumlah target", "Gen (10 pertama)"],
                     [[n, len(g), ", ".join(g[:10])] for n, g in
                      sorted(target.items(), key=lambda x: -len(x[1]))[:12]], rata_kanan=(1,)))
@@ -220,12 +227,12 @@ def html(k: Dict[str, Any], G=None, info: Optional[Dict[str, Any]] = None) -> st
     o.append(_judul(6, "Gen penyakit dan target terapi potensial"))
     o.append(f"<p>Sebanyak {len(gen_penyakit)} gen berasosiasi dengan {H.escape(penyakit)} menurut "
              f"{H.escape((k.get('penyakit') or {}).get('sumber') or 'sumber yang dipakai')}. "
-             f"Irisannya dengan target senyawa menghasilkan {len(irisan)} target terapi potensial.</p>")
+             f"Irisan antara kedua himpunan itu menghasilkan {len(irisan)} target terapi potensial.</p>")
     if irisan:
         o.append(f"<p><b>Target terapi potensial:</b> {H.escape(', '.join(irisan))}</p>")
 
     # 7. Jaringan
-    o.append(_judul(7, "Jaringan interaksi protein-protein"))
+    o.append(_judul(7, "Jaringan interaksi protein–protein"))
     t = topologi(G) if G is not None else {}
     if t:
         o.append(f"<p>{H.escape(teks_topologi(t))}</p>")
@@ -241,9 +248,9 @@ def html(k: Dict[str, Any], G=None, info: Optional[Dict[str, Any]] = None) -> st
                  f"dan memuat {len(k.get('tepi_ppi') or [])} tepi.</p>")
     if hub:
         o.append("<h3>Protein hub</h3>")
-        o.append("<p>Diperingkat dengan Maximal Clique Centrality (MCC), metode cytoHubba yang dinilai "
-                 "paling tepat untuk menemukan protein esensial. Derajat, betweenness, dan closeness "
-                 "disertakan sebagai pembanding.</p>")
+        o.append("<p>Protein hub diperingkat dengan Maximal Clique Centrality (MCC), metode cytoHubba yang "
+                 "pada pengujian aslinya paling tepat menemukan protein esensial. Derajat, betweenness, "
+                 "dan closeness disertakan sebagai pembanding.</p>")
         o.append(_tabel(["Peringkat", "Gen", "MCC", "Derajat", "Betweenness", "Closeness"],
                         [[i + 1, b["gen"], _a(b["mcc"], 1), _a(b["derajat"], 0),
                           _a(b["betweenness"], 4), _a(b["closeness"], 4)] for i, b in enumerate(hub[:10])],
@@ -254,8 +261,8 @@ def html(k: Dict[str, Any], G=None, info: Optional[Dict[str, Any]] = None) -> st
     if jalur:
         gmt = {"reactome": "Reactome", "go_bp": "Gene Ontology Biological Process"}.get(k.get("gmt"), k.get("gmt"))
         o.append(f"<p>Pengayaan terhadap set gen {H.escape(str(gmt))} memakai uji hipergeometrik satu sisi "
-                 f"dengan koreksi Benjamini-Hochberg. {len(jalur)} jalur dilaporkan; "
-                 f"{sum(1 for b in jalur if (b.get('q') or 1) <= 0.05)} di antaranya q ≤ 0,05.</p>")
+                 f"dengan koreksi Benjamini-Hochberg. Sebanyak {len(jalur)} jalur dilaporkan, dan "
+                 f"{sum(1 for b in jalur if (b.get('q') or 1) <= 0.05)} di antaranya memiliki q ≤ 0,05.</p>")
         o.append(_tabel(["Jalur", "Gen", "Ukuran set", "p", "q", "Gen yang terlibat"],
                         [[b["nama"], _a(b["n_overlap"], 0), _a(b["n_set"], 0), uji.f_p(b["p"]),
                           uji.f_p(b.get("q") or 1), ", ".join((b.get("gen") or [])[:8])]
@@ -270,9 +277,9 @@ def html(k: Dict[str, Any], G=None, info: Optional[Dict[str, Any]] = None) -> st
              "terdaftar atau belum banyak diteliti tidak akan muncul, dan gen yang banyak dipelajari "
              "cenderung lebih sering tampil sebagai target utama.</li>"
              "<li><b>Dosis tidak diperhitungkan.</b> Interaksi dimodelkan secara kualitatif; apakah kadar "
-             "senyawa di dalam tubuh cukup untuk mencapai efek terapi tidak diprediksi.</li>"
+             "senyawa di dalam tubuh cukup untuk menimbulkan efek terapi tidak ikut diprediksi.</li>"
              "<li><b>Pencernaan dan metabolisme diabaikan.</b> Analisis memakai senyawa asli dari tanaman, "
-             "padahal zat itu diubah usus dan hati menjadi metabolit yang bentuk dan fungsinya bisa "
+             "padahal zat itu diubah oleh usus dan hati menjadi metabolit yang bentuk dan fungsinya bisa "
              "sangat berbeda.</li>"
              "<li><b>Arah interaksi tidak diketahui.</b> Data menunjukkan hubungan senyawa dengan protein, "
              "tanpa menjelaskan apakah sifatnya menghambat atau justru mengaktifkan.</li>"

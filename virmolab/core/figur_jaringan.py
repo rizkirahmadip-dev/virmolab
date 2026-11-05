@@ -54,7 +54,7 @@ def lingkar_hub(hub: Sequence[Dict[str, Any]], tepi: Sequence = (), n: int = 10,
 
     hub: keluaran core.farmakologi.hub() — butuh kunci 'gen' dan `metrik`.
     tepi: [(gen_a, gen_b, skor)] apa pun; hanya pasangan yang kedua ujungnya masuk lingkaran digambar.
-    Susunan melingkar dipakai karena yang dibaca adalah peringkat dan kerapatan hubungan antar hub,
+    Susunan melingkar dipakai karena yang dibaca adalah peringkat dan kerapatan hubungan antarhub,
     bukan jarak topologisnya — tata letak gaya pegas justru menyembunyikan peringkat itu.
     """
     w = warna(gelap)
@@ -130,7 +130,7 @@ def gelembung_jalur(jalur: Sequence[Dict[str, Any]], n: int = 15, lebar: int = 8
     baris = [b for b in jalur if b.get("n_overlap")][:max(1, n)]
     if not baris:
         k = Kanvas(lebar, 200, gelap, transparan, judul)
-        k.teks(lebar / 2, 110, "Belum ada jalur yang lolos ambang.", 12, "middle", warna_=w["tinta2"])
+        k.teks(lebar / 2, 110, "Belum ada jalur yang lolos ambang q.", 12, "middle", warna_=w["tinta2"])
         return k.selesai()
 
     baris = list(reversed(baris))            # q terkecil di atas gambar
@@ -288,7 +288,7 @@ def daftar() -> List[Dict[str, str]]:
     """Figur yang tersedia: (kunci, nama tampilan, keterangan singkat)."""
     return [
         {"kunci": "venn", "nama": "Diagram Venn irisan",
-         "ket": "Target senyawa berbanding gen penyakit; irisannya target terapi potensial."},
+         "ket": "Target senyawa dibandingkan dengan gen penyakit; irisannya adalah target terapi potensial."},
         {"kunci": "jaringan", "nama": "Jaringan berlapis",
          "ket": "Senyawa–target–jalur–penyakit dengan tata letak gaya pegas."},
         {"kunci": "hub", "nama": "Hub melingkar (peringkat MCC)",

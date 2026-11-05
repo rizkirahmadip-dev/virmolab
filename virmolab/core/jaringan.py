@@ -30,7 +30,7 @@ def _jejak(j) -> Dict[str, Any]:
 
 
 def tepi_string(gen: Sequence[str], ambang: float = AMBANG_STRING, spesies: int = SPESIES_STRING) -> tuple:
-    """Tepi protein-protein STRING antar gen yang diberikan. Kembalikan ([(a, b, skor)], jejak).
+    """Tepi protein-protein STRING antargen yang diberikan. Kembalikan ([(a, b, skor)], jejak).
 
     ambang: skor gabungan STRING 0-1 (0,4 rendah; 0,7 tinggi; 0,9 sangat tinggi).
     """

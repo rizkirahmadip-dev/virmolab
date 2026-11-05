@@ -6,7 +6,7 @@ Modul ini merangkai bagian yang sudah ada di VirmoLab menjadi satu alur yang utu
   core.sifat        sifat fisikokimia dan aturan Lipinski/Veber/Egan
   core.admet        prediksi ADMET (ADMET-AI) untuk penyaringan
   core.target_balik target dugaan dari kemiripan ligan (ChEMBL) dan penargetan balik berbasis struktur
-  core.ctd          interaksi senyawa-gen terkurasi dari literatur
+  core.ctd          interaksi senyawa–gen terkurasi dari literatur
   core.jaringan     gen penyakit (Open Targets), tepi PPI (STRING), perakitan graf, metrik
   core.pengayaan    pengayaan jalur (ORA hipergeometrik + Benjamini-Hochberg) atas GMT Reactome/GO-BP
   core.venn         diagram Venn irisan target senyawa dengan gen penyakit
@@ -58,7 +58,7 @@ _PETA_ADMET = {
 SUMBER_TARGET = {
     "kemiripan": ("kemiripan ligan ChEMBL (ECFP4, pChEMBL ≥ 6)",
                   "ligand similarity against ChEMBL actives (ECFP4, pChEMBL ≥ 6)"),
-    "ctd": ("interaksi senyawa-gen terkurasi CTD", "curated chemical-gene interactions from CTD"),
+    "ctd": ("interaksi senyawa–gen terkurasi dari CTD", "curated chemical-gene interactions from CTD"),
     "impor": ("tabel target yang diimpor pengguna", "a user-supplied target table"),
     "docking": ("penargetan balik berbasis struktur", "structure-based reverse docking"),
 }
@@ -75,6 +75,22 @@ def label_sumber(kunci: Sequence[str], inggris: bool = False) -> str:
         return label[0]
     return ("; ".join(label[:-1])) + (" and " if inggris else " dan ") + label[-1]
 
+
+# Label alasan pengguguran, dipakai tabel ringkasan di laporan. Kuncinya sama dengan `alasan_kode`
+# yang ditulis saring() pada tiap senyawa.
+LABEL_ALASAN = {
+    "struktur": "Struktur tidak terbaca",
+    "lipinski": "Melanggar aturan lima Lipinski",
+    "pains": "Kena peringatan PAINS",
+    "hia_min": "Absorpsi usus di bawah ambang",
+    "bioavailability_min": "Bioavailabilitas oral di bawah ambang",
+    "dili_maks": "Risiko cedera hati di atas ambang",
+    "herg_maks": "Risiko hERG di atas ambang",
+    "ames_maks": "Risiko mutagenik di atas ambang",
+}
+
+# Nama set gen sebagaimana ditulis di naskah, bukan kunci berkasnya.
+NAMA_GMT = {"reactome": "Reactome", "go_bp": "Gene Ontology — Biological Process"}
 
 LABEL_KRITERIA = {
     "lipinski_maks": "Pelanggaran Lipinski maksimum",
@@ -232,12 +248,16 @@ def saring(senyawa: List[Dict[str, Any]], kriteria: Optional[Dict[str, Any]] = N
     n_lolos = n_gagal = n_tanpa = 0
     for s in senyawa:
         alasan: List[str] = []
+        # Kode kriteria disimpan terpisah dari kalimatnya supaya laporan bisa mengelompokkan alasan
+        # pengguguran tanpa memotong-motong teksnya.
+        kode: List[str] = []
         sf, ad = s.get("sifat") or {}, s.get("admet") or {}
         # Struktur yang tidak terbaca digugurkan keras: tanpa struktur, tidak ada tahap berikutnya
         # yang bisa dikerjakan untuk senyawa itu.
         gagal_struktur = s.get("sifat_gagal")
         if gagal_struktur:
             alasan.append(str(gagal_struktur))
+            kode.append("struktur")
         elif not sf:
             alasan.append("sifat belum dihitung")
 
@@ -247,12 +267,14 @@ def saring(senyawa: List[Dict[str, Any]], kriteria: Optional[Dict[str, Any]] = N
         n_pelanggaran = len(pelanggaran) if isinstance(pelanggaran, (list, tuple)) else int(pelanggaran or 0)
         if sf and n_pelanggaran > int(k["lipinski_maks"]):
             alasan.append(f"pelanggaran Lipinski {n_pelanggaran} > {k['lipinski_maks']}")
+            kode.append("lipinski")
         pains = sf.get("pains")
         kena_pains = bool(pains) if isinstance(pains, (list, tuple)) else \
             str(pains or "").strip().lower() not in ("", "0", "tidak", "no", "-", "none")
         if k.get("pains") and sf and kena_pains:
             n_pains = len(pains) if isinstance(pains, (list, tuple)) else 1
             alasan.append(f"kena peringatan PAINS ({n_pains})")
+            kode.append("pains")
 
         if not ad:
             n_tanpa += 1
@@ -263,11 +285,14 @@ def saring(senyawa: List[Dict[str, Any]], kriteria: Optional[Dict[str, Any]] = N
             ambang = float(k[kunci])
             if arah > 0 and float(nilai) < ambang:
                 alasan.append(f"{kunci_admet} {float(nilai):.2f} < {ambang:g}")
+                kode.append(kunci)
             elif arah < 0 and float(nilai) > ambang:
                 alasan.append(f"{kunci_admet} {float(nilai):.2f} > {ambang:g}")
+                kode.append(kunci)
 
         keras = [a for a in alasan if a != "sifat belum dihitung"]
         s["alasan"] = alasan
+        s["alasan_kode"] = kode
         s["lolos"] = not keras
         n_lolos += bool(s["lolos"])
         n_gagal += not s["lolos"]
@@ -474,9 +499,9 @@ def paragraf_metode(k: Dict[str, Any], inggris: bool = False) -> str:
     return (
         f"Analisis farmakologi jaringan dikerjakan dengan VirmoLab. Sebanyak {n_senyawa} senyawa dari {tanaman} "
         f"dikumpulkan lalu disaring berdasarkan sifat fisikokimia dan prediksi ADMET, menyisakan {n_lolos} senyawa. "
-        f"Target dugaan ditetapkan melalui {sumber}, menghasilkan {n_target} simbol gen unik. Gen yang berasosiasi "
-        f"dengan {penyakit} sebanyak {n_penyakit} gen diiriskan dengan target senyawa sehingga diperoleh {n_irisan} "
-        f"target terapi potensial. Jaringan interaksi protein-protein diambil dari STRING (Homo sapiens, skor gabungan "
+        f"Target dugaan ditetapkan melalui {sumber}, menghasilkan {n_target} simbol gen unik. Sebanyak {n_penyakit} "
+        f"gen yang berasosiasi dengan {penyakit} kemudian diiriskan dengan target senyawa, sehingga diperoleh "
+        f"{n_irisan} target terapi potensial. Jaringan interaksi protein–protein diambil dari STRING (Homo sapiens, skor gabungan "
         f"≥ {_koma(ambang)}) dan memuat {n_tepi} tepi; protein hub diperingkat dengan Maximal Clique Centrality. "
         f"Pengayaan jalur terhadap set gen {gmt} memakai uji hipergeometrik satu sisi dengan koreksi Benjamini-Hochberg, "
         f"dan {n_jalur} jalur dilaporkan. Seluruh hasil ini merupakan hipotesis komputasi dan memerlukan validasi "
@@ -497,7 +522,8 @@ def ringkasan(k: Dict[str, Any]) -> List[Dict[str, Any]]:
         {"tahap": "Irisan", "nilai": len(k.get("irisan") or []), "satuan": "target potensial", "ket": ""},
         {"tahap": "Tepi PPI", "nilai": len(k.get("tepi_ppi") or []), "satuan": "tepi",
          "ket": f"STRING ≥ {_koma(k.get('ambang_string', jaringan.AMBANG_STRING))}"},
-        {"tahap": "Jalur", "nilai": len(k.get("jalur") or []), "satuan": "jalur", "ket": k.get("gmt") or ""},
+        {"tahap": "Jalur", "nilai": len(k.get("jalur") or []), "satuan": "jalur",
+         "ket": NAMA_GMT.get(k.get("gmt"), k.get("gmt") or "")},
     ]
 
 

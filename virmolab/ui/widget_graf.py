@@ -146,7 +146,7 @@ class TampilanGraf(QGraphicsView):
         """Gambar ulang seluruh jaringan. `G` boleh None atau kosong.
 
         metode kosong = pilih sendiri: Kamada-Kawai untuk graf kecil (persilangan tepi lebih sedikit,
-        jarak antar simpul lebih merata), spring untuk graf besar karena KK berbiaya O(n²).
+        jarak antarsimpul lebih merata), spring untuk graf besar karena KK berbiaya O(n²).
         """
         self._G = G
         self._mode = mode if mode in ("terang", "gelap") else "terang"
@@ -314,7 +314,7 @@ class TampilanGraf(QGraphicsView):
 
     # ---------------------------------------------------------------- tampilan
     def muat_penuh(self):
-        """Pas-kan seluruh jaringan ke dalam area tampilan."""
+        """Paskan seluruh jaringan ke dalam area tampilan."""
         if not self.scene() or self.scene().sceneRect().isEmpty():
             return
         self.resetTransform()

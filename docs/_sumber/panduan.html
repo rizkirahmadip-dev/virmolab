@@ -129,10 +129,10 @@
 <h2 id="banding">Bandingkan ligan &amp; peta interaksi</h2>
 <figure><img src="gambar/12_bandingkan.png" alt="Bandingkan"><figcaption>Centang 2–4 ligan di tab Hasil lalu Analisis › Bandingkan ligan dicentang.</figcaption></figure>
 <p>Viewport berdampingan (tombol <i>Samakan sudut pandang</i>), daftar residu yang berinteraksi dengan semua ligan, dan peta panas residu × ligan. <b>Analisis › Peta interaksi residu × ligan</b> menampilkan peta untuk semua hasil.</p>
-<p><b>Sidik jari interaksi (IFP)</b>: tiap pose terbaik diringkas sebagai himpunan “residu × jenis interaksi” (tanpa vdW). Kolom <b>IFP vs kristal</b> di tab Hasil = kemiripan Tanimoto terhadap pose kristal ligan asli (1 = pola interaksi sama persis; berguna untuk memilih ligan yang meniru ligan asli). Tab Statistik › <i>Kemiripan interaksi (IFP)</i> menampilkan matriks kemiripan antar ligan; Excel berisi lembar <i>Sidik jari interaksi</i> (0/1 per residu × jenis).</p>
+<p><b>Sidik jari interaksi (IFP)</b>: tiap pose terbaik diringkas sebagai himpunan “residu × jenis interaksi” (tanpa vdW). Kolom <b>IFP vs kristal</b> di tab Hasil = kemiripan Tanimoto terhadap pose kristal ligan asli (1 = pola interaksi sama persis; berguna untuk memilih ligan yang meniru ligan asli). Tab Statistik › <i>Kemiripan interaksi (IFP)</i> menampilkan matriks kemiripan antarligan; Excel berisi lembar <i>Sidik jari interaksi</i> (0/1 per residu × jenis).</p>
 
 <h2 id="konsensus">Konsensus skor</h2>
-<p><b>Analisis › Konsensus skor…</b> menggabungkan beberapa fungsi skor agar peringkat ligan tidak bergantung pada satu mesin saja. Centang kolom skor: job dengan mesin berbeda (mis. AutoDock-GPU dan Vina) dan/atau <b>rescoring</b> pose terbaik dengan fungsi skor <b>Vina</b> dan <b>Vinardo</b> (cepat, tanpa docking ulang; hasilnya disimpan di proyek). Tabel menampilkan ΔG dan peringkat tiap kolom, rata-rata peringkat (urutan konsensus), z-score rata-rata, dan tanda ✓ untuk ligan yang <b>konsisten</b> berada di persentil teratas (bawaan 20 %) di semua kolom. Kesepakatan antar fungsi skor dinilai dengan <b>Kendall W</b> (≥ 0,7 kuat; &lt; 0,5 lemah — tafsirkan hati-hati) dan korelasi Spearman. Tersedia ekspor CSV dan paragraf metode siap tempel.</p>
+<p><b>Analisis › Konsensus skor…</b> menggabungkan beberapa fungsi skor agar peringkat ligan tidak bergantung pada satu mesin saja. Centang kolom skor: job dengan mesin berbeda (mis. AutoDock-GPU dan Vina) dan/atau <b>rescoring</b> pose terbaik dengan fungsi skor <b>Vina</b> dan <b>Vinardo</b> (cepat, tanpa docking ulang; hasilnya disimpan di proyek). Tabel menampilkan ΔG dan peringkat tiap kolom, rata-rata peringkat (urutan konsensus), z-score rata-rata, dan tanda ✓ untuk ligan yang <b>konsisten</b> berada di persentil teratas (bawaan 20 %) di semua kolom. Kesepakatan antarfungsi skor dinilai dengan <b>Kendall W</b> (≥ 0,7 kuat; &lt; 0,5 lemah — tafsirkan hati-hati) dan korelasi Spearman. Tersedia ekspor CSV dan paragraf metode siap tempel.</p>
 
 <h2 id="sifat">Sifat ligan &amp; BOILED-Egg</h2>
 <figure><img src="gambar/16_sifat.png" alt="Sifat ligan"><figcaption>Tab Sifat Ligan.</figcaption></figure>
@@ -140,7 +140,7 @@
 
 <h2 id="statistik">Statistik &amp; grafik</h2>
 <figure><img src="gambar/17_statistik.png" alt="Statistik"><figcaption>Tab Statistik.</figcaption></figure>
-<p><b>Analisis › Statistik dan grafik</b>: histogram ΔG, diagram sebar dengan regresi dan korelasi Pearson/Spearman (beserta p), batang ΔG teratas, matriks korelasi antar variabel (ΔG, LE, pKi, interaksi, sifat ligan). Pilih job tertentu atau “Semua job”. Ekspor grafik dan data.</p>
+<p><b>Analisis › Statistik dan grafik</b>: histogram ΔG, diagram sebar dengan regresi dan korelasi Pearson/Spearman (beserta p), batang ΔG teratas, matriks korelasi antarvariabel (ΔG, LE, pKi, interaksi, sifat ligan). Pilih job tertentu atau “Semua job”. Ekspor grafik dan data.</p>
 
 <h2 id="uji">Uji statistik &amp; grafik publikasi</h2>
 <p>Tab <b>Uji &amp; Grafik</b> (<b>Analisis › Uji statistik dan grafik publikasi</b>) untuk data penelitian Anda sendiri, mis. hasil uji in vitro. Alurnya: lembar data → analisis → grafik, semuanya diperbarui otomatis saat data diubah dan tersimpan di proyek.</p>
@@ -152,7 +152,7 @@
 <li><b>Data XY dosis–respons</b>: kolom pertama konsentrasi, kolom berikutnya ulangan respons. Regresi nonlinear 4 parameter (log[inhibitor] vs respons, kemiringan bebas) → IC₅₀/EC₅₀ dengan CI 95%, Hill slope, R²; grafik sumbu x logaritmik.</li>
 <li><b>Berpasangan ≥ 3 kolom</b> (centang <i>Berpasangan</i>; baris = subjek yang sama): ANOVA pengukuran berulang dengan koreksi Greenhouse–Geisser, atau Friedman bila data tidak normal; uji lanjut t berpasangan / Wilcoxon.</li>
 <li><b>Koreksi perbandingan ganda</b> dapat dipilih: Holm (bawaan), Bonferroni, Šidák, atau Benjamini–Hochberg (FDR) — dipakai Dunn, uji lanjut berpasangan, dan ANOVA dua arah.</li>
-<li><b>Data Dua faktor</b> (ANOVA dua arah): kolom pertama = level faktor A (diulang untuk tiap ulangan), judul kolom berikutnya = level faktor B. Hasil: efek A, B, dan interaksi (jumlah kuadrat tipe III, η²ₚ), perbandingan antar level A di tiap level B, grafik batang berkelompok dengan legenda.</li>
+<li><b>Data Dua faktor</b> (ANOVA dua arah): kolom pertama = level faktor A (diulang untuk tiap ulangan), judul kolom berikutnya = level faktor B. Hasil: efek A, B, dan interaksi (jumlah kuadrat tipe III, η²ₚ), perbandingan antarlevel A di tiap level B, grafik batang berkelompok dengan legenda.</li>
 <li><b>Cek asumsi</b>: tabel deskriptif kini memuat D'Agostino–Pearson (n ≥ 8) selain Shapiro–Wilk; pilih grafik <i>Q–Q plot</i> untuk memeriksa normalitas secara visual; kemungkinan pencilan dilaporkan dengan uji Grubbs (tidak dibuang otomatis).</li>
 <li><b>Model dosis–respons</b>: <i>Otomatis</i> membandingkan 4PL (kemiringan bebas) dengan 3PL (Hill = 1) memakai uji F extra sum-of-squares dan AICc, lalu memakai model yang lebih sesuai; bisa juga dipaksa 4PL atau 3PL.</li>
 <li><b>Data ROC</b>: kolom 1 = skor kelompok negatif (decoy/kontrol), kolom 2 = skor kelompok positif (aktif/kasus). Untuk ΔG docking pilih <i>Skor rendah = positif</i>. Hasil: AUC dengan CI 95% (DeLong), p, titik potong optimal (indeks Youden) beserta sensitivitas &amp; spesifisitas, faktor pengayaan EF1%/5%/10%, <b>BEDROC</b> dan <b>logAUC</b> (pengayaan dini) dengan CI bootstrap — cocok untuk validasi penapisan virtual aktif vs decoy. Pilih tampilan: ROC, ROC semilog, atau kurva pengayaan.</li>
@@ -169,8 +169,8 @@
 <figure><img src="gambar/19_komposer.png" alt="Komposer figur" style="max-width:760px"><figcaption>Grafik uji (A) dan gambar 3D (B) disusun menjadi satu figur 174 mm.</figcaption></figure>
 <p><b>Analisis › Komposer figur</b> (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd>) menggabungkan beberapa gambar menjadi satu figur jurnal berlabel A, B, C. Tambahkan panel dari <i>＋ Tambah ▾</i>: grafik Uji &amp; Grafik, grafik Statistik, diagram interaksi 2D, BOILED-Egg, gambar viewport 3D, atau berkas gambar (PNG/JPG/SVG). Urutkan dengan menyeret atau tombol ↑ ↓; centang <i>Lebar penuh</i> agar panel (mis. gambar 3D) memakai satu baris sendiri.</p>
 <ul>
-<li>Atur jumlah kolom, jarak antar panel, gaya label (A / a / (A) / (a) / A.), ukuran label, dan lebar cetak (85 / 120 / 174 mm).</li>
-<li><i>Samakan skala huruf antar grafik</i> (bawaan) memperkecil semua grafik dengan faktor yang sama sehingga ukuran huruf seragam di seluruh figur.</li>
+<li>Atur jumlah kolom, jarak antarpanel, gaya label (A / a / (A) / (a) / A.), ukuran label, dan lebar cetak (85 / 120 / 174 mm).</li>
+<li><i>Samakan skala huruf antargrafik</i> (bawaan) memperkecil semua grafik dengan faktor yang sama sehingga ukuran huruf seragam di seluruh figur.</li>
 <li>Simpan sebagai PDF/SVG vektor atau TIFF/PNG 600 dpi, atau salin ke clipboard. Isi komposer tersimpan di proyek.</li>
 </ul>
 
@@ -331,7 +331,7 @@
 <p>Tab <b>Jaringan &amp; jalur</b> pada dialog yang sama merangkai target terpilih menjadi jaringan farmakologi. Tekan <b>Kirim target terpilih ke Jaringan</b> di tab penargetan balik (baris yang disorot, atau target berkeyakinan tinggi bila tidak ada yang disorot), lalu <b>Bangun jaringan</b>.</p>
 <ul>
 <li><b>Pengayaan jalur:</b> uji hipergeometrik satu sisi terhadap set gen Reactome atau Gene Ontology (proses biologis) yang ikut dalam paket, dengan koreksi Benjamini-Hochberg. Latar adalah seluruh gen beranotasi pada berkas tersebut dan jumlahnya disebut di paragraf metode.</li>
-<li><b>Interaksi protein (STRING):</b> tepi antar target dengan skor gabungan di atas ambang pilihan (0,4 / 0,7 / 0,9). Skor STRING mencakup bukti ko-ekspresi dan penambangan teks, bukan hanya interaksi fisik.</li>
+<li><b>Interaksi protein (STRING):</b> tepi antartarget dengan skor gabungan di atas ambang pilihan (0,4 / 0,7 / 0,9). Skor STRING mencakup bukti ko-ekspresi dan penambangan teks, bukan hanya interaksi fisik.</li>
 <li><b>Asosiasi penyakit (Open Targets):</b> lima penyakit teratas per target dengan skor asosiasi di atas ambang pilihan.</li>
 <li><b>Uji sensitivitas:</b> jaringan dibangun ulang pada ambang STRING 0,4/0,7/0,9 dan 5/10/20 target teratas. Gen yang tetap berderajat tinggi pada setidaknya 80&nbsp;% kombinasi ditandai sebagai simpul inti stabil (bertepi tebal pada graf).</li>
 <li>Graf dapat diperbesar dengan gulir dan digeser dengan seret. Hasil diekspor sebagai GraphML (Cytoscape, Gephi), CSV tepi, atau dikirim ke Komposer Figur. Tombol <b>Salin paragraf metode</b> menuliskan basis data, versi, ambang, hasil uji sensitivitas, dan latar pengayaan.</li>
@@ -486,7 +486,7 @@
 <ul>
 <li><b>Diagram Venn irisan</b> — target senyawa berbanding gen penyakit.</li>
 <li><b>Jaringan berlapis</b> — senyawa, target, jalur, dan penyakit dalam satu gambar bertata letak gaya pegas.</li>
-<li><b>Hub melingkar</b> — protein paling sentral disusun melingkar, diwarnai menurut peringkat MCC. Susunan melingkar dipakai karena yang dibaca adalah peringkat dan kerapatan hubungan antar hub; tata letak gaya pegas justru menyembunyikan peringkat itu. Ini padanan terbuka untuk gambar cytoHubba yang lazim dipakai di naskah farmakologi jaringan.</li>
+<li><b>Hub melingkar</b> — protein paling sentral disusun melingkar, diwarnai menurut peringkat MCC. Susunan melingkar dipakai karena yang dibaca adalah peringkat dan kerapatan hubungan antarhub; tata letak gaya pegas justru menyembunyikan peringkat itu. Ini padanan terbuka untuk gambar cytoHubba yang lazim dipakai di naskah farmakologi jaringan.</li>
 <li><b>Bubble plot jalur</b> — bentuk baku pengayaan jalur: sumbu x rasio gen (gen kueri yang jatuh pada jalur dibagi seluruh gen kueri), ukuran titik jumlah gen, warna −log₁₀(q). Angkanya ditulis di samping tiap titik sehingga figurnya tetap terbaca saat dicetak hitam-putih.</li>
 <li><b>Batang jalur</b> — bentuk paling ringkas, jumlah gen per jalur.</li>
 </ul>

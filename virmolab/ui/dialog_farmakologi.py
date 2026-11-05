@@ -6,7 +6,7 @@ Tujuh tahap, satu tab masing-masing, dikerjakan berurutan dari kiri ke kanan:
   2 Saring ADMET     buang kandidat yang sifat fisikokimia dan prediksi ADMET-nya tidak memenuhi syarat
   3 Target senyawa   target dugaan dari kemiripan ligan ChEMBL dan/atau interaksi terkurasi CTD
   4 Gen penyakit     gen penyakit dari Open Targets atau impor CSV, lalu irisan (diagram Venn)
-  5 Jaringan PPI     tepi STRING antar target irisan, graf interaktif, peringkat protein hub
+  5 Jaringan PPI     tepi STRING antartarget hasil irisan, graf interaktif, peringkat protein hub
   6 Jalur            pengayaan jalur Reactome / GO-BP (hipergeometrik + Benjamini-Hochberg)
   7 Laporan          ringkasan tiap tahap, paragraf metode siap tempel, dan ekspor
 
@@ -63,7 +63,7 @@ class DialogFarmakologi(QDialog):
         lay.setSpacing(10)
         lay.addWidget(kit.judul("Farmakologi jaringan",
                                 "Satu senyawa bekerja lewat banyak target dan banyak jalur — "
-                                "alur ini menelusuri rantai senyawa › target › jalur › penyakit"))
+                                "alur ini menelusuri rantai senyawa › target › jalur › penyakit."))
         lay.addWidget(kit.catatan(PERINGATAN, jenis="peringatan"))
 
         self.tabs = QTabWidget()
@@ -94,8 +94,8 @@ class DialogFarmakologi(QDialog):
         self.b_lanjut = kit.tombol("Lanjut", self._lanjut, utama=True)
         lay.addLayout(kit.bar_bawah(self, kiri=(self.l_status,),
                                     kanan=(kit.tombol("Simpan ke proyek", self._simpan,
-                                                      tip="Keadaan alur sebenarnya sudah disimpan sendiri "
-                                                          "tiap tahap; tombol ini memaksa simpan sekarang"),
+                                                      tip="Hasil alur sudah disimpan sendiri setiap tahap; "
+                                                          "tombol ini menyimpannya sekarang juga"),
                                            self.b_lanjut)))
         self.tabs.currentChanged.connect(lambda _=0: self._perbarui_lanjut())
 
@@ -104,19 +104,19 @@ class DialogFarmakologi(QDialog):
         """Apa yang sudah ada di tiap tahap, dipakai tombol Lanjut dan ringkasan laporan."""
         sen = self.k.get("senyawa") or []
         return [
-            {"nama": "Senyawa", "ada": bool(sen), "kurang": "kumpulkan senyawa dulu"},
+            {"nama": "Senyawa", "ada": bool(sen), "kurang": "kumpulkan senyawa lebih dulu"},
             {"nama": "Saring ADMET", "ada": any(s.get("sifat") for s in sen),
-             "kurang": "hitung sifat dan saring dulu"},
+             "kurang": "hitung sifat dan saring lebih dulu"},
             {"nama": "Target senyawa", "ada": bool(self.k.get("target_senyawa")),
-             "kurang": "cari target senyawa dulu"},
+             "kurang": "cari target senyawa lebih dulu"},
             {"nama": "Gen penyakit", "ada": bool(self.k.get("gen_penyakit")),
-             "kurang": "ambil atau impor gen penyakit dulu"},
+             "kurang": "ambil atau impor gen penyakit lebih dulu"},
             {"nama": "Jaringan PPI", "ada": bool(self.k.get("tepi_ppi")),
-             "kurang": "bangun jaringan PPI dulu"},
-            {"nama": "Jalur", "ada": bool(self.k.get("jalur")), "kurang": "hitung pengayaan jalur dulu"},
+             "kurang": "bangun jaringan PPI lebih dulu"},
+            {"nama": "Jalur", "ada": bool(self.k.get("jalur")), "kurang": "hitung pengayaan jalur lebih dulu"},
             {"nama": "Figur", "ada": bool(self.k.get("jalur") or self.k.get("tepi_ppi")),
-             "kurang": "selesaikan tahap jaringan atau jalur dulu"},
-            {"nama": "Laporan", "ada": bool(self.k.get("irisan")), "kurang": "selesaikan tahap irisan dulu"},
+             "kurang": "selesaikan tahap jaringan atau jalur lebih dulu"},
+            {"nama": "Laporan", "ada": bool(self.k.get("irisan")), "kurang": "selesaikan tahap irisan lebih dulu"},
         ]
 
     def _perbarui_lanjut(self):
@@ -136,7 +136,7 @@ class DialogFarmakologi(QDialog):
             self.b_lanjut.setEnabled(bisa)
             self.b_lanjut.setToolTip(
                 "Siapkan senyawa yang mengenai target hub sebagai ligan docking, lalu pindah ke alur "
-                "Docking Molekuler" if bisa else "Selesaikan dulu irisan target dan jaringannya")
+                "Docking Molekuler." if bisa else "Selesaikan lebih dulu irisan target dan jaringannya.")
             return
         kini = tahap[i]
         berikut = tahap[i + 1]
@@ -166,8 +166,8 @@ class DialogFarmakologi(QDialog):
         pilih = [s for s in F.yang_lolos(self.k.get("senyawa") or [])
                  if hub_gen & {g.upper() for g in (self.k.get("target_senyawa") or {}).get(s["nama"], [])}]
         if not pilih:
-            kit.pesan_peringatan(self, "Tidak ada senyawa lolos saring yang mengenai target hub. "
-                                       "Turunkan ambang penyaringan atau perluas pencarian target.")
+            kit.pesan_peringatan(self, "Tidak ada senyawa lolos penyaringan yang mengenai target hub. "
+                                       "Longgarkan kriteria penyaringan atau perluas pencarian target.")
             return
         jawab = QMessageBox.question(
             self, "Bawa ke docking",
@@ -380,8 +380,9 @@ class DialogFarmakologi(QDialog):
         self.t_admet = kit.tabel(["Senyawa", "MW", "WLOGP", "TPSA", "Lipinski", "HIA", "DILI", "hERG",
                                   "Status", "Alasan"], regang=9, urut=True)
         v.addWidget(self.t_admet, 1)
-        self.l_admet = kit.catatan("Senyawa yang nilai ADMET-nya belum ada tidak digugurkan karena itu — "
-                                   "ketiadaan data bukan bukti buruk, hanya penyaringan yang belum lengkap.")
+        self.l_admet = kit.catatan("Senyawa yang belum punya nilai ADMET tidak digugurkan karena alasan itu: "
+                                   "ketiadaan data bukan bukti buruk, melainkan tanda bahwa penyaringannya "
+                                   "belum lengkap.")
         v.addWidget(self.l_admet)
 
     def _kriteria(self) -> Dict[str, Any]:
@@ -391,7 +392,7 @@ class DialogFarmakologi(QDialog):
 
     def _jalankan_saring(self):
         if not self.k["senyawa"]:
-            kit.pesan_peringatan(self, "Belum ada senyawa. Isi tahap 1 dulu.")
+            kit.pesan_peringatan(self, "Belum ada senyawa. Isi tahap 1 lebih dulu.")
             return
         self._mulai("Menghitung sifat fisikokimia…")
 
@@ -412,8 +413,8 @@ class DialogFarmakologi(QDialog):
     def _jalankan_admet(self):
         from ..core import admet
         if not admet.tersedia():
-            kit.pesan_peringatan(self, "ADMET-AI belum terpasang di lingkungan ini. Penyaringan tetap bisa "
-                                       "dijalankan dengan aturan Lipinski dan PAINS saja.")
+            kit.pesan_peringatan(self, "ADMET-AI belum terpasang. Penyaringan tetap bisa dijalankan, tetapi "
+                                       "hanya dengan aturan Lipinski dan peringatan PAINS.")
             return
         senyawa = [s for s in self.k["senyawa"] if s.get("smiles")]
         if not senyawa:
@@ -466,11 +467,11 @@ class DialogFarmakologi(QDialog):
         form = QFormLayout(kotak)
         self.cb_kemiripan = QCheckBox("Kemiripan ligan ChEMBL (ECFP4, pChEMBL ≥ 6)")
         self.cb_kemiripan.setChecked(True)
-        self.cb_kemiripan.setToolTip("Target yang terikat senyawa berstruktur mirip — padanan terbuka untuk "
+        self.cb_kemiripan.setToolTip("Target yang diikat senyawa berstruktur mirip — padanan terbuka untuk "
                                      "SwissTargetPrediction")
         form.addRow(self.cb_kemiripan)
         self.cb_ctd = QCheckBox("Interaksi terkurasi CTD (berbasis literatur)")
-        self.cb_ctd.setToolTip("Hubungan senyawa-gen yang dikurasi dari publikasi; dicari dengan nama senyawa")
+        self.cb_ctd.setToolTip("Hubungan senyawa–gen yang dikurasi dari publikasi, dicari berdasarkan nama senyawa")
         form.addRow(self.cb_ctd)
         self.sp_k = QSpinBox()
         self.sp_k.setRange(1, 50)
@@ -510,8 +511,9 @@ class DialogFarmakologi(QDialog):
             menit = max(1, round(len(senyawa) * 6 / 60))
             jawab = QMessageBox.question(
                 self, "Daftar senyawa panjang",
-                f"{len(senyawa)} senyawa akan ditanyakan ke ChEMBL satu per satu, perkiraan sekitar "
-                f"{menit} menit saat pertama kali (berikutnya lebih cepat karena ada cache).\n\n"
+                f"{len(senyawa)} senyawa akan ditanyakan ke ChEMBL satu per satu; perkiraannya sekitar "
+                f"{menit} menit pada pencarian pertama, dan lebih cepat sesudahnya karena hasilnya "
+                f"disimpan di cache.\n\n"
                 f"Banyak alur farmakologi jaringan cukup memakai senyawa utama saja. Lanjutkan?",
                 QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
             if jawab != QMessageBox.Yes:
@@ -565,7 +567,7 @@ class DialogFarmakologi(QDialog):
             self._simpan_diam()
             n = len({g for d in peta.values() for g in d})
             self._henti(f"{n} gen target unik dari {len(peta)} senyawa."
-                        if n else "Tidak ada target yang ditemukan untuk senyawa ini.")
+                        if n else "Tidak ada target yang ditemukan untuk senyawa-senyawa ini.")
 
         kerja.jalankan(kerjakan, selesai=selesai, galat=self._galat, log=self.l_status.setText,
                        progres=lambda i, n, t: self.l_status.setText(f"{t} ({i}/{n})"))
@@ -653,7 +655,7 @@ class DialogFarmakologi(QDialog):
         self.sp_maks_gen.setSingleStep(50)
         self.sp_maks_gen.setValue(500)
         self.sp_maks_gen.setToolTip("Jumlah gen teratas yang diminta dari Open Targets (batas layanan 500). "
-                                    "Bila hasilnya pas sebanyak ini, daftarnya kemungkinan terpotong.")
+                                    "Bila hasilnya tepat sebanyak batas ini, daftarnya kemungkinan terpotong.")
         baris.addWidget(self.sp_maks_gen)
         baris.addWidget(kit.tombol("Ambil gen penyakit", self._ambil_gen_penyakit, utama=True))
         baris.addStretch(1)
@@ -679,7 +681,7 @@ class DialogFarmakologi(QDialog):
         pisah.setSizes([420, 620])
         v.addWidget(pisah, 1)
 
-        self.l_irisan = kit.catatan("Irisan target senyawa dengan gen penyakit disebut potential therapeutic target.")
+        self.l_irisan = kit.catatan("Irisan antara target senyawa dan gen penyakit inilah yang disebut potential therapeutic target.")
         v.addWidget(self.l_irisan)
 
     def _cari_penyakit(self):
@@ -697,7 +699,7 @@ class DialogFarmakologi(QDialog):
             self._hasil_cari_penyakit = daftar
             self.lw_penyakit.clear()
             for d in daftar:
-                it = QListWidgetItem(f"{d['nama']}  ·  {d['id']}")
+                it = QListWidgetItem(f"{d['nama']} · {d['id']}")
                 it.setToolTip(d.get("keterangan") or "")
                 it.setData(Qt.UserRole, d)
                 self.lw_penyakit.addItem(it)
@@ -710,7 +712,7 @@ class DialogFarmakologi(QDialog):
     def _ambil_gen_penyakit(self):
         it = self.lw_penyakit.currentItem()
         if it is None:
-            kit.pesan_peringatan(self, "Pilih dulu salah satu penyakit dari hasil pencarian.")
+            kit.pesan_peringatan(self, "Pilih lebih dulu salah satu penyakit dari hasil pencarian.")
             return
         d = it.data(Qt.UserRole)
         ambang = self.sp_skor.value()
@@ -735,7 +737,7 @@ class DialogFarmakologi(QDialog):
                 pesan += f" Daftar terpotong di batas {maks}."
                 kit.ganti_jenis(self.l_irisan, "peringatan")
                 self.l_irisan.setText(
-                    f"{self.l_irisan.text()}  Daftar gen penyakit mencapai batas {maks} dan kemungkinan "
+                    f"{self.l_irisan.text()} Daftar gen penyakit mencapai batas {maks} dan kemungkinan "
                     f"terpotong: gen dengan skor di bawah yang terakhir diambil tidak ikut diiriskan. "
                     f"Naikkan 'Batas gen' atau 'Skor asosiasi minimum'.")
             self._henti(pesan)
@@ -803,7 +805,7 @@ class DialogFarmakologi(QDialog):
         self.sp_string.setSingleStep(0.05)
         self.sp_string.setDecimals(2)
         self.sp_string.setValue(jaringan.AMBANG_STRING)
-        self.sp_string.setToolTip("0,40 medium; 0,70 high — ambang yang lazim dipakai publikasi; 0,90 highest")
+        self.sp_string.setToolTip("0,40 kepercayaan sedang; 0,70 tinggi, ambang yang lazim dipakai publikasi; 0,90 sangat tinggi")
         baris.addWidget(self.sp_string)
         self.cb_lapisan = QCheckBox("Sertakan lapisan senyawa, jalur, dan penyakit")
         self.cb_lapisan.setChecked(True)
@@ -813,7 +815,8 @@ class DialogFarmakologi(QDialog):
         self.cb_label.setChecked(True)
         self.cb_label.toggled.connect(lambda on: self.graf.set_label(on))
         baris.addWidget(self.cb_label)
-        baris.addWidget(kit.tombol("Pas-kan", lambda: self.graf.muat_penuh()))
+        baris.addWidget(kit.tombol("Pas ke layar", lambda: self.graf.muat_penuh(),
+                                   tip="Kembalikan perbesaran agar seluruh jaringan terlihat"))
         baris.addStretch(1)
         v.addLayout(baris)
 
@@ -847,7 +850,7 @@ class DialogFarmakologi(QDialog):
         if not gen:
             gen = sorted({g for d in (self.k.get("target_senyawa") or {}).values() for g in d})
         if len(gen) < 2:
-            kit.pesan_peringatan(self, "Perlu setidaknya dua gen. Lengkapi tahap 3 dan 4 dulu.")
+            kit.pesan_peringatan(self, "Perlu setidaknya dua gen. Lengkapi tahap 3 dan 4 lebih dulu.")
             return
         ambang = self.sp_string.value()
         berlapis = self.cb_lapisan.isChecked()
@@ -881,7 +884,7 @@ class DialogFarmakologi(QDialog):
                 # ambang STRING-nya yang terlalu tinggi untuk pasangan itu.
                 pesan += (f" {len(sendiri)} target tanpa tepi PPI pada ambang ini "
                           f"({', '.join(sendiri[:6])}{'…' if len(sendiri) > 6 else ''}) "
-                          f"— turunkan ambang bila ingin menyertakannya.")
+                          f"— turunkan ambangnya bila ingin menyertakannya.")
             self.l_jaringan.setText(pesan)
             self._simpan_diam()
             self._henti(f"Jaringan dibangun: {len(tepi)} tepi PPI.")
@@ -980,14 +983,14 @@ class DialogFarmakologi(QDialog):
         pisah.setSizes([420, 300])
         v.addWidget(pisah, 1)
         self.l_jalur = kit.catatan("Uji hipergeometrik satu sisi dengan koreksi Benjamini-Hochberg. "
-                                   "Latar belakang adalah gabungan seluruh gen pada set gen yang dipilih.")
+                                   "Semesta gen latar adalah gabungan seluruh gen di dalam set yang dipilih.")
         v.addWidget(self.l_jalur)
 
     def _jalankan_jalur(self):
         gen = list(self.k.get("irisan") or []) or sorted(
             {g for d in (self.k.get("target_senyawa") or {}).values() for g in d})
         if not gen:
-            kit.pesan_peringatan(self, "Belum ada gen untuk diuji. Lengkapi tahap 3 atau 4 dulu.")
+            kit.pesan_peringatan(self, "Belum ada gen untuk diuji. Lengkapi tahap 3 atau 4 lebih dulu.")
             return
         nama_gmt, q_maks = self.cb_gmt.currentData(), self.sp_q.value()
         self._mulai(f"Menghitung pengayaan jalur untuk {len(gen)} gen…")
@@ -1066,7 +1069,7 @@ class DialogFarmakologi(QDialog):
         self.sp_figur_n = QSpinBox()
         self.sp_figur_n.setRange(3, 40)
         self.sp_figur_n.setValue(10)
-        self.sp_figur_n.setToolTip("Berapa protein hub atau jalur yang digambar")
+        self.sp_figur_n.setToolTip("Banyaknya protein hub atau jalur yang digambar")
         self.sp_figur_n.valueChanged.connect(lambda _=0: self._segarkan_figur())
         aksi.addWidget(self.sp_figur_n)
         aksi.addWidget(kit.tombol("Segarkan", self._segarkan_figur))
@@ -1127,7 +1130,7 @@ class DialogFarmakologi(QDialog):
         ket = next((d["ket"] for d in FG.daftar() if d["kunci"] == kunci), "")
         contoh = self._svg_figur(kunci)
         if not contoh:
-            self.l_figur_ket.setText(f"{ket}  Datanya belum ada — selesaikan tahap yang bersangkutan dulu.")
+            self.l_figur_ket.setText(f"{ket} Datanya belum ada — selesaikan tahap yang bersangkutan lebih dulu.")
             self.g_figur.atur_pembuat(lambda l, t: "")
             self.g_figur.update()
             return
@@ -1226,7 +1229,7 @@ class DialogFarmakologi(QDialog):
         aksi.addWidget(kit.tombol("Salin metode (EN)",
                                   lambda: kit.salin(F.paragraf_metode(self.k, inggris=True), self.l_status)))
         aksi.addWidget(kit.tombol("Ekspor JSON…", self._ekspor_json,
-                                  tip="Seluruh keadaan alur untuk lampiran suplemen"))
+                                  tip="Seluruh hasil alur untuk lampiran suplemen"))
         v.addLayout(aksi)
 
     def _html_laporan(self) -> str:
@@ -1240,7 +1243,7 @@ class DialogFarmakologi(QDialog):
 
     def _ekspor_laporan(self, fmt: str):
         if not (self.k.get("senyawa") or self.k.get("target_senyawa")):
-            kit.pesan_peringatan(self, "Belum ada yang bisa dilaporkan. Jalankan tahapnya dulu.")
+            kit.pesan_peringatan(self, "Belum ada yang bisa dilaporkan. Jalankan tahap-tahapnya lebih dulu.")
             return
         saring = {"pdf": "PDF (*.pdf)", "docx": "Word (*.docx)", "html": "HTML (*.html)"}[fmt]
         nama = f"laporan_farmakologi_jaringan.{fmt}"
@@ -1298,7 +1301,7 @@ class DialogFarmakologi(QDialog):
             self.tb_laporan.setHtml(self._html_laporan())
 
     def _ekspor_json(self):
-        path, _ = QFileDialog.getSaveFileName(self, "Simpan keadaan alur", "farmakologi_jaringan.json",
+        path, _ = QFileDialog.getSaveFileName(self, "Simpan hasil alur", "farmakologi_jaringan.json",
                                               "JSON (*.json)")
         if not path:
             return
@@ -1332,8 +1335,8 @@ class DialogFarmakologi(QDialog):
         self.k["tanaman"] = self.e_tanaman.text().strip()
         self._segarkan_laporan()
         if self.proyek is None:
-            kit.pesan_peringatan(self, "Belum ada proyek terbuka, jadi keadaan alur tidak bisa disimpan. "
-                                       "Buat atau buka proyek dulu, lalu simpan lagi.")
+            kit.pesan_peringatan(self, "Belum ada proyek yang terbuka, jadi hasil alur ini tidak bisa disimpan. "
+                                       "Buat atau buka proyek lebih dulu, lalu simpan lagi.")
             return
         self.proyek.farmakologi = self.k
         for j in self._jejak:
@@ -1344,4 +1347,4 @@ class DialogFarmakologi(QDialog):
         self.keadaanBerubah.emit(self.k)
         if self.jw is not None and hasattr(self.jw, "minta_simpan"):
             self.jw.minta_simpan()
-        self._catat("Keadaan alur farmakologi jaringan disimpan ke proyek.")
+        self._catat("Hasil alur farmakologi jaringan disimpan ke proyek.")

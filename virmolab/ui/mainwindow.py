@@ -1106,20 +1106,21 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
             A("4 · Gen penyakit && irisan…", "search", lambda: self.buka_farmakologi(3), None,
               "Gen penyakit dari Open Targets atau impor CSV, lalu diagram Venn target terapi potensial"),
             A("5 · Jaringan PPI && hub…", "link", lambda: self.buka_farmakologi(4), None,
-              "Tepi STRING antar target, graf interaktif, dan peringkat protein hub (MCC)"),
+              "Tepi STRING antartarget, graf interaktif, dan peringkat protein hub (MCC)"),
             A("6 · Pengayaan jalur…", "chart", lambda: self.buka_farmakologi(5), None,
               "Reactome / GO-BP dengan uji hipergeometrik dan koreksi Benjamini-Hochberg"),
             A("7 · Figur siap publikasi…", "palette", lambda: self.buka_farmakologi(6), None,
               "Venn, jaringan berlapis, hub melingkar, bubble plot jalur, dan batang jalur — "
               "SVG vektor atau raster ber-DPI"),
-            A("8 · Ringkasan && metode…", "report", lambda: self.buka_farmakologi(7), None,
-              "Angka tiap tahap dan paragraf metode siap tempel (Indonesia/Inggris)")))
+            A("8 · Laporan lengkap…", "report", lambda: self.buka_farmakologi(7), None,
+              "Ringkasan tiap tahap, statistik pendukung, keterbatasan, dan paragraf metode siap "
+              "tempel; dapat disimpan sebagai PDF, Word, atau HTML")))
         m.addSeparator()
         self._judul_menu(m, "LANJUTAN")
         isi(m, (
             A("Penargetan balik (docking panel target)…", "target", self.buka_target_balik, None,
               "Jalur berbasis struktur: docking senyawa terhadap panel target terkurasi"),
-            A("Analisis antarmuka protein-protein…", "box", self.buka_ppi, None,
+            A("Analisis antarmuka protein–protein…", "box", self.buka_ppi, None,
               "Periksa satu pasangan protein secara struktural (SASA, residu antarmuka)")))
 
         # ---------------------------------------------------------------- Alat
