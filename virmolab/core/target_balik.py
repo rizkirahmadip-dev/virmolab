@@ -4,7 +4,8 @@ Menyediakan dua jalur komplementer:
 1. Jalur berbasis ligan: kemiripan 2D (Morgan2/ECFP4) terhadap ligan aktif ChEMBL (pChEMBL >= 6) per target.
 2. Jalur berbasis struktur: docking molekul terhadap panel target terkurasi (Vina) yang dinormalisasi dengan z-skor
    terhadap 50 umpan/decoy latar belakang.
-3. Integrasi konsensus: peringkat Borda (R_ligan + R_struktur) dengan evaluasi keyakinan (tinggi bila keduanya <= 10 besar).
+3. Integrasi konsensus: peringkat Borda (R_ligan + R_struktur) dengan evaluasi keyakinan berambang mutlak
+   (tinggi bila z <= -2 dan 3 besar jalur struktur, sekaligus Tanimoto >= 0,40 jalur ligan).
 
 Peringatan ilmiah (pedoman BCPT 2025):
 Hasil penargetan balik adalah hipotesis komputasi; klaim interaksi dan mekanisme farmakologi memerlukan validasi eksperimental.
@@ -25,6 +26,14 @@ DIR_DATA_PANEL = Path(__file__).resolve().parent.parent / "data" / "panel_target
 RMSD_MAKS = 2.0          # ambang redocking yang sah untuk masuk panel (Å)
 PCHEMBL_MIN = 6.0        # ambang "aktif" jalur ligan
 AMBANG_SIM = 40          # persen kemiripan minimum kueri similarity ChEMBL
+
+# Ambang keyakinan konsensus. Peringkat saja tidak berarti apa-apa pada panel kecil: panel antibakteri
+# berisi 9 target, jadi syarat lama "10 besar kedua jalur" dipenuhi SETIAP target dan semuanya tampak
+# berkeyakinan tinggi. Keyakinan karena itu diukur dengan ambang mutlak pada besaran yang benar-benar
+# diukur, dan peringkat hanya dipakai sebagai syarat tambahan di jalur struktur.
+AMBANG_Z = -2.0                  # z-skor energi docking terhadap umpan acak target itu
+AMBANG_PERINGKAT_STRUKTUR = 3    # sekaligus harus 3 besar jalur struktur
+AMBANG_TANIMOTO = 0.40           # kemiripan Morgan2 ke ligan aktif terdekat (seirama AMBANG_SIM)
 
 
 class GalatTargetBalik(Exception):
@@ -331,7 +340,10 @@ def gabung(peringkat_ligan: List[Dict[str, Any]], peringkat_struktur: List[Dict[
     """Gabungkan peringkat jalur ligan dan jalur struktur dengan hitungan Borda (target diidentifikasi lewat UniProt).
 
     Borda = R_ligan + R_struktur; terkecil = paling konsisten. Target yang tak muncul di satu jalur diberi N+1 jalur itu.
-    Keyakinan: "tinggi" bila kedua peringkat <= 10; "sedang" bila salah satu <= 10; selain itu "rendah".
+
+    Keyakinan memakai ambang mutlak, bukan peringkat (lihat AMBANG_* di atas): jalur struktur lolos bila
+    z <= AMBANG_Z dan masuk AMBANG_PERINGKAT_STRUKTUR besar, jalur ligan lolos bila kemiripan tetangga
+    terdekat >= AMBANG_TANIMOTO. Lolos keduanya = "tinggi", salah satu = "sedang", tidak keduanya = "rendah".
     Target gagal/belum di-docking tidak diperingkat pada jalur struktur dan dilaporkan statusnya.
     """
     peta_ligan = {}
@@ -357,9 +369,14 @@ def gabung(peringkat_ligan: List[Dict[str, Any]], peringkat_struktur: List[Dict[
         d_status = d_str or peta_status.get(kunci)
         ref = d_status or d_lig or {}
         borda = (r_lig if r_lig is not None else n_ligan) + (r_str if r_str is not None else n_struktur)
-        if r_lig is not None and r_str is not None and r_lig <= 10 and r_str <= 10:
+        z_str = d_str.get("z_skor") if d_str else None
+        sim_lig = d_lig.get("skor_max") if d_lig else None
+        lolos_struktur = (r_str is not None and r_str <= AMBANG_PERINGKAT_STRUKTUR
+                          and z_str is not None and z_str <= AMBANG_Z)
+        lolos_ligan = sim_lig is not None and sim_lig >= AMBANG_TANIMOTO
+        if lolos_struktur and lolos_ligan:
             keyakinan = "tinggi"
-        elif (r_lig is not None and r_lig <= 10) or (r_str is not None and r_str <= 10):
+        elif lolos_struktur or lolos_ligan:
             keyakinan = "sedang"
         else:
             keyakinan = "rendah"
@@ -369,8 +386,8 @@ def gabung(peringkat_ligan: List[Dict[str, Any]], peringkat_struktur: List[Dict[
             "uniprot": ref.get("uniprot") or (d_lig or {}).get("uniprot", ""),
             "nama": ref.get("nama") or (d_lig or {}).get("nama", ""),
             "pdb": (d_status or {}).get("pdb", ""),
-            "skor_ligan": d_lig.get("skor_max") if d_lig else None,
-            "struktur_z": d_str.get("z_skor") if d_str else None,
+            "skor_ligan": sim_lig,
+            "struktur_z": z_str,
             "energi": d_status.get("energi") if d_status else None,
             "r_ligan": r_lig, "r_struktur": r_str, "borda": borda, "keyakinan": keyakinan,
             "status": d_status.get("status", "") if d_status else "tidak_diuji",
@@ -414,7 +431,12 @@ def susun_paragraf_metode(
                 f"{'/'.join(str(n) for n in nu) if nu else 'sejumlah'} umpan acak per target; {n_sukses} target berhasil ditambatkan, "
                 f"{n_gagal} gagal dan tidak diperingkat.")
     if param.get("jalur_ligan") and param.get("jalur_struktur"):
-        bagian.append("Peringkat kedua jalur digabung dengan hitungan Borda; keyakinan 'tinggi' bila target berada di 10 besar kedua jalur.")
+        bagian.append(
+            f"Peringkat kedua jalur digabung dengan hitungan Borda. Keyakinan dinilai dengan ambang mutlak, bukan "
+            f"peringkat relatif: 'tinggi' bila target mencapai z <= {AMBANG_Z:g} sekaligus {AMBANG_PERINGKAT_STRUKTUR} "
+            f"besar pada jalur struktur dan kemiripan Tanimoto >= {AMBANG_TANIMOTO:.2f} pada jalur ligan, 'sedang' bila "
+            f"hanya satu jalur yang memenuhi, 'rendah' bila tidak satu pun. Ambang mutlak dipakai karena panel target "
+            f"berisi puluhan struktur saja, sehingga syarat berbasis peringkat akan meloloskan hampir semua target.")
     if not bagian:
         return ""
     bagian.append("Seluruh target kandidat merupakan hipotesis komputasi dan memerlukan validasi eksperimental sebelum "
@@ -447,8 +469,13 @@ def _paragraf_metode_en(kelas, param, panel, n_sukses, n_gagal, jejak):
                 f"{'/'.join(str(n) for n in nu) if nu else 'several'} random decoys per target; {n_sukses} targets "
                 f"were docked successfully, {n_gagal} failed and were not ranked.")
     if param.get("jalur_ligan") and param.get("jalur_struktur"):
-        bagian.append("The ranks from both routes were combined by Borda count; confidence is 'high' when a target "
-                      "is in the top 10 of both routes.")
+        bagian.append(
+            "The ranks from both routes were combined by Borda count. Confidence was assessed with absolute "
+            f"thresholds rather than relative ranks: 'high' when a target reaches z <= {AMBANG_Z:g} and is within the "
+            f"top {AMBANG_PERINGKAT_STRUKTUR} of the structure-based route while also reaching a Tanimoto similarity "
+            f">= {AMBANG_TANIMOTO:.2f} in the ligand-based route, 'medium' when only one route qualifies, and 'low' "
+            "when neither does. Absolute thresholds were used because the target panel holds only tens of structures, "
+            "so a rank-based criterion would qualify almost every target.")
     if not bagian:
         return ""
     bagian.append("All candidate targets are computational hypotheses and require experimental validation before "

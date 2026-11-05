@@ -42,7 +42,29 @@ def uji_borda():
     cek(g["B"]["borda"] == 2 + 1 and g["A"]["borda"] == 1 + 2, "Borda B=2+1, A=1+2")
     cek(g["C"]["borda"] == 3 + 3, "target hanya di satu jalur: peringkat terburuk jalur lain + 1 (=N+1)")
     cek(g["D"]["r_struktur"] is None, "target gagal docking tidak diperingkat")
-    cek(g["A"]["keyakinan"] == "tinggi" and g["C"]["keyakinan"] == "sedang", "label keyakinan")
+    cek(g["B"]["keyakinan"] == "tinggi", "keyakinan tinggi: z -3,0 di 3 besar DAN Tanimoto 0,8")
+    cek(g["A"]["keyakinan"] == "sedang", "z -1,0 belum mencapai ambang -2: sedang walau 2 besar jalur struktur")
+    cek(g["C"]["keyakinan"] == "sedang", "hanya jalur ligan yang memenuhi: sedang")
+    cek(g["D"]["keyakinan"] == "rendah", "tidak satu jalur pun memenuhi: rendah")
+
+
+def uji_keyakinan_panel_kecil():
+    """Panel kecil adalah sebab kriteria peringkat diganti ambang mutlak.
+
+    Ketiga target di bawah ada di 3 besar KEDUA jalur, jadi syarat lama "10 besar kedua jalur" akan
+    melabeli semuanya 'tinggi' - padahal z-nya jauh dari -2 dan kemiripannya di bawah 0,40.
+    """
+    lig = [{"gen": g, "uniprot": "U" + g, "skor_max": s} for g, s in (("A", .38), ("B", .25), ("C", .17))]
+    st = [{"gen": g, "uniprot": "U" + g, "pdb": g * 4, "z_skor": z, "energi": -7.0}
+          for g, z in (("A", -1.2), ("B", -0.8), ("C", -0.4))]
+    g = {x["gen"]: x for x in tb.gabung(lig, st)}
+    cek(all(v["r_ligan"] <= 3 and v["r_struktur"] <= 3 for v in g.values()),
+        "prasyarat: ketiganya memang 3 besar kedua jalur")
+    cek(all(v["keyakinan"] == "rendah" for v in g.values()),
+        "angka lemah di panel kecil: semua rendah, bukan semua tinggi")
+    kuat = tb.gabung([{"gen": "A", "uniprot": "UA", "skor_max": .55}],
+                     [{"gen": "A", "uniprot": "UA", "pdb": "AAAA", "z_skor": -2.4, "energi": -9.0}])
+    cek(kuat[0]["keyakinan"] == "tinggi", "panel kecil tetap bisa tinggi bila angkanya memang kuat")
 
 
 def uji_uniprot_ganda():
@@ -110,7 +132,8 @@ def uji_daring():
 
 
 if __name__ == "__main__":
-    for f in (uji_zskor, uji_borda, uji_uniprot_ganda, uji_tanimoto, uji_panel_tak_sah):
+    for f in (uji_zskor, uji_borda, uji_keyakinan_panel_kecil, uji_uniprot_ganda, uji_tanimoto,
+              uji_panel_tak_sah):
         f()
     if "--panel" in sys.argv:
         uji_panel_nyata()

@@ -4125,7 +4125,6 @@
   "Jalur berbasis struktur tidak dijalankan karena panel target belum tersedia.": "The structure-based route was not run because the target panel is not available yet.",
   "Ligan belum disiapkan (tidak ada PDBQT). Siapkan ligan di proyek lebih dulu.": "The ligand has not been prepared (no PDBQT). Prepare the ligand in the project first.",
   "Penargetan balik. ": "Reverse targeting. ",
-  "Peringkat kedua jalur digabung dengan hitungan Borda; keyakinan 'tinggi' bila target berada di 10 besar kedua jalur.": "The ranks from both routes are combined by Borda count; confidence is 'high' when a target is in the top 10 of both routes.",
   "SMILES kueri tidak valid.": "Invalid query SMILES.",
   "Seluruh target kandidat merupakan hipotesis komputasi dan memerlukan validasi eksperimental sebelum mekanisme farmakologi dapat dinyatakan.": "All candidate targets are computational hypotheses and require experimental validation before a pharmacological mechanism can be claimed.",
   "berkas reseptor .pdbqt tidak ada": "receptor .pdbqt file missing",
