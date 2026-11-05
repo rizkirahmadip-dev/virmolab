@@ -334,6 +334,24 @@ def uji(lapor=None):
         return f"{n} obat disetujui; COCONUT {'terpasang' if pustaka.coconut_ada() else 'belum diunduh'}"
     cek("Pustaka ligan", pustaka_uji)
 
+    def batal_tanaman_uji():
+        """Bendera pembatalan menerima Event maupun fungsi.
+
+        Regresi: ui/dialog_tanaman.py mengirim threading.Event sedangkan core/tanaman.py memanggilnya
+        seperti fungsi, sehingga "Ambil senyawa" gagal dengan TypeError: 'Event' object is not callable
+        begitu takson punya rujukan artikel (sejak 1.8.0, ketahuan pada Curcuma zedoaria).
+        """
+        import threading
+        from . import tanaman
+        e = threading.Event()
+        if tanaman.dibatalkan(e) or tanaman.dibatalkan(None) or tanaman.dibatalkan(lambda: False):
+            raise RuntimeError("bendera belum di-set tetapi dibaca sebagai batal")
+        e.set()
+        if not (tanaman.dibatalkan(e) and tanaman.dibatalkan(lambda: True)):
+            raise RuntimeError("bendera sudah di-set tetapi tidak dibaca sebagai batal")
+        return "Event, fungsi, dan None diterima"
+    cek("Pembatalan pengambilan senyawa tanaman", batal_tanaman_uji)
+
     def ketcher_uji():
         f = paths.KETCHER / "index.html"
         js = list((paths.KETCHER / "static" / "js").glob("609.*.js"))
