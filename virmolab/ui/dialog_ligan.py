@@ -207,7 +207,10 @@ class DialogLigan(QDialog):
         def kerjakan(lapor):
             from concurrent.futures import ThreadPoolExecutor
             hasil, gagal = [], []
-            with ThreadPoolExecutor(max_workers=6 if jenis == "pubchem" else 2) as ex:  # sopan ke server PubChem
+            # PubChem membatasi 5 permintaan/detik dan tiap senyawa dapat memakan dua permintaan
+            # (record_type 3d lalu 2d), jadi tiga pekerja sudah mendekati batas itu. molekul._get
+            # menahan lajunya sendiri; jumlah pekerja di sini hanya menjaga antreannya tetap pendek.
+            with ThreadPoolExecutor(max_workers=3 if jenis == "pubchem" else 2) as ex:
                 for i, (objs, g) in enumerate(ex.map(satu, isi), 1):
                     if dlg_prog.dibatalkan:
                         break

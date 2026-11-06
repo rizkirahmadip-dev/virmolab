@@ -6,6 +6,8 @@ terpisah, seperti di PyMOL atau Discovery Studio.
 """
 import itertools
 import re
+import threading
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -391,9 +393,41 @@ def _elemen_pdbqt(b):
 
 
 # --------------------------------------------------------------- unduhan
-def _get(url, timeout=60):
+# PubChem PUG-REST membatasi pemanggil pada 5 permintaan per detik dan membalas 503 PUGREST.ServerBusy
+# begitu dilampaui. Jeda di bawah menjaga seluruh aplikasi tetap di bawah batas itu, berapa pun jumlah
+# utas yang mengunduh bersamaan; tanpa itu impor banyak senyawa gagal seluruhnya.
+_JEDA_HOST = {"pubchem.ncbi.nlm.nih.gov": 0.25, "eutils.ncbi.nlm.nih.gov": 0.35}
+_kunci_laju = threading.Lock()
+_terakhir_host: dict = {}
+
+
+def _tunggu_laju(url):
+    host = urllib.parse.urlparse(url).hostname or ""
+    jeda = _JEDA_HOST.get(host)
+    if not jeda:
+        return
+    with _kunci_laju:                       # giliran dipegang satu utas: urutannya jadi berderet
+        sisa = jeda - (time.monotonic() - _terakhir_host.get(host, 0.0))
+        if sisa > 0:
+            time.sleep(sisa)
+        _terakhir_host[host] = time.monotonic()
+
+
+def _get(url, timeout=60, coba=3):
+    """Unduh dengan pembatas laju per host; 503/429 dicoba lagi dengan jeda yang menanjak.
+
+    503 dari PubChem berarti "sedang sibuk", bukan "tidak ada" — menyerah pada percobaan pertama
+    membuat impor gagal padahal permintaan yang sama berhasil sedetik kemudian.
+    """
     req = urllib.request.Request(url, headers={"User-Agent": "VirmoLab/1.0"})
-    return urllib.request.urlopen(req, timeout=timeout).read()
+    for n in range(coba):
+        _tunggu_laju(url)
+        try:
+            return urllib.request.urlopen(req, timeout=timeout).read()
+        except urllib.error.HTTPError as e:
+            if e.code not in (429, 503) or n == coba - 1:
+                raise
+            time.sleep(1.0 * (n + 1))
 
 
 def unduh_rcsb(kode):
