@@ -82,7 +82,12 @@ def gambar_2d(mol, sorot=None, lebar=460, tinggi=360, gelap=False):
     from rdkit import Chem
     from rdkit.Chem import rdDepictor
     from rdkit.Chem.Draw import rdMolDraw2D
-    m = Chem.RemoveHs(Chem.Mol(mol))
+    try:
+        m = Chem.RemoveHs(Chem.Mol(mol))
+    except Exception:
+        # Sama seperti core.sunting3d.titik_tumbuh: amina terprotonasi pada pose docking gagal disanitasi
+        # ulang. Tanpa penanganan ini seluruh dialog gagal dibuka, bukan hanya diagramnya.
+        m = Chem.RemoveHs(Chem.Mol(mol), sanitize=False)
     m.RemoveAllConformers()
     rdDepictor.SetPreferCoordGen(True)
     rdDepictor.Compute2DCoords(m)
@@ -174,6 +179,7 @@ class DialogSunting3D(QDialog):
         h = QHBoxLayout()
         h.addWidget(QLabel("Titik tumbuh"))
         self.cb_atom = QComboBox()
+        self.cb_atom.setToolTip("Atom tempat gugus baru dipasang. Hanya atom berat yang masih membawa hidrogen yang dapat dipilih — hidrogen itulah yang digantikan gugus baru.")
         self.cb_atom.currentIndexChanged.connect(self._ganti_atom)
         h.addWidget(self.cb_atom, 1)
         v.addLayout(h)

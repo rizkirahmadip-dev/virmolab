@@ -101,7 +101,13 @@ def titik_tumbuh(mol):
 
     Indeks mengacu pada molekul tanpa hidrogen eksplisit, sama seperti yang dipakai gambar 2D."""
     from rdkit import Chem
-    m = Chem.RemoveHs(mol)
+    try:
+        m = Chem.RemoveHs(mol)
+    except Exception:
+        # Pose docking sering memuat amina terprotonasi (N bervalensi 4) tanpa muatan formal tercatat di
+        # berkasnya; sanitasi ulang menolaknya dan dialog gagal dibuka sama sekali. Membuang hidrogen tanpa
+        # sanitasi tetap memberi indeks atom berat yang sama, yang memang satu-satunya yang dipakai di sini.
+        m = Chem.RemoveHs(mol, sanitize=False)
     hasil = []
     for a in m.GetAtoms():
         if a.GetAtomicNum() > 1 and a.GetTotalNumHs() > 0:
