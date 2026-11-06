@@ -39,8 +39,7 @@ class DialogFBDD(QDialog):
         lay_utama.setSpacing(8)
         lay_utama.addWidget(kit.judul(
             "Desain berbasis fragmen",
-            "Kembangkan, tautkan, atau gabungkan fragmen dari pose docking untuk memperoleh kandidat ligan "
-            "baru."))
+            "Kembangkan, tautkan, atau gabungkan fragmen dari pose docking untuk memperoleh kandidat ligan baru. Mulai dari fragmen yang sudah terbukti menempati kantong: efisiensi ligannya biasanya turun setiap kali molekul diperbesar, jadi periksa LE, bukan hanya ΔG."))
 
         # Bilah mode pemilihan strategi
         self.tabs_strategi = QTabWidget()

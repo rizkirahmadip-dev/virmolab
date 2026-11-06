@@ -60,8 +60,7 @@ class DialogSelektivitas(QDialog):
         lay_utama.setSpacing(8)
         lay_utama.addWidget(kit.judul(
             "Selektivitas multi-target",
-            "Bandingkan skor ligan yang sama di beberapa proyek target untuk menilai selektivitas dan risiko "
-            "efek samping."))
+            "Bandingkan skor ligan yang sama di beberapa proyek target untuk menilai selektivitas dan risiko efek samping. Perbedaan ΔG di bawah 1 kcal/mol antar-target berada dalam galat fungsi skor, jadi jangan dibaca sebagai selektivitas."))
 
         # Bilah atas
         bar_atas = QHBoxLayout()
@@ -71,6 +70,7 @@ class DialogSelektivitas(QDialog):
 
         bar_atas.addWidget(QLabel("Metrik Tampilan:"))
         self.cb_metrik = QComboBox()
+        self.cb_metrik.setToolTip("ΔG membandingkan afinitas mentah antar-target; efisiensi ligan (LE) menormalkan terhadap ukuran molekul, sehingga ligan besar tidak otomatis tampak lebih selektif.")
         self.cb_metrik.addItem("Afinitas Docking ΔG (kcal/mol)", "energi")
         self.cb_metrik.addItem("Ligand Efficiency (LE)", "le")
         self.cb_metrik.addItem("Z-Score Relatif Per Target", "zscore")

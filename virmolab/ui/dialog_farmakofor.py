@@ -175,6 +175,7 @@ class DialogFarmakofor(QDialog):
         self.lbl_bobot = QLabel("50 % Farmakofor : 50 % Bentuk-Warna")
         v_bobot.addWidget(self.lbl_bobot)
         self.sl_bobot = QSlider(Qt.Horizontal)
+        self.sl_bobot.setToolTip("Bobot antara kecocokan fitur farmakofor dan kemiripan bentuk-warna. Geser ke farmakofor bila yang penting adalah pola donor/akseptor; ke bentuk bila yang dicari adalah rangka dengan volume serupa.")
         self.sl_bobot.setRange(0, 100)
         self.sl_bobot.setValue(50)
         self.sl_bobot.valueChanged.connect(self._update_label_bobot)
@@ -185,6 +186,7 @@ class DialogFarmakofor(QDialog):
         g_pus = QGroupBox("Pustaka senyawa")
         v_pus = QVBoxLayout(g_pus)
         self.cb_pustaka = QComboBox()
+        self.cb_pustaka.setToolTip("Pustaka yang ditapis. Obat yang sudah disetujui berguna untuk penggunaan ulang (repurposing); COCONUT untuk bahan alam.")
         self.cb_pustaka.addItem("Obat disetujui (ChEMBL)", "obat")
         if pustaka.coconut_ada():
             self.cb_pustaka.addItem("COCONUT lokal (Bahan alam)", "coconut")
@@ -195,6 +197,7 @@ class DialogFarmakofor(QDialog):
         h_konf = QHBoxLayout()
         h_konf.addWidget(QLabel("Konformer / senyawa:"))
         self.sp_konf = QSpinBox()
+        self.sp_konf.setToolTip("Konformer 3D per senyawa. 30 cukup untuk molekul berukuran obat; molekul sangat lentur (lebih dari 10 ikatan berputar) butuh lebih banyak agar bentuk yang relevan ikut terwakili.")
         self.sp_konf.setRange(1, 100)
         self.sp_konf.setValue(30)
         h_konf.addWidget(self.sp_konf)
@@ -436,6 +439,7 @@ class DialogFarmakofor(QDialog):
 
             # Kolom 2: Spin Toleransi
             sp = QDoubleSpinBox()
+            sp.setToolTip("Jari-jari bola toleransi fitur ini, dalam ångström. Makin kecil makin ketat: 1,0 Å menuntut penempatan yang rapat, 2,0 Å memberi kelonggaran untuk fleksibilitas konformasi. Melonggarkan semua fitur sekaligus membuat hampir semua senyawa lolos.")
             sp.setRange(0.5, 3.0)
             sp.setSingleStep(0.1)
             sp.setValue(f.get("toleransi", 1.0))

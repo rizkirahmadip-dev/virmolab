@@ -100,6 +100,7 @@ class DialogPenapisan(QDialog):
         self.sp_dg.setValue(0.0)
         self.sp_dg.setSingleStep(0.5)
         self.sp_dg.setSpecialValueText("Tanpa Batas")
+        self.sp_dg.setToolTip("Hanya ligan dengan ΔG lebih negatif dari nilai ini yang lolos. Patokan kasar: −7 kcal/mol sudah terhitung mengikat, −9 kuat. Ambang terlalu ketat membuang kandidat yang skornya kurang tepat, bukan yang ikatannya buruk.")
         self.sp_dg.valueChanged.connect(self._terapkan_filter)
         gb_lay.addWidget(self.sp_dg)
 
@@ -110,6 +111,7 @@ class DialogPenapisan(QDialog):
         self.sp_qed.setValue(0.0)
         self.sp_qed.setSingleStep(0.05)
         self.sp_qed.setSpecialValueText("Tanpa Batas")
+        self.sp_qed.setToolTip("QED merangkum kemiripan-obat dalam satu angka 0–1. Di atas 0,5 umumnya dianggap mirip-obat; bahan alam sering jatuh di bawahnya tanpa berarti buruk, jadi longgarkan untuk pustaka alam.")
         self.sp_qed.valueChanged.connect(self._terapkan_filter)
         gb_lay.addWidget(self.sp_qed)
 
@@ -120,6 +122,7 @@ class DialogPenapisan(QDialog):
         self.sp_sa.setValue(10.0)
         self.sp_sa.setSingleStep(0.5)
         self.sp_sa.setSpecialValueText("Tanpa Batas (10)")
+        self.sp_sa.setToolTip("SAScore memperkirakan kesulitan sintesis: 1 mudah, 10 sangat sulit. Di bawah 4 biasanya dapat disintesis rutin; di atas 6 perlu jalur khusus. Tidak ada kaitannya dengan afinitas.")
         self.sp_sa.valueChanged.connect(self._terapkan_filter)
         gb_lay.addWidget(self.sp_sa)
 
@@ -130,6 +133,7 @@ class DialogPenapisan(QDialog):
         self.sp_mpo.setValue(0.0)
         self.sp_mpo.setSingleStep(5.0)
         self.sp_mpo.setSpecialValueText("Tanpa Batas (0)")
+        self.sp_mpo.setToolTip("Oral MPO menggabungkan beberapa sifat fisikokimia menjadi skor 0–100 untuk peluang diserap lewat mulut. Di atas 60 dianggap baik. Kosongkan bila target Anda bukan obat oral.")
         self.sp_mpo.valueChanged.connect(self._terapkan_filter)
         gb_lay.addWidget(self.sp_mpo)
 
@@ -161,6 +165,7 @@ class DialogPenapisan(QDialog):
         top_lay = QVBoxLayout(gb_top)
         top_lay.addWidget(QLabel("Jumlah Top Hits (N):"))
         self.sp_top_n = QSpinBox()
+        self.sp_top_n.setToolTip("Berapa banyak ligan teratas yang ditandai sebagai hit setelah semua saringan diterapkan. Angka ini tidak menyaring apa pun, hanya menentukan berapa yang disorot dan diekspor.")
         self.sp_top_n.setRange(1, 200)
         self.sp_top_n.setValue(20)
         self.sp_top_n.valueChanged.connect(self._terapkan_filter)

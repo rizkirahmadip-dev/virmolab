@@ -64,6 +64,7 @@ class DialogAsisten(QDialog):
         bar_opsi = QHBoxLayout()
         bar_opsi.addWidget(QLabel("Mode Narasi:"))
         self.cb_mode = QComboBox()
+        self.cb_mode.setToolTip("Panjang dan bentuk teks yang disusun. Ringkasan untuk catatan sendiri; draf Hasil & Pembahasan mengikuti susunan naskah. Keduanya wajib diperiksa: cocokkan tiap angka dengan tab Hasil sebelum dipakai.")
         self.cb_mode.addItem("Ringkasan Eksekutif (1-2 Paragraf)", "ringkasan")
         self.cb_mode.addItem("Draf Hasil & Pembahasan Skripsi/Jurnal (2-3 Paragraf)", "hasil_pembahasan")
         bar_opsi.addWidget(self.cb_mode)

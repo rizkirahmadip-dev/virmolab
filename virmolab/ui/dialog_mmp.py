@@ -60,6 +60,7 @@ class DialogMMP(QDialog):
 
         bar_atas.addWidget(QLabel("Ambang SAR Cliff: |ΔΔG| ≥"))
         self.sp_ddg = QDoubleSpinBox()
+        self.sp_ddg.setToolTip("Beda energi minimum antara dua anggota pasangan agar dihitung sebagai activity cliff. 1,5 kcal/mol kira-kira satu dasawarsa potensi; nilai lebih kecil akan menandai derau skor sebagai cliff.")
         self.sp_ddg.setRange(0.5, 8.0)
         self.sp_ddg.setValue(1.5)
         self.sp_ddg.setSingleStep(0.2)
@@ -68,6 +69,7 @@ class DialogMMP(QDialog):
 
         bar_atas.addWidget(QLabel("kcal/mol, Tanimoto ≥"))
         self.sp_sim = QDoubleSpinBox()
+        self.sp_sim.setToolTip("Kemiripan Tanimoto minimum agar dua molekul dianggap berpasangan. 0,65 menjaring pasangan yang benar-benar hanya berbeda satu gugus; menurunkannya memasukkan pasangan yang perbedaannya terlalu besar untuk ditafsirkan sebagai satu perubahan.")
         self.sp_sim.setRange(0.3, 0.99)
         self.sp_sim.setValue(0.65)
         self.sp_sim.setSingleStep(0.05)

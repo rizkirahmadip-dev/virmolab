@@ -40,6 +40,9 @@ class DialogMPO(QDialog):
         lay.setContentsMargins(12, 12, 12, 12)
         lay.setSpacing(8)
 
+        lay.addWidget(kit.judul("Optimasi multi-parameter (MPO)",
+                                "Gabungkan beberapa sifat ligan menjadi satu skor 0–100, supaya peringkat tidak ditentukan oleh afinitas saja. Pilih preset yang sesuai target Anda, lalu baca grafik radar untuk melihat sifat mana yang menahan skor sebuah ligan."))
+
         # Bilah atas: pemilihan preset dan keterangan
         atas = QHBoxLayout()
         atas.addWidget(QLabel("Preset MPO:"))

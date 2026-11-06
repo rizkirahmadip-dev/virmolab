@@ -66,10 +66,12 @@ class DialogFleksibel(QDialog):
         self.sp.setValue(5.0 if acuan else 10.0)
         self.sp.setSuffix(" Å")
         self.sp.setDecimals(1)
+        self.sp.setToolTip("Residu yang atom mana pun berada dalam jarak ini akan didaftarkan. 5 Å menjaring lapisan pertama dinding kantong; melebihi 8 Å biasanya menambah residu yang tidak menyentuh ligan. Tiap residu fleksibel menambah derajat kebebasan, jadi docking melambat dan hasilnya lebih berderau — pilih seperlunya.")
         self.sp.valueChanged.connect(self._isi)
         h.addWidget(self.sp)
         h.addStretch(1)
         b_auto = QPushButton("Pilih 6 terdekat")
+        b_auto.setToolTip("Memilih enam residu terdekat dari acuan. Titik awal yang masuk akal: cukup untuk induced fit terbatas tanpa membuat pencarian melebar.")
         b_auto.setToolTip("Centang enam rantai samping terdekat dengan ligan acuan (batas praktis Vina/AD-GPU); "
                           "sisanya dikosongkan")
         b_auto.clicked.connect(self._pilih_otomatis)

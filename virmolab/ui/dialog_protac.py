@@ -50,6 +50,7 @@ class DialogPROTAC(QDialog):
         lyt_w = QHBoxLayout()
         lyt_w.addWidget(QLabel("Warhead (Ligan Target):"))
         self.cmb_warhead = QComboBox()
+        self.cmb_warhead.setToolTip("Ujung PROTAC yang mengikat protein target. Ambil dari ligan proyek bila Anda sudah mendockingnya, supaya geometri pengikatannya diketahui.")
         for l in kit.ligan_proyek(self.jw, dengan_mol=False):
             self.cmb_warhead.addItem(l["nama"], l["smiles"])
         else:
@@ -62,6 +63,7 @@ class DialogPROTAC(QDialog):
         lyt_e = QHBoxLayout()
         lyt_e.addWidget(QLabel("E3 Ligase Binder:"))
         self.cmb_e3 = QComboBox()
+        self.cmb_e3.setToolTip("Pengikat E3 ligase menentukan ligase mana yang direkrut. VHL dan cereblon paling banyak dipakai dan paling banyak datanya; pilihan ligase membatasi jenis sel tempat degradasi dapat terjadi.")
         for k, v in protac.daftar_e3_binders().items():
             self.cmb_e3.addItem(f"{v['nama']}", k)
         self.cmb_e3.currentIndexChanged.connect(self._perbarui_rakitan)
@@ -72,6 +74,7 @@ class DialogPROTAC(QDialog):
         lyt_l = QHBoxLayout()
         lyt_l.addWidget(QLabel("Jenis & Panjang Linker:"))
         self.cmb_linker = QComboBox()
+        self.cmb_linker.setToolTip("Panjang dan sifat linker menentukan apakah kompleks bertiga dapat terbentuk. Linker terlalu pendek membuat kedua protein berbenturan; terlalu panjang membuat kompleksnya kurang stabil.")
         for k, v in protac.daftar_linkers().items():
             self.cmb_linker.addItem(f"{v['nama']} (~{v['panjang_est']} Å)", k)
         self.cmb_linker.currentIndexChanged.connect(self._perbarui_rakitan)

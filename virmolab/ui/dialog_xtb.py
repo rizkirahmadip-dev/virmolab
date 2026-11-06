@@ -76,6 +76,7 @@ class DialogXtb(QDialog):
         h_pel = QHBoxLayout()
         h_pel.addWidget(QLabel("Pelarut:"))
         self.cb_pelarut = QComboBox()
+        self.cb_pelarut.setToolTip("Model pelarut implisit. Fase gas paling cepat tetapi melebih-lebihkan interaksi bermuatan; pilih air bila hasilnya akan dibandingkan dengan data larutan.")
         for p in xtb.PELARUT:
             self.cb_pelarut.addItem("Vakum (fase gas)" if p == "none" else p, p)
         self.cb_pelarut.setCurrentIndex(0)
@@ -128,6 +129,7 @@ class DialogXtb(QDialog):
         h_mode = QHBoxLayout()
         h_mode.addWidget(QLabel("Pewarnaan:"))
         self.cb_mode = QComboBox()
+        self.cb_mode.setToolTip("Besaran yang diwarnakan pada permukaan molekul. Muatan parsial memperlihatkan daerah kaya dan miskin elektron; potensial elektrostatik memperlihatkan bagaimana molekul lain 'melihat' molekul ini.")
         for teks, kunci in MODE_TAMPIL:
             self.cb_mode.addItem(teks, kunci)
         self.cb_mode.currentIndexChanged.connect(self._perbarui_viewer)

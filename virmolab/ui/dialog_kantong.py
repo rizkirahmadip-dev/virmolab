@@ -38,6 +38,7 @@ class DialogKantong(QDialog):
         self.l_info.setObjectName("subjudul")
         bar.addWidget(self.l_info, 1)
         self.b_pindai = kit.tombol("Pindai ulang", self.pindai)
+        self.b_pindai.setToolTip("P2Rank menilai permukaan protein dan memeringkat kantong menurut peluangnya mengikat ligan. Berjalan di CPU, beberapa detik untuk protein biasa, dan tidak memerlukan ligan.")
         bar.addWidget(self.b_pindai)
         lay.addLayout(bar)
 
@@ -57,6 +58,7 @@ class DialogKantong(QDialog):
         v.addWidget(g, 1)
         self.b_kotak = kit.tombol("Jadikan grid box docking", self.jadikan_kotak, utama=True,
                                   tip="Pusat dan ukuran kantong ini dipakai sebagai kotak pencarian docking proyek")
+        self.b_kotak.setToolTip("Membuat grid box docking yang menyelimuti kantong terpilih. Pakai ini bila struktur tidak memuat ligan kristal sebagai acuan tempat.")
         v.addWidget(self.b_kotak)
         v.addWidget(kit.tombol("Tampilkan pusat kantong di viewport", self.tampil_viewer))
         kanan.setMaximumWidth(400)

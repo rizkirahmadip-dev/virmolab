@@ -44,6 +44,7 @@ class DialogMetabolisme(QDialog):
         lyt_l = QHBoxLayout(box_lig)
         lyt_l.addWidget(QLabel("Pilih Ligan:"))
         self.cmb_ligan = QComboBox()
+        self.cmb_ligan.setToolTip("Senyawa yang diperiksa titik metabolismenya. Prediksi berlaku untuk strukturnya, bukan untuk pose docking tertentu.")
         for l in kit.ligan_proyek(self.jw, dengan_mol=False):
             self.cmb_ligan.addItem(l["nama"], l["smiles"])
         if not self.cmb_ligan.count():

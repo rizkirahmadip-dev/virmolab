@@ -160,6 +160,7 @@ class DialogPenelitian(QDialog):
     def _hal_umpan(self):
         w, v = self._wadah()
         self.n_umpan = QSpinBox()
+        self.n_umpan.setToolTip("Jumlah senyawa umpan (decoy) per senyawa aktif. Nisbah yang lebih besar membuat uji pengayaan lebih ketat dan angkanya lebih bermakna, tetapi docking berjalan lebih lama secara sebanding.")
         self.n_umpan.setRange(5, 40)
         self.n_umpan.setValue(15)
         v.addWidget(QLabel("Umpan berpadanan sifat dari ligan yang sudah disiapkan (SMILES). "
@@ -260,12 +261,15 @@ class DialogPenelitian(QDialog):
     def _hal_naskah(self):
         w, v = self._wadah()
         self.e_dpi = QSpinBox()
+        self.e_dpi.setToolTip("Resolusi gambar yang diekspor. Banyak jurnal meminta minimal 300 dpi untuk foto dan 600 dpi untuk gambar garis; di atas 600 ukuran berkas naik tanpa perbaikan yang terlihat saat dicetak.")
         self.e_dpi.setRange(72, 1200)
         self.e_dpi.setValue(300)
         self.e_mm = QSpinBox()
+        self.e_mm.setToolTip("Lebar cetak gambar dalam milimeter. 85 mm memenuhi satu kolom jurnal, 174 mm memenuhi dua kolom; menyetelnya di sini membuat ukuran huruf di gambar sesuai saat dicetak.")
         self.e_mm.setRange(40, 400)
         self.e_mm.setValue(85)
         self.e_pt = QSpinBox()
+        self.e_pt.setToolTip("Ukuran huruf di dalam gambar, dalam poin pada lebar cetak di atas. 7–9 pt lazim diminta jurnal; huruf di bawah 6 pt sering ditolak karena tidak terbaca.")
         self.e_pt.setRange(4, 24)
         self.e_pt.setValue(8)
         self.e_warna = QLineEdit("#2B6FD6, #d4594a")
