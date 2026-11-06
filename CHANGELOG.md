@@ -2,6 +2,41 @@
 
 Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x adalah pra-rilis.
 
+## [Belum dirilis]
+
+Kesiapan pemakaian internasional dan bantuan di dalam aplikasi.
+
+### Baru
+- **Pemilih bahasa ID | EN di bilah alat**, di sebelah tombol tema. Menggantinya menawarkan **Mulai ulang
+  sekarang**, yang menutup jendela lewat pemeriksaan biasa (docking atau MD yang berjalan tetap ditanyakan)
+  lalu menjalankan VirmoLab lagi.
+- **Installer meneruskan bahasa yang dipilih penggunanya** ke aplikasi lewat `HKCU\Software\VirmoLab`.
+  Sebelumnya installer berbahasa Inggris tetap membuka aplikasi berbahasa Indonesia.
+- **Bahasa bawaan mengikuti locale Windows** pada pemasangan yang belum pernah menyetelnya — terutama untuk
+  versi portable, yang tidak melewati installer.
+- **Bantuan kontekstual**: `F1` di dialog mana pun membuka bagian panduan untuk fitur itu, dan
+  **Bantuan › Panduan fitur** mendaftar 38 alat dengan tautan langsung ke bagiannya. Dipasang lewat penyaring
+  kejadian aplikasi, sehingga berlaku untuk seluruh dialog tanpa mengubah tata letaknya.
+- **Dokumen instalasi berbahasa Inggris** (`docs/instalasi_en.html`); antarmuka Inggris membuka versi Inggris
+  sebuah dokumen bila tersedia.
+- **65 tooltip parameter baru** di 21 dialog, menjelaskan nilai yang wajar dan akibat mengubahnya — bukan
+  mengulang rentang yang sudah tertulis di label.
+
+### Diperbaiki
+- **Dialog Sunting di kantong (3D) gagal dibuka sama sekali** untuk ligan dengan nitrogen terprotonasi
+  (lazim pada pH fisiologis, termasuk ligan contoh MK1): `Chem.RemoveHs` menolak sanitasi ulang dengan
+  `AtomValenceException`, di `core/sunting3d.py` dan di diagram 2D dialognya.
+- **Setelah docking selesai, pose terbaik dimuat tetapi viewport tetap tersembunyi** di balik tab Tabel hasil,
+  sehingga pengguna mengira visualisasinya belum ada dan mencarinya dengan klik dua kali. Viewport kini dibawa
+  ke depan beserta pesan yang menunjuk ke tab Hasil.
+- **Memuat pose menuntut klik dua kali.** Satu klik pada baris tabel hasil kini sudah menampilkan posenya;
+  klik dua kali tetap bekerja.
+- Antarmuka Inggris: 100 teks yang masih berbahasa Indonesia diperbaiki, termasuk **seluruh modul farmakologi
+  jaringan**. Penyebabnya tiga: teks yang diberikan lewat konstruktor widget tidak pernah melewati lapisan
+  terjemahan, sepuluh entri kamus berisi terjemahan setengah jadi, dan label figur siap publikasi tidak memakai
+  i18n sama sekali — figur yang ditempel ke naskah berbahasa Inggris tetap bersumbu Indonesia.
+- `dev/uji_alur.py` menimpa widget `JendelaUtama.langkah` dengan pencacah integer, sehingga uji itu selalu gagal.
+
 ## [1.9.1] - 5 November 2026
 
 Rilis perbaikan. Satu kriteria ilmiah yang dapat menyesatkan pembacaan hasil diperbaiki, pemakaian

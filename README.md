@@ -212,7 +212,12 @@ VirmoLab: GPL-3.0-or-later ([`LICENSE`](LICENSE)). Komponen pihak ketiga dan taw
 **VirmoLab** is a free, open-source (GPL-3.0-or-later) Windows desktop application for molecular docking.
 It covers the whole workflow in one window — importing proteins and ligands, preparation, grid box, docking,
 interaction analysis, statistics, and publication-ready export — with no Python, WSL, MGLTools, or command
-line required. The interface is available in Indonesian and English (**Tampilan › Bahasa / Language**).
+line required. Since 1.9 it also carries a seven-stage **network pharmacology** workflow: compounds →
+ADMET filter → targets → disease genes → PPI network with MCC hub ranking → pathway enrichment → report.
+
+The interface runs in **English or Indonesian**, switched with the **ID | EN** buttons in the toolbar (the
+installer also passes your chosen language to the application, and a fresh install follows your Windows
+locale). Methods paragraphs, reports, and publication figures are written in whichever language is active.
 
 Docking engines: AutoDock-GPU (OpenCL, native Windows), AutoDock Vina 1.2.7, AutoDock 4.2.6, and Uni-Dock 1.2
 (GPU batch, via WSL). Optional Linux-only tools (Uni-Dock, OpenFE, GNINA, Boltz-2) install from inside the
@@ -220,8 +225,10 @@ app through **Tools › Install advanced tools (WSL)**; core features never need
 
 Download the installer or the portable build from the
 [Releases](https://github.com/rizkirahmadip-dev/virmolab/releases/latest) page and verify it against
-`SHA256SUMS-<version>.txt`. Documentation ships with the application (Help › User guide) and lives in
-[`docs/`](docs/) (Indonesian). Bug reports:
+`SHA256SUMS-<version>.txt`. Documentation ships with the application (Help › User guide) and lives in [`docs/`](docs/). Installation is
+available in English ([`docs/instalasi_en.html`](docs/instalasi_en.html)); the remaining guides are in
+Indonesian for now. Inside the app, **F1** in any dialog opens the guide section for that feature, and
+**Help › Feature guide** lists every tool. Bug reports:
 [GitHub Issues](https://github.com/rizkirahmadip-dev/virmolab/issues); security reports:
 [`SECURITY.md`](SECURITY.md). VirmoLab sends no project data anywhere — see *Privasi* above.
 
