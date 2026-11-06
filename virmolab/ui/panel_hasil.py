@@ -1,5 +1,5 @@
 """Tab Hasil: satu baris per ligan per job (pose terbaik), dapat diperluas ke semua pose."""
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import Qt, QTimer, Signal
 from PySide6.QtGui import QColor
 from PySide6.QtWidgets import (QHBoxLayout, QHeaderView, QLabel, QLineEdit, QPushButton,
                                QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget)
@@ -109,6 +109,15 @@ class PanelHasil(QWidget):
         h.setStretchLastSection(False)
         self.pohon.itemDoubleClicked.connect(self._klik)
         self.pohon.itemActivated.connect(self._klik)
+        # Satu klik sudah memuat posenya. Klik dua kali tetap bekerja, tetapi tidak lagi menjadi satu-satunya
+        # jalan: pengguna yang baru selesai docking mengklik baris untuk "melihat hasilnya", bukan untuk
+        # memilihnya. Dipanggil lewat timer supaya menelusuri daftar dengan panah tidak memuat tiap baris
+        # yang terlewati.
+        self._t_pilih = QTimer(self)
+        self._t_pilih.setSingleShot(True)
+        self._t_pilih.setInterval(180)
+        self._t_pilih.timeout.connect(self._muat_terpilih)
+        self.pohon.currentItemChanged.connect(lambda *_: self._t_pilih.start())
         self.pohon.itemChanged.connect(lambda *_: self._hitung_centang())
         lay.addWidget(self.pohon, 1)
         self.l_kosong = QLabel("Belum ada hasil docking.\nIkuti langkah 1-4 di panel kiri, lalu klik "
@@ -126,7 +135,7 @@ class PanelHasil(QWidget):
                      "bila GNINA ada di WSL, untuk 10 ligan terbaik. Sel kosong bukan nol. "
                      "Syarat jarak adalah jarak terdekat pose ke residu yang dipilih. "
                      "Baris memakai pose berenergi terbaik yang lolos; pose lain tetap di bawahnya. "
-                     "Klik dua kali baris untuk memuat pose.")
+                     "Klik satu baris untuk menampilkan posenya di Viewport 3D.")
         cat.setObjectName("muted")
         cat.setWordWrap(True)
         cat.setContentsMargins(8, 4, 8, 4)
@@ -227,6 +236,7 @@ class PanelHasil(QWidget):
                             f"{id_angka(format(p.get('tanimoto', 0.0), '.2f'))}.")
 
     def muat(self, baris):
+        self._t_pilih.stop()            # mengisi ulang tabel bukan pilihan pengguna
         """baris: dari core.ekspor.baris_hasil."""
         t = theme.TOKEN[self.mode]
         qc_ada = qc.tersedia()
@@ -373,9 +383,26 @@ class PanelHasil(QWidget):
     def _banding(self):
         self.bandingkan.emit(self.dicentang())
 
+    def _muat_terpilih(self):
+        """Muat pose baris yang sedang aktif (dipicu pemilihan, bukan hanya klik dua kali).
+
+        Hanya saat barisnya benar-benar berganti: memuat ulang pose yang sudah tampil membuat viewport
+        dibangun dua kali dan berakhir kosong.
+        """
+        it = self.pohon.currentItem()
+        d = it.data(1, Qt.UserRole + 1) if it is not None else None
+        if not d:
+            return
+        kunci = tuple(d[:3])
+        if kunci == getattr(self, "_pose_terakhir", None):
+            return
+        self._pose_terakhir = kunci
+        self._klik(it)
+
     def _klik(self, it, _k=0):
         d = it.data(1, Qt.UserRole + 1)
         if d:
+            self._pose_terakhir = tuple(d[:3])
             self.bukaPose.emit(d[0], d[1], d[2] if len(d) > 2 else 1)
 
     def terpilih(self):
