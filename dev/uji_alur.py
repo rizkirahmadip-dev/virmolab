@@ -38,7 +38,7 @@ def hook():
             super().__init__()
             s.resize(1600, 960)
             s.move(20, 20)
-            s.langkah = 0
+            s.n_job = 0        # pencacah job; JANGAN pakai s.langkah: itu widget DaftarLangkah
             s.pelaksana.jobSelesai.connect(s._job_ok)
             QTimer.singleShot(2500, s.l1)
             QTimer.singleShot(400000, lambda: (print("TIMEOUT"), s._foto("dev/uji/gambar/alur_timeout.png"), QApplication.quit()))
@@ -81,8 +81,8 @@ def hook():
         def _job_ok(s, jid):
             j = s.pelaksana.cari(jid)
             s.cetak("JOB", jid, j["mesin"], j["status"], [(l["id"], l["status"], l["energi"], l["detik"]) for l in j["ligan"]])
-            s.langkah += 1
-            if s.langkah == 2:
+            s.n_job += 1
+            if s.n_job == 2:
                 QTimer.singleShot(800, s.l5)
 
         def l5(s):
