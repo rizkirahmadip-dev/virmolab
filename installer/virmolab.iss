@@ -77,6 +77,9 @@ Type: files; Name: "{autoprograms}\{#NamaLama} - Panduan.lnk"
 Type: files; Name: "{autodesktop}\{#NamaLama}.lnk"
 
 [Registry]
+; Bahasa yang dipilih di installer diteruskan ke aplikasi, supaya pengguna tidak ditanya dua kali.
+; Tanpa ini aplikasi selalu mulai dalam Bahasa Indonesia walau installernya berbahasa Inggris.
+Root: HKCU; Subkey: "Software\VirmoLab"; ValueType: string; ValueName: "bahasa"; ValueData: "{language}"; Flags: uninsdeletevalue
 ; asosiasi berkas lama
 Root: HKA; Subkey: "Software\Classes\{#NamaLama}.Cadangan"; ValueType: none; Flags: deletekey
 Root: HKA; Subkey: "Software\Classes\{#NamaLama}.Struktur"; ValueType: none; Flags: deletekey

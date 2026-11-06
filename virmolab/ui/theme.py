@@ -165,6 +165,10 @@ QPushButton#ruang {{ background: transparent; border: 1px solid {t['line']}; bor
                     color: {t['ink2']}; margin: 0; }}
 QPushButton#ruang:checked {{ background: {t['accs']}; border-color: {t['acc']}; color: {t['acct']}; font-weight: 600; }}
 QPushButton#ruang:hover:!checked {{ background: {t['hov']}; }}
+QPushButton#bahasa {{ background: transparent; border: 1px solid {t['line']}; border-radius: 0; padding: 3px 9px;
+                     color: {t['ink2']}; margin: 0; font-size: 8pt; font-weight: 600; letter-spacing: 0.5px; }}
+QPushButton#bahasa:checked {{ background: {t['accs']}; border-color: {t['acc']}; color: {t['acct']}; }}
+QPushButton#bahasa:hover:!checked {{ background: {t['hov']}; }}
 QToolButton#antreanRingkas {{ padding: 1px 8px; border-radius: 2px; color: {t['ink2']}; }}
 QToolButton#antreanRingkas:checked {{ background: {t['accs']}; color: {t['acct']}; border-color: transparent; }}
 QToolButton#antreanRingkas[perhatian="true"] {{ color: {t['bad']}; font-weight: 600; }}

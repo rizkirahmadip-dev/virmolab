@@ -8,7 +8,7 @@ from pathlib import Path
 
 from PySide6.QtCore import QTimer, QUrl
 from PySide6.QtGui import QDesktopServices
-from PySide6.QtWidgets import QFileDialog, QMessageBox
+from PySide6.QtWidgets import QButtonGroup, QFileDialog, QMessageBox
 
 from ..core import molekul
 from ..core.proyek import nama_aman
@@ -157,9 +157,47 @@ class MediaAnimasi:
             self.log.tulis(f"Ligan digambar (Ketcher): {d.hasil_nama} {d.hasil_smiles}")
 
     def ganti_bahasa(self, kode):
-        if self.st.value("bahasa", "id") == kode:
+        """Simpan pilihan bahasa, lalu tawarkan mulai ulang.
+
+        Lapisan terjemahan memasang pembungkus pada kelas Qt saat aplikasi dimulai (lihat i18n.pasang),
+        sehingga bahasa tidak dapat ditukar pada jendela yang sudah terbentuk. Alih-alih meminta pengguna
+        menutup sendiri, mulai ulang ditawarkan di tempat.
+        """
+        from .. import i18n
+        kini = self.st.value("bahasa", "") or i18n.bahasa_bawaan()
+        if kini == kode:
+            self._segar_tombol_bahasa(kode)
             return
         self.st.setValue("bahasa", kode)
-        QMessageBox.information(self, "Bahasa / Language",
-                                "Bahasa antarmuka akan berganti setelah VirmoLab dibuka ulang.\n"
-                                "The interface language will change after VirmoLab is restarted.")
+        self.st.sync()
+        self._segar_tombol_bahasa(kode)
+        k = QMessageBox(QMessageBox.Question, "Bahasa / Language",
+                        "Bahasa antarmuka berganti setelah VirmoLab dibuka ulang.\n"
+                        "The interface language changes after VirmoLab is restarted.", parent=self)
+        b_ulang = k.addButton("Mulai ulang sekarang / Restart now", QMessageBox.AcceptRole)
+        k.addButton("Nanti / Later", QMessageBox.RejectRole)
+        k.setDefaultButton(b_ulang)
+        k.exec()
+        if k.clickedButton() is b_ulang:
+            self.mulai_ulang()
+
+    def _segar_tombol_bahasa(self, kode):
+        """Samakan keadaan tombol ID | EN dengan setelan (menu dan tombol menyetel nilai yang sama)."""
+        for b in getattr(self, "grp_bahasa", QButtonGroup(self)).buttons():
+            b.setChecked(b.property("kode") == kode)
+
+    def mulai_ulang(self):
+        """Tutup jendela dengan pemeriksaan biasa, lalu jalankan VirmoLab lagi.
+
+        closeEvent tetap dijalankan, sehingga docking atau MD yang sedang berjalan ditanyakan lebih dulu dan
+        dijeda dengan rapi; bila pengguna membatalkan penutupan, aplikasi baru tidak jadi dijalankan.
+        """
+        import sys
+        from PySide6.QtCore import QProcess
+        from ..core import paths
+        if not self.close():
+            return
+        if getattr(sys, "frozen", False):
+            QProcess.startDetached(str(paths.EXE_UTAMA), [])
+        else:
+            QProcess.startDetached(sys.executable, ["-m", "virmolab"], str(paths.AKAR))
