@@ -12,6 +12,7 @@ from PySide6.QtWidgets import (QApplication, QButtonGroup, QDockWidget, QFileDia
                                QMessageBox, QSystemTrayIcon, QTabWidget, QToolBar, QToolButton, QVBoxLayout,
                                QWidget)
 
+from .. import i18n
 from ..core import analisis, arti, catat, laporan
 from ..core.laporan import id_angka
 from ..core import antrean as antreanmod
@@ -433,7 +434,7 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
 
     def _aksi_langkah(self, k):
         tab = {"tab_hasil": self.hasil, "tab_diagram": self.diagram, "tab_sifat": self.sifat,
-               "tab_statistik": self.statistik, "tab_uji": self.uji}
+               "tab_statistik": self.statistik, "tab_uji": self.uji, "tab_viewport": self.w_view}
         if k in tab:
             self.atur_ruang("analisis", dari_langkah=True)
             self.tab_tengah.setCurrentWidget(tab[k])
@@ -929,12 +930,14 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
             grup_mode.addAction(a)
         m_bhs = m.addMenu("Bahasa / Language")
         grup = QActionGroup(m_bhs)
-        kini = self.st.value("bahasa", "id")
+        kini = self.st.value("bahasa", "") or i18n.bahasa_bawaan()
+        self.aksi_bahasa = {}
         for kode, nama in (("id", "Bahasa Indonesia"), ("en", "English")):
             a = m_bhs.addAction(nama, lambda k=kode: self.ganti_bahasa(k))
             a.setCheckable(True)
             a.setChecked(kini == kode)
             grup.addAction(a)
+            self.aksi_bahasa[kode] = a
 
         # ---------------------------------------------------------------- Siapkan
         m = menu("&Siapkan")
@@ -1166,6 +1169,12 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
                 A("Tur aplikasi", None, self.tur, None, "Sorot bagian-bagian jendela satu per satu (± 1 menit)"),
                 A("Pintasan keyboard", None, self.pintasan, "Ctrl+/", "Daftar semua pintasan keyboard dan mouse"),
                 A("Apa yang baru", None, lambda: self.apa_baru(), None, "Ringkasan perubahan tiap versi")))
+        # Panduan memuat penjelasan tiap alat, tetapi seluruhnya di dalam satu dokumen panjang; daftar
+        # ini membuka bagian yang dicari langsung, tanpa menggulir mencarinya.
+        from . import bantuan_fitur
+        self._sub(m, "Panduan fitur",
+                  [A(j_, None, lambda _=False, b_=b_, a_=a_: self.buka_panduan(b_, a_))
+                   for j_, b_, a_ in bantuan_fitur.DAFTAR])
         self._sub(m, "Dokumentasi", [A(t, None, lambda _=False, k=k: self.buka_panduan(k))
                                      for k, t in (("instalasi", "Instalasi"), ("pindah_laptop", "Pindah laptop"),
                                                   ("gpu", "Setup GPU"), ("troubleshooting", "Mengatasi masalah"),
@@ -1324,6 +1333,25 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
                 tb.addWidget(ruang)
             else:
                 tb.addWidget(sp)
+        # Pemilih bahasa ditempatkan di sebelah tombol tema: keduanya preferensi tampilan, dan calon pengguna
+        # di luar Indonesia melihatnya tanpa perlu menelusuri menu lebih dulu.
+        ruang_bhs = QWidget()
+        hb = QHBoxLayout(ruang_bhs)
+        hb.setContentsMargins(0, 0, 6, 0)
+        hb.setSpacing(0)
+        self.grp_bahasa = QButtonGroup(self)
+        bhs_kini = self.st.value("bahasa", "") or i18n.bahasa_bawaan()
+        for kode, nama in (("id", "ID"), ("en", "EN")):
+            b = QPushButton(nama)
+            b.setObjectName("bahasa")
+            b.setCheckable(True)
+            b.setChecked(bhs_kini == kode)
+            b.setProperty("kode", kode)
+            b.setToolTip("Bahasa antarmuka: Indonesia / Inggris\nInterface language: Indonesian / English")
+            b.clicked.connect(lambda _=False, k=kode: self.ganti_bahasa(k))
+            self.grp_bahasa.addButton(b)
+            hb.addWidget(b)
+        tb.addWidget(ruang_bhs)
         ikon_saja(self.a_tema)
 
         # toolbar kecil di atas viewport: gaya cepat
@@ -3468,8 +3496,10 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
             isi = f"{len(ok)}/{len(j['ligan'])} ligan · terbaik {terbaik['nama']} {terbaik['energi']:.2f} kcal/mol"
             if not j.get("validasi"):
                 self.ke_langkah(4)
-                # Otomatis buka pose terbaik di binding site
-                QTimer.singleShot(250, lambda: self.buka_pose(jid, terbaik["id"], 1))
+                # Otomatis buka pose terbaik di binding site, lalu PERLIHATKAN viewport-nya. Tanpa langkah
+                # kedua, pose memang dimuat tetapi tersembunyi di balik tab Tabel hasil, dan pengguna
+                # mengira visualisasinya belum ada.
+                QTimer.singleShot(250, lambda: self._tampilkan_pose_terbaik(jid, terbaik["id"]))
             if not any(x["status"] in ("berjalan", "menunggu") for x in self.proyek.job):
                 self._tampil_bawah(False)   # sukses: antrean dilipat lagi (tetap di bilah status)
         elif j["status"] == "dibatalkan":
@@ -3481,6 +3511,14 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
             self.pesan.tulis(f"{judul} - {isi}")
         self.notifikasi(judul, isi, gagal=j["status"] == "gagal")
         self._simpan_diam()
+
+    def _tampilkan_pose_terbaik(self, jid, lid):
+        """Muat pose terbaik dan bawa Viewport 3D ke depan, supaya hasil docking langsung terlihat."""
+        if self.buka_pose(jid, lid, 1) is None:
+            return
+        self.tab_tengah.setCurrentWidget(self.w_view)
+        self.statusBar().showMessage(
+            "Pose terbaik ditampilkan di Viewport 3D. Peringkat semua ligan ada di tab Hasil.", 8000)
 
     def aksi_antrean(self, aksi, jid):
         pl = self.pelaksana
@@ -4908,12 +4946,31 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
         kerja.jalankan(pindah.impor, f, self.st, tujuan, log=self.log.tulis, selesai=selesai, galat=self._galat)
 
     # --------------------------------------------------------------- help
-    def buka_panduan(self, nama):
+    def buka_panduan(self, nama, anchor=""):
+        """Buka dokumen panduan; `anchor` melompat ke bagiannya (mis. "qsar")."""
+        nama, _, dari_nama = nama.partition("#")
+        anchor = anchor or dari_nama
+        # Versi Inggris dokumen dipakai bila ada: pengguna antarmuka Inggris tidak boleh mendarat di
+        # halaman berbahasa Indonesia saat menekan F1.
+        if i18n.inggris() and "." not in nama and (paths.DOCS / f"{nama}_en.html").exists():
+            nama = f"{nama}_en"
         f = paths.DOCS / (nama if "." in nama else f"{nama}.html")
         if not f.exists():
             self._galat(f"Dokumen {f.name} tidak ditemukan di {paths.DOCS}.")
             return
-        QDesktopServices.openUrl(QUrl.fromLocalFile(str(f)))
+        url = QUrl.fromLocalFile(str(f))
+        if anchor:
+            url.setFragment(anchor)
+        QDesktopServices.openUrl(url)
+
+    def bantuan_dialog(self, d):
+        """Buka bagian panduan untuk dialog `d`; jatuh ke panduan umum bila belum dipetakan."""
+        from . import bantuan_fitur
+        tujuan = bantuan_fitur.untuk(d)
+        if tujuan:
+            self.buka_panduan(tujuan[0], tujuan[1])
+        else:
+            self.buka_panduan("panduan")
 
     def uji_mandiri(self):
         from ..core import ujimandiri

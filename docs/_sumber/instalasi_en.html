@@ -1,0 +1,93 @@
+<h1>Installation</h1>
+<p class="lead">VirmoLab runs on 64-bit Windows 10/11 with no need for Python, WSL, MGLTools, or any other program. The Vina and AutoDock-GPU docking engines are bundled. The advanced tools that exist only for Linux (Uni-Dock, OpenFE, GNINA, Boltz-2) are optional and install from inside the application; see <a href="#alat-lanjutan">Advanced tools</a>.</p>
+
+<h2>Minimum requirements</h2>
+<table>
+<tr><th></th><th>Minimum</th><th>Recommended</th></tr>
+<tr><td>System</td><td>Windows 10 64-bit</td><td>Latest Windows 10/11 64-bit</td></tr>
+<tr><td>RAM</td><td>4 GB</td><td>8 GB or more</td></tr>
+<tr><td>Disk space</td><td>± 1.8 GB (program) + room for projects</td><td>SSD</td></tr>
+<tr><td>GPU</td><td>Not required (Vina on CPU)</td><td>NVIDIA/AMD/Intel with an up-to-date OpenCL driver (AutoDock-GPU)</td></tr>
+<tr><td>Display</td><td>1366 × 768</td><td>1920 × 1080, 100–200 % scaling</td></tr>
+</table>
+
+<h2>Option A — Installer (recommended)</h2>
+<ol class="langkah">
+<li>Run <code>VirmoLab-Setup-x.y.z.exe</code>. If Windows SmartScreen appears (“Windows protected your PC”), click <b>More info › Run anyway</b> — the installer is not yet signed with a paid certificate.</li>
+<li>Choose who VirmoLab is installed for. The default is this user only, in <code>%LOCALAPPDATA%\Programs\VirmoLab</code>, with no administrator rights. Choose all users for <code>C:\Program Files\VirmoLab</code> (administrator rights needed).</li>
+<li>Choose the optional tasks: desktop icon, and associating <code>.pdbqt</code>/<code>.vmdbackup</code> files with VirmoLab.</li>
+<li>Click <b>Install</b>, then <b>Finish</b> to open VirmoLab.</li>
+</ol>
+<p>Uninstall through <b>Settings › Apps › VirmoLab › Uninstall</b>. Projects in the working folder (<code>Documents\VirmoLab</code> by default) are not removed.</p>
+
+<h2>Option B — Portable build (no installation)</h2>
+<ol class="langkah">
+<li>Extract <code>VirmoLab-Portable-x.y.z.zip</code> into any folder (a USB stick, or <code>D:\VirmoLab</code>). Avoid protected folders such as <code>C:\Program Files</code>.</li>
+<li>Run <code>VirmoLab.exe</code>.</li>
+</ol>
+<p>The portable build keeps its settings in <code>data\pengaturan.ini</code> and its default projects in <code>Proyek\</code> inside that same folder — it never touches the registry. The portable marker is the file <code>portable.flag</code>; do not delete it.</p>
+
+<h2>First launch</h2>
+<figure><img src="gambar/01_wizard.png" alt="First-run wizard" style="max-width:640px"><figcaption>The system-check wizard.</figcaption></figure>
+<ol class="langkah">
+<li><b>System check</b>: GPU, driver, CPU, RAM, and the default docking mode (GPU when OpenCL is available, CPU otherwise). If a GPU is present but OpenCL is not, follow the driver guidance shown — see <a href="gpu.html">GPU setup</a>.</li>
+<li><b>Companion software</b>: PyMOL, ChimeraX, and Discovery Studio Visualizer are detected for the “Open in…” button. All of them are optional.</li>
+<li><b>Working folder</b>: where new projects are stored.</li>
+</ol>
+<p>GPU detection runs again every time VirmoLab starts, so nothing needs configuring after moving to another laptop or updating a driver. The wizard can be reopened from <b>Tools › Check system and GPU…</b>.</p>
+
+<h2 id="alat-lanjutan">Advanced tools (optional, through WSL)</h2>
+<p>Four tools exist only for Linux and are therefore not part of the installer. The core features (preparation,
+docking with Vina and AutoDock-GPU, analysis, reporting) do not need them. When you do need them, install them
+from inside VirmoLab through <b>Tools › Install advanced tools (WSL)…</b>. They are installed into WSL (Windows
+Subsystem for Linux), in the Linux home folder <code>~/virmolab-alat</code>; no project data is sent anywhere.</p>
+<table>
+<tr><th>Package</th><th>Contents</th><th>Used for</th><th>Disk space</th><th>Time (measured 25 Oct 2026)</th></tr>
+<tr><td>GPU docking &amp; RBFE</td><td>Uni-Dock 1.2, OpenFE 1.13</td><td>Batch docking on an NVIDIA GPU; relative
+free energy (RBFE)</td><td>± 15 GB (± 19 GB during installation)</td><td>± 10 minutes</td></tr>
+<tr><td>Co-folding &amp; CNN scoring</td><td>Boltz-2 2.2.1 with its weights, GNINA 1.3.3</td><td>Protein–ligand
+co-folding and peptide docking; CNN rescoring</td><td>± 17 GB</td><td>± 14 minutes</td></tr>
+</table>
+<p>Installation times were measured on a ± 12 MB/s (± 100 Mbps) connection; on a slow link they can be several times longer.</p>
+
+<h3>Prerequisites</h3>
+<p>The dialog checks all of these before the <b>Install</b> button becomes active, and offers a fix for whatever is missing.</p>
+<ul>
+<li><b>Windows 10 version 2004 (build 19041) or newer</b>, or Windows 11.</li>
+<li><b>WSL 2 with a Linux distribution</b> (Ubuntu). If there is none, the <b>Install WSL…</b> button opens the
+Windows administrator consent dialog. After that, restart, open Ubuntu once from the Start menu to create a
+username and password, then reopen the dialog.</li>
+<li><b>An NVIDIA GPU</b> with an up-to-date Windows driver for Uni-Dock and GNINA (both are CUDA-only). Without an
+NVIDIA GPU those two are skipped; OpenFE and Boltz-2 still install and run on the CPU, but very slowly.</li>
+<li><b>Disk space</b> on the Windows drive holding the WSL virtual disk (usually C:). That virtual disk grows on
+its own and does not shrink automatically after files are deleted.</li>
+<li><b>Internet access</b> to conda-forge, GitHub, PyPI, PyTorch, and Hugging Face. On a campus network a proxy may
+be needed (the <code>HTTPS_PROXY</code> variable inside Ubuntu).</li>
+</ul>
+
+<h3>Installing</h3>
+<ol class="langkah">
+<li>Open <b>Tools › Install advanced tools (WSL)…</b> and wait for the prerequisite check (a few seconds).</li>
+<li>Click <b>Install</b> on the package you need. The step in progress, its elapsed time, and the log appear under
+<b>Progress</b>; the dialog must stay open.</li>
+<li>When it finishes, the feature buttons become active immediately, without restarting VirmoLab.</li>
+</ol>
+<p><b>Stop</b> halts every installer process inside WSL. Downloads that already finished are kept, so clicking
+<b>Install</b> again resumes — including after a dropped connection. The full log for each package is in
+<code>%LOCALAPPDATA%\VirmoLab\log\alat_wsl_gpu_rbfe.log</code> and <code>alat_wsl_cofolding.log</code>.</p>
+<p>If the computer has more than one distribution, choose which one under <b>Prerequisites</b>; VirmoLab uses that
+distribution for every advanced tool.</p>
+
+<h3>Removing</h3>
+<p>In an Ubuntu terminal: <code>rm -rf ~/virmolab-alat ~/.boltz</code>. The space on drive C: only returns once the
+WSL virtual disk is compacted, for example with <code>wsl --manage Ubuntu --set-sparse true</code> in PowerShell
+(WSL 2.0 and later).</p>
+
+<h2>File locations</h2>
+<table>
+<tr><th>Contents</th><th>Installed</th><th>Portable</th></tr>
+<tr><td>Program</td><td>Installation folder</td><td>Extracted folder</td></tr>
+<tr><td>Settings</td><td>Registry <code>HKCU\Software\VirmoLab</code></td><td><code>data\pengaturan.ini</code></td></tr>
+<tr><td>Logs (for bug reports)</td><td><code>%LOCALAPPDATA%\VirmoLab\log</code></td><td><code>data\log</code></td></tr>
+<tr><td>Projects</td><td><code>Documents\VirmoLab</code> (can be changed)</td><td><code>Proyek\</code></td></tr>
+</table>

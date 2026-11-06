@@ -82,6 +82,8 @@ def main():
     i18n.pasang(app)          # bahasa antarmuka (sebelum modul UI diimpor)
     from .ui.mainwindow import JendelaUtama
     w = JendelaUtama()
+    from .ui import bantuan_dialog
+    bantuan_dialog.pasang(app, w)      # F1 di dialog mana pun membuka bagian panduannya
     w.showMaximized()
     # buka dari Explorer ("Open with" / asosiasi berkas)
     berkas = [a for a in arg if os.path.exists(a)]

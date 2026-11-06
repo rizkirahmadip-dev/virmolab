@@ -332,7 +332,9 @@ class PanelLangkah(QStackedWidget):
 
         self.s_hasil = _status()
         isi_hasil = _kolom(self.s_hasil, 4,
-                           A("tab_hasil", _tombol("Tabel hasil", ikon="table", tip="Peringkat ΔG semua ligan; klik dua kali untuk melihat pose")),
+                           A("tab_viewport", _tombol("Lihat pose di Viewport 3D", True, ikon="eye",
+                                                     tip="Tampilkan pose yang sedang dipilih beserta interaksinya")),
+                           A("tab_hasil", _tombol("Tabel hasil", ikon="table", tip="Peringkat ΔG semua ligan; klik satu baris untuk melihat posenya")),
                            A("tab_diagram", _tombol("Diagram interaksi 2D", ikon="diagram")),
                            A("tab_sifat", _tombol("Sifat ligan && BOILED-Egg", ikon="lig")),
                            A("mpo", _tombol("MPO && Radar Chart…", ikon="chart", tip="Multi-Parameter Optimization dan grafik radar ligan")),
