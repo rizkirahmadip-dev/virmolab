@@ -7,8 +7,8 @@ authors:
     given-names: "Rizki Rahmadi"
     name-suffix: "apt., M. Farm"
     orcid: "https://orcid.org/0000-0002-5275-7211"
-version: 1.9.1
-date-released: "2026-11-05"
+version: 1.9.2
+date-released: "2026-11-06"
 license: "GPL-3.0-or-later"
 repository-code: "https://github.com/rizkirahmadip-dev/virmolab"
 doi: "10.5281/zenodo.23978036"

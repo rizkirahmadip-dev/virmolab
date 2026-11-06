@@ -2,9 +2,10 @@
 
 Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x adalah pra-rilis.
 
-## [Belum dirilis]
+## [1.9.2] - 6 November 2026
 
-Kesiapan pemakaian internasional dan bantuan di dalam aplikasi.
+Kesiapan pemakaian internasional, bantuan di dalam aplikasi, dan empat perbaikan dari laporan
+pengguna pertama di luar laptop pengembang.
 
 ### Baru
 - **Pemilih bahasa ID | EN di bilah alat**, di sebelah tombol tema. Menggantinya menawarkan **Mulai ulang
@@ -35,6 +36,11 @@ Kesiapan pemakaian internasional dan bantuan di dalam aplikasi.
   jaringan**. Penyebabnya tiga: teks yang diberikan lewat konstruktor widget tidak pernah melewati lapisan
   terjemahan, sepuluh entri kamus berisi terjemahan setengah jadi, dan label figur siap publikasi tidak memakai
   i18n sama sekali — figur yang ditempel ke naskah berbahasa Inggris tetap bersumbu Indonesia.
+- **Tab Diagram 2D tidak punya cara mengganti senyawa.** Satu-satunya jalan adalah kembali ke tab Hasil,
+  mengklik baris lain, lalu kembali lagi. Kini ada pemilih ligan di bilah atas tab itu sendiri, lengkap
+  dengan ΔG tiap senyawa (laporan pengguna).
+- **Catatan "Belum divalidasi (redocking)." terbaca seperti galat** — menyebut kekurangan tanpa menyebut
+  tindakannya, dan tanpa mengatakan bahwa validasi itu opsional (laporan pengguna).
 - `dev/uji_alur.py` menimpa widget `JendelaUtama.langkah` dengan pencacah integer, sehingga uji itu selalu gagal.
 
 ## [1.9.1] - 5 November 2026
