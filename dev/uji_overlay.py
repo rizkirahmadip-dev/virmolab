@@ -7,7 +7,24 @@ import virmolab.app as A
 from PySide6.QtWidgets import QApplication, QMessageBox
 Path("dev/uji/gambar").mkdir(parents=True, exist_ok=True)  # keluaran gambar uji
 QMessageBox.information = staticmethod(lambda *a, **k: None)
-P = sorted(Path("dev/uji/kerja").glob("*.vmd"))[-1].resolve()
+# Proyek .vmd terakhir belum tentu memuat job validasi: isi folder kerja bergantung pada uji mana yang
+# terakhir berjalan, sehingga memakai [-1] membuat uji ini gagal menurut urutan regresi, bukan menurut
+# kode yang diujinya. Pilih proyek terbaru yang benar-benar punya job validasi.
+def _proyek_validasi():
+    import json
+    for p in sorted(Path("dev/uji/kerja").glob("*.vmd"), reverse=True):
+        f = p / "proyek.json" if p.is_dir() else p
+        try:
+            d = json.loads(Path(f).read_text(encoding="utf-8"))
+        except Exception:
+            continue
+        if any(j.get("validasi") for j in d.get("job", [])):
+            return p.resolve()
+    raise SystemExit("LEWAT: belum ada proyek dengan job validasi di dev/uji/kerja "
+                     "(jalankan uji_validasi atau uji_alur lebih dulu)")
+
+
+P = _proyek_validasi()
 def hook():
     from virmolab.ui import mainwindow
     class U(mainwindow.JendelaUtama):

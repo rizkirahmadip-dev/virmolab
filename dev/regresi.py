@@ -27,7 +27,8 @@ ABAIKAN = re.compile(r"GL_INVALID|gl_utils|^js:|DevTools|MFT name|handler_name|v
 BURUK = re.compile(r"Traceback|\bGAGAL\b|\bGALAT\b|\bTIMEOUT\b|fatal exception")
 
 # uji yang memakai keluaran uji lain harus berjalan sesudahnya (urutan abjad saja tidak cukup)
-SESUDAH = {"uji_impor_eksternal_gui": "uji_md_gui"}     # butuh proyek MD + hasil docking yang dibuat uji_md_gui
+SESUDAH = {"uji_impor_eksternal_gui": "uji_md_gui",    # butuh proyek MD + hasil docking yang dibuat uji_md_gui
+           "uji_overlay": "uji_tahap3"}               # butuh proyek berisi job validasi redocking
 nama = sys.argv[1:] or [f.stem for f in sorted((AKAR / "dev").glob("uji_*.py")) if f.stem not in LEWATI]
 for n_, sesudah_ in SESUDAH.items():
     if n_ in nama and sesudah_ in nama and nama.index(n_) < nama.index(sesudah_):
