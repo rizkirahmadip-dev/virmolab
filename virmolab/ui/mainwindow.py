@@ -125,6 +125,8 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
         self.diagram = TabDiagram()
         self.diagram.minta.connect(self._gambar_diagram)
         self.diagram.ekspor.connect(self._diagram_cepat)
+        self.diagram.pilihPose.connect(
+            lambda j, l, k: self.buka_pose(j, l, k, ke_viewport=False))   # ganti ligan tanpa pindah tab
         self.tab_tengah.addTab(self.diagram, "Diagram 2D")
         self.sifat = TabSifat()
         self.sifat.minta.connect(lambda: self._muat_sifat(paksa=True))
@@ -1513,11 +1515,18 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
             QTimer.singleShot(8000, self._cek_pembaruan_otomatis)
 
     # ------------------------------------------------------------- objek
-    def _fokus(self, sel):
+    def _fokus(self, sel, pindah_tab=True):
         """Pusatkan kamera; bila tab Viewport tersembunyi, tampilkan dulu lalu fokus setelah kanvas aktif
-        (WebGL tidak merender benar saat tab tersembunyi)."""
+        (WebGL tidak merender benar saat tab tersembunyi).
+
+        `pindah_tab=False` untuk pemanggil yang sengaja berada di tab lain — kameranya tetap dipusatkan,
+        tetapi penggunanya tidak dilempar keluar dari tab yang sedang ia baca.
+        """
         if self.tab_tengah.currentWidget() is self.w_view and self.stak_view.currentIndex() == 0:
             self.viewer.js("fokus", sel)
+            return
+        if not pindah_tab:
+            QTimer.singleShot(250, lambda: self.viewer.js("fokus", sel))
             return
         self.tab_tengah.setCurrentWidget(self.w_view)
         QTimer.singleShot(250, lambda: (self.viewer.js("segarkanKanvas"), self.viewer.js("fokus", sel)))
@@ -3578,7 +3587,7 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
             self.hier.set_centang(o.id, True)
         return o
 
-    def buka_pose(self, jid, lid, k=1, maks=9):
+    def buka_pose(self, jid, lid, k=1, maks=9, ke_viewport=True):
         """Muat pose hasil satu ligan sebagai objek di grup 'Hasil · <ligan>'; pose k ditampilkan & dipilih."""
         pr = self.proyek
         j = self.pelaksana.cari(jid)
@@ -3652,7 +3661,7 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
         if sasaran:
             if not self.a_inter.isChecked():
                 self.a_inter.setChecked(True)
-            self._fokus({"id": sasaran.id})
+            self._fokus({"id": sasaran.id}, pindah_tab=ke_viewport)
             self.hier.pilih_objek(sasaran.id)
             self.pilih_objek(sasaran.id)
             self.analisis_objek(sasaran)
@@ -3661,7 +3670,16 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
             n_int = len(self._aktif_inter.get("daftar", [])) if self._aktif_inter else 0
             self.statusBar().showMessage(
                 f"Pose {k} ({l['nama']}) di binding site · ΔG = {e:.2f} kcal/mol · {n_int} interaksi aktif", 6000)
-        self.tab_tengah.setCurrentWidget(self.w_view)
+        # Pemanggil yang sudah berada di tab lain (mis. pemilih ligan di Diagram 2D) tidak boleh dilempar
+        # ke viewport: ia sedang melihat tab itu justru untuk membandingkan senyawa di sana.
+        if ke_viewport:
+            self.tab_tengah.setCurrentWidget(self.w_view)
+        # Pemilih ligan di tab Diagram 2D ikut berpindah, supaya tab itu selalu menunjukkan pose yang sama
+        # dengan viewport — dari mana pun posenya dibuka.
+        try:
+            self.diagram.set_daftar(eksmod.baris_hasil(self.proyek) if self.proyek else [], (jid, lid))
+        except Exception:
+            pass
         self.minta_simpan()
         return sasaran
 
@@ -3799,7 +3817,12 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
 
     # ------------------------------------------------------------ analisis
     def _muat_hasil(self):
-        self.hasil.muat(eksmod.baris_hasil(self.proyek) if self.proyek else [])
+        baris = eksmod.baris_hasil(self.proyek) if self.proyek else []
+        self.hasil.muat(baris)
+        # Tab Diagram 2D punya pemilih ligannya sendiri; isinya mengikuti tabel hasil.
+        info = getattr(self.prop, "_pose_aktif", None) or {}
+        self.diagram.set_daftar(baris, (info.get("job"), info.get("lid"))
+                                if info.get("job") and info.get("lid") else None)
         self.segarkan_langkah()
         self._sifat_kotor = self._stat_kotor = True
         self._tab_berganti()

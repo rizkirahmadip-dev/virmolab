@@ -2,10 +2,12 @@
 from PySide6.QtCore import QByteArray, QRectF, Qt, Signal
 from PySide6.QtGui import QColor, QPainter
 from PySide6.QtSvg import QSvgRenderer
-from PySide6.QtWidgets import (QCheckBox, QGridLayout, QHeaderView, QLabel, QPushButton, QToolBar,
+from PySide6.QtWidgets import (QCheckBox, QComboBox, QGridLayout, QHeaderView, QLabel, QPushButton,
+                               QToolBar,
                                QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget)
 
 from ..core.laporan import id_angka
+from . import kit
 from ..core.analisis import KRITERIA, NAMA_JENIS, URUT_JENIS
 from . import theme
 from .panels import judul_seksi
@@ -158,6 +160,7 @@ class KanvasSvg(QWidget):
 class TabDiagram(QWidget):
     minta = Signal()           # gambar ulang (opsi berubah)
     ekspor = Signal(str)       # salin | svg | png
+    pilihPose = Signal(str, str, int)   # job, lid, peringkat — ganti ligan tanpa pindah tab
 
     def __init__(self):
         super().__init__()
@@ -165,6 +168,15 @@ class TabDiagram(QWidget):
         lay.setContentsMargins(0, 0, 0, 0)
         lay.setSpacing(0)
         bar = QToolBar()
+        # Pemilih ligan di tab ini sendiri: tanpa itu, berganti senyawa menuntut kembali ke tab Hasil,
+        # mengklik baris lain, lalu kembali lagi ke sini.
+        bar.addWidget(QLabel("Ligan:"))
+        self.c_ligan = QComboBox()
+        self.c_ligan.setMinimumWidth(220)
+        self.c_ligan.setToolTip("""Ligan yang digambar. Daftarnya mengikuti hasil docking, terurut dari ΔG terbaik.""")
+        self.c_ligan.activated.connect(self._ganti_ligan)
+        bar.addWidget(self.c_ligan)
+        bar.addWidget(QLabel("   "))
         self.c_vdw = QCheckBox("Kontak van der Waals")
         self.c_vdw.setChecked(True)
         self.c_vdw.toggled.connect(self.minta)
@@ -184,11 +196,35 @@ class TabDiagram(QWidget):
         lay.addWidget(bar)
         self.kanvas = KanvasSvg()
         lay.addWidget(self.kanvas, 1)
-        self.l_kosong = QLabel("Belum ada diagram. Pilih pose atau ligan, lalu buka tab ini.")
+        self.l_kosong = QLabel("Belum ada diagram. Jalankan docking lebih dulu; setelah itu ligan dapat dipilih di bilah atas tab ini.")
         self.l_kosong.setObjectName("muted")
         self.l_kosong.setAlignment(Qt.AlignCenter)
         lay.addWidget(self.l_kosong)
         self.svg = ""
+
+    def _ganti_ligan(self, i):
+        d = self.c_ligan.itemData(i)
+        if d:
+            self.pilihPose.emit(d[0], d[1], d[2])
+
+    def set_daftar(self, baris, aktif=None):
+        """Isi pemilih ligan dari baris hasil docking; `aktif` = (job, lid) yang sedang digambar."""
+        self.c_ligan.blockSignals(True)
+        self.c_ligan.clear()
+        for b in baris:
+            label = b.get("ligan") or b.get("nama") or b.get("lid", "")
+            e = b.get("energi")
+            if isinstance(e, (int, float)):
+                label += " · " + kit.f(e, 2, "kcal/mol")   # koma desimal & minus asli, seperti tabel hasil
+            self.c_ligan.addItem(label, (b["job"], b["lid"], b.get("peringkat") or 1))
+        if aktif:
+            for i in range(self.c_ligan.count()):
+                d = self.c_ligan.itemData(i)
+                if d and (d[0], d[1]) == tuple(aktif):
+                    self.c_ligan.setCurrentIndex(i)
+                    break
+        self.c_ligan.setEnabled(self.c_ligan.count() > 1)
+        self.c_ligan.blockSignals(False)
 
     def tampil(self, svg, latar):
         self.svg = svg
