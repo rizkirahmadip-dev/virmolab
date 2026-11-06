@@ -521,7 +521,10 @@ class JendelaUtama(PembukaDialog, KomposerFigur, MediaAnimasi, QMainWindow):
             nama_skor = "skor kovalen" if terbaik[0].get("kovalen") else "ΔG"
             t5 = ok(f"{n_hasil} hasil docking") + f" · {nama_skor} terbaik {kit.f(dg, 2, 'kcal/mol')}"
             if not getattr(pr, "validasi", None):
-                t5 += "<br>" + catat("Belum divalidasi (redocking).")
+                # Catatan ini pernah terbaca seperti galat: ia menyebut kekurangan tanpa menyebut
+                # tindakannya, dan tanpa mengatakan bahwa validasi memang opsional.
+                t5 += "<br>" + catat("Protokol belum divalidasi — Analisis › Validasi redocking "
+                                     "(opsional, disarankan sebelum publikasi).")
         else:
             s5 = ("belum", "belum ada")
             t5 = "Belum ada hasil. Jalankan docking di langkah 4."
