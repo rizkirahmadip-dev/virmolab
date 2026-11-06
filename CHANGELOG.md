@@ -41,6 +41,10 @@ pengguna pertama di luar laptop pengembang.
   dengan ΔG tiap senyawa (laporan pengguna).
 - **Catatan "Belum divalidasi (redocking)." terbaca seperti galat** — menyebut kekurangan tanpa menyebut
   tindakannya, dan tanpa mengatakan bahwa validasi itu opsional (laporan pengguna).
+- **Impor banyak senyawa dari PubChem ditolak seluruhnya dengan 503.** PubChem membatasi 5 permintaan
+  per detik; aplikasi menjalankan enam unduhan sekaligus, dan tiap senyawa dapat memakan dua permintaan.
+  Laju kini ditahan per host untuk seluruh aplikasi, 503 dan 429 dicoba lagi, dan pekerjanya diturunkan
+  ke tiga.
 - `dev/uji_alur.py` menimpa widget `JendelaUtama.langkah` dengan pencacah integer, sehingga uji itu selalu gagal.
 
 ## [1.9.1] - 5 November 2026
