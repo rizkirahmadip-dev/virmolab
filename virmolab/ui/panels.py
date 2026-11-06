@@ -6,6 +6,7 @@ from PySide6.QtWidgets import (QAbstractItemView, QCheckBox, QColorDialog, QComb
                                QScrollArea, QSizePolicy, QSlider, QTabWidget, QToolButton, QTreeWidget,
                                QTreeWidgetItem, QVBoxLayout, QWidget)
 
+from .. import i18n
 from ..core.laporan import id_angka
 from . import icons
 from . import kit
@@ -21,7 +22,7 @@ PERMUKAAN = [("ses", "Molekuler (SES)"), ("sas", "Terjangkau pelarut (SAS)"), ("
 
 
 def judul_seksi(teks):
-    l = QLabel(teks.upper())
+    l = QLabel(i18n.t(teks).upper())
     l.setObjectName("sech")
     return l
 
@@ -414,7 +415,7 @@ class PanelProperti(QWidget):
 
     def tampil(self, judul, baris):
         self._bersih()
-        self.judul.setText(judul.upper())
+        self.judul.setText(i18n.t(judul).upper())
         for k, v in baris:
             kk = QLabel(k)
             kk.setObjectName("muted")

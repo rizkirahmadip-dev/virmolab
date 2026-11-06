@@ -19,10 +19,25 @@ _teks, _pola, _cache = {}, [], {}
 _frasa = None
 
 
+def bahasa_bawaan():
+    """Bahasa untuk pemasangan yang belum pernah menyetelnya: ikuti bahasa Windows.
+
+    Installer menuliskan pilihan penggunanya ke setelan, jadi jalur ini dipakai oleh versi portable dan
+    oleh pemasangan yang setelannya terhapus. Tanpa ini aplikasi selalu mulai berbahasa Indonesia, dan
+    pengguna di luar Indonesia melihat antarmuka yang tidak dapat ia baca sebelum sempat menggantinya.
+    """
+    try:
+        from PySide6.QtCore import QLocale
+        return "id" if QLocale.system().language() == QLocale.Language.Indonesian else "en"
+    except Exception:
+        return "id"
+
+
 def bahasa_tersimpan():
     try:
         from ..core import paths
-        return str(paths.settings().value("bahasa", "id") or "id")
+        tersimpan = paths.settings().value("bahasa", "")
+        return str(tersimpan) if tersimpan else bahasa_bawaan()
     except Exception:
         return "id"
 
@@ -178,6 +193,31 @@ def _bungkus_str_mana_pun(kelas, nama):
     setattr(kelas, nama, f)
 
 
+def _bungkus_init(kelas):
+    """Terjemahkan argumen teks pada konstruktor, mis. QAction("Kartun", induk) atau QPushButton("Bersihkan").
+
+    Pembungkus setter saja tidak cukup: widget yang teksnya diberikan sekali lewat konstruktor tidak pernah
+    melewati setText, sehingga tetap berbahasa Indonesia di mode English.
+    """
+    asli = kelas.__init__
+    if getattr(asli, "_vm_i18n", False):
+        return
+
+    def _satu(x):
+        if isinstance(x, str):
+            return t(x)
+        if isinstance(x, (list, tuple)) and x and all(isinstance(y, str) for y in x):
+            return type(x)(t(y) for y in x)        # QTreeWidgetItem(induk, ["Rantai A", "99 res"])
+        return x
+
+    def f(self, *a, **k):
+        if a:
+            a = tuple(_satu(x) for x in a)
+        return asli(self, *a, **k)
+    f._vm_i18n = True
+    kelas.__init__ = f
+
+
 def _bungkus_statis(kelas, nama, posisi):
     asli = getattr(kelas, nama, None)
     if asli is None or getattr(asli, "_vm_i18n", False):
@@ -288,6 +328,10 @@ def pasang(app):
                           (W.QDockWidget, ("setWindowTitle",))):
         for n in daftar:
             _bungkus(kelas, n)
+    # Konstruktor: teks yang diberikan sekali saat widget dibuat tidak pernah melewati setter mana pun.
+    for kelas in (QtGui.QAction, W.QAbstractButton, W.QLabel, W.QGroupBox,
+                  W.QTreeWidgetItem, W.QTableWidgetItem, W.QListWidgetItem):
+        _bungkus_init(kelas)
     _bungkus(W.QComboBox, "setItemText", (1,))
     _bungkus(W.QTabWidget, "setTabText", (1,))
     _bungkus(W.QTabWidget, "setTabToolTip", (1,))

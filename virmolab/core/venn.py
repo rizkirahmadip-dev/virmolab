@@ -21,6 +21,15 @@ TEMA_VENN = {
 WARNA = ["#0072b2", "#e69f00", "#009e73"]
 
 
+def _tr(s: str) -> str:
+    """Terjemahkan label diagram mengikuti bahasa antarmuka."""
+    try:
+        from .. import i18n
+        return i18n.t(s)
+    except Exception:
+        return s
+
+
 def _t(x, y, teks, ukuran=13, warna="#1b2430", anchor="middle", tebal=False, kelas=""):
     gaya = f"font-family:{FONT};font-size:{ukuran}px;fill:{warna}"
     if tebal:
@@ -110,4 +119,4 @@ def svg(himpunan: Dict[str, Sequence[str]], lebar: int = 560, tinggi: int = 420,
 def ringkas(w: Dict[str, List[str]]) -> str:
     """Satu kalimat Bahasa Indonesia yang merangkum isi tiap wilayah."""
     bagian = [f"{k}: {len(v)}" for k, v in w.items() if v]
-    return "; ".join(bagian) if bagian else "Semua wilayah kosong."
+    return "; ".join(bagian) if bagian else _tr("Semua wilayah kosong.")

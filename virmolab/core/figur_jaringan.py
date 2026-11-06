@@ -27,6 +27,15 @@ RAMP_BIRU = ["#86b6ef", "#6da7ec", "#5598e7", "#3987e5", "#2a78d6", "#256abf",
 _AMBANG_TEKS_PUTIH = 4
 
 
+def _tr(s: str) -> str:
+    """Terjemahkan label figur mengikuti bahasa antarmuka (no-op dalam Bahasa Indonesia)."""
+    try:
+        from .. import i18n
+        return i18n.t(s)
+    except Exception:
+        return s
+
+
 def _langkah(i: int, n: int) -> int:
     """Indeks ramp untuk butir ke-i dari n, paling gelap untuk peringkat teratas."""
     if n <= 1:
@@ -68,7 +77,7 @@ def lingkar_hub(hub: Sequence[Dict[str, Any]], tepi: Sequence = (), n: int = 10,
 
     pilih = list(hub)[:max(1, n)]
     if not pilih:
-        o.append(_t(lebar / 2, tinggi / 2, "Belum ada protein hub.", 12, w["tinta2"], "middle"))
+        o.append(_t(lebar / 2, tinggi / 2, _tr("Belum ada protein hub."), 12, w["tinta2"], "middle"))
         o.append("</svg>")
         return "\n".join(o)
 
@@ -106,12 +115,12 @@ def lingkar_hub(hub: Sequence[Dict[str, Any]], tepi: Sequence = (), n: int = 10,
     # cukup arah peringkatnya.
     lx, ly = 24, tinggi - 30
     lebar_kotak = 15
-    o.append(_t(lx, ly - 8, f"Peringkat {metrik.upper()}", 10.5, w["tinta2"]))
+    o.append(_t(lx, ly - 8, _tr("Peringkat {0}").format(metrik.upper()), 10.5, w["tinta2"]))
     for i in range(len(pilih)):
         idx = _langkah(i, len(pilih))
         o.append(f'<rect x="{lx + i * lebar_kotak}" y="{ly}" width="{lebar_kotak}" height="10" '
                  f'fill="{RAMP_BIRU[idx]}"/>')
-    o.append(_t(lx, ly + 24, "1 (paling sentral)", 10, w["tinta2"]))
+    o.append(_t(lx, ly + 24, _tr("1 (paling sentral)"), 10, w["tinta2"]))
     o.append(_t(lx + len(pilih) * lebar_kotak, ly + 24, str(len(pilih)), 10, w["tinta2"], "end"))
     o.append("</svg>")
     return "\n".join(o)
@@ -130,7 +139,7 @@ def gelembung_jalur(jalur: Sequence[Dict[str, Any]], n: int = 15, lebar: int = 8
     baris = [b for b in jalur if b.get("n_overlap")][:max(1, n)]
     if not baris:
         k = Kanvas(lebar, 200, gelap, transparan, judul)
-        k.teks(lebar / 2, 110, "Belum ada jalur yang lolos ambang q.", 12, "middle", warna_=w["tinta2"])
+        k.teks(lebar / 2, 110, _tr("Belum ada jalur yang lolos ambang q."), 12, "middle", warna_=w["tinta2"])
         return k.selesai()
 
     baris = list(reversed(baris))            # q terkecil di atas gambar
@@ -180,7 +189,7 @@ def gelembung_jalur(jalur: Sequence[Dict[str, Any]], n: int = 15, lebar: int = 8
         o.append(f'<line x1="{X(v):.1f}" y1="{atas + ph}" x2="{X(v):.1f}" y2="{atas + ph + 5}" '
                  f'stroke="{w["garis"]}"/>')
         o.append(_t(X(v), atas + ph + 18, fmt(v, 2), 10.5, w["tinta2"], "middle"))
-    o.append(_t(kiri + pw / 2, atas + ph + 40, "Rasio gen (gen jalur ÷ gen kueri)", 11.5, w["tinta2"], "middle"))
+    o.append(_t(kiri + pw / 2, atas + ph + 40, _tr("Rasio gen (gen jalur ÷ gen kueri)"), 11.5, w["tinta2"], "middle"))
 
     r_min, r_maks = 4.0, 13.0
     j_min, j_maks = min(jumlah), max(jumlah)
@@ -215,14 +224,14 @@ def gelembung_jalur(jalur: Sequence[Dict[str, Any]], n: int = 15, lebar: int = 8
     o.append(_t(lx + 19, atas + 16 + len(RAMP_BIRU) * 9, fmt(nl_maks, 1), 9.5, w["tinta2"]))
 
     ly = atas + 30 + len(RAMP_BIRU) * 9 + 28
-    o.append(_t(lx, ly - 10, "Jumlah gen", 10.5, w["tinta2"]))
+    o.append(_t(lx, ly - 10, _tr("Jumlah gen"), 10.5, w["tinta2"]))
     for k, j in enumerate(sorted({j_min, (j_min + j_maks) // 2, j_maks})):
         r = R(j)
         o.append(f'<circle cx="{lx + 10}" cy="{ly + 10 + k * 30:.1f}" r="{r:.1f}" fill="none" '
                  f'stroke="{w["garis"]}" stroke-width="1.2"/>')
         o.append(_t(lx + 26, ly + 14 + k * 30, j, 9.5, w["tinta2"]))
 
-    o.append(_t(kiri, tinggi - 10, "Uji hipergeometrik satu sisi, koreksi Benjamini-Hochberg.",
+    o.append(_t(kiri, tinggi - 10, _tr("Uji hipergeometrik satu sisi, koreksi Benjamini-Hochberg."),
                 9.5, w["tinta2"]))
     o.append("</svg>")
     return "\n".join(o)
@@ -236,7 +245,7 @@ def batang_jalur(jalur: Sequence[Dict[str, Any]], n: int = 10, lebar: int = 820,
     baris = [b for b in jalur if b.get("n_overlap")][:max(1, n)]
     if not baris:
         k = Kanvas(lebar, 200, gelap, transparan, judul)
-        k.teks(lebar / 2, 110, "Belum ada jalur yang lolos ambang.", 12, "middle", warna_=w["tinta2"])
+        k.teks(lebar / 2, 110, _tr("Belum ada jalur yang lolos ambang."), 12, "middle", warna_=w["tinta2"])
         return k.selesai()
     baris = sorted(baris, key=lambda b: int(b["n_overlap"]))
 
@@ -278,7 +287,7 @@ def batang_jalur(jalur: Sequence[Dict[str, Any]], n: int = 10, lebar: int = 820,
                  f'rx="4" fill="{RAMP_BIRU[6]}"/>')
         o.append(_t(kiri + panjang + 7, y + 4, nilai[i], 10.5, w["tinta2"]))
 
-    o.append(_t(kiri + pw / 2, atas + ph + 40, "Jumlah gen kueri pada jalur", 11.5, w["tinta2"], "middle"))
+    o.append(_t(kiri + pw / 2, atas + ph + 40, _tr("Jumlah gen kueri pada jalur"), 11.5, w["tinta2"], "middle"))
     o.append("</svg>")
     return "\n".join(o)
 
