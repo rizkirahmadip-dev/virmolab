@@ -7,7 +7,7 @@ NAV = [("panduan", "Panduan pengguna"), ("instalasi", "Instalasi"), ("pindah_lap
        ("validasi", "Validasi")]
 # Dokumen berbahasa Inggris dibangun dari <nama>_en.html dengan navigasinya sendiri, supaya pengguna
 # antarmuka Inggris tidak mendarat di halaman berbahasa Indonesia.
-NAV_EN = [("instalasi_en", "Installation"), ("pindah_laptop_en", "Move to another laptop"),
+NAV_EN = [("panduan_en", "User guide"), ("instalasi_en", "Installation"), ("pindah_laptop_en", "Move to another laptop"),
           ("gpu_en", "GPU setup"), ("troubleshooting_en", "Troubleshooting"),
           ("validasi_en", "Validation")]
 versi = re.search(r'__version__ = "([^"]+)"', Path("virmolab/__init__.py").read_text()).group(1)

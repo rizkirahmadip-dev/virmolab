@@ -1,0 +1,569 @@
+<h1>User guide</h1>
+<p class="lead">The whole docking workflow in VirmoLab, from importing a protein to the report (PDF, Word, or interactive HTML) — all inside one application, guided by five steps.</p>
+
+<nav class="isi"><b>Contents:</b>
+<a href="#tampilan">Window</a> · <a href="#mulai">Getting started</a> · <a href="#protein">1. Protein</a> ·
+<a href="#ligan">2. Ligands</a> · <a href="#area">3. Docking area</a> · <a href="#jalankan">4. Run</a> ·
+<a href="#hasil">5. Results</a> · <a href="#interaksi">Interactions</a> · <a href="#diagram">2D diagram</a> ·
+<a href="#validasi">Validation</a> · <a href="#qc">PoseBusters</a> · <a href="#banding">Compare</a> ·
+<a href="#sifat">Ligand properties</a> · <a href="#statistik">Statistics</a> · <a href="#ekspor">Export &amp; reports</a> ·
+<a href="#md">MD &amp; MM/GBSA</a> · <a href="#desain">Design &amp; advanced analysis tools</a> · <a href="#cli">Command line</a> ·
+<a href="#proyek">Projects</a> · <a href="#privasi">Privacy</a> · <a href="#pintasan">Shortcuts</a></nav>
+
+<h2 id="tampilan">The main window</h2>
+<figure><img src="gambar/02_impor.png" alt="Main window"><figcaption>The main window after protein 1HSG has been loaded.</figcaption></figure>
+<table>
+<tr><th style="width:28%">Part</th><th>What it does</th></tr>
+<tr><td>Menu bar (top)</td><td>Eight menus: <b>File, Edit, View, Prepare, Docking, Analysis, Tools, Help</b>. Hover over an item to read what it does in the status bar.</td></tr>
+<tr><td>Toolbar</td><td>Open file, save, fetch from RCSB, 3D interactions, measure distance, 3D image, report, “Open in…” another program; in the middle the <b>workspace</b> buttons <i>Prepare · Docking · Analysis</i>; dark mode on the right.</td></tr>
+<tr><td>Steps (upper left)</td><td>Five steps: <b>1 Protein → 2 Ligands → 3 Docking area → 4 Run → 5 Results</b>. A tick means the step is done; the small text is its status (“3 ready”, for instance). Click one to open it.</td></tr>
+<tr><td>Objects (lower left)</td><td>Everything loaded: protein → chains → residues, ligands, water, ions, <i>Ligands ready for docking</i>, result poses. The checkbox shows or hides; right-click for style, colour, focus, rename, export, delete.</td></tr>
+<tr><td>Centre</td><td>The <b>3D Viewport</b>, <b>Results</b>, <b>2D Diagram</b>, <b>Ligand Properties</b>, and <b>Statistics</b> tabs (which of them appear follows the workspace).</td></tr>
+<tr><td>Work panel (right)</td><td>What the active step needs: a one-sentence explanation, action buttons, the blue primary button, and a <i>Next ›</i> link. The <b>View</b> tab holds PyMOL-style appearance settings; the <b>Interactions</b> tab appears in the Analysis workspace. <b>Properties</b> below it shows the details of whatever object is selected.</td></tr>
+<tr><td>Status bar (bottom)</td><td>GPU and driver, object and atom counts, the project folder, and the <b>Queue: … ▴</b> button that opens the Job queue / Log / Messages panel.</td></tr>
+</table>
+<h3>Workspaces</h3>
+<p>Three workspaces decide which tabs and panels are shown so the screen stays uncluttered: <b>Prepare</b> (<kbd>Ctrl</kbd>+<kbd>1</kbd>, steps 1–3), <b>Docking</b> (<kbd>Ctrl</kbd>+<kbd>2</kbd>, step 4 plus the Results tab), <b>Analysis</b> (<kbd>Ctrl</kbd>+<kbd>3</kbd>, every tab plus the Interactions panel). The workspace follows the step automatically, and the step follows the workspace.</p>
+<p>Panels can be moved, stacked, or detached; the layout is saved by itself. Restore it with <b>View › Reset layout</b>. A panel you closed comes back from <b>View › Panels</b>. Dark mode: <kbd>Ctrl</kbd>+<kbd>T</kbd>.</p>
+
+<h2 id="mulai">The welcome page</h2>
+<figure><img src="gambar/00_sambutan.png" alt="Welcome page"><figcaption>With no structure loaded, the viewport shows the welcome page.</figcaption></figure>
+<p>Choose <b>Fetch protein from RCSB</b>, <b>Open file</b> (or drag a file onto the window), <b>Open project</b>, or <b>Recent project</b>. The links below open the tutorial PDF and this guide.</p>
+
+<h2 id="protein">Step 1 · Protein</h2>
+<ol class="langkah">
+<li>Load a protein: <b>Fetch from RCSB PDB…</b> in the work panel (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>, type <code>1HSG</code> for instance), <b>Fetch from AlphaFold DB…</b> (see below), or <b>Open file…</b> (<kbd>Ctrl</kbd>+<kbd>O</kbd>: PDB, PDBQT, mmCIF, SDF, MOL2, SMILES). The structure is split automatically into protein, native ligand, water, and ions.</li>
+<li>Click the blue <b>Prepare receptor…</b> button (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>1</kbd>).</li>
+</ol>
+<figure><img src="gambar/03_dialog_reseptor.png" alt="Receptor dialog" style="max-width:560px"><figcaption>The Prepare receptor dialog.</figcaption></figure>
+<ul>
+<li>Choose the protein and its chains; remove water, remove the native ligand and additives, keep metal ions (Zn, Mg, Ca, Mn, Fe, Cu, Co, Ni) within a radius of the native ligand (0 = all of them).</li>
+<li>Alternate conformations: highest occupancy (recommended) or always altloc A. Charges: Gasteiger computed by Meeko (recommended) or residue template charges.</li>
+<li>The result is an object named <i>“… (ready)”</i>; the files <code>reseptor/reseptor.pdbqt</code> and <code>laporan_prep.txt</code> are saved in the project. Residues with incomplete atoms are dropped and reported; if Meeko fails, Open Babel is used automatically.</li>
+</ul>
+<figure><img src="gambar/04_reseptor_siap.png" alt="Receptor ready"><figcaption>Step 1 finished (ticked); the application moves on to step 2.</figcaption></figure>
+<h3 id="alphafold">Proteins from AlphaFold DB</h3>
+<p>For targets that have no crystal structure yet. Type a UniProt code (<code>P00918</code>, say) or a protein or gene name (<code>ACE2</code>), choose the organism, click <b>Search</b>, pick one result, then <b>Import</b>.</p>
+<ul>
+<li>The protein is coloured by <b>pLDDT</b> (per-residue confidence): dark blue &gt; 90, light blue 70–90, yellow 50–70, orange &lt; 50. A pLDDT summary appears in Properties and in the Messages panel; this colouring is also available under View › colour <i>pLDDT (AlphaFold)</i>.</li>
+<li>Disordered N and C termini (pLDDT &lt; 50) are trimmed by default, because they can cover the pocket. The threshold can be changed, applied anywhere, or switched off.</li>
+<li>P2Rank pocket detection runs automatically with the <code>alphafold</code> configuration. Once the grid box is set, VirmoLab reports the pLDDT of the residues inside the box and warns when it is low.</li>
+<li>An AlphaFold model holds no ligand, cofactor, or ion, and pocket side chains can differ from the bound form. Validate against a reference ligand where one exists, consider <a href="#fleksibel">flexible residues</a>, and state the model entry and version in your methods (the report does this for you).</li>
+</ul>
+
+<h2 id="ligan">Step 2 · Ligands</h2>
+<p>The work panel offers <b>Fetch from PubChem…</b> (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd>, one name or CID per line), <b>From SMILES…</b>, and <b>Open file / folder…</b>. Then click <b>Prepare ligands…</b> (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>2</kbd>).</p>
+<figure><img src="gambar/05_dialog_ligan.png" alt="Ligand dialog"><figcaption>The Prepare ligands dialog: status and reason for each ligand.</figcaption></figure>
+<ul>
+<li>Options: protonation at a given pH (7.4 by default) with <b>Open Babel</b> or <b>Dimorphite-DL</b>, MMFF94 minimisation, rigid or flexible macrocycles.</li>
+<li><b>Dimorphite-DL</b> works from per-group pKa rules. <i>variants ≤ 1</i> gives one state at exactly that pH; <i>variants ≤ 2–8</i> gives every protonation state within pH ± 1, each becoming a separate ligand named <code>name [v1]</code>, <code>[v2]</code>, and so on, so they can all be docked and compared. A caveat: Dimorphite-DL tends to treat phenols and catechols as deprotonated; for flavonoids, Open Babel is usually more reasonable. Check the charge column.</li>
+<li>Status: <span style="color:var(--ok)">ready</span>, <span style="color:var(--warn)">warning</span> (more than 32 torsions or 256 atoms, say — not possible with AutoDock-GPU, use Vina), <span style="color:var(--bad)">failed</span> (with the reason). One ligand failing does not stop the others.</li>
+<li>Prepared ligands join the <b>Ligands ready for docking</b> group in the Objects panel.</li>
+</ul>
+
+<h2 id="area">Step 3 · Docking area (grid box)</h2>
+<figure><img src="gambar/06_parameter_gridbox.png" alt="Docking area"><figcaption>The blue box in the viewport; the placement buttons and size figures in the work panel.</figcaption></figure>
+<ul>
+<li>If the structure holds a native ligand, the box is centred on it automatically (crystallisation additives such as GOL, EDO, and SO4 are ignored).</li>
+<li>Buttons: <b>Centre on native ligand (recommended)</b>, <b>Centre on selected residues</b> (click an atom or pick residues in Objects, <kbd>Ctrl</kbd>+click for several), <b>Fit to selected ligand</b>, <b>Detect pockets (P2Rank)…</b>, <b>Whole protein (blind docking)</b>. All of them are in the <b>Prepare</b> menu as well.</li>
+<li><b>Detect pockets (P2Rank)</b>: for proteins with no native ligand — an AlphaFold model or an apo structure. P2Rank, a machine-learning method, finds binding pockets in 5–30 seconds; pockets are marked with numbered orange spheres in the viewport and listed in a table (score, probability, residues). Pick one and choose <i>Use this pocket</i>: the box is centred on the pocket, and its size is the spread of the pocket residues plus 4 Å (16–30 Å). On 1HSG, pocket #1 lies 0.8 Å from the centre of the crystallographic indinavir.</li>
+<li id="fleksibel"><b>Flexible residues…</b> (Prepare menu, or <i>Configure…</i> in step 4): tick 2–6 pocket side chains that may rotate during docking (candidates are ordered by distance to the native ligand; Gly, Ala, and Pro are not offered; 8 at most). <i>Pick the 6 nearest</i> ticks the six closest side chains in one go (a practical limit: every side chain adds 1&ndash;4 torsions to the search space), and <i>Clear</i> unticks everything. It works with AutoDock-GPU and Vina, not with AutoDock4. The side chains of each pose appear as an object named <i>Pose n · flexible residues</i>, and interactions are computed from those positions. A ΔG obtained with flexible residues is not directly comparable with rigid docking — compare ligands within the same setting. <i>Back to rigid receptor</i> turns it off; preparing the receptor again does so too.</li>
+<li id="kovalen"><b>Covalent docking…</b> (Prepare menu, or <i>Configure…</i> in step 4): choose one nucleophilic residue (Cys, Ser, or Lys) whose nucleophilic atom lies inside the grid box. Ligands carrying a reactive group (a <i>warhead</i>) are bonded chemically to that residue's side chain, then docked as a single residue–ligand adduct with the <i>tethered</i> method (AutoDock-GPU <code>--flexres</code>; the receptor is used without the target residue's side chain). The reactive groups recognised are: Michael acceptors (acrylamides, enones, vinyl sulfones), activated alkynes, α-haloketones and haloacetamides, sulfonyl fluorides, nitriles, and aldehydes — which of them fit depends on the residue, and the dialog shows what was detected per ligand. Ligands with no matching reactive group are skipped. <b>The score reported is the adduct–receptor energy, not a binding ΔG</b>: Ki and ligand efficiency are not shown, and scores are comparable only between covalent ligands on the same target residue. AutoDock-GPU only; it cannot be combined with flexible residues. <i>Turn off (ordinary docking)</i> restores it; preparing the receptor again does so too.</li>
+<li><b>Margin around the ligand (Å)</b>: the extra distance on each side of the ligand that the top two buttons use, 8 Å by default. This is the number that most often needs adjusting: a shallow, enclosed pocket is fine with 4&ndash;5 Å, while a flexible ligand or a branched pocket needs more room. Too narrow and poses are clipped at the box edge; too wide and the search slows down without becoming any more accurate. The button labels show the value currently in force.</li>
+<li><b>Size and position</b>: centre X/Y/Z, the size of each axis, the grid spacing, and the number of grid points. Below them are the <b>box bounds</b> (the minimum–maximum range of each axis) and the <b>volume</b> &mdash; the bounds for matching the box to the pocket you can see in the viewport, the volume for judging how long the search will take. A warning appears above 126 points per axis or 30 Å.</li>
+<li><b>Keep all three sides equal</b>: while this is ticked, changing one side changes the other two with it, so the box stays a cube. Useful for <i>blind docking</i> and for comparing several targets with boxes of the same size.</li>
+<li><b>Grid spacing</b> sets how densely the points are placed: denser means more accurate and slower. AutoDock's standard value is 0.375 Å; raising it is the easiest way past the 126-point warning without shrinking the box.</li>
+<li>Every change to the box enters the <kbd>Ctrl</kbd>+<kbd>Z</kbd> history, so experimenting with sizes is safe: the previous box can always be brought back.</li>
+<li>With the mouse in the viewport: <kbd>Shift</kbd>+drag moves the box; <kbd>Shift</kbd>+scroll resizes it; <kbd>Alt</kbd>+scroll resizes one axis (choose it with <kbd>X</kbd>/<kbd>Y</kbd>/<kbd>Z</kbd>). <kbd>G</kbd> shows or hides the box.</li>
+</ul>
+
+<h2 id="jalankan">Step 4 · Run the docking</h2>
+<figure><img src="gambar/06b_jalankan.png" alt="Run docking"><figcaption>Step 4: a summary of the inputs, the engine, the device, the accuracy, and the Run button.</figcaption></figure>
+<table>
+<tr><th>Engine</th><th>When to use it</th></tr>
+<tr><td>AD-GPU (AutoDock-GPU)</td><td>A laptop with an OpenCL GPU. Very fast; suits large ligand sets.</td></tr>
+<tr><td>Vina (AutoDock Vina)</td><td>No GPU, or large ligands (more than 32 torsions).</td></tr>
+<tr><td>AD4 (AutoDock4)</td><td>Comparison with older studies (slow).</td></tr>
+<tr><td>Uni-Dock (GPU, through WSL)</td><td>Large libraries: hundreds of ligands in a single GPU call (&plusmn;0.7 seconds per ligand in a batch). It has to be installed once inside WSL with <code>build_tools/pasang_openfe_unidock_wsl.sh</code>; the button stays disabled until it is. Pose accuracy sits slightly below Vina (see <a href="validasi_en.html">Validation</a>), so a pose that is going to be reported is checked again with Vina or AutoDock-GPU. It does not yet support flexible residues or covalent docking.</td></tr>
+</table>
+<ul>
+<li><b>Accuracy</b>: <i>Fast</i>, <i>Standard</i>, or <i>Thorough</i> (or a preset of your own) — applied immediately.</li>
+<li><b>Advanced ▸</b> opens the detailed parameters (number of runs, evaluations, exhaustiveness, number of poses, energy range, CPU threads, seed) and the button that saves a preset. A fixed seed means the result can be repeated. The same settings window: <b>Docking › Docking settings…</b> (<kbd>Ctrl</kbd>+<kbd>D</kbd>).</li>
+<li><b>Device</b>: if the laptop has more than one OpenCL GPU (Intel plus NVIDIA, for instance), all of them appear; the one with the most VRAM is chosen by default.</li>
+<li>Click <b>Run docking (n ligands)</b> or press <kbd>F5</kbd>. Every prepared ligand is docked; to dock only some, select them in the Objects panel first.</li>
+</ul>
+<h3>The job queue</h3>
+<figure><img src="gambar/07_antrean.png" alt="Queue"><figcaption>The Queue panel opens by itself when docking starts.</figcaption></figure>
+<ul>
+<li>The Queue panel (the <b>Queue: … ▴</b> button in the status bar, or <kbd>Ctrl</kbd>+<kbd>J</kbd>) shows the status, progress, best ΔG, elapsed time, and estimated time remaining for each ligand. The panel closes itself once every job has succeeded.</li>
+<li><b>Pause</b> (after the ligand currently running), <b>Resume</b>, <b>Cancel</b> — in the panel or the <b>Docking</b> menu. The window may be minimised; a Windows notification appears when the run finishes.</li>
+<li>If the GPU fails with an OpenCL error, the job continues automatically with Vina on the CPU; the reason is written into the Messages panel.</li>
+<li>Closing the application while docking: jobs become <i>Paused</i> and can be resumed without repeating the ligands that already finished.</li>
+</ul>
+
+<h2 id="hasil">Step 5 · Results</h2>
+<figure><img src="gambar/08_hasil.png" alt="Results"><figcaption>The Results tab: one row per ligand; the arrow opens every pose.</figcaption></figure>
+<ul>
+<li>Default columns: <b>#</b>, <b>Ligand</b>, <b>ΔG</b> (kcal/mol), <b>LE</b> (ligand efficiency), <b>RMSD crystal</b> (green at ≤ 2 Å), <b>PoseBusters</b>, <b>H</b> (hydrogen bonds). <b>Right-click a column header</b> to show the others: estimated Ki, cluster, reference RMSD, hydrophobic, π, other interactions, engine, job.</li>
+<li>Sort by clicking a header; filter by name or a ΔG limit. Select a row to load its pose into the viewport; double-click still works too.</li>
+<li>Menu: <b>Analysis › Results table</b> (<kbd>Ctrl</kbd>+<kbd>R</kbd>).</li>
+</ul>
+
+<h2 id="interaksi">3D interactions</h2>
+<figure><img src="gambar/09_interaksi.png" alt="Interactions"><figcaption>Coloured dashed lines per interaction type; contact residues as sticks.</figcaption></figure>
+<p>The <b>Interactions</b> tab (on the right, in the Analysis workspace) lists interactions by type with their distances and angles; click a row to focus that residue. Tick the types you want shown; there are options for distance labels, residue labels, and residues as sticks. <kbd>I</kbd> shows or hides the interactions. Colours: <span style="color:#2e9e5b">hydrogen bond</span>, <span style="color:#c98a12">hydrophobic</span>, <span style="color:#7b5cd6">π–π</span>, <span style="color:#2f8fd6">π–cation</span>, <span style="color:#cf3f3f">salt bridge</span>, <span style="color:#1aa3a3">halogen bond</span>, <span style="color:#7d80b0">metal</span>. The criteria: <a href="metode.html">Methods &amp; criteria</a>.</p>
+
+<h3>Per-atom energy contribution</h3>
+<p><b>Analysis › Per-atom energy contribution</b> (<kbd>K</kbd>) colours the atoms of the active pose: <span style="color:#1f8a4c">green</span> favourable, <span style="color:#c62828">red</span> unfavourable; the larger the sphere, the larger the contribution. It is computed from the intermolecular terms of the AutoDock Vina scoring function (gauss, repulsion, hydrophobic, hydrogen bond) per ligand atom; the total comes close to Vina's “Final Intermolecular Energy”. Useful for seeing which part of a molecule is worth modifying.</p>
+
+<h3>Pinning a pose</h3>
+<p>Opening another pose normally hides the previous one. Right-click a pose in the Objects panel › <b>Pin</b> to keep it visible (a pin icon) — for comparing the best poses of two ligands in one viewport, for instance.</p>
+
+<h2 id="diagram">2D interaction diagram</h2>
+<figure><img src="gambar/10_diagram2d.png" alt="2D diagram"><figcaption>The 2D Diagram tab for the selected pose.</figcaption></figure>
+<p>To look at another compound there is no need to go back to the results table: the <b>Ligand:</b> box in this tab's top bar moves between compounds, ordered from the best ΔG.</p>
+<p>Save as SVG or PDF (vector, editable in Inkscape, Illustrator, or Word) or as PNG/TIFF at a DPI of your choosing. The <b>Copy</b> button puts the image on the clipboard to paste straight into Word or PowerPoint.</p>
+
+<h2 id="validasi">Redocking validation</h2>
+<figure><img src="gambar/11_validasi.png" alt="Validation"><figcaption>Crystal pose (magenta carbons) against the best docked pose (blue carbons).</figcaption></figure>
+<p><b>Docking › Redocking validation…</b> (also in the Analysis menu) redocks the crystal ligand with the same parameters, starting from the crystal conformation without minimisation, then computes the RMSD of the best pose against the crystal. <b>RMSD ≤ 2.0 Å means the method is valid.</b> The result is stored in the project and quoted in the PDF report. Do this before interpreting any screening results.</p>
+
+<h2 id="qc">Pose checking (PoseBusters)</h2>
+<p>Every best pose is checked automatically with PoseBusters (22 tests: bond geometry and angles, ring planarity, stereochemistry, internal energy, minimum distance to the protein, and so on). The outcome appears in the <b>PoseBusters</b> column of the Results tab — hover to see which tests failed — and in the pose Properties. <b>Analysis › Check active pose (PoseBusters)…</b> shows every test for any pose.</p>
+
+<h2 id="banding">Comparing ligands &amp; the interaction map</h2>
+<figure><img src="gambar/12_bandingkan.png" alt="Compare"><figcaption>Tick 2–4 ligands in the Results tab, then Analysis › Compare ticked ligands.</figcaption></figure>
+<p>Side-by-side viewports (with a <i>Sync viewpoints</i> button), a list of residues that interact with every ligand, and a residue × ligand heat map. <b>Analysis › Residue × ligand interaction map</b> shows the map for all results.</p>
+<p><b>Interaction fingerprints (IFP)</b>: each best pose is summarised as a set of “residue × interaction type” (van der Waals excluded). The <b>IFP vs crystal</b> column in the Results tab is the Tanimoto similarity to the crystal pose of the native ligand (1 means an identical interaction pattern; useful for picking ligands that mimic the native one). Statistics tab › <i>Interaction similarity (IFP)</i> shows the ligand-to-ligand similarity matrix; the Excel export holds an <i>Interaction fingerprints</i> sheet (0/1 per residue × type).</p>
+
+<h2 id="konsensus">Consensus scoring</h2>
+<p><b>Analysis › Consensus scoring…</b> combines several scoring functions so that the ligand ranking does not rest on one engine alone. Tick the score columns: jobs run with different engines (AutoDock-GPU and Vina, say) and/or <b>rescoring</b> of the best poses with the <b>Vina</b> and <b>Vinardo</b> scoring functions (fast, without redocking; the results are stored in the project). The table shows ΔG and the rank for each column, the mean rank (the consensus order), the mean z-score, and a ✓ for ligands that stay <b>consistently</b> in the top percentile (20 % by default) across every column. Agreement between scoring functions is judged with <b>Kendall's W</b> (≥ 0.7 strong; &lt; 0.5 weak — interpret with care) and Spearman correlation. CSV export and a ready-to-paste methods paragraph are provided.</p>
+
+<h2 id="sifat">Ligand properties &amp; BOILED-Egg</h2>
+<figure><img src="gambar/16_sifat.png" alt="Ligand properties"><figcaption>The Ligand Properties tab.</figcaption></figure>
+<p><b>Analysis › Ligand properties and BOILED-Egg</b>: MW, WLOGP, TPSA, donors and acceptors, rotatable bonds, QED; the Lipinski, Ghose, Veber, Egan, and Muegge rules; PAINS and Brenk alerts; and the BOILED-Egg plot (predicted intestinal absorption and brain penetration). Export as CSV, or the plot as SVG/PDF/PNG/TIFF.</p>
+
+<h2 id="statistik">Statistics &amp; plots</h2>
+<figure><img src="gambar/17_statistik.png" alt="Statistics"><figcaption>The Statistics tab.</figcaption></figure>
+<p><b>Analysis › Statistics and charts</b>: a ΔG histogram, scatter plots with regression and Pearson/Spearman correlation (with p values), a bar chart of the best ΔG values, and a correlation matrix between variables (ΔG, LE, pKi, interactions, ligand properties). Choose one job or “All jobs”. Plots and data can be exported.</p>
+
+<h2 id="uji">Statistical tests &amp; publication plots</h2>
+<p>The <b>Tests &amp; Plots</b> tab (<b>Analysis › Statistical tests and publication charts</b>) is for your own experimental data, in vitro results for instance. The flow is: data sheet → analysis → plot, each updating by itself when the data change, and all of it stored in the project.</p>
+<ul>
+<li><b>Column data</b>: one column per group, rows are replicates. Paste straight from Excel (<kbd>Ctrl</kbd>+<kbd>V</kbd>; a header row is recognised), import CSV, or use <i>Fill data ▾ › ΔG per job / per engine</i> from the docking results. Double-click a column header to rename it.</li>
+<li><b>Automatic test selection</b> checks normality (Shapiro–Wilk) and homogeneity of variance (Brown–Forsythe), then chooses: 2 groups → Welch's t-test / Mann–Whitney (paired: paired t / Wilcoxon); ≥ 3 groups → ANOVA + Tukey, Welch ANOVA + Games–Howell, or Kruskal–Wallis + Dunn (Holm). It can also be chosen by hand, including ANOVA + Dunnett against the first column as control.</li>
+<li>Results: descriptive statistics (n, mean, SD, SEM, median, range), the test statistic, df, p, effect size (Cohen's d / Hedges' g, η², ε², r), post-hoc tables, a ready-to-paste <b>interpretation paragraph</b> and <b>Methods paragraph</b> (the <i>Copy results &amp; methods paragraph</i> button), and a warning whenever an assumption is not met.</li>
+<li><b>Plots</b>: bars with points, points (mean ± SD/SEM/95 % CI), box and whisker (Tukey), points (median ± IQR); automatic stacked significance brackets (ns/*/**/***/**** or exact p); the Okabe–Ito palette (colour-blind friendly), blue, or grey for print.</li>
+<li><b>XY dose–response data</b>: the first column is concentration, the following columns are response replicates. Four-parameter nonlinear regression (log[inhibitor] vs response, free slope) gives IC₅₀/EC₅₀ with 95 % CI, the Hill slope, and R²; the x axis is logarithmic.</li>
+<li><b>Paired data with ≥ 3 columns</b> (tick <i>Paired</i>; a row is one subject): repeated-measures ANOVA with the Greenhouse–Geisser correction, or Friedman when the data are not normal; post-hoc paired t or Wilcoxon.</li>
+<li><b>Multiple-comparison correction</b> can be chosen: Holm (default), Bonferroni, Šidák, or Benjamini–Hochberg (FDR) — used by Dunn, the paired post-hoc tests, and two-way ANOVA.</li>
+<li><b>Two-factor data</b> (two-way ANOVA): the first column holds the levels of factor A (repeated for each replicate), the remaining column headers are the levels of factor B. Results: the A, B, and interaction effects (type III sums of squares, η²ₚ), comparisons between A levels within each B level, and a grouped bar chart with a legend.</li>
+<li><b>Assumption checks</b>: the descriptive table now carries D'Agostino–Pearson (n ≥ 8) alongside Shapiro–Wilk; choose the <i>Q–Q plot</i> to inspect normality visually; possible outliers are reported with Grubbs' test (and never removed automatically).</li>
+<li><b>Dose–response model</b>: <i>Automatic</i> compares 4PL (free slope) against 3PL (Hill = 1) using an extra sum-of-squares F test and AICc, then uses whichever fits better; 4PL or 3PL can also be forced.</li>
+<li><b>ROC data</b>: column 1 holds the scores of the negative group (decoys or controls), column 2 those of the positive group (actives or cases). For docking ΔG, choose <i>Low score = positive</i>. Results: AUC with a 95 % CI (DeLong), p, the optimal cut-off (Youden index) with its sensitivity and specificity, enrichment factors EF1%/5%/10%, and <b>BEDROC</b> and <b>logAUC</b> (early enrichment) with bootstrap CIs — made for validating virtual screening of actives against decoys. Choose the view: ROC, semi-log ROC, or an enrichment curve.</li>
+<li><b>Contingency data</b>: the first column holds the group names, the following columns the frequency of each category (Improved / Not improved, say). A 2 × 2 table gives Fisher's exact test, χ² with Yates' correction, and the odds ratio and relative risk with 95 % CIs; a larger table gives Pearson's χ² (switching to an exact r × c Fisher test when expected frequencies are small) and Cramér's V. The plot is a 100 % stacked bar chart.</li>
+<li>Export as SVG/PDF (vector) or PNG/TIFF at 600 dpi, <b>Copy</b> to the clipboard, or send to the <b>＋ Composer</b> to become a figure panel.</li>
+</ul>
+<h3>Plot formatting (click an element)</h3>
+<figure><img src="gambar/18_uji_format.png" alt="Tests and Plots with the Format panel" style="max-width:860px"><figcaption>The Tests &amp; Plots tab: the “Ekstrak 100” group has been clicked, and the Format panel on the right shows its colour, marker, and opacity.</figcaption></figure>
+<p>The <b>Format</b> panel on the right (the <i>Format ◂/▸</i> button) controls how the plot looks. Move the mouse over the plot and whatever can be formatted is highlighted; click it to open it in the panel — the <b>title</b>, the <b>Y axis label</b>, the <b>Y axis</b> (minimum, maximum, tick spacing, log₁₀ scale, and an <b>axis break</b> for skipping an empty range when one group is far larger than the rest), the <b>X axis</b> (label, slanted group names), the <b>groups</b> (colour per group, marker shape and size, opacity, bar width), and the <b>significance marks</b>. Click the plot background for the general settings (size, font, line weight, palette, grid, individual points).</p>
+<p><b>Reference lines &amp; annotations</b>: on the <i>Y axis</i> page fill in <i>Reference lines</i>, for example <code>−8.2=Native ligand; −7</code> (labelled dashed lines); on <i>Plot (general)</i> fill in <i>Annotation</i> (<code>|</code> starts a new line) and choose its corner.</p>
+<p><b>Saved styles</b>: save a look you like (font, colours, sizes, markers) with <i>Save…</i>, then apply it to another plot with <i>Apply</i> — text and axis ranges are left alone. Three styles come built in: <i>Journal black and white</i>, <i>Journal column (compact)</i>, and <i>Presentation (large type)</i>.</p>
+
+<h2 id="komposer">Figure composer (panels A/B/C)</h2>
+<figure><img src="gambar/19_komposer.png" alt="Figure composer" style="max-width:760px"><figcaption>A test plot (A) and a 3D image (B) arranged into one 174 mm figure.</figcaption></figure>
+<p><b>Analysis › Figure composer</b> (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd>) combines several images into one journal figure labelled A, B, C. Add panels from <i>＋ Add ▾</i>: a Tests &amp; Plots chart, a Statistics chart, a 2D interaction diagram, a BOILED-Egg plot, a 3D viewport image, or an image file (PNG/JPG/SVG). Reorder by dragging or with the ↑ ↓ buttons; tick <i>Full width</i> to give a panel — a 3D image, say — a row of its own.</p>
+<ul>
+<li>Set the number of columns, the gap between panels, the label style (A / a / (A) / (a) / A.), the label size, and the print width (85 / 120 / 174 mm).</li>
+<li><i>Match font scale across plots</i> (on by default) shrinks every plot by the same factor, so type is the same size throughout the figure.</li>
+<li>Save as vector PDF/SVG or as TIFF/PNG at 600 dpi, or copy to the clipboard. The composer's contents are stored in the project.</li>
+</ul>
+
+<h2 id="ekspor">Export &amp; reports</h2>
+<figure><img src="gambar/13_ekspor.png" alt="Export" style="max-width:720px"><figcaption>File › Export › Export centre (<kbd>Ctrl</kbd>+<kbd>E</kbd>).</figcaption></figure>
+<table>
+<tr><th style="width:22%">Category</th><th>Contents</th></tr>
+<tr><td>3D image</td><td>PNG, TIFF (LZW or uncompressed), JPEG, WebP; journal presets at 85/120/180 mm @ 600 dpi, slides at 1920×1080 and 4K, posters; white or transparent background. Re-rendered at full resolution; above 4096 px it is rendered in tiles and stitched (16384 px maximum). Shortcut <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd>.</td></tr>
+<tr><td>2D diagram</td><td>Vector SVG/PDF, or PNG/TIFF at a chosen DPI.</td></tr>
+<tr><td>Structures</td><td>A PDB complex (receptor plus pose, the ligand in chain L), a complex holding every ligand, tagged SDF (ΔG, Ki, LE, RMSD, interactions, SMILES), and PDBQT.</td></tr>
+<tr><td>Tables</td><td>Excel (.xlsx: Summary, All poses, Interactions, Ligand properties, Statistics, Parameters, Info) or CSV (semicolons and decimal commas for Indonesian Excel).</td></tr>
+<tr><td>Report</td><td>Validation, receptor, parameters and device, top results, a 3D image and 2D diagram of the best ligand, interactions, PoseBusters, ligand properties, methods, and software citations. Three formats: <b>PDF</b> (ready to print), <b>Word .docx</b> (headings, tables, and images all editable), and <b>interactive HTML</b> — a single file that opens offline in any browser: a 3D explorer (click a table row to see the poses of the top 30 ligands with their contact residues and interaction lines; pocket surface, rotate, save PNG), a searchable and sortable full results table, and the complete report. Shortcut <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd>.</td></tr>
+</table>
+<figure><img src="gambar/20_video.png" alt="Video dialog" style="max-width:420px"><figcaption>A cinematic 4K presentation video: zoom → rotate → highlight interactions.</figcaption></figure>
+<p><b>File › Export › 3D video / animation (4K MP4, GIF)…</b> records the viewport exactly as it looks now: <i>Rotate 360°</i>, <i>Rock ±30°</i>, or <i>Zoom into the binding site</i> (a smooth move from the whole protein to the current view). Every frame is re-rendered at full resolution — this is not a screen recording — residue labels included. Format: <b>MP4 H.264 video</b> — Full HD 1920×1080, 2K 2560×1440, 4K 3840×2160, square 1080×1080, or portrait 1080×1920 (Reels/Stories) at 24/30/60 frames per second, high quality (4K30 at about 40 Mbps); suited to PowerPoint, YouTube, and social media. An 8-second 4K recording takes about a minute. Animated GIF (for WhatsApp and the web, 256 colours), animated WebP, and a folder of PNG frames for a video editor are available too.</p>
+<p><b>3D labels</b> (residues, interaction distances, measurements, pockets) are redrawn at the real canvas resolution — they stay sharp on a HiDPI screen and in a 4K export or video. A residue label is pill-shaped: the residue name in bold, the number in grey, and a coloured dot for its interaction type.</p>
+<p><b>Copy image</b> (<b>Edit › Copy image</b>, <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>C</kbd>) copies whatever the open tab holds — the 3D viewport, a 2D diagram, a BOILED-Egg plot, or a chart — to the clipboard, to paste into Word or PowerPoint.</p>
+<p><b>File › Export › PyMOL / ChimeraX session…</b> writes a folder holding the receptor, the active pose, and <code>.pml</code> and <code>.cxc</code> scripts that show the contact residues (labelled) and interaction lines in the same colours VirmoLab uses. <b>Tools › Open in another program</b> opens this session in PyMOL or ChimeraX when there is an active pose; otherwise it sends whatever objects are visible (to Discovery Studio Visualizer as well).</p>
+
+<h2 id="md">MD &amp; MM/GBSA</h2>
+<p><b>Analysis › MD &amp; MM/GBSA…</b> refines the best docked poses with OpenMM: Amber ff14SB for the protein, OpenFF Sage 2.3 for the ligand (NAGL charges, equivalent to AM1-BCC), and either OBC2 implicit solvent or explicit TIP3P water. Tick the ligands (the top 5 by default), choose a level, then press <b>Run</b>.</p>
+<table>
+<tr><th>Level</th><th>What it does</th><th>Time (example: RTX 3060 / 8-core CPU, 1 ligand)</th></tr>
+<tr><td>Light</td><td>Complex minimisation + single-point MM/GBSA</td><td>±20 seconds / ±40 seconds</td></tr>
+<tr><td>Medium</td><td>1–2 ns of implicit-solvent MD + RMSD/RMSF + averaged MM/GBSA</td><td>±15 minutes / ±7 hours per 2 ns</td></tr>
+<tr><td>Full</td><td>10–100 ns of explicit-water MD + multi-frame MM/GBSA</td><td>±2.5 hours per 10 ns / not advisable without a GPU</td></tr>
+</table>
+<ul>
+<li>The first time the dialog opens, VirmoLab <b>measures how fast your laptop is</b> on your own complex (±30 seconds), then shows an estimated time and a verdict of <i>Recommended</i> (&lt; 2 hours), <i>Possible (long)</i> (2–12 hours), or <i>Not recommended</i> (&gt; 12 hours). The measurement is stored per device; <b>Measure speed</b> repeats it.</li>
+<li><b>Pause</b> writes a checkpoint; <b>Resume</b> continues from it at any time, including after the application has been restarted. Closing VirmoLab while MD is running pauses it with a checkpoint. Keep the laptop plugged in for long runs.</li>
+<li><b>Full MD trajectory analysis (F2)</b>: since VirmoLab 1.2 this presents seven tabs of results:
+  <ul>
+    <li><b>Summary</b>: statistics for the second half (ligand RMSD, Cα RMSD, Rg, hydrogen bonds, MM/GBSA ΔG as mean ± SD), a convergence badge, and a <i>Compute advanced analysis</i> button for older MD trajectories held in saved DCD files.</li>
+    <li><b>Stability</b>: interactive plots of ligand and protein RMSD, per-residue RMSF, radius of gyration (R<sub>g</sub>), and SASA (protein, ligand, and the buried contact area via <code>rdFreeSASA</code> / Shrake–Rupley).</li>
+    <li><b>Interactions</b>: a table of contact residue occupancy, plus a per-frame binary barcode of interactions and hydrogen bonds (RLE-compressed to save memory).</li>
+    <li><b>PCA &amp; FEL</b>: projection of the Cα coordinates onto the principal components (PC1 and PC2), and a 2D free energy landscape (Boltzmann FEL, ΔG = −k<sub>B</sub>T ln(P/P<sub>max</sub>)).</li>
+    <li><b>Clusters</b>: hierarchical clustering of the ligand conformations (2.0 Å RMSD threshold) with a representative medoid structure for each. There is a <i>Show medoid</i> button for the 3D viewport, and <i>Use as ensemble receptor</i> for multi-conformation docking afterwards.</li>
+    <li><b>Replicas</b>: multi-replica simulation (1–5 independent replicas with different random seeds; three replicas is the recommendation for publication), with a consistency table and overlaid RMSD curves.</li>
+    <li><b>Actions &amp; publication</b>: every plot offers <i>Send to composer</i> and <i>Save figure…</i> (vector SVG or raster PNG).</li>
+  </ul>
+</li>
+<li>Files in the project folder <code>md/&lt;id&gt;/</code>: <code>hasil.json</code>, <code>kompleks_minimisasi.pdb</code>, <code>topologi.pdb</code> plus <code>trajektori_terlarut.dcd</code> (open these in PyMOL, VMD, or ChimeraX), and a folder of medoid PDB clusters.</li>
+<li><b>Interpretation</b>: MM/GBSA leaves entropy out, so its numbers come out far more negative than an experimental ΔG; use them to <i>compare</i> ligands on the same receptor with the same settings. A mean ligand RMSD above 3 Å says the pose is unstable. Receptors with metal ions use a nonbonded model, which is an approximation.</li>
+</ul>
+
+<h2 id="desain">Design &amp; advanced analysis tools</h2>
+<p>The tools below live in the <b>Analysis</b> menu unless stated otherwise. All of them run offline on your own computer. Several are <i>rule-based estimates</i>: each dialog states its assumptions and limits at the bottom — read those before any of the numbers reach a manuscript.</p>
+
+<h3 id="kantong-geo">Binding pocket detection (geometric)</h3>
+<p>VirmoLab's own cavity finder, for apo structures or AlphaFold models with no co-crystallised ligand. Unlike <b>Prepare › Detect pockets (P2Rank)</b>, which uses a machine-learning model and needs Java, this one is purely geometric and always available.</p>
+<ul>
+<li>The structure is wrapped in a 0.8 Å grid. Every point outside the van der Waals surface is examined along 13 axes; an axis blocked by protein in both directions counts as one protein–solvent–protein event (PSP, the LIGSITE approach). Points with PSP ≥ 10 that lie 1.4–5 Å from the wall are taken as part of a pocket, then clustered.</li>
+<li>Water, ions, and crystallisation solvents (HOH, SO4, GOL, EDO, DMS, …) are ignored. A co-crystallised ligand is <i>not</i> ignored: while it is still in place its pocket looks filled — remove it first (the receptor wizard already does) so the cavity is found.</li>
+<li>The <b>Suitability</b> column (0–1) only blends volume, depth, and the number of wall residues. It is not a trained druggability score like fpocket or DoGSiteScorer: use it to order candidates, not to cite.</li>
+<li><b>Use as docking grid box</b> takes the centre and size of the selected pocket as the project's search box; <b>Show pocket centres in the viewport</b> draws numbered spheres. The list can be copied as Vina configuration parameters or exported as CSV.</li>
+<li>Reference test: on 1HSG without MK1, the top pocket is centred 0.9 Å from the crystal ligand (volume ±207 Å³) and its wall holds the catalytic ASP 25.</li>
+</ul>
+
+<h3 id="saluran">Ligand access channels</h3>
+<p>Examines the routes a small molecule can take between the active site and the solvent. From a starting point — the grid box centre, or the centre of the pose being analysed — 64 rays are cast; along each ray the free gap to the nearest van der Waals surface is measured.</p>
+<ul>
+<li>A ray that reaches solvent (a gap ≥ 6 Å after travelling ≥ 8 Å) without striking the protein is reported as a channel, with its <b>bottleneck radius</b> (the narrowest point), mean radius, length, the <b>gatekeeper residues</b> at the bottleneck, and the wall residues.</li>
+<li>A rough guide: a bottleneck of ≥ 1.4 Å is wide enough for a small drug molecule to pass without side chains opening; 1.0–1.4 Å is narrow; below 1.0 Å it is effectively closed in that structure.</li>
+<li><b>Draw the centreline in the viewport</b> shows a string of spheres along the channel, with a red sphere marking the narrowest point.</li>
+<li>A limit: straight paths only. A winding tunnel will not appear, and the length reported is a straight-line distance. For definitive channel analysis — gate motion over time included — use CAVER or MOLE on an MD trajectory.</li>
+</ul>
+
+<h3 id="kontak-pose">Pose atom contact check</h3>
+<p>Counts every protein–ligand heavy atom pair within 4 Å in the pose being analysed, grouped by element combination (an RF-Score-style descriptor). Useful for weeding out poses whose docking score looks strong but which really only perch at the mouth of the pocket.</p>
+<ul>
+<li><b>Per ligand atom</b> is the most useful figure: below 1.5 contacts per heavy atom usually means the pose is dangling rather than buried.</li>
+<li>The <b>contact score</b> uses simple linear weights. It is <i>not</i> a Random Forest model trained on PDBbind, and it does not replace a docking ΔG or MM/GBSA. A difference of a few kcal/mol against the docking score is ordinary, because the assumptions differ.</li>
+</ul>
+
+<h3 id="kinetika">Kinetics and residence time</h3>
+<p>A rough estimate of the dissociation rate k<sub>off</sub>, the residence time τ = 1/k<sub>off</sub>, and the complex half-life. ΔG, the hydrogen bond count, and the hydrophobic contacts are filled in from the active pose and can be edited.</p>
+<ul>
+<li>k<sub>on</sub> is guessed from the ligand's rotatable bond count; k<sub>off</sub> follows from K<sub>d</sub> (that is, ΔG), then is slowed by buried hydrogen bonds and hydrophobic contacts.</li>
+<li>A docking score does not model the transition state, so τ can be off by several orders of magnitude. Use it to compare ligands within one series; do not report it as a k<sub>off</sub> value. Real kinetic data come from SPR or BLI.</li>
+</ul>
+
+<h3 id="metabolisme">CYP450 metabolism sites</h3>
+<p>Flags the groups commonly oxidised by phase I cytochrome P450 (N-dealkylation, O-demethylation, benzylic, aliphatic, and aromatic hydroxylation, S-oxidation) together with suggested replacements, −OCH<sub>3</sub> → −OCHF<sub>2</sub> for instance. Detection uses SMARTS patterns, not a model trained on metabolite data or CYP isoform structures; the stability score is only a weighted count of susceptible groups, not an intrinsic clearance.</p>
+
+<h3 id="fbdd">Fragment-based design (FBDD)</h3>
+<p>Two modes: <b>Fragment growing</b> grows bioisosteric groups onto a starting fragment, and <b>Fragment linking</b> joins two fragments with a choice of rigid or flexible linkers. For every derivative, MW, WLOGP, TPSA, QED, SAScore, and the Lipinski rules are computed at once. <b>Import selected compounds</b> adds them to the viewer as ligand objects; their 3D conformations come from a quick embedding, so go through <i>Prepare ligands</i> before docking them.</p>
+
+<h3 id="protac">PROTAC designer</h3>
+<p>Assembles bivalent <b>warhead – linker – E3 ligase binder</b> molecules (VHL VH032, pomalidomide, thalidomide) with a choice of PEG, alkyl, or piperazine linkers. The warhead can be taken from a ligand in the project. The result is one covalently connected molecule, not a mixture of fragments, assessed against <i>beyond Rule of 5</i> criteria: MW, LogP, TPSA, HBD/HBA, and rotatable bonds. The linker length shown is the theoretical fully extended chain span, not a distance from 3D modelling.</p>
+
+<h3 id="peta-tubuh">ADMET organ map</h3>
+<p>The <b>Organ map</b> tab in the <b>ADMET prediction</b> dialog condenses 30 ADMET-AI parameters into a two-row flow diagram. The top row follows the drug's journey: absorption (gut) → circulation (heart) → metabolism (liver) → excretion (kidney). The bottom row holds the organs and systems affected: brain, skin, cell nucleus, and overall exposure.</p>
+<ul>
+<li><b>Each card scores 0–100</b> (higher is safer): the mean of its relevant endpoints, then capped by its worst endpoint, so one bad value cannot hide behind an average.</li>
+<li><b>Click a card</b> to see the endpoints behind it: the raw value, a 0–100 score bar, and which endpoints took no part in the score.</li>
+<li><b>A blue number</b> — on the brain card, for instance — is information rather than a risk judgement: crossing the blood–brain barrier is good for a neurological target and unwanted for a peripheral one, so VirmoLab does not decide that for you.</li>
+<li><b>Organs with no model</b> (lung, pancreas, thyroid) get no card and are named in the detail panel — no number is invented.</li>
+<li><b>Motion</b>: cards appear in sequence as the ligand changes, particles travel along the arrows at a speed following the predicted half-life, cards at risk pulse briefly, a card lifts when hovered, and a ripple spreads once when a card is selected. The <i>Drug journey animation</i> checkbox turns all of it off at once — useful on battery, or while recording the screen.</li>
+<li><b>PNG/SVG export</b> produces a still image, without animation, for a manuscript: it carries the ligand name and the colour legend, so the figure stands on its own in the text.</li>
+<li><b>Keyboard</b>: once a card has been clicked, left and right arrows move between cards in a row and up and down move between rows.</li>
+</ul>
+<p>Every number here is a machine-learning prediction meant for triaging candidates, not a substitute for toxicity testing. If you also use a service such as pkCSM, treat the two as two different estimates rather than one truth.</p>
+
+<h3 id="mpo">Multi-parameter optimisation (MPO) and radar</h3>
+<p>Combines physicochemical properties, QED, SAScore, and the docking ΔG into one 0–100 suitability score with a radar chart that can be copied or saved as SVG. The <b>Oral</b> preset uses seven terms; the <b>partial CNS-MPO</b> preset uses four of the six terms from Wager et al. 2010 (MW, ClogP approximated by WLOGP, TPSA, HBD) — ClogD and pKa are not computed, so the figure is not comparable with Pfizer's 0–6 CNS-MPO value.</p>
+
+<h3 id="penapisan">Virtual screening dashboard</h3>
+<p>For projects with many ligands: a ligand × parameter heat map, a ΔG against SAScore scatter plot coloured by MPO, a histogram of the affinity distribution, multi-criteria filters (Lipinski, Veber, PAINS, Brenk, GI absorption), a composite ranking, flagging of the top hits, and CSV export of the filtered results.</p>
+
+<h3 id="mmp">Matched molecular pairs (MMP)</h3>
+<p>Finds pairs of ligands that differ by a single R group (RDKit <code>rdMMPA</code>), then pairs that difference with the change in ΔG, QED, and SAScore. A pair with a large |ΔΔG| across very similar structures is flagged as an <i>activity cliff</i> — precisely where docking scores go wrong most often, so treat it as a pointer towards a substitution, not as a conclusion.</p>
+
+<h3 id="glikosida">Glycosides and aglycones</h3>
+<p>Many natural products are glycosides, and a glycoside almost always scores more negatively than its aglycone simply because the molecule is larger. Analysis › Ligand properties and design › <b>Glycosides and aglycones</b> recognises cyclic sugar units on the project's ligands (pyranoses and furanoses joined through an O-, N-, or S-glycosidic bond), highlights them on the 2D diagram, then cuts them as enzymatic hydrolysis would: the linking heteroatom stays with the aglycone. C-glycosides such as vitexin and mangiferin are not cut.</p>
+<ol>
+<li>Click <b>Add aglycone to project</b>; any aglycone not already present is prepared and saved as a new ligand named “&lt;glycoside&gt; (aglycone)”.</li>
+<li>Dock that aglycone with the <b>same</b> receptor, box, and engine as its glycoside, then click <b>Reload</b>. A pair is only compared when both were docked under the same conditions.</li>
+<li>Read the <b>Conclusion</b> column: “Ahead because of size” means the glycoside does score more strongly, but each sugar atom contributes less than the ligand efficiency (LE) of its aglycone. Per-row detail appears below the table; <b>Copy methods</b> copies the methods paragraph together with its four references.</li>
+</ol>
+<p>An example on HIV protease 1HSG (Vina, exhaustiveness 4, used as a workflow test rather than a biologically meaningful target): cosmosiin −8.75 against apigenin −7.82 kcal/mol, but LE 0.282 against 0.391; arbutin −6.60 against hydroquinone −4.56 kcal/mol, LE 0.347 against 0.570. Both are “ahead because of size”.</p>
+
+<h3 id="konservasi">Pocket residue conservation</h3>
+<p>Analysis › Simulation and advanced research › Advanced research › <b>Residue conservation</b>. Paste FASTA homologues (or fetch them from UniProt, NCBI BLAST against Swiss-Prot, EBI, or RCSB; an online search sends the chain sequence off this computer), then click <b>Compute &amp; colour B-factor</b>. The per-position percentage identity is computed on this computer (Needleman–Wunsch, BLOSUM62) and the protein is coloured by B-factor (100 = fully conserved). When a pose or ligand is selected in the Objects panel, the output also summarises the <b>pocket residues</b> (atoms within 5 Å of the ligand): how many there are, the mean pocket identity against the whole chain, and the least conserved pocket residues. Pocket residues that differ between homologues are where a selectivity argument starts; a fully conserved pocket means selectivity will be hard to achieve through it.</p>
+
+<h3 id="selektivitas">Multi-target selectivity</h3>
+<p>Compares the same ligand across several target projects: a ligand × target matrix, per-target z-score normalisation, the ΔΔG gap, and a profile classification (selective, semi-selective, promiscuous). The comparison only holds when every target was docked with the same engine, box size, and preparation protocol.</p>
+
+<h3 id="ppi">Protein–protein interfaces (PPI)</h3>
+<p>Computes surface residues with SASA (Shrake–Rupley), inter-chain contacts and hydrogen bonds, salt bridges, and the buried surface area (ΔSASA) of a multi-chain complex. VirmoLab does <b>not</b> run protein–protein docking itself: for that, this tool prepares a PDB file you upload to ClusPro yourself under your own account — nothing is sent automatically.</p>
+
+<h3 id="lab">Wet-lab assay plan</h3>
+<p>Bridges in silico results to the bench: estimated K<sub>i</sub> and IC<sub>50</sub> (Cheng–Prusoff) from ΔG, a serial dilution series, pipetting volumes, DMSO limits, and a 96/384/48/24-well plate layout complete with control wells, a text protocol, and CSV export. A K<sub>i</sub> from a docking score is a rough estimate — use it as a starting point for the dose range, then adjust it against real assay results.</p>
+
+<h3 id="interpretasi">Interpreting docking results</h3>
+<p><b>Analysis › Docking results interpretation…</b> assembles a summary or a draft Results &amp; Discussion chapter from the project's own numbers. If Ollama is running on this computer, the text comes from a local language model; otherwise VirmoLab builds it from a fixed template. Both need checking: match every number and residue name against the Results tab, rewrite it in your own words, and declare the use of AI in your methods section where the journal requires it.</p>
+
+<h3 id="skrip-figur">Publication figure scripts</h3>
+<p><b>Tools › Publication figure script (PyMOL / ChimeraX)…</b> writes ready-to-run <code>.pml</code> and <code>.cxc</code> files: a protein cartoon, sticks for the ligand and pocket residues, dashed hydrogen bonds, a transparent pocket surface, and a 2400 × 1800 pixel render. Copies of the receptor and the pose are written into the target folder as well, so the paths inside the script stay valid if the folder is moved.</p>
+
+<h3 id="validasi-protokol">Docking protocol validation package (for publication)</h3>
+<p><b>Analysis › Validation and quality › Protocol validation package…</b> (or the button in the <b>Tests</b> tab toolbar) is a standardised four-step wizard for validating a computational docking protocol before large-scale virtual screening:</p>
+<ul>
+<li><b>Step 1 (Crystal redocking):</b> tests whether the protocol reproduces the crystal pose (symmetry-corrected RMSD ≤ 2.0 Å). Option A uses your own project's redocking validation (its receptor, box, and engine); option B runs redocking from another complex PDB file. Where the crystal ligand has several copies, the largest single residue is used.</li>
+<li><b>Step 2 (Cross-docking):</b> needs at least 2 complex PDB files of the same target. Structures are superposed on their shared Cα atoms before RMSD is computed; a pair that cannot be aligned or fails to dock is marked grey as “failed” rather than filled in as zero.</li>
+<li><b>Step 3 (Enrichment):</b> uses the project's receptor and box. Actives come from ChEMBL (or your own CSV) with diverse scaffolds; decoys are drawn at random from approved drugs and natural products with matching physicochemical properties and a Tanimoto below 0.3 against every active, and every ligand is then genuinely docked. A ligand that fails to dock is excluded and reported, not counted as a score of 0. Output: ROC-AUC, BEDROC (α = 20), EF 1%, logAUC. <b>A limit:</b> these are not DUD-E decoys from ZINC; property matching does not remove topological differences, so treat the values as an upper estimate. Use at least 10 actives and 100 decoys for a defensible conclusion.</li>
+<li><b>Step 4 (Summary &amp; publication):</b> metric cards for the tests that were actually run (the rest show “–”), the percentage of PoseBusters-valid poses from the QC already recorded on the project's docking results, a methods paragraph (in Indonesian and English) covering only the tests that were run, a one-page HTML report, and the ROC curve sent to the Figure composer.</li>
+</ul>
+
+<h3 id="target-balik">Reverse targeting</h3>
+<p><b>Analysis › Multi-ligand screening › Reverse targeting &amp; network…</b> looks for the protein targets a single compound might act on:</p>
+<ul>
+<li><b>The ligand route (ChEMBL, online):</b> similar compounds in ChEMBL together with the targets they are active against (pChEMBL ≥ 6). Similarity is measured with the Tanimoto coefficient of Morgan fingerprints.</li>
+<li><b>The structure route (target panel):</b> docking against a panel of crystal structures validated by redocking, normalised as z-scores against random baits. This option is disabled when the installed package carries no panel.</li>
+<li><b>Borda ranking:</b> the ranks from both routes are summed; confidence is high when a target lands in the top 10 of both. A target that fails to dock gets no rank.</li>
+<li>Every result is a computational hypothesis that has to be tested in the laboratory.</li>
+</ul>
+<h3 id="jaringan-jalur">Networks &amp; pathways</h3>
+<p>The <b>Networks &amp; pathways</b> tab in the same dialog assembles the selected targets into a pharmacology network. Press <b>Send selected targets to Network</b> in the reverse targeting tab (the highlighted rows, or the high-confidence targets when nothing is highlighted), then <b>Build network</b>.</p>
+<ul>
+<li><b>Pathway enrichment:</b> a one-sided hypergeometric test against the Reactome or Gene Ontology (biological process) gene sets shipped with the package, with Benjamini–Hochberg correction. The background is every annotated gene in that file, and its size is stated in the methods paragraph.</li>
+<li><b>Protein interactions (STRING):</b> edges between targets with a combined score above a chosen threshold (0.4 / 0.7 / 0.9). A STRING score includes co-expression and text-mining evidence, not only physical interaction.</li>
+<li><b>Disease associations (Open Targets):</b> the top five diseases per target with an association score above a chosen threshold.</li>
+<li><b>Sensitivity analysis:</b> the network is rebuilt at STRING thresholds of 0.4/0.7/0.9 and with the top 5/10/20 targets. Genes that keep a high degree in at least 80&nbsp;% of the combinations are marked as stable core nodes (drawn with a thick edge on the graph).</li>
+<li>The graph zooms with the scroll wheel and pans by dragging. Results export as GraphML (for Cytoscape or Gephi), as a CSV edge list, or go to the Figure composer. <b>Copy methods paragraph</b> writes out the databases, versions, thresholds, sensitivity results, and the enrichment background.</li>
+<li>Every network is a computational hypothesis that has to be tested in the laboratory.</li>
+</ul>
+
+<h3 id="qsar">QSAR &amp; prediction models</h3>
+<p><b>Analysis › Multi-ligand screening › QSAR &amp; prediction models…</b> builds a model from your own activity data in five steps: Data → Curation → Model → Validation → Prediction.</p>
+<ul>
+<li><b>Data:</b> a ChEMBL activity table already fetched into the project, or a CSV file with <code>smiles</code> and <code>nilai</code> columns (in nM, µM, or M) or <code>smiles</code> and <code>pIC50</code>. Values marked &gt; or &lt; are skipped, because they are not exact measurements.</li>
+<li><b>Curation:</b> structures are standardised (largest fragment, neutralisation), inorganic compounds and fragments are discarded with the reason given, duplicate measurements are merged as a median, and then measurement ranges spanning more than 1 log and <i>activity cliff</i> pairs (Tanimoto similarity ≥ 0.85 with a difference ≥ 1.5 log) are flagged for you to decide on.</li>
+<li><b>Model:</b> regression or classification; Morgan2, MACCS, RDKit 2D descriptors, or a combination as features; Random Forest, SVR, kNN, Gaussian Process, or Ridge as the algorithm. Hyperparameters are tuned with 5-fold cross-validation <i>inside the training set only</i>.</li>
+<li><b>Validation:</b> two splits are reported side by side. A random split is almost always better than a Bemis–Murcko scaffold split; a large gap means the model only recognises scaffolds it has already seen, and the application writes that warning out. Also provided: Q², test-set R², the Golbraikh–Tropsha criteria, 50× Y-randomisation, a predicted-against-measured plot, a Williams plot, and permutation feature importance (with an example substructure for each Morgan bit).</li>
+<li><b>Prediction:</b> the project's ligands are predicted with a 90 % conformal interval and an applicability domain flag. Compounds inside the domain are listed at the top, those outside are dimmed below. If fewer than half the ligands fall inside the domain, VirmoLab states that the model does not fit that series: do not rank or select compounds from its predictions, but train a model on data with similar scaffolds instead. Results can be written into the <i>predicted pIC50</i> column of the Results panel, exported to CSV, or the model saved along with a model card (holding a data fingerprint, the metrics, package versions, and the date).</li>
+<li>A compound outside the domain still receives a number, but it is flagged and must not be read as a quantitative value.</li>
+</ul>
+
+<h3 id="farmakofor">Pharmacophore &amp; 3D shape screening</h3>
+<p><b>Analysis › Multi-ligand screening › Pharmacophore &amp; 3D shape screening…</b> filters a compound library by 3D similarity to one reference ligand, ahead of the more expensive docking.</p>
+<ul>
+<li><b>Query source:</b> the pose currently open in the Interactions panel, or the project's co-crystallised ligand. Other project ligands are not offered, because their coordinates are only generated conformers rather than a bound pose. When the project has a receptor, protein heavy atoms within 4&nbsp;Å of the reference ligand become exclusion spheres.</li>
+<li><b>Features:</b> hydrogen bond donors and acceptors, aromatic rings, and hydrophobic groups from the reference pose. Each feature can be switched off and its distance tolerance changed; the centre coordinates appear in the feature name's tooltip.</li>
+<li><b>Scoring:</b> each conformer of a compound is rigidly aligned to the reference ligand (shape and pharmacophoric colour), then the matching query features are counted on that aligned conformer. A slider sets the weight of the pharmacophore score against the shape-and-colour score.</li>
+<li><b>Query validation:</b> load actives for the target from ChEMBL or a CSV; matched decoys are generated automatically from a local library, then ROC-AUC, BEDROC, and EF 1% are computed for the query currently in force. EF 1% is only shown when the set holds at least 100 compounds. Changing a feature or a tolerance clears the previous validation figures, because they no longer apply.</li>
+<li><b>Send top hits to docking</b> adds the selected compounds as ligands in the main window and opens <b>Prepare ligands</b>, so protonation and PDBQT generation go through the usual route before docking.</li>
+<li>Ligand-based screening is a coarse filter: in an internal test (a query from the 1HSG ligand against 8 HIV protease inhibitors and 520 matched drugs) the ROC-AUC was only 0.66. Use it to narrow a library, not as evidence of activity.</li>
+</ul>
+
+<h3 id="hipotesis">Hypothesis tracker → laboratory assays</h3>
+<p>The <b>Hypothesis</b> tab in the <b>Wet-lab assay plan</b> dialog compares in silico predictions against assay results you have measured.</p>
+<ul>
+<li><b>Prediction to compare against:</b> the docking ΔG, MM/GBSA from a finished MD simulation (the mean across replicas where there are several), or a pIC50 estimated from ΔG. An option with no data in the project is disabled.</li>
+<li><b>Entering assay results:</b> type the measured value and its unit into the table (pIC50 is computed for you), or press <b>+ Add entry</b> for a compound not yet in the project — write its name exactly as the ligand's name so it pairs with its prediction.</li>
+<li><b>Importing plate reader CSV:</b> either a table of IC50 per ligand, or a matrix of 96-well plate readings. A matrix is a raw signal, not an IC50: VirmoLab normalises it against the blank and solvent control wells according to the plate layout currently open, then fits a four-parameter dose–response curve per compound. Build the plate layout first in the <b>Microplate layout</b> tab. An IC50 outside the concentration range tested is marked censored (“IC50 &gt; 100 µM”, for instance) and left out of the correlation. The Z′ value of the solvent control against the positive control is reported too; Z′ &lt; 0.5 means the assay window is too narrow.</li>
+<li><b>Correlation:</b> Spearman's ρ and Kendall's τ with bootstrap 95&nbsp;% confidence intervals, and a warning when fewer than 8 pairs are available. The sign of the energies is inverted, so a positive correlation means the predicted ranking agrees with the measured pIC50.</li>
+<li><b>Retrain QSAR with the new data</b> opens the QSAR wizard with the project's lab activities already loaded, so a model can be retrained on your own measurements.</li>
+</ul>
+
+<h3 id="rbfe">Relative binding free energy (experimental)</h3>
+<p><b>Analysis › Ligand properties and design › Relative free energy (experimental)…</b> (shown in expert mode only) builds a perturbation network for a congeneric series. The method is far more accurate than a docking score, and far more expensive.</p>
+<ul>
+
+<li><b>What Windows can do:</b> choose compound pairs, map their atoms, build the perturbation network, see an estimate of the computational cost, and analyse the results.</li>
+<li><b>Running the simulations:</b> OpenFE runs only on Linux and macOS, so VirmoLab runs it inside WSL &mdash; as it does GNINA, Boltz-2, and Uni-Dock. Install it once with <code>build_tools/pasang_openfe_unidock_wsl.sh</code> (conda-forge packages, &plusmn;5&nbsp;GB, not part of the installer). When OpenFE is absent the dialog says so plainly and can still build a network and load results produced on another machine. The <b>Run</b> button starts simulations that live on independently of the application: VirmoLab may be closed, and an interrupted calculation resumes because legs that already have results are skipped.</li>
+<li><b>Protocol:</b> the OpenFE default (11 &lambda; windows, 5&nbsp;ns, 3 repeats per leg) for numbers you intend to report, or a <i>quick test</i> (0.5&nbsp;ns, 1 repeat) to confirm the workflow runs. Ligand partial charges come from OpenFF NAGL.</li>
+<li><b>Installation test (16 October 2026, RTX 3060 Laptop):</b> the lig_ejm_31 &rarr; lig_ejm_43 edge from the OpenFE TYK2 benchmark set with the quick-test protocol gave &Delta;&Delta;G = +2.28 &plusmn; 0.95 kcal/mol against an experimental value of +1.28 kcal/mol (Ki 0.096 &rarr; 0.84 &micro;M). The direction is right and the 1.0 kcal/mol difference still falls inside the statistical error of so short a protocol. The measured speed was about 99&nbsp;ns/day for the complex leg, so the default protocol means roughly 1.7 days per complex leg per edge.</li>
+<li><b>Pair selection:</b> only pairs changing up to 10 heavy atoms are used. A larger perturbation is not merely slow, it is also untrustworthy.</li>
+<li><b>The network:</b> a minimum spanning tree picks the easiest perturbations, then edges are added to close cycles so consistency can be checked. The ΔΔG values around a closed cycle should sum to zero; a large deviation says the sampling is not yet adequate.</li>
+<li><b>Cost:</b> the number of edges multiplied by the lambda windows, the replicas, and the length of each window. The numbers are large: a dozen edges with the standard protocol is already hundreds of nanoseconds of simulation, which means days on a GPU.</li>
+<li>This whole feature is labelled experimental and is only meaningful for a congeneric compound series.</li>
+</ul>
+
+<h3 id="penapisan-bertahap">Large library screening (active learning)</h3>
+<p><b>Analysis &rsaquo; Multi-ligand screening &rsaquo; Large library screening (active learning)&hellip;</b> docks a small part of a library, trains a model on the scores obtained, then docks the compounds predicted to be strongest next. The design follows MolPAL (Graff et al., <i>Chem Sci</i> 2021).</p>
+<ul>
+<li><b>What it is for:</b> libraries of tens to hundreds of thousands of compounds that cannot all be docked. A small library, under a thousand compounds, is better docked outright.</li>
+<li><b>The library:</b> a SMILES/CSV/SDF file (.gz allowed), COCONUT natural products already downloaded, or the approved drugs that ship with the application. SMILES are checked by RDKit, salts and solvents are stripped (largest fragment), duplicates are removed, and 2048-bit atom-pair fingerprints are generated.</li>
+<li><b>Round plan:</b> a random initial batch, then several further rounds, each 1&nbsp;% of the library by default. Model: an ensemble of three neural networks (the default) or a random forest; selection: UCB (prediction minus uncertainty), greedy, or random as a baseline.</li>
+<li><b>The docking is ordinary docking:</b> the engine settings, box, and receptor come from steps 3&ndash;4 and are then locked for the campaign, and each round enters the Queue panel as a job. Uni-Dock (GPU) helps a great deal here. Campaign ligands are tagged so they do not mix with the project's ordinary ligands.</li>
+<li><b>It keeps running:</b> a campaign continues with the dialog closed, is stored in the project, and resumes after the application is reopened. <i>Stop after this round</i> finishes the round in progress; <i>Stop now</i> cancels the jobs and returns the undocked ligands to the candidate pool.</li>
+<li><b>What is reported:</b> how many compounds have been docked, the best &Delta;G, the mean of the top 100, and the model's prospective accuracy (Spearman's &rho; between the predictions and the docking scores of the last batch, computed before that batch was docked). The <i>Predicted, not yet docked</i> tab shows candidates predicted to be strong but not yet docked &mdash; predictions, not docking results.</li>
+<li><b>How well it works (retrospective test):</b> with the MolPAL Enamine docking scores (thymidylate kinase 4UNN) and only 6&nbsp;% of the library docked, a neural network with greedy selection found 64&nbsp;% of the best 1&nbsp;% of compounds in a 10-thousand library and 74&nbsp;% in a 50-thousand one; a random forest found 53&nbsp;% and 57&nbsp;%; random selection only 6&nbsp;% and 5&nbsp;%. Iterative screening therefore cuts the docking load more than tenfold while still missing some strong compounds: it is a filter, not a guarantee of finding the best.</li>
+</ul>
+
+<h3 id="sunting-kantong-3d">Editing in the pocket (3D)</h3>
+<p><b>Analysis &rsaquo; Ligand properties and design &rsaquo; Edit in pocket (3D)&hellip;</b> grows a group onto an existing pose and scores it in place, to answer the question “if I add a methyl here, does the score improve?”</p>
+<ul>
+<li><b>How to use it:</b> choose the parent pose, click an atom on the 2D diagram as the growth point, tick the groups you want to try, then click <i>Score suggestions</i>. The second tab replaces a whole functional group with its bioisostere (carboxylate &rarr; tetrazole, for instance).</li>
+<li><b>How it works:</b> analogues are built with the shared core pinned to the parent pose's coordinates, only the new group is optimised (MMFF94), then the pose is minimised in place and scored with AutoDock Vina <code>--local_only</code>. One suggestion takes seconds.</li>
+<li><b>What is reported:</b> the local &Delta;G, its difference from the parent pose (&Delta;&Delta;G), the ligand efficiency, how many atoms clash with the protein before minimisation, and MW, logP, QED, and SAScore.</li>
+<li><b>Its limits:</b> a local score only ranks suggestions against the parent pose and does not replace redocking. The ligand conformation is effectively kept from the parent pose, so a suggestion that would really need a different binding mode will look bad. Add a promising suggestion to the project as a ligand and dock it again from scratch.</li>
+</ul>
+
+<h3 id="generatif">Generative design</h3>
+<p><b>Analysis › Ligand properties and design › Generative design…</b> builds new analogues from one parent compound. Replacement fragments are taken from real compounds, so the suggestions tend to remain synthesisable, unlike a random structure generator.</p>
+<ul>
+<li><b>Operations:</b> <i>replace fragment</i> swaps a piece of the molecule for another that has appeared in a similar chemical environment; <i>add fragment</i> grows a new group. The context radius decides how wide an environment has to match: wider is more conservative and yields fewer results.</li>
+<li><b>Fragment source:</b> the database is built from the compound libraries already in VirmoLab, which means the approved drugs. Because that is a far smaller set than the whole of ChEMBL, its fragment diversity is narrower. Where the database came from is printed in the methods paragraph and the CSV export.</li>
+<li><b>Filters:</b> nuisance substructures (PAINS and Brenk), synthetic accessibility (SAScore), drug-likeness (QED), and novelty against the parent. How many were rejected and why is always shown, so you can tell when the filters are too strict.</li>
+<li><b>Thresholds follow the parent:</b> if your own parent compound already falls outside a threshold — a peptidomimetic inhibitor with a low QED, say — the threshold is lowered to match it. Without that, every derivative would be rejected and the feature would be useless on exactly the series that most needs optimising. This can be switched off.</li>
+<li><b>Ranking:</b> once candidates have been docked, they are ranked on a Pareto front over binding free energy, QED, and SAScore together, rather than one combined number. A candidate that fails to dock is removed from the ranking and counted separately, not given a substitute score.</li>
+<li><b>Workflow:</b> select candidates in the table, press <b>Import selected as ligands</b>, then carry on through Prepare ligands and the docking queue like any other ligand.</li>
+<li>Every analogue is a computational suggestion. Whether it can actually be synthesised still needs a chemist's judgement before any laboratory work.</li>
+</ul>
+
+<h3 id="xtb">Electronic properties (xTB)</h3>
+<p><b>Analysis › Ligand properties and design › Electronic properties (xTB)…</b> computes a ligand's electronic properties with GFN2-xTB. Docking judges shape and interactions; this part explains the electronic side — which atoms are open to attack, and how readily the molecule gives up or accepts an electron.</p>
+<ul>
+<li><b>Descriptors:</b> HOMO, LUMO, the gap, chemical hardness (&eta;), chemical potential (&mu;), electrophilicity (&omega;), and the dipole moment. A solvent can be chosen (water, methanol, DMSO, and others) or the calculation run in the gas phase.</li>
+<li><b>Fukui indices:</b> f(−) marks atoms open to electrophilic attack, f(+) those open to nucleophilic attack. The values are coloured directly onto the atoms in the 3D viewer with a diverging scale and its numeric bounds.</li>
+<li><b>Electrostatic potential:</b> ESP points from xtb are mapped to the nearest atom for colouring. The numbers shown in the table still come straight from xtb, not from that mapping.</li>
+<li><b>Relation to metabolism:</b> the application compares the f(−) ranking against the predicted CYP metabolism sites. When both point at the same atom, the case for an oxidation site is stronger.</li>
+<li><b>A limit that must be stated:</b> GFN2-xTB is a semi-empirical method, not DFT. Its HOMO–LUMO gap tends to come out smaller than DFT's, so use it to compare trends between ligands rather than as an absolute value citable as a DFT result. This sentence is printed in the methods paragraph and the CSV export.</li>
+</ul>
+
+<h3 id="peptida">Peptide docking</h3>
+<p><b>Prepare › Step 2 · Ligands › Peptide from sequence…</b> builds a peptide–receptor complex. Docking scoring functions such as Vina were designed for small molecules and become unreliable once a ligand has dozens of rotatable bonds, so this workflow uses no docking at all.</p>
+<ul>
+<li><b>Input:</b> a peptide sequence in one-letter code, up to 30 residues. A letter that is not an amino acid is highlighted red in place, so a typo shows at once. Non-standard codes such as X, B, or Z are accepted but warned about, because the prediction is less trustworthy.</li>
+<li><b>Prerequisite:</b> the same as co-folding, namely Boltz-2 installed in WSL. The receptor comes from the project, and the peptide is sent as a protein chain of its own.</li>
+<li><b>Refinement:</b> the predicted complex is minimised in implicit solvent with the receptor restrained, so it is mainly the peptide that adjusts. Short dynamics can be added, but take far longer. MM/GBSA is then computed with the peptide treated as the binding partner.</li>
+<li><b>Results:</b> the model's confidence, how far the peptide shifted during minimisation, the MM/GBSA estimate, the buried surface area, and a list of interface residues on both chains. The complex can be loaded into the viewer with the peptide in its own colour.</li>
+<li>An MM/GBSA number is a rough estimate for comparing several peptides on the same target, not an absolute affinity prediction. The training-data leakage warning in the co-folding section applies here too.</li>
+</ul>
+
+<h3 id="kofolding">Boltz-2 co-folding and pose agreement</h3>
+<p>The <b>Co-folding</b> tab in the Properties panel compares a docked pose against the complex structure predicted by the Boltz-2 AI model. Its purpose is a cross-check: two methods that work in entirely different ways, when they agree, lend the pose more confidence.</p>
+<ul>
+<li><b>Prerequisite:</b> Boltz-2 installed in WSL through <code>build_tools/pasang_gnina_boltz_wsl.sh</code>. The package and its model weights are MIT-licensed and are not bundled into the VirmoLab installer. Until it is installed the button stays disabled and the status explains how to install it.</li>
+<li><b>How to use it:</b> select one docked pose in the viewer, then press <b>Run co-folding for this ligand</b>. The prediction runs in the background; on a 6 GB GPU it often runs out of memory, and when it does, run it on the CPU.</li>
+<li><b>Alignment:</b> the Boltz-2 output structure is superposed onto the project receptor using Cα atoms before the ligand RMSD is computed. Without that step the two structures sit in different coordinate frames and the RMSD means nothing.</li>
+<li><b>Agreement:</b> <i>Agree</i> when the ligand RMSD is below 2.0 &Aring; and both poses pass PoseBusters; <i>Partial</i> when the RMSD is small but a pose fails, or the RMSD is large while the contact pattern is still similar (IFP Tanimoto of at least 0.6); otherwise <i>Conflicting</i>. The <b>Consensus scoring</b> dialog shows the Boltz-2 affinity and the agreement as columns, and can be filtered to agreeing ligands only.</li>
+<li><b>Agreement is not proof of correctness.</b> Boltz-2 was trained on structures from the PDB. If your target and ligand are already in the PDB — 1HSG with indinavir, for instance — the model has most likely seen the answer during training, so high agreement proves nothing about its predictive ability. This is called training-data leakage. VirmoLab checks how similar your ligand is to ligands already in the PDB and warns when the similarity is high. A genuinely meaningful test uses a target or ligand not represented in the PDB.</li>
+<li>A Boltz-2 affinity is a model estimate, not a measurement, and still needs laboratory testing.</li>
+</ul>
+
+<h2 id="farmakologi">Network pharmacology</h2>
+<p>This workflow answers a different question from docking. Docking asks <i>how strongly one compound binds one protein</i>; network pharmacology asks <i>through which proteins and pathways a set of compounds might act on a disease</i>. The shift is from <i>one drug › one target › one disease</i> to <i>many compounds › many targets › many pathways</i>.</p>
+<p>Open it from the <b>Network › Open the network pharmacology workflow…</b> menu (Ctrl+Shift+J), or choose <b>Network Pharmacology</b> in the workflow selector of the <b>Steps</b> panel. The window has seven tabs worked through from left to right; their state is stored inside the project file, so the work can be left and resumed later.</p>
+
+<h3 id="np-senyawa">1 · Compounds</h3>
+<p>Assemble a list of compounds with their SMILES. Three ways in: <b>Medicinal plant compounds…</b> (searching by plant taxon through LOTUS/Wikidata and COCONUT), <b>Take project ligands</b> (using the ligands already in this docking project), and <b>Import CSV/TSV…</b> for a list of your own — a KNApSAcK download with a SMILES column added from PubChem, for instance. The column separator and header names are recognised automatically; the SMILES column may be called <code>SMILES</code>, <code>Isomeric SMILES</code>, or <code>Canonical SMILES</code>. Where both are available, use isomeric SMILES because they carry stereochemistry, and do not mix the two kinds in one dataset: the target predictions stop being comparable.</p>
+<p>Fill in the <b>Compound source</b> box with the plant or collection used. That text goes into the methods paragraph on the last tab.</p>
+
+<h3 id="np-admet">2 · ADMET filtering</h3>
+<p>Of the hundreds of compounds in one plant, not all are worth carrying forward. This filtering works in two layers. The first is always available: the number of Lipinski rule-of-five violations and PAINS alerts, both computed by RDKit on your own computer. The second uses ADMET-AI predictions where it is installed — intestinal absorption (HIA), oral bioavailability, drug-induced liver injury risk (DILI), hERG inhibition, and Ames mutagenicity — and runs from the <b>Predict ADMET (ADMET-AI)…</b> button.</p>
+<p>The default thresholds in the dialog are a customary starting point, not a fixed rule: adjust them to the size of your dataset and the aim of your study, then report the thresholds you actually used. A compound whose ADMET values are missing is <i>not</i> dropped for that reason — absence of data is not evidence of harm — but the reason is recorded in the <b>Reason</b> column so you know the filtering is incomplete. These results are predictions, not final truth.</p>
+
+<h3 id="np-target">3 · Compound targets</h3>
+<p>Two complementary target sources, which may be used together:</p>
+<ul>
+<li><b>ChEMBL ligand similarity</b> — finds structurally similar compounds (ECFP4 fingerprints) whose activity has been measured (pChEMBL ≥ 6), then takes the targets they bind. This gives the targets a compound <i>might</i> bind based on structural similarity, the same principle as SwissTargetPrediction.</li>
+
+<li><b>CTD curated interactions</b> — compound–gene relationships read and curated by curators from the toxicological and biomedical literature. This gives targets that <i>have been reported</i>, searched by compound name, so make sure the naming is standard.</li>
+</ul>
+<p>If you would rather use the tools' own web pages, the <b>Import target CSV…</b> button accepts a table with a compound name column and a gene symbol column. For the structure-based route — docking compounds against a curated target panel — use <b>Network › Reverse targeting</b>.</p>
+
+<h3 id="np-penyakit">4 · Disease genes &amp; the intersection</h3>
+<p>Type a disease name, press <b>Search Open Targets</b>, choose the right entry from the list, then press <b>Fetch disease genes</b>. An Open Targets association score runs from 0 to 1 and blends genetic, literature, pathway, and drug evidence; the default threshold of 0.10 is lenient, so raise it when too many genes come back.</p>
+<p>VirmoLab does not contact GeneCards automatically, because its licence is paid and forbids automated retrieval. If you have access, download the results yourself and use <b>Import gene CSV…</b>; DisGeNET, OMIM, and CTD exports are accepted too as long as there is a gene symbol column. Filter to <i>protein coding</i> on the source site first.</p>
+<p>The intersection between compound targets and disease genes is what is called the <b>potential therapeutic target</b>, drawn as a Venn diagram on the right. The number in each region is a gene count; the circles are a fixed size rather than proportional, because a proportional Venn does not always have a geometric solution and a forced area is more misleading than a plain one.</p>
+
+<h3 id="np-jaringan">5 · The PPI network</h3>
+<p>Protein–protein interaction edges come from STRING for the intersecting genes. The <b>combined score</b> is a confidence threshold: 0.40 medium, 0.70 high — the one network pharmacology papers customarily use — and 0.90 highest. Below 0.40, false positives are likely.</p>
+<p>Keep in mind that a STRING edge does not always mean two proteins physically touch. STRING blends several evidence channels: experiments, curated databases (KEGG, Reactome, Biocarta), text mining across millions of abstracts, co-expression, gene neighbourhood, gene fusion, and co-occurrence. A functional association — two proteins working in the same pathway without ever touching — also produces an edge.</p>
+<p>The network can be explored: the scroll wheel zooms, dragging pans, clicking a node highlights it with its neighbours, and double-clicking restores the full view. The table on the right ranks the <b>hub proteins</b> — those with the most connections, and therefore taken to matter most. The primary ordering uses <b>MCC</b> (Maximal Clique Centrality, the cytoHubba method), with degree, betweenness, and closeness alongside for comparison. Selecting a row in the table highlights its node in the picture.</p>
+<p>Do not read a network as merely a scatter of dots and lines. What you are after is the hub proteins and the strength of their evidence, not how the network looks. For further analysis, <b>Export GraphML</b> opens this network in Cytoscape or Gephi.</p>
+
+<h3 id="np-jalur">6 · Pathways</h3>
+<p>Pathway enrichment uses a one-sided hypergeometric test: how unlikely it is that this many of your genes land on one pathway by chance alone. Because thousands of pathways are tested at once, the <i>p</i> value is corrected by the Benjamini–Hochberg method into a <i>q</i> value; use <i>q</i>, not <i>p</i>, to decide which pathways to report. Two gene sets are available offline: Reactome and Gene Ontology Biological Process. The background is every gene in the chosen set.</p>
+
+<h3 id="np-figur">7 · Figures</h3>
+<p>Five publication-ready images are assembled from the workflow's state, chosen in the list on the left and shown at once in the preview on the right. <b>Number of items</b> sets how many hub proteins or pathways are drawn; <b>DPI</b> applies to raster output only.</p>
+<ul>
+<li><b>Intersection Venn diagram</b> — compound targets against disease genes.</li>
+<li><b>Layered network</b> — compounds, targets, pathways, and disease in one force-directed picture.</li>
+<li><b>Circular hubs</b> — the most central proteins arranged in a circle, coloured by MCC rank. A circular arrangement is used because what is being read is the ranking and the density of connections between hubs; a force-directed layout hides that ranking. This is the open equivalent of the cytoHubba figure that network pharmacology manuscripts customarily use.</li>
+<li><b>Pathway bubble plot</b> — the standard form for pathway enrichment: gene ratio on the x axis (query genes landing on the pathway divided by all query genes), point size as the gene count, colour as −log₁₀(q). The numbers are written beside each point, so the figure still reads when printed in black and white.</li>
+<li><b>Pathway bars</b> — the most compact form, gene count per pathway.</li>
+</ul>
+<p>Ordered quantities (hub rank, q value) are drawn with <i>a single hue running light to dark</i> rather than a rainbow, and the ramp has been checked for colour-blind legibility and contrast against the background. That means the figure still reads correctly in greyscale: darker always means higher.</p>
+<p><b>Save SVG/PNG…</b> writes the figure currently shown; <b>Save all…</b> writes every figure whose data exist into one folder, each as both SVG and PNG. Use SVG where the journal accepts vector — the files are small and never pixelate when enlarged.</p>
+
+<h3 id="np-laporan">8 · Report</h3>
+<p>Summary cards show the figures from each stage, and below them the full report is reassembled every time a stage completes — nothing needs pressing. It has ten sections: summary, methods, compound list, filtering results with the reason for each exclusion, targets per compound, disease genes and their intersection, network topology with the hub protein table, pathway table, Limitations, and a table of data sources with their versions and licences.</p>
+<p>The report can be saved as <b>PDF</b>, <b>Word</b>, or <b>HTML</b>. <b>Export JSON…</b> saves the entire workflow state for a supplementary file, and the copy button gives the methods paragraph alone, in Indonesian or English.</p>
+
+<h4>The statistics included</h4>
+<p>Two things are tested with the same statistics engine as the Tests &amp; Plots tab, so test selection and assumption checking stay consistent.</p>
+<ul>
+<li><b>Properties of compounds that passed against those excluded</b> — molecular weight, WLOGP, TPSA, QED, and SA Score are compared between the two groups. The test is chosen automatically: Welch when the distribution is normal by Shapiro–Wilk, Mann–Whitney when it is not. This answers a question a reader will fairly ask: what did the ADMET filtering actually remove? If not one property differs meaningfully, the filtering worked through predicted toxicity criteria rather than through molecular size or lipophilicity — and the report states that conclusion as it stands.</li>
+<li><b>Network topology</b> — density, degree distribution (mean, SD, median, maximum), clustering coefficient, the number of connected components, and the number of isolated proteins, with a paragraph reading them. When the highest degree far exceeds the median, the report names that pattern: a few proteins hold most of the connections, which is characteristic of biological networks.</li>
+</ul>
+<p>The <b>Limitations</b> section is always printed and cannot be removed. It covers six things: the dependence on how complete the public databases are, dose not being accounted for, digestion and metabolism being ignored, the direction of interactions being unknown, time and location in the body being ignored, and the fact that a STRING edge is not only a physical interaction.</p>
+
+<h4>Carrying on to docking</h4>
+<p>The button in the bottom right follows whichever stage is open: while the workflow is unfinished it reads <b>Next: &lt;the following stage&gt;</b> and stays disabled until the current stage has content. On the Report tab it becomes <b>Take to molecular docking…</b>.</p>
+<p>That button selects only the compounds that passed filtering <i>and</i> hit one of the top ten hub targets, then opens the import dialog with their SMILES already filled in and moves the Steps panel to the Molecular Docking workflow. This is where 3D structures are first built — not at the beginning — because by this point it is clear which compounds are worth testing and against which protein. After docking, <b>MD &amp; MM/GBSA</b> is there when the stability of a pose needs checking.</p>
+
+<h2 id="cli">Command line (VirmoLab-cli)</h2>
+<p><code>VirmoLab-cli.exe</code> sits in the VirmoLab installation folder. Open a Command Prompt there (or write the full path), then for example:</p>
+<pre>VirmoLab-cli dock -r 1HSG -l kandidat.smi --acuan auto -o hasil_1hsg
+VirmoLab-cli dock -r AF-P00918 -l folder_ligan --kantong 1 --mesin vina -o hasil_ca2
+VirmoLab-cli reseptor 1HSG -o rec.pdbqt --flex A:25,B:25
+VirmoLab-cli dock -r 6OIM -l sotorasib.smi --acuan auto --kovalen A:12 -o hasil_kovalen
+VirmoLab-cli info</pre>
+<ul>
+<li>Commands: <code>info</code>, <code>uji</code> (self-test), <code>reseptor</code> (receptor), <code>ligan</code> (ligands), <code>kantong</code> (pocket, P2Rank), <code>alphafold</code>, <code>dock</code>, <code>mmgbsa</code>. The command names stay Indonesian so that scripts keep working in either interface language. Add <code>-h</code> for every option.</li>
+<li><code>mmgbsa -r hasil_dock -o folder [--md --ns 2 --pelarut implisit|eksplisit]</code>: MM/GBSA of the best poses from a <code>dock</code> output folder (or <code>-r</code> a PDB file or code plus <code>-l</code> an SDF pose) → <code>mmgbsa.csv</code>.</li>
+<li><code>dock</code> accepts a receptor as a PDB code, <code>AF-&lt;UniProt&gt;</code>, a PDB/CIF file, or a ready PDBQT; and ligands as a file, a folder, or SMILES text. The docking area: <code>--pusat X Y Z</code> (plus <code>--ukuran</code>), <code>--acuan file</code> or <code>--acuan auto</code> (the native ligand), or <code>--kantong N</code>.</li>
+<li>Output: a pose folder (DLG/PDBQT plus an SDF of the best poses), <code>ringkasan.csv</code> (ΔG, Ki, LE, hydrogen bonds, hydrophobic contacts, contact residues), <code>metode.txt</code> (the parameters plus a command that reproduces the run exactly), and <code>log.txt</code>. An exit code of 0 means at least one ligand succeeded.</li>
+</ul>
+
+<h2 id="proyek">Projects, autosave, recovery</h2>
+<ul>
+<li>A project is a <code>Name.vmd</code> folder holding <code>proyek.json</code>, the receptor, ligands, grid, and results (the engines' own logs are always kept). It is created automatically at the first preparation step; manage it through <b>File › New project</b> / <b>Open project</b> / <b>Open recent project</b> / <b>Save project</b> (<kbd>Ctrl</kbd>+<kbd>S</kbd>).</li>
+<li>Autosave runs after every significant change and every 3 minutes, keeping the last 5 backups in <code>.cadangan</code>.</li>
+<li>If VirmoLab closes abnormally — a power cut, say — the next start offers to <i>Recover the last session</i>.</li>
+<li><b>Tools › Open project folder</b> opens the active project folder in Explorer.</li>
+</ul>
+
+<h2 id="privasi">Privacy and internet connections</h2>
+<p>VirmoLab sends your projects, structures, and results nowhere, and carries no telemetry. Project files, logs, and settings stay on your own computer (<code>Documents\VirmoLab</code>, <code>%LOCALAPPDATA%\VirmoLab</code>, <code>HKCU\Software\VirmoLab</code>; the portable build keeps everything inside its own folder).</p>
+<p>The only things that contact the internet are:</p>
+<ul>
+<li><b>Downloads you ask for yourself</b>: RCSB PDB, AlphaFold DB, PubChem, ChEMBL, COCONUT, LOTUS, STRING, Open Targets. All that is sent is the code or search term you typed.</li>
+<li><b>The ColabFold MSA server</b> for Boltz-2 — only when <i>Request MSA from ColabFold</i> is ticked; the protein sequence in question is sent with the request. Without it, Boltz runs single-sequence and entirely locally.</li>
+<li><b>The update check</b>: one GET request to <code>api.github.com</code> at most once a day, reading only the latest release number. Turn it off under <b>Tools › Settings</b> if you would rather it did not. A new installer file is downloaded from GitHub only when you yourself press <b>Download and install</b> in the update dialog; all that is sent is the request for that release file.</li>
+<li><b>The advanced tool installer (WSL)</b>: package downloads from conda-forge, GitHub, PyPI, PyTorch, and Hugging Face, only while you are pressing Install.</li>
+</ul>
+<p>The structures and ligands you open are never sent along with an update check or a tool installation.</p>
+
+<h2 id="pintasan">Keyboard shortcuts</h2>
+<p>The full list: <b>Help › Keyboard shortcuts</b> (<kbd>Ctrl</kbd>+<kbd>/</kbd>). The ones used most:</p>
+<table>
+<tr><th>Key</th><th>Action</th><th>Key</th><th>Action</th></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>O</kbd></td><td>Open structure file</td><td><kbd>F5</kbd></td><td>Run docking</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd></td><td>Protein from RCSB</td><td><kbd>Ctrl</kbd>+<kbd>J</kbd></td><td>Job queue</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd></td><td>Ligand from PubChem</td><td><kbd>Ctrl</kbd>+<kbd>R</kbd></td><td>Results table</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>1</kbd> / <kbd>2</kbd></td><td>Prepare receptor / ligands</td><td><kbd>Ctrl</kbd>+<kbd>D</kbd></td><td>Docking settings</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>1</kbd> … <kbd>5</kbd></td><td>Open steps 1–5</td><td><kbd>Ctrl</kbd>+<kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd></td><td>Prepare / Docking / Analysis workspace</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>S</kbd></td><td>Save project</td><td><kbd>G</kbd></td><td>Show or hide the docking box</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>E</kbd></td><td>Export centre</td><td><kbd>I</kbd></td><td>3D interactions</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd></td><td>Report (PDF/Word/HTML)</td><td><kbd>M</kbd></td><td>Measure distance (click two atoms)</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>F</kbd></td><td>Find object or residue</td><td><kbd>F</kbd></td><td>Fit view</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>T</kbd></td><td>Dark / light mode</td><td><kbd>F1</kbd></td><td>This guide</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>C</kbd></td><td>Copy image to clipboard</td><td><kbd>K</kbd></td><td>Per-atom energy contribution</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd></td><td>Figure composer</td><td></td><td></td></tr>
+</table>
+<div class="peringatan">Docking results are computational predictions, not evidence of biological activity; confirm them experimentally. Ki is computed from ΔG as an estimate.</div>
