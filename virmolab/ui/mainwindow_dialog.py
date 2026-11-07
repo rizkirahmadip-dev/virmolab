@@ -370,8 +370,21 @@ class PembukaDialog:
         d.setAttribute(Qt.WA_DeleteOnClose)
         d.show()
 
+    def _tawarkan_pembaruan(self, h):
+        """Buka dialog pembaruan sendiri, sekali untuk tiap nomor versi.
+
+        Sebelumnya rilis baru hanya diumumkan lewat satu baris di bilah status yang hilang sesudah 15
+        detik dan satu baris di panel Pesan yang biasanya tertutup; praktis tidak pernah terlihat.
+        Nomor versi yang sudah ditawarkan dicatat sebelum dialognya dibuka, sehingga rilis yang sama
+        tidak ditawarkan lagi pada pembukaan aplikasi berikutnya — rilis berikutnya tetap muncul."""
+        versi = str(h.get("versi") or "")
+        if not versi or str(self.st.value("pembaruan_ditawarkan", "")) == versi:
+            return
+        self.st.setValue("pembaruan_ditawarkan", versi)
+        self.buka_pembaruan(h)
+
     def _cek_pembaruan_otomatis(self):
-        """Sekali sehari di latar; hanya menulis satu baris ke panel Pesan bila ada versi baru.
+        """Sekali sehari di latar; menawarkan dialog pembaruan bila ada versi baru yang belum ditawarkan.
         Gagal jaringan diam saja (dicatat di log), karena aplikasi tetap bekerja tanpa internet."""
         from ..core import pembaruan
         from . import kerja
@@ -386,6 +399,7 @@ class PembukaDialog:
                 self.pesan.tulis(f"VirmoLab {h['versi']} sudah terbit (terpasang {h['versi_sekarang']}). "
                                  "Bantuan › Periksa pembaruan… untuk catatan rilis dan tautan unduhan.")
                 self.statusBar().showMessage(f"VirmoLab {h['versi']} tersedia - Bantuan › Periksa pembaruan…", 15000)
+                self._tawarkan_pembaruan(h)
             elif st == "galat":
                 self.log.tulis("Pemeriksaan pembaruan dilewati: " + h.get("pesan", ""))
 
