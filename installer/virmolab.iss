@@ -45,8 +45,13 @@ SignedUninstaller=yes
 CloseApplications=yes
 ChangesAssociations=yes
 ShowLanguageDialog=auto
-; AppId sama dengan versi lama (sebelum 1.2.0) agar terpasang sebagai upgrade; folder lama dibersihkan di [Code]
-UsePreviousAppDir=no
+; AppId sama dengan versi lama (sebelum 1.2.0) agar terpasang sebagai upgrade; folder lama dibersihkan di [Code].
+; UsePreviousAppDir=yes (juga nilai bawaan Inno, ditulis tersurat): pemutakhiran harus mendarat di folder tempat
+; pengguna benar-benar memasang VirmoLab, termasuk folder pilihannya sendiri. Dengan "no", pemasangan di
+; folder selain bawaan menghasilkan dua salinan — versi baru di {autopf}\VirmoLab, versi lama ditinggalkan,
+; dan entri uninstall ikut pindah sehingga folder lama tidak lagi dapat dibuang lewat Apps & features.
+; Perkara folder VirmoDock lama ditangani di [Code], bukan dengan mengabaikan folder sebelumnya milik semua orang.
+UsePreviousAppDir=yes
 
 [Languages]
 Name: "id"; MessagesFile: "Indonesian.isl"
@@ -97,6 +102,11 @@ Root: HKA; Subkey: "Software\Classes\VirmoLab.Struktur\shell\open\command"; Valu
 
 [Run]
 Filename: "{app}\VirmoLab.exe"; Description: "{cm:LaunchProgram,VirmoLab}"; Flags: nowait postinstall skipifsilent
+; Pemutakhiran dari dalam aplikasi berjalan senyap, dan entri di atas dilewati pada pemasangan senyap
+; (skipifsilent). Tanpa baris ini pengguna menekan "Unduh dan pasang" lalu ditinggal di desktop kosong.
+; Hanya berlaku bila installer dipanggil dengan /JALANKANLAGI=1, yaitu hanya dari pemutakhiran dalam
+; aplikasi; pemasangan biasa tetap memakai kotak centang di akhir wizard.
+Filename: "{app}\VirmoLab.exe"; Flags: nowait runasoriginaluser; Check: MintaJalankanLagi
 
 [Messages]
 id.BeveledLabel=VirmoLab {#Versi}
@@ -104,6 +114,17 @@ id.BeveledLabel=VirmoLab {#Versi}
 [Code]
 var
   FolderLama: String;
+
+{ Pemutakhiran dari dalam aplikasi menambahkan /JALANKANLAGI=1 supaya VirmoLab terbuka lagi sendiri. }
+function MintaJalankanLagi(): Boolean;
+begin
+  Result := ExpandConstant('{param:JALANKANLAGI|0}') = '1';
+end;
+
+function FolderLamaVirmoDock(): Boolean;
+begin
+  Result := (FolderLama <> '') and FileExists(AddBackslash(FolderLama) + '{#NamaLama}.exe');
+end;
 
 { Folder instalasi lama (AppId sama) - dibaca sebelum entri uninstall ditimpa }
 function InitializeSetup(): Boolean;
@@ -116,11 +137,19 @@ begin
   Result := True;
 end;
 
+{ Pemasangan VirmoDock lama memakai AppId yang sama, sehingga Setup menawarkan foldernya sebagai tujuan.
+  Hanya dalam hal itu tujuannya dialihkan ke folder VirmoLab; folder VirmoDock-nya dihapus di ssPostInstall.
+  Pemasangan 1.2.0 ke atas tidak tersentuh dan tetap dimutakhirkan di tempatnya sendiri. }
+procedure InitializeWizard();
+begin
+  if FolderLamaVirmoDock() then
+    WizardForm.DirEdit.Text := ExpandConstant('{autopf}\VirmoLab');
+end;
+
 { Hapus folder lama hanya bila benar folder program lama (berisi exe lama) dan bukan folder tujuan baru }
 procedure CurStepChanged(CurStep: TSetupStep);
 begin
-  if (CurStep = ssPostInstall) and (FolderLama <> '') and
-     (CompareText(RemoveBackslashUnlessRoot(FolderLama), RemoveBackslashUnlessRoot(ExpandConstant('{app}'))) <> 0) and
-     FileExists(AddBackslash(FolderLama) + '{#NamaLama}.exe') then
+  if (CurStep = ssPostInstall) and FolderLamaVirmoDock() and
+     (CompareText(RemoveBackslashUnlessRoot(FolderLama), RemoveBackslashUnlessRoot(ExpandConstant('{app}'))) <> 0) then
     DelTree(FolderLama, True, True, True);
 end;
