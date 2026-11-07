@@ -12,7 +12,7 @@ from PySide6.QtWidgets import QFileDialog, QMessageBox
 from ..core import analisis, diagram2d
 from ..core import sifat as sifat_mod
 from ..core.proyek import nama_aman
-from . import kerja, theme
+from . import kerja, kit, theme
 
 
 class KomposerFigur:
@@ -284,7 +284,11 @@ class KomposerFigur:
             return
         self._aktif_inter = {"oid": o.id, "rec": rec.id, "daftar": daftar, "mol": mol,
                              "judul": f"{o.info.get('ligan', o.nama)}" + (f" · {o.nama}" if o.jenis == "pose" else "")
-                             + (f" · {o.info['energi']:.2f} kcal/mol" if o.info.get("energi") is not None else "")}
+                             # kit.f: koma desimal dan minus asli, sama dengan tabel hasil dan panel
+                             # Properti. Judul ini juga menjadi judul diagram 2D yang diekspor ke
+                             # SVG/PDF untuk naskah, jadi angkanya tidak boleh berbeda gaya.
+                             + (f" · {kit.f(o.info['energi'], 2, 'kcal/mol')}"
+                                if o.info.get("energi") is not None else "")}
         self.p_inter.muat(self._aktif_inter["judul"], daftar)
         self._tampilkan_interaksi()
         self._gambar_diagram()
