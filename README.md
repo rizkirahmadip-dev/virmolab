@@ -30,15 +30,20 @@ Installer dan versi portable ada di halaman
 Periksa unduhan sebelum dijalankan (PowerShell, di folder unduhan):
 
 ```powershell
-Get-FileHash .\VirmoLab-Setup-1.9.1.exe -Algorithm SHA256
+Get-FileHash .\VirmoLab-Setup-*.exe -Algorithm SHA256
 ```
 
-Cocokkan hasilnya dengan baris di `SHA256SUMS-1.9.1.txt`. Installer **belum ditandatangani sertifikat
+Cocokkan hasilnya dengan baris di `SHA256SUMS-<versi>.txt`. Installer **belum ditandatangani sertifikat
 berbayar**, jadi Windows SmartScreen menampilkan "Windows protected your PC" — klik *More info › Run anyway*
 setelah sidik jarinya cocok.
 
 Setelah terpasang, jalankan **Alat › Uji mandiri komponen…** untuk memastikan semua mesin berfungsi
 (64 butir), dan ikuti tutorial 1HSG di **Bantuan › Tutorial**.
+
+Pemeriksaan sidik jari dengan tangan di atas hanya perlu untuk unduhan pertama. Sesudah VirmoLab
+terpasang, rilis berikutnya ditawarkan sendiri lewat dialog pembaruan: tombol **Unduh dan pasang**
+mengunduh installernya, mencocokkan SHA-256-nya, memasangnya tanpa pertanyaan, lalu membuka aplikasi
+lagi. Rinciannya di [panduan instalasi](docs/instalasi.html#memperbarui).
 
 ## Kebutuhan sistem
 
@@ -97,7 +102,9 @@ Yang menghubungi internet hanya:
   Open Targets, dan — bila kotaknya dicentang — peladen MSA ColabFold untuk Boltz-2, yang menerima sekuens
   protein yang bersangkutan);
 - pemeriksaan pembaruan: satu permintaan GET ke `api.github.com` yang hanya membaca nomor rilis terbaru,
-  dapat dimatikan di **Alat › Pengaturan**;
+  dapat dimatikan di **Alat › Pengaturan**. Berkas installer baru diunduh dari GitHub hanya ketika Anda
+  menekan **Unduh dan pasang** di dialog pembaruan, dan dijalankan hanya bila sidik jari SHA-256-nya
+  cocok dengan berkas `SHA256SUMS` rilis yang sama;
 - pemasang alat lanjutan (WSL): unduhan paket dari conda-forge, GitHub, PyPI, PyTorch, dan Hugging Face.
 
 Berkas proyek, log, dan pengaturan tersimpan di komputer Anda saja
@@ -116,7 +123,7 @@ tersedia; sertakan versi VirmoLab, versi Windows, GPU, langkah yang dilakukan, d
 Tiap rilis diarsipkan di Zenodo dan punya DOI. Kutip seperti ini (sesuaikan gayanya dengan jurnal
 yang dituju):
 
-> Pratama RR. VirmoLab (versi 1.9.1) [perangkat lunak]. 2026. doi:10.5281/zenodo.23978036
+> Pratama RR. VirmoLab (versi 1.9.2) [perangkat lunak]. 2026. doi:10.5281/zenodo.23978036
 
 DOI di atas adalah **DOI konsep**: ia selalu menunjuk versi terbaru. Bila jurnal meminta versi yang
 benar-benar dipakai, kutip DOI versi itu sendiri — nomornya tercantum di halaman arsip tiap rilis,

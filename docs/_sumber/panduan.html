@@ -121,6 +121,7 @@
 
 <h2 id="diagram">Diagram interaksi 2D</h2>
 <figure><img src="gambar/10_diagram2d.png" alt="Diagram 2D"><figcaption>Tab Diagram 2D untuk pose yang dipilih.</figcaption></figure>
+<p>Untuk melihat senyawa lain, tidak perlu kembali ke tabel hasil: kotak <b>Ligan:</b> di bilah atas tab ini berpindah antarsenyawa, terurut dari ΔG terbaik.</p>
 <p>Simpan sebagai SVG/PDF (vektor, bisa diedit di Inkscape, Illustrator, Word) atau PNG/TIFF dengan DPI pilihan. Tombol <b>Salin</b> menaruh gambar di clipboard untuk langsung ditempel ke Word/PowerPoint.</p>
 
 <h2 id="validasi">Validasi redocking</h2>
@@ -541,7 +542,7 @@ VirmoLab-cli info</pre>
 <ul>
 <li><b>Unduhan yang Anda minta sendiri</b>: RCSB PDB, AlphaFold DB, PubChem, ChEMBL, COCONUT, LOTUS, STRING, Open Targets. Yang terkirim hanya kode atau kata kunci pencarian yang Anda ketik.</li>
 <li><b>Peladen MSA ColabFold</b> untuk Boltz-2 — hanya bila kotak <i>Minta MSA ke ColabFold</i> dicentang; sekuens protein yang bersangkutan ikut terkirim. Tanpa centang itu, Boltz berjalan satu sekuens, sepenuhnya lokal.</li>
-<li><b>Pemeriksaan pembaruan</b>: satu permintaan GET ke <code>api.github.com</code> paling sering sekali sehari, yang hanya membaca nomor rilis terbaru. Matikan di <b>Alat › Pengaturan</b> bila tidak diinginkan.</li>
+<li><b>Pemeriksaan pembaruan</b>: satu permintaan GET ke <code>api.github.com</code> paling sering sekali sehari, yang hanya membaca nomor rilis terbaru. Matikan di <b>Alat › Pengaturan</b> bila tidak diinginkan. Berkas installer baru hanya diunduh dari GitHub ketika Anda sendiri menekan <b>Unduh dan pasang</b> di dialog pembaruan; yang terkirim hanya permintaan berkas rilis itu.</li>
 <li><b>Pemasang alat lanjutan (WSL)</b>: unduhan paket dari conda-forge, GitHub, PyPI, PyTorch, dan Hugging Face, hanya saat Anda menekan Pasang.</li>
 </ul>
 <p>Struktur dan ligan yang Anda buka tidak pernah ikut terkirim pada pemeriksaan pembaruan atau pemasangan alat.</p>

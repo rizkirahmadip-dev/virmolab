@@ -36,6 +36,29 @@
 </ol>
 <p>GPU detection runs again every time VirmoLab starts, so nothing needs configuring after moving to another laptop or updating a driver. The wizard can be reopened from <b>Tools › Check system and GPU…</b>.</p>
 
+<h2 id="memperbarui">Updating</h2>
+<p>VirmoLab checks GitHub for a new release at most once a day, a few seconds after the application
+starts. When a new version exists, the update dialog opens by itself — once per version number, not every
+time the application runs. The same dialog is always available from
+<b>Help › Check for updates…</b>.</p>
+<ol class="langkah">
+<li>Press <b>Download and install</b>. The installer is downloaded to
+<code>%LOCALAPPDATA%\VirmoLab\unduhan</code>; an interrupted download resumes rather than starting over,
+and can be cancelled at any time.</li>
+<li>The file's SHA-256 fingerprint is checked against the <code>SHA256SUMS</code> file from the same
+release. A file that does not match is rejected and deleted at once, and is never run.</li>
+<li>VirmoLab closes, the update installs without asking anything, and the application opens again by
+itself. Any work in progress is asked about first, before the application closes.</li>
+</ol>
+<p>Projects, settings, and WSL tools are preserved; the new version is installed in the same folder as the
+previous one, including a folder you chose yourself. The SmartScreen warning does not appear for an
+in-app update — only for an installer you download yourself through a browser.</p>
+<p>The automatic check can be turned off under <b>Tools › Settings</b>. An update is never downloaded or
+installed without you pressing the button.</p>
+<p><b>The portable build</b> has no installer: download the new release's zip from the releases page and
+replace the folder's contents. Do not overwrite the <code>data\</code> and <code>Proyek\</code>
+folders.</p>
+
 <h2 id="alat-lanjutan">Advanced tools (optional, through WSL)</h2>
 <p>Four tools exist only for Linux and are therefore not part of the installer. The core features (preparation,
 docking with Vina and AutoDock-GPU, analysis, reporting) do not need them. When you do need them, install them
@@ -89,5 +112,6 @@ WSL virtual disk is compacted, for example with <code>wsl --manage Ubuntu --set-
 <tr><td>Program</td><td>Installation folder</td><td>Extracted folder</td></tr>
 <tr><td>Settings</td><td>Registry <code>HKCU\Software\VirmoLab</code></td><td><code>data\pengaturan.ini</code></td></tr>
 <tr><td>Logs (for bug reports)</td><td><code>%LOCALAPPDATA%\VirmoLab\log</code></td><td><code>data\log</code></td></tr>
+<tr><td>Update downloads</td><td><code>%LOCALAPPDATA%\VirmoLab\unduhan</code></td><td>not used</td></tr>
 <tr><td>Projects</td><td><code>Documents\VirmoLab</code> (can be changed)</td><td><code>Proyek\</code></td></tr>
 </table>

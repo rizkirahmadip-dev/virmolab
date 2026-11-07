@@ -20,7 +20,8 @@ makan waktu; Anda akan dikabari saat perbaikannya dirilis dan disebut di catatan
 ## Yang termasuk dan tidak
 
 **Termasuk:** kode VirmoLab sendiri — penanganan berkas proyek (`.vmd`, `.vmdbackup`) dan struktur dari luar,
-pemanggilan program bantu, skrip pemasang alat WSL, pemeriksaan pembaruan, dan penyimpanan pengaturan.
+pemanggilan program bantu, skrip pemasang alat WSL, pemeriksaan pembaruan beserta unduhan dan
+verifikasi SHA-256 installernya, dan penyimpanan pengaturan.
 
 **Tidak termasuk:** celah di komponen pihak ketiga yang dibundel (AutoDock-GPU, Vina, Open Babel, RDKit,
 OpenMM, P2Rank, Java, dan lainnya — laporkan ke proyeknya masing-masing, lihat
@@ -37,6 +38,7 @@ Security fixes target the latest release only. Please **do not open a public iss
 VirmoLab version, Windows version, reproduction steps, and impact. You will get a reply within 7 days.
 
 In scope: VirmoLab's own code (project and structure file handling, helper-process invocation, the WSL tool
-installer, update checks, settings storage). Out of scope: bundled third-party components (report upstream),
+installer, update checks together with the download and SHA-256 verification of the installer,
+settings storage). Out of scope: bundled third-party components (report upstream),
 the SmartScreen warning from the unsigned installer (known), and incorrect scientific output (ordinary bug —
 use Issues).

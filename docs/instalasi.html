@@ -36,6 +36,27 @@
 </ol>
 <p>Deteksi GPU dijalankan ulang setiap kali VirmoLab dibuka, jadi setelah pindah laptop atau memperbarui driver tidak perlu mengatur apa pun. Wizard bisa dibuka lagi lewat <b>Alat › Cek sistem dan GPU…</b>.</p>
 
+<h2 id="memperbarui">Memperbarui</h2>
+<p>VirmoLab memeriksa rilis baru di GitHub paling sering sekali sehari, beberapa detik setelah aplikasi
+dibuka. Bila ada versi baru, dialog pembaruan terbuka sendiri — sekali untuk tiap nomor versi, bukan
+setiap kali aplikasi dijalankan. Dialog yang sama selalu dapat dibuka lewat
+<b>Bantuan › Periksa pembaruan…</b>.</p>
+<ol class="langkah">
+<li>Tekan <b>Unduh dan pasang</b>. Installer diunduh ke <code>%LOCALAPPDATA%\VirmoLab\unduhan</code>;
+unduhan yang terputus dilanjutkan, bukan diulang dari nol, dan dapat dibatalkan kapan saja.</li>
+<li>Sidik jari SHA-256 berkasnya dicocokkan dengan berkas <code>SHA256SUMS</code> dari rilis yang sama.
+Berkas yang tidak cocok ditolak dan langsung dihapus, tidak pernah dijalankan.</li>
+<li>VirmoLab ditutup, pembaruan dipasang tanpa pertanyaan apa pun, lalu aplikasi dibuka lagi sendiri.
+Pekerjaan yang sedang berjalan ditanyakan lebih dulu, sebelum aplikasi ditutup.</li>
+</ol>
+<p>Proyek, pengaturan, dan alat WSL tetap terbaca; versi baru dipasang di folder yang sama dengan versi
+sebelumnya, termasuk bila Anda dulu memilih folder sendiri. Peringatan SmartScreen tidak muncul pada
+pembaruan dari dalam aplikasi — hanya pada installer yang Anda unduh sendiri lewat peramban.</p>
+<p>Pemeriksaan otomatis dapat dimatikan di <b>Alat › Pengaturan</b>. Pembaruan tidak pernah diunduh atau
+dipasang tanpa Anda menekan tombolnya.</p>
+<p><b>Versi portable</b> tidak punya installer: unduh zip rilis baru dari halaman rilis, lalu ganti isi
+foldernya. Folder <code>data\</code> dan <code>Proyek\</code> jangan ikut ditimpa.</p>
+
 <h2 id="alat-lanjutan">Alat lanjutan (opsional, lewat WSL)</h2>
 <p>Empat alat hanya ada untuk Linux, sehingga tidak ikut installer. Fitur inti (preparasi, docking Vina dan
 AutoDock-GPU, analisis, laporan) tidak membutuhkannya. Bila diperlukan, pasang dari dalam VirmoLab lewat
@@ -89,6 +110,7 @@ ke atas).</p>
 <tr><td>Program</td><td>Folder instalasi</td><td>Folder hasil ekstrak</td></tr>
 <tr><td>Pengaturan</td><td>Registry <code>HKCU\Software\VirmoLab</code></td><td><code>data\pengaturan.ini</code></td></tr>
 <tr><td>Log (untuk lapor masalah)</td><td><code>%LOCALAPPDATA%\VirmoLab\log</code></td><td><code>data\log</code></td></tr>
+<tr><td>Unduhan pembaruan</td><td><code>%LOCALAPPDATA%\VirmoLab\unduhan</code></td><td>tidak dipakai</td></tr>
 <tr><td>Proyek</td><td><code>Documents\VirmoLab</code> (bisa diubah)</td><td><code>Proyek\</code></td></tr>
 </table>
 <footer>VirmoLab 1.9.2 · dokumentasi offline · GPL-3.0-or-later</footer></main></body></html>
