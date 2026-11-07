@@ -1,0 +1,31 @@
+<h1>Troubleshooting</h1>
+<p class="lead">Common problems and how to get past them. Every error is also explained in the <b>Messages</b> panel, together with the step it suggests.</p>
+
+<div class="catatan"><b>First step:</b> run <b>Tools › Component self-test…</b>. VirmoLab checks every docking engine, Open Babel, RDKit/Meeko, a small Vina docking run, GPU detection, ligand properties, statistics, PoseBusters, Excel export, the interface themes, the WSL tool scripts, and the network pharmacology workflow (64 checks), then shows which ones failed. From the command line: <code>VirmoLab.exe --uji-mandiri result.json</code>.</div>
+<table>
+<tr><th style="width:32%">Symptom</th><th>Cause &amp; remedy</th></tr>
+<tr><td>Status bar: “OpenCL not available — CPU mode”</td><td>An old GPU driver, or the one Windows ships. Update the driver (<a href="gpu_en.html">GPU setup</a>), restart, and open VirmoLab again.</td></tr>
+<tr><td>Messages panel: “AutoDock-GPU could not use the GPU (OpenCL error)”</td><td>The job has already continued with Vina. Update the driver; if it still fails, use Vina.</td></tr>
+<tr><td>The 3D viewport is black or empty</td><td>The graphics driver does not support WebGL. Update it. Meanwhile, run VirmoLab with software rendering: make a shortcut whose target is <code>VirmoLab.exe --disable-gpu</code>.</td></tr>
+<tr><td>Import from RCSB or PubChem fails</td><td>Check the internet connection; a campus or office network with a proxy can block it. Download the PDB/SDF file through a browser and open it with <b>File › Open structure file…</b> (<kbd>Ctrl</kbd>+<kbd>O</kbd>).</td></tr>
+<tr><td>“ID … not found in RCSB PDB”</td><td>A mistyped ID, or a structure that exists only as mmCIF (VirmoLab tries mmCIF automatically).</td></tr>
+<tr><td>Receptor preparation drops many residues</td><td>Residues with missing atoms, common in flexible loops. If they sit near the active site, pick another PDB structure with better resolution, or repair the structure in other software first.</td></tr>
+<tr><td>Receptor preparation fails in Meeko</td><td>VirmoLab falls back to Open Babel on its own. If that fails too, try keeping only one chain and removing ligands and additives.</td></tr>
+<tr><td>Ligand: “&gt; 32 torsions (AutoDock-GPU limit)”</td><td>Run that ligand with the Vina engine.</td></tr>
+<tr><td>Ligand: “atom type not supported by AutoDock”</td><td>It contains an element such as B or Si, for which AutoDock4 has no parameters. Replace the ligand, or use Vina with care.</td></tr>
+<tr><td>Grid warning “exceeds 126 points”</td><td>The box is too large for 0.375 Å spacing. Raise the spacing (to 0.5–0.6 Å, say) or shrink the box. The “Whole protein (blind docking)” button sets the spacing by itself.</td></tr>
+<tr><td>Redocking validation gives RMSD &gt; 2 Å</td><td>Try: centring the box on the native ligand, more runs (the Thorough preset), or another engine. If the native ligand has a metal ion or structural waters in the active site, keep them during receptor preparation.</td></tr>
+<tr><td>Installing advanced tools: “WSL refused to start … ERROR_NO_SYSTEM_RESOURCES”</td><td>Windows is short of resources for the WSL virtual machine, often while a camera or video application is open. Close it, wait a moment, then click <b>Check again</b>. Lowering the WSL memory limit does not help.</td></tr>
+<tr><td>Installing advanced tools: “Internet connection lost or blocked”</td><td>Click <b>Install</b> again; downloads that already finished are not repeated. On a campus or office network, set the proxy inside Ubuntu (<code>export HTTPS_PROXY=http://proxy:port</code> in <code>~/.bashrc</code>).</td></tr>
+<tr><td>Installing advanced tools: “WSL disk full”, or not enough disk space</td><td>The WSL virtual disk normally lives on drive C:. Free space there, then click <b>Install</b> again. The GPU &amp; RBFE package needs about 24 GB free during installation, the co-folding package about 22 GB.</td></tr>
+<tr><td>Installing advanced tools: the distribution “runs on WSL 1”</td><td>Click <b>Copy command</b>, run <code>wsl --set-version &lt;distro&gt; 2</code> in PowerShell, then <b>Check again</b>.</td></tr>
+<tr><td>The Uni-Dock button in the docking panel is greyed out</td><td>Uni-Dock is not installed, or the computer has no NVIDIA GPU. Install the GPU &amp; RBFE docking package through <b>Tools › Install advanced tools (WSL)…</b>.</td></tr>
+<tr><td>Docking stops when the laptop sleeps</td><td>Set Windows not to sleep while plugged in. An interrupted job is marked <i>Paused</i> and can be resumed.</td></tr>
+<tr><td>Antivirus deletes or blocks <code>autodock_gpu.exe</code> or <code>vina.exe</code></td><td>Unsigned scientific programs are sometimes treated as suspicious. Add the VirmoLab folder to the antivirus exclusions, then install again.</td></tr>
+<tr><td>Everything is too small or too large</td><td>VirmoLab follows the Windows scale (Settings › Display › Scale). Panels can be hidden through <b>View › Panels</b>; the workspaces (<kbd>Ctrl</kbd>+<kbd>1</kbd>/<kbd>2</kbd>/<kbd>3</kbd>) show only the panels you need; <b>View › Reset layout</b> restores the default arrangement.</td></tr>
+<tr><td>The window is invisible after unplugging a second monitor</td><td>It is centred on the primary screen automatically at startup. If it stays hidden: <kbd>Alt</kbd>+<kbd>Space</kbd> › Move.</td></tr>
+</table>
+
+<h2>Reporting a problem</h2>
+<p><b>Help › Report a problem or send feedback…</b> assembles a text holding your description, system information, and the most recent log. Read it through, click <b>Copy</b>, then send it by email or through the project's Issues page. VirmoLab sends nothing by itself. The log folder: <b>Help › Open log folder</b>.</p>
+<figure><img src="gambar/14_lapor.png" alt="Report a problem" style="max-width:720px"></figure>

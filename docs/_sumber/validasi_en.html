@@ -1,0 +1,123 @@
+<h1>Validation: numbers you can check yourself</h1>
+<p class="lead">This page holds what VirmoLab measured on open reference datasets, together with how to run the
+measurements again. Every number here comes from real calculations on the developer's computer (RTX 3060 Laptop,
+Ryzen 7 6800H), not from someone else's paper, and the scripts that produced them ship with the source code.</p>
+
+<h2>How to read this page</h2>
+<ul>
+<li><b>RMSD &le; 2 &Aring;</b> means the rank-1 pose lies at most 2 &aring;ngstr&ouml;m from the crystal ligand
+(heavy atoms, ligand symmetry accounted for). This is the usual measure for calling a pose &ldquo;correct&rdquo;.</li>
+<li><b>PB-valid</b> means that pose also passes every PoseBusters physics check (geometry, clashes, internal energy).
+A pose with a small RMSD that fails the physics checks is not worth reporting.</li>
+<li><b>95&nbsp;% confidence intervals</b> use the Wilson method. With 85 to 428 cases, an interval of about &plusmn;10 % is
+to be expected: a difference of a few per cent between methods need not mean anything.</li>
+<li>Comparison figures from papers are quoted as published, so you can judge for yourself whether the installation on
+your computer behaves sensibly.</li>
+</ul>
+
+<h2>1. Redocking: the Astex Diverse Set and the PoseBusters Benchmark Set</h2>
+<p>Two open datasets used by the PoseBusters paper (Buttenschoen et al., <i>Chem Sci</i> 2024): the <b>Astex
+Diverse Set</b> (85 selected crystal complexes) and the <b>PoseBusters Benchmark Set</b> (428 complexes released
+since 2021, chosen so as not to be training data for machine-learning methods). For each complex, VirmoLab prepares
+the receptor and the ligand with its own default workflow (gemmi, Meeko, PROPKA protonation, cofactors kept), uses a
+docking box that encloses the crystal ligand, then redocks the ligand with the <b>Standard</b> preset.</p>
+<table>
+<tr><th>Dataset</th><th>Engine</th><th>RMSD &le; 2 &Aring;</th><th>RMSD &le; 2 &Aring; &amp; PB-valid</th><th>A pose &le; 2 &Aring; among the top 9</th><th>Median RMSD</th><th>Published comparison (Vina)</th></tr>
+<tr><td>Astex Diverse (85)</td><td>AutoDock Vina</td><td><b>62.4 %</b> (95 % CI 51.7&ndash;71.9)</td><td>60.0 %</td><td>83.5 %</td><td>1.35 &Aring;</td><td>58 % / 56 % PB-valid</td></tr>
+<tr><td>Astex Diverse (85)</td><td>Uni-Dock (GPU)</td><td>57.6 % (95 % CI 47.0&ndash;67.6)</td><td>55.3 %</td><td>82.4 %</td><td>1.47 &Aring;</td><td>&ndash;</td></tr>
+<tr><td>PoseBusters Benchmark (428)</td><td>AutoDock Vina</td><td>50.5 % (95 % CI 45.7&ndash;55.2)</td><td>48.8 %</td><td>74.5 %</td><td>1.98 &Aring;</td><td>60 % / 58 % PB-valid (308 cases, first version)</td></tr>
+</table>
+<p>One PoseBusters case (7Q27, a boron-containing ligand) failed because AutoDock Vina does not know the B atom
+type; that is reported as a failure rather than counted as a score of zero. The PoseBusters set used here holds 428
+complexes (the latest release), whereas the paper used the 308 complexes of the first version, so the figures are not
+strictly comparable &mdash; the 50.5 % here sits in the same range as the 60 % reported for the smaller and easier
+set.</p>
+<p>Speed on Astex: a median of 11.9 seconds per ligand for Vina (CPU, exhaustiveness 16) and 3.5 seconds for
+Uni-Dock called one ligand at a time; in real use, where a batch holds tens to hundreds of ligands, Uni-Dock drops to
+roughly 0.7 seconds per ligand.</p>
+<p>Case-by-case comparison over the same 85 complexes: 48 cases correct with both engines, 5 correct only with Vina,
+1 only with Uni-Dock, the rest wrong with both. The two are therefore equivalent for screening, and a pose that is
+going to be reported is better checked again with Vina or AutoDock-GPU.</p>
+<p>What follows from this: VirmoLab's default preparation workflow produces figures on a par with those reported for
+AutoDock Vina on the same datasets, and Uni-Dock sits slightly below Vina with overlapping confidence intervals. What
+does <i>not</i> follow: that your docking will be 60 % correct. Both datasets hold high-quality crystal complexes
+with pockets that are already formed; new targets, AlphaFold structures, and ligands outside crystallographic chemical
+space are harder.</p>
+<p>To run it again:</p>
+<pre><code>PYTHONIOENCODING=utf-8 PYTHONPATH=. .venv/Scripts/python.exe dev/tolok_ukur_pose.py siapkan --set astex
+PYTHONIOENCODING=utf-8 PYTHONPATH=. .venv/Scripts/python.exe dev/tolok_ukur_pose.py docking --set astex --mesin vina
+PYTHONIOENCODING=utf-8 PYTHONPATH=. .venv/Scripts/python.exe dev/tolok_ukur_pose.py ringkas</code></pre>
+
+<h2>2. Iterative screening (active learning)</h2>
+<p>Enamine docking scores from the MolPAL repository (thymidylate kinase 4UNN) stand in for docking, so a whole
+campaign can be simulated many times over. An initial batch of 1&nbsp;% of the library, then 5 rounds &times;
+1&nbsp;% (6&nbsp;% of the library docked in total); what is measured is the fraction of the best 1&nbsp;% of
+compounds that were found.</p>
+<table>
+<tr><th>Strategy</th><th>Enamine 10k (5 replicates)</th><th>Enamine 50k (3 replicates)</th></tr>
+<tr><td>Neural network + greedy (default)</td><td><b>63.7 &plusmn; 2.8 %</b></td><td><b>74.4 &plusmn; 1.4 %</b></td></tr>
+<tr><td>Neural network + UCB</td><td>63.1 &plusmn; 4.4 %</td><td>72.2 &plusmn; 0.7 %</td></tr>
+<tr><td>Random forest + greedy</td><td>52.9 &plusmn; 7.4 %</td><td>56.7 &plusmn; 5.9 %</td></tr>
+<tr><td>Random selection (reference)</td><td>6.2 &plusmn; 2.5 %</td><td>5.1 &plusmn; 0.1 %</td></tr>
+</table>
+<p>So docking 6&nbsp;% of a library finds roughly three quarters of its best compounds &mdash; more than ten times
+better than picking at random, while a quarter is still missed. The command:
+<code>dev/tolok_ukur_al.py --set 50k</code>.</p>
+
+<h2>3. Relative binding free energy (RBFE, OpenFE under WSL)</h2>
+<p>The lig_ejm_31 &rarr; lig_ejm_43 edge from the OpenFE TYK2 benchmark set, with the quick-test protocol
+(11 &lambda; windows, 0.5 ns, 1 repeat per leg):</p>
+<table>
+<tr><th>Quantity</th><th>Value</th></tr>
+<tr><td>Solvent leg</td><td>27.55 &plusmn; 0.41 kcal/mol</td></tr>
+<tr><td>Complex leg</td><td>29.83 &plusmn; 0.85 kcal/mol</td></tr>
+<tr><td>&Delta;&Delta;G calculated</td><td><b>+2.28 &plusmn; 0.95 kcal/mol</b></td></tr>
+<tr><td>&Delta;&Delta;G experimental (Ki 0.096 &rarr; 0.84 &micro;M)</td><td>+1.28 kcal/mol</td></tr>
+<tr><td>Difference</td><td>+1.00 kcal/mol (1.05 &sigma;)</td></tr>
+</table>
+<p>The direction of the change is right and the difference still falls inside the statistical error of so short a
+protocol. For numbers meant to be reported, use OpenFE's own default protocol (5 ns &times; 3 repeats): on an RTX 3060
+Laptop that means about 1.7 days per complex leg per edge. Test: <code>dev/uji_rbfe_openfe.py</code>.</p>
+
+<h2>4. Docking with flexible side chains, and the induced fit that was not released</h2>
+<p>Five cross-docking cases from Sherman et al. (<i>J Med Chem</i> 2006) &mdash; the crystal ligand of one structure
+docked into another structure of the same protein &mdash; were used to test whether a full induced-fit protocol
+(trim side chains, soft docking, OpenMM relaxation, redock) was worth releasing. <b>It was not:</b> 0 of 5 cases
+reached RMSD &le; 2 &Aring;, four of them were worse than rigid docking, while the scores appeared to improve
+(CDK2 &minus;8.16 &rarr; &minus;12.56 kcal/mol on the wrong pose). The feature was therefore not shipped; the details
+are in <code>dev/dokumen/INDUCED_FIT_EKSPERIMEN.md</code>.</p>
+<p>What is used instead is ordinary flexible side chains (Vina <code>--flex</code>) with the six nearest pocket
+residues:</p>
+<table>
+<tr><th>Case (receptor &larr; ligand)</th><th>Rigid docking</th><th>Flexible, 6 residues</th><th>Full induced fit</th></tr>
+<tr><td>1KIM &larr; 1KI4 (thymidine kinase)</td><td>4.88</td><td>4.85</td><td>8.01</td></tr>
+<tr><td>2ACR &larr; 1AH3 (aldose reductase)</td><td>7.01</td><td>7.00</td><td>7.54</td></tr>
+<tr><td>1DM2 &larr; 1AQ1 (CDK2)</td><td>7.13</td><td>6.98</td><td>6.62</td></tr>
+<tr><td>1ERR &larr; 3ERT (estrogen receptor)</td><td>5.11</td><td><b>1.71</b></td><td>8.87</td></tr>
+<tr><td>1NSC &larr; 1A4Q (neuraminidase)</td><td>5.65</td><td>6.19</td><td>7.90</td></tr>
+</table>
+<p>Cross-docking really is hard: 1 of 5 cases correct with flexible side chains, 0 of 5 without. A sanity check:
+redocking each ligand into its own structure in the same cases gives 0.47 &Aring; (1KIM) and 0.45 &Aring; (1KI4), so
+the failures above are the difficulty of cross-docking, not an error in preparation.</p>
+
+<h2>5. Things validated elsewhere</h2>
+<ul>
+<li><b>Covalent docking</b>: 6OIM (KRAS G12C&ndash;sotorasib, Cys12), rank-1 pose at RMSD 1.34 &Aring;. See
+<a href="metode.html">Methods &amp; criteria</a>.</li>
+<li><b>Filling missing loops</b>: a loop-deletion test on 3KS3 gives backbone RMSD of 0.20&ndash;0.56 &Aring; for
+loops of 4&ndash;12 residues grafted from AlphaFold.</li>
+<li><b>Pocket detection</b>: the centre of the best pocket lies 0.9 &Aring; from the MK1 ligand in apo 1HSG.</li>
+<li>The <b>protocol validation package</b> inside the application (redocking, cross-docking, decoy enrichment,
+PoseBusters) produces numbers for <i>your own protocol</i>, and those are what belong in a manuscript, not the
+numbers on this page.</li>
+</ul>
+
+<h2>Limits worth remembering</h2>
+<ul>
+<li>A docking score is not a measured affinity. The correlation between score and activity is usually weak; what can
+be trusted comparatively is the shape of the pose and a coarse ranking.</li>
+<li>The numbers on this page were measured on one computer with one version of each program. A different docking
+engine version, operating system, or GPU can shift them.</li>
+<li>Reference datasets hold high-quality crystal complexes. Targets without a crystal structure, AlphaFold models,
+and pockets that only form on ligand binding are considerably harder than the figures above.</li>
+</ul>

@@ -1,0 +1,25 @@
+<h1>Moving to another laptop</h1>
+<p class="lead">Carry settings, parameter presets, window layout, and projects to another laptop in a single file.</p>
+
+<h2>On the old laptop</h2>
+<ol class="langkah">
+<li>Open the project you want to take with you (optional).</li>
+<li><b>File › Move to another laptop › Export settings and projects…</b></li>
+<li>Answer <b>Yes</b> if the project currently open should be included.</li>
+<li>Save the <code>VirmoLab_YYYYMMDDHH.vmdbackup</code> file and copy it to the new laptop (USB stick, Google Drive, and so on).</li>
+</ol>
+<p>The backup holds every setting (theme, layout, custom presets, working folder, the locations of PyMOL/ChimeraX/DSV) and — when chosen — the whole project folder (receptor, ligands, grid, results). Grid maps are copied as well, so docking can continue straight away.</p>
+
+<h2>On the new laptop</h2>
+<ol class="langkah">
+<li>Install VirmoLab (installer or portable build) — see <a href="instalasi_en.html">Installation</a>.</li>
+<li><b>File › Move to another laptop › Import settings and projects…</b>, then choose the <code>.vmdbackup</code> file.</li>
+<li>Projects are extracted into the working folder; choose <b>Yes</b> to open one immediately.</li>
+</ol>
+<div class="catatan">Paths that do not exist on the new laptop (a working folder on drive <code>D:</code>, say, or the location of PyMOL) are ignored and noted in the Messages panel; VirmoLab falls back to its defaults and detects the companion software again. The GPU is also detected again: if the new laptop has no OpenCL GPU, the engine switches to Vina on the CPU.</div>
+
+<h2>Without exporting</h2>
+<ul>
+<li><b>The portable build</b>: copy the whole portable folder, including <code>data\</code> and <code>Proyek\</code> — the settings travel with it.</li>
+<li><b>A single project</b>: copy the <code>Name.vmd</code> folder, then <b>File › Open project…</b> on the new laptop. Unfinished jobs appear as <i>Paused</i> and can be resumed.</li>
+</ul>

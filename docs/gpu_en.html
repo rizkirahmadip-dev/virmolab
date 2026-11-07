@@ -1,0 +1,36 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>GPU setup · VirmoLab</title><link rel="stylesheet" href="gaya.css"><link rel="icon" href="gambar/ikon.png"></head><body><header><img src="gambar/logo_putih.svg" alt="VirmoLab" style="height:30px;margin-right:6px"><span style="color:#9fb4d3;font-size:13px;margin-right:10px">1.9.2</span><a href="instalasi_en.html">Installation</a><a href="pindah_laptop_en.html">Move to another laptop</a><a href="gpu_en.html" class="aktif">GPU setup</a><a href="troubleshooting_en.html">Troubleshooting</a><a href="validasi_en.html">Validation</a><a href="gpu.html">ID</a></header><main><h1>GPU setup</h1>
+<p class="lead">AutoDock-GPU in VirmoLab uses OpenCL, so it runs on NVIDIA, AMD, and Intel GPUs without CUDA or WSL. With no GPU at all, VirmoLab still works in full using AutoDock Vina on the CPU.</p>
+
+<h2>Reading the status bar</h2>
+<table>
+<tr><th>Status bar</th><th>Meaning</th><th>What to do</th></tr>
+<tr><td><code>● NVIDIA GeForce … · 6 GB · driver 610.74 · OpenCL</code></td><td>The GPU is ready for AutoDock-GPU.</td><td>Nothing.</td></tr>
+<tr><td><code>● … · OpenCL not available — CPU mode</code></td><td>The GPU is visible but its driver provides no OpenCL.</td><td>Update the driver (below).</td></tr>
+<tr><td><code>● No GPU — CPU mode (Vina)</code></td><td>No usable GPU was found.</td><td>Use Vina; set exhaustiveness to match the time you have.</td></tr>
+</table>
+<p>Check again at any time through <b>Tools › Check system and GPU…</b>. The device choice (GPU or CPU) sits in step 4 <i>Run</i>, under <i>Engine and device</i>. If the laptop has more than one OpenCL GPU (Intel plus NVIDIA, for instance), all of them appear in the list; the one with the most VRAM is chosen by default.</p>
+
+<h2>Installing or updating the driver</h2>
+<h3>NVIDIA</h3>
+<ol><li>Open <a href="https://www.nvidia.com/Download/index.aspx">nvidia.com/Download</a> and choose your laptop's GPU series and model.</li>
+<li>Download the <i>Game Ready</i> or <i>Studio Driver</i>, run it, and choose the <i>Express</i> installation.</li>
+<li>Restart the laptop, then open VirmoLab again.</li></ol>
+<h3>AMD</h3>
+<ol><li>Open <a href="https://www.amd.com/en/support/download/drivers.html">amd.com › Drivers</a> and choose <i>Auto-Detect and Install</i>.</li>
+<li>Run the installer, restart, then open VirmoLab again.</li></ol>
+<h3>Intel (integrated graphics)</h3>
+<ol><li>Open the <a href="https://www.intel.com/content/www/us/en/support/detect.html">Intel Driver &amp; Support Assistant</a>.</li>
+<li>Install the recommended graphics update, restart, then open VirmoLab again.</li></ol>
+<div class="catatan">Laptops with two GPUs (Intel plus NVIDIA, say): VirmoLab picks the discrete GPU, the one with the most VRAM. Keep the laptop plugged in and set the power mode to “Best performance” so the discrete GPU stays active.</div>
+
+<h2>When the GPU fails during docking</h2>
+<p>If AutoDock-GPU reports an OpenCL error — a kernel that will not compile, GPU memory exhausted, a broken driver — VirmoLab <b>continues the job automatically with AutoDock Vina on the CPU</b> and writes the reason into the <b>Messages</b> panel. The results stay valid; they only take longer. Update the driver and start a new job to use the GPU again.</p>
+
+<h2>Expected timings</h2>
+<table>
+<tr><th>Engine &amp; device</th><th>1 ligand (14 torsions, 22 Å box)</th></tr>
+<tr><td>AutoDock-GPU, RTX 3060 Laptop, 50 runs</td><td>± 3–5 seconds</td></tr>
+<tr><td>AutoDock Vina, Ryzen 7 5800H with 16 threads, exhaustiveness 8</td><td>± 50 seconds</td></tr>
+</table>
+<p>Ligands with more than 32 torsions or more than 256 atoms are not supported by AutoDock-GPU and are skipped automatically with the reason given; run those with Vina.</p>
+<footer>VirmoLab 1.9.2 · offline documentation · GPL-3.0-or-later</footer></main></body></html>
