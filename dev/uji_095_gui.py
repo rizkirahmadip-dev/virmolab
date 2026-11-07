@@ -18,6 +18,11 @@ st.setValue("tema", "terang")
 st.remove("layout")
 st.remove("sesi_terbuka")
 st.setValue("mode_pengguna", "pemula")
+# Bahasa dipatok: uji palet mencari "siapkan reseptor" pada label menu. Uji lain (uji_bahasa,
+# uji_alat_wsl_gui, uji_label_terpotong, ...) memindahkan pengaturan ini ke "en", dan bila salah satunya
+# berhenti sebelum mengembalikannya, uji ini gagal dengan palet kosong padahal paletnya sendiri sehat —
+# dalam bahasa Inggris "prepare receptor" tetap mengembalikan hasil.
+st.setValue("bahasa", "id")
 OUT = Path("dev/uji/v095").resolve()
 shutil.rmtree(OUT, ignore_errors=True)
 OUT.mkdir(parents=True)

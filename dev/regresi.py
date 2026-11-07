@@ -5,6 +5,7 @@ Isi dev/uji/ tidak ikut Git. Di komputer baru (atau sesudah folder itu dibersihk
 lebih dulu, kalau tidak puluhan uji berhenti karena berkas contohnya tidak ada.
   PYTHONIOENCODING=utf-8 .venv/Scripts/python.exe dev/regresi.py [nama ...]   (tanpa nama = semua kecuali LEWATI)
 """
+import atexit
 import os
 import re
 import subprocess
@@ -17,7 +18,8 @@ OUT = AKAR / "dev" / "uji" / "regresi"
 OUT.mkdir(parents=True, exist_ok=True)
 # butuh internet / sangat lama / membuat proyek docking baru (jalankan terpisah bila perlu)
 LEWATI = {"uji_pubchem", "uji_alur", "uji_responsif", "uji_chembl", "uji_alphafold",
-          "uji_induced_fit"}   # eksperimen: butuh unduhan PDB dan berjam-jam (lihat dev/dokumen/INDUCED_FIT_EKSPERIMEN.md)
+          "uji_induced_fit",   # eksperimen: butuh unduhan PDB dan berjam-jam (lihat dev/dokumen/INDUCED_FIT_EKSPERIMEN.md)
+          "uji_pemutakhiran_installer"}   # memasang dan mencopot perangkat lunak sungguhan; jalankan sendiri sebelum rilis
 LAMA = {"uji_tahap3": 900, "uji_animasi": 600, "uji_laporan": 400, "uji_mesin": 600, "uji_qc_antrean": 600,
         "uji_video": 300, "uji_p2rank": 300, "uji_antrean": 600, "uji_alat_wsl_gui": 900,
         "uji_kontrol": 600, "uji_impor_eksternal_gui": 600, "uji_label_terpotong": 900, "uji_bahasa_lanjut": 900,
@@ -37,6 +39,19 @@ if not (AKAR / "dev" / "uji" / "1HSG_rec.pdbqt").exists():
     print("Catatan: berkas contoh di dev/uji/ belum lengkap — jalankan dev/siapkan_contoh.py dulu "
           "agar uji tidak gagal karena berkasnya tidak ada.\n", flush=True)
 env = dict(os.environ, PYTHONIOENCODING="utf-8", PYTHONPATH=str(AKAR))
+
+# Pemeriksaan pembaruan otomatis dimatikan selama regresi. Sejak rilis baru membuka dialognya sendiri,
+# pemeriksaan yang kebetulan menemukan versi lebih baru akan menaruh dialog di atas jendela yang sedang
+# ditangkap uji GUI — hasil uji jadi bergantung pada apa yang sedang terbit di GitHub. Nilai aslinya
+# dikembalikan setelah seluruh uji selesai, termasuk bila regresi dihentikan di tengah jalan.
+from PySide6.QtCore import QSettings  # noqa: E402
+
+_st = QSettings("VirmoLab", "VirmoLab")
+_cek_lama = _st.value("cek_pembaruan", True, type=bool)
+_st.setValue("cek_pembaruan", False)
+_st.sync()
+atexit.register(lambda: (_st.setValue("cek_pembaruan", _cek_lama), _st.sync()))
+
 hasil = []
 for n in nama:
     t0 = time.time()
