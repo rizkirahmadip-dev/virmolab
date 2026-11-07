@@ -340,7 +340,7 @@ class DialogValidasiProtokol(QDialog):
         h.addWidget(self.s_exh_enrich)
         self.b_decoy = kit.tombol("Buat decoy", self._buat_decoy)
         h.addWidget(self.b_decoy)
-        self.b_enrich = kit.tombol("Docking & hitung pengayaan", self._jalankan_enrichment, utama=True)
+        self.b_enrich = kit.tombol("Docking && hitung pengayaan", self._jalankan_enrichment, utama=True)
         h.addWidget(self.b_enrich)
         h.addStretch(1)
         v.addLayout(h)
