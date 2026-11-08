@@ -9,7 +9,7 @@ NAV = [("panduan", "Panduan pengguna"), ("instalasi", "Instalasi"), ("pindah_lap
 # antarmuka Inggris tidak mendarat di halaman berbahasa Indonesia.
 NAV_EN = [("panduan_en", "User guide"), ("instalasi_en", "Installation"), ("pindah_laptop_en", "Move to another laptop"),
           ("gpu_en", "GPU setup"), ("troubleshooting_en", "Troubleshooting"),
-          ("validasi_en", "Validation")]
+          ("metode_en", "Methods & criteria"), ("validasi_en", "Validation")]
 versi = re.search(r'__version__ = "([^"]+)"', Path("virmolab/__init__.py").read_text()).group(1)
 for nama, judul in NAV + NAV_EN:
     isi = (SUMBER / f"{nama}.html").read_text(encoding="utf-8")
