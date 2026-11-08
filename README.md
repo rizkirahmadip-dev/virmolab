@@ -209,7 +209,8 @@ SHA-256, hasil di `rilis/`.
 
 ## Lisensi
 
-VirmoLab: GPL-3.0-or-later ([`LICENSE`](LICENSE)). Komponen pihak ketiga dan tawaran kode sumbernya:
+VirmoLab: GPL-3.0-or-later. Teks lisensinya apa adanya di [`LICENSE`](LICENSE), pemberitahuan hak cipta
+dwibahasa di [`COPYRIGHT`](COPYRIGHT). Komponen pihak ketiga dan tawaran kode sumbernya:
 [`LISENSI_PIHAK_KETIGA.txt`](LISENSI_PIHAK_KETIGA.txt) dan folder [`licenses/`](licenses/).
 
 ---
