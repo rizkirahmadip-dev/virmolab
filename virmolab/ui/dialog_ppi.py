@@ -64,7 +64,9 @@ class DialogPPI(QDialog):
         lay_p1.addWidget(self.l_p1)
         bar_b1 = QHBoxLayout()
         b_p1_proyek = QPushButton("Ambil dari Proyek")
-        b_p1_proyek.clicked.connect(self._ambil_p1_proyek)
+        # lambda: clicked mengirim bool yang akan mengisi parameter `diam`. Kebetulan nilainya
+        # sama dengan bawaannya sekarang, tetapi mengubah bawaan itu akan membungkam dialognya.
+        b_p1_proyek.clicked.connect(lambda: self._ambil_p1_proyek())
         bar_b1.addWidget(b_p1_proyek)
         b_p1_berkas = QPushButton("Pilih PDB…")
         b_p1_berkas.clicked.connect(self._pilih_p1_berkas)

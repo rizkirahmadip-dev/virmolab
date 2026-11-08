@@ -71,10 +71,11 @@ class DialogFleksibel(QDialog):
         h.addWidget(self.sp)
         h.addStretch(1)
         b_auto = QPushButton("Pilih 6 terdekat")
-        b_auto.setToolTip("Memilih enam residu terdekat dari acuan. Titik awal yang masuk akal: cukup untuk induced fit terbatas tanpa membuat pencarian melebar.")
         b_auto.setToolTip("Centang enam rantai samping terdekat dengan ligan acuan (batas praktis Vina/AD-GPU); "
                           "sisanya dikosongkan")
-        b_auto.clicked.connect(self._pilih_otomatis)
+        # lambda, bukan sambungan langsung: clicked mengirim satu argumen bool, sehingga
+        # _pilih_otomatis terpanggil dengan n=False (nol) dan justru mengosongkan seluruh baris.
+        b_auto.clicked.connect(lambda: self._pilih_otomatis())
         h.addWidget(b_auto)
         b_kosong = QPushButton("Kosongkan")
         b_kosong.clicked.connect(lambda: self._centang_semua(False))

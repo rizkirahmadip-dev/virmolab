@@ -32,6 +32,12 @@ BURUK = re.compile(r"Traceback|\bGAGAL\b|\bGALAT\b|\bTIMEOUT\b|fatal exception")
 SESUDAH = {"uji_impor_eksternal_gui": "uji_md_gui",    # butuh proyek MD + hasil docking yang dibuat uji_md_gui
            "uji_overlay": "uji_tahap3"}               # butuh proyek berisi job validasi redocking
 nama = sys.argv[1:] or [f.stem for f in sorted((AKAR / "dev").glob("uji_*.py")) if f.stem not in LEWATI]
+
+# Pemeriksaan statis yang murah dijalankan lebih dulu: hasilnya tidak bergantung pada GUI mana pun
+# dan menangkap kelas kesalahan yang uji GUI justru lewatkan (lihat dev/cek_sinyal_qt.py).
+for _cek in ("cek_sinyal_qt",):
+    if not sys.argv[1:] or _cek in sys.argv[1:]:
+        nama.insert(0, _cek) if _cek not in nama else None
 for n_, sesudah_ in SESUDAH.items():
     if n_ in nama and sesudah_ in nama and nama.index(n_) < nama.index(sesudah_):
         nama.insert(nama.index(sesudah_) + 1, nama.pop(nama.index(n_)))

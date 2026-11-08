@@ -29,7 +29,9 @@ class PemutarTrajektori(QFrame):
         self.b_putar.setText("▶")
         self.b_putar.setToolTip("Putar / jeda (Spasi)")
         self.b_putar.setFixedWidth(30)
-        self.b_putar.clicked.connect(self.putar_jeda)
+        # lambda: clicked mengirim bool, sehingga putar_jeda(False) membuat tombolnya selalu
+        # menjeda dan tidak pernah memutar. Tanpa argumen, putar=None dan keadaannya dibalik.
+        self.b_putar.clicked.connect(lambda: self.putar_jeda())
         self.slider = QSlider(Qt.Horizontal)
         self.slider.valueChanged.connect(self.ke)
         self.l_waktu = QLabel()

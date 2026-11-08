@@ -44,8 +44,13 @@ def hook():
         self.resize(560, 560)
         self.show()
         QApplication.processEvents()
-        # tombol pilih-otomatis: enam residu terdekat harus tercentang, sisanya kosong
-        self._pilih_otomatis()
+        # Tombolnya DITEKAN, bukan metodenya yang dipanggil. Pemanggilan langsung lolos sementara
+        # tombolnya rusak: clicked mengirim bool, sehingga _pilih_otomatis terpanggil dengan n=False
+        # (nol) dan daftarnya justru dikosongkan — dilaporkan pengguna, bukan ditemukan uji ini.
+        from PySide6.QtWidgets import QPushButton
+        tombol = [b for b in self.findChildren(QPushButton) if "6 terdekat" in b.text()]
+        assert tombol, "tombol 'Pilih 6 terdekat' tidak ditemukan"
+        tombol[0].click()
         QApplication.processEvents()
         auto = [self.tabel.item(r, 0).data(Qt.UserRole) for r in range(self.tabel.rowCount())
                 if self.tabel.item(r, 0).checkState() == Qt.Checked]
