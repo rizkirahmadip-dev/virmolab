@@ -123,7 +123,7 @@ tersedia; sertakan versi VirmoLab, versi Windows, GPU, langkah yang dilakukan, d
 Tiap rilis diarsipkan di Zenodo dan punya DOI. Kutip seperti ini (sesuaikan gayanya dengan jurnal
 yang dituju):
 
-> Pratama RR. VirmoLab (versi 1.9.2) [perangkat lunak]. 2026. doi:10.5281/zenodo.23978036
+> Pratama RR. VirmoLab (versi 1.9.3) [perangkat lunak]. 2026. doi:10.5281/zenodo.23978036
 
 DOI di atas adalah **DOI konsep**: ia selalu menunjuk versi terbaru. Bila jurnal meminta versi yang
 benar-benar dipakai, kutip DOI versi itu sendiri — nomornya tercantum di halaman arsip tiap rilis,

@@ -14,7 +14,9 @@ from virmolab.core import tolok_ukur
 def main():
     print("=== Menjalankan Tolok Ukur Validasi Redocking 1HSG (Indinavir) ===")
     try:
-        hasil = tolok_ukur.jalankan_benchmark_1hsg(mesin_docking="vina", exhaustiveness=4, timeout=120)
+        # 120 detik cukup saat uji ini berjalan sendirian (terukur 104 detik), tetapi di tengah regresi
+        # mesin berebut CPU dan Vina --cpu 1 selalu lewat batas. Yang diuji ketepatan pose, bukan kecepatan.
+        hasil = tolok_ukur.jalankan_benchmark_1hsg(mesin_docking="vina", exhaustiveness=4, timeout=420)
     except Exception as e:
         print(f"FAIL Galat saat menjalankan benchmark: {e}")
         return 1

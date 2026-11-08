@@ -2,6 +2,67 @@
 
 Format: setiap versi berisi **Baru**, **Diperbaiki**, dan **Diubah**. Versi 0.x adalah pra-rilis.
 
+## [1.9.3] - 8 November 2026
+
+Pembaruan dari dalam aplikasi, dokumentasi berbahasa Inggris, dan tiga bug yang gagalnya diam —
+dua di antaranya dilaporkan pengguna, bukan ditemukan uji.
+
+### Baru
+- **Unduh dan pasang pembaruan dari dalam aplikasi.** Rilis baru membuka dialog pembaruan sendiri,
+  sekali untuk tiap nomor versi, bukan setiap kali aplikasi dibuka. Tombol **Unduh dan pasang**
+  mengunduh installernya, mencocokkan sidik jari SHA-256-nya, memasangnya tanpa pertanyaan apa pun,
+  lalu membuka aplikasi lagi. Unduhan yang terputus dilanjutkan lewat header Range, bukan diulang
+  dari nol, dan dapat dibatalkan kapan saja. Berkas yang sidik jarinya tidak cocok ditolak dan
+  langsung dihapus, tidak pernah dijalankan.
+  Sebelumnya pembaruan berhenti pada satu baris abu-abu di bilah status yang hilang sesudah 15 detik:
+  pengguna membuka peramban, mengunduh 500 MB sendiri, mencocokkan sidik jari dengan tangan, lalu
+  menjalankan installer.
+- **Tujuh dokumen berbahasa Inggris**: panduan pengguna, instalasi, pindah laptop, setup GPU,
+  mengatasi masalah, metode & kriteria, dan validasi. `F1` di antarmuka Inggris kini mendarat di
+  halaman Inggris — 42 tujuan bantuan kontekstual tersedia di kedua bahasa. Tombol bahasa di kepala
+  halaman berpindah ke halaman yang sama dalam bahasa lain, bukan selalu ke halaman instalasi.
+- **Bagian Memperbarui** di panduan instalasi (dua bahasa): cara pembaruan berjalan, folder unduhan,
+  verifikasi, apa yang tetap terbaca, dan cara memperbarui versi portable.
+
+### Diperbaiki
+- **Tombol "Pilih 6 terdekat" pada dialog residu fleksibel tidak mencentang apa pun** — justru
+  mengosongkan seluruh daftar. Sinyal `clicked` Qt mengirim satu argumen bool, sehingga
+  `_pilih_otomatis` terpanggil dengan `n=False`, yaitu nol. Dilaporkan pengguna yang mengira dirinya
+  salah langkah. Gagalnya diam: tidak ada galat, tidak ada apa pun di log.
+- **Tombol putar/jeda pemutar trajektori MD selalu menjeda, tidak pernah memutar.** Sebab yang sama:
+  `putar_jeda(putar=False)` membuat `not putar` selalu benar. Ditemukan lewat sapuan sesudah bug
+  pertama, bukan dari laporan.
+- **Pemutakhiran memasang versi baru di folder lain.** Pengguna yang dulu memilih folder sendiri
+  mendapat dua salinan: versi baru di folder bawaan, versi lama ditinggalkan, dan entri uninstall
+  ikut pindah sehingga folder lama tidak lagi dapat dibuang lewat Apps & features.
+  `UsePreviousAppDir` dikembalikan ke nilai yang benar; perkara folder VirmoDock lama ditangani di
+  `[Code]`, bukan dengan mengabaikan folder sebelumnya milik semua orang.
+- **Judul diagram 2D memakai gaya angka yang berbeda dari seluruh aplikasi** — `-12.48` sementara
+  kotak ligan dan panel Properti menulis `−12,48`. Judul itu ikut terbawa ke diagram yang diekspor
+  ke SVG/PDF untuk naskah, sehingga gambar yang masuk jurnal membawa gaya angka yang tidak konsisten
+  dengan tabelnya.
+- **Tanda `&` pada label tombol dimakan Qt** sebagai penanda tombol pintas: "Docking & hitung
+  pengayaan" tampil "Docking  hitung pengayaan". Sapuan seluruh tombol menemukan satu lagi di sisi
+  Inggris ("Free Q&A").
+- **Panduan dan tutorial masih menyuruh klik dua kali** baris hasil untuk memuat pose, padahal satu
+  klik sudah cukup sejak 1.9.2. Pemilih ligan di tab Diagram 2D juga belum terdokumentasi di mana
+  pun — padahal itu yang ditanyakan penguji.
+- **Lisensi repositori terbaca "Other" di GitHub**, bukan GPL-3.0: berkas `LICENSE` memuat teks GPL
+  lengkap tetapi didahului kepala hak cipta dwibahasa, dan itu cukup membuat pendeteksi otomatis
+  gagal mengenalinya. Kepalanya dipindah ke berkas `COPYRIGHT`.
+- **Impor banyak senyawa dari PubChem ditolak 503** karena melanggar batas 5 permintaan per detik.
+
+### Diubah
+- Daftar privasi di panduan, README, dan `SECURITY.md` kini menyebut unduhan installer. Daftar yang
+  mengaku lengkap harus benar-benar lengkap.
+- Seluruh 28 tangkapan layar dokumentasi dibuat ulang; 18 di antaranya berubah, yang berarti
+  antarmukanya sudah bergerak jauh dari gambarnya.
+- `dev/cek_sinyal_qt.py` memeriksa sambungan sinyal Qt yang menimpa parameter; ikut dijalankan di
+  awal tiap regresi. `dev/cek_istilah_en.py` mencocokkan nama menu di dokumen Inggris dengan
+  antarmuka sungguhan — menangkap enam nama yang diterjemahkan sekenanya sebelum sempat terbit.
+- `dev/uji_pemutakhiran_installer.py` menguji pemutakhiran dengan installer sungguhan, sengaja
+  menjalankan perilaku lama juga supaya bug foldernya tidak bisa diam-diam kembali.
+
 ## [1.9.2] - 6 November 2026
 
 Kesiapan pemakaian internasional, bantuan di dalam aplikasi, dan empat perbaikan dari laporan
